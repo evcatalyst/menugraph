@@ -2,7 +2,7 @@
 
 MenuGraph is a deployable prototype for exploring the Culinary Institute of America's historical menu collection as a visual knowledge base.
 
-The app uses the public CONTENTdm API for the CIA Menu Collection (`p16940coll1`) and builds a live local cache of all published menu records. It supports:
+The app uses a committed snapshot of the public CONTENTdm API for the CIA Menu Collection (`p16940coll1`) and builds a live in-memory index of all published menu records. It supports:
 
 - A time lens for menu formats across known years.
 - Place, type, and collector/source lineage lenses.
@@ -12,7 +12,7 @@ The app uses the public CONTENTdm API for the CIA Menu Collection (`p16940coll1`
 - A culinary ontology index for meals, dishes, ingredients, beverages, styles, and discovered clusters.
 - A bottom activity rail that reports archive loading, OCR search, transcript indexing progress, current menu titles, and ontology coverage.
 
-## Run
+## Run Locally
 
 ```bash
 npm run dev
@@ -20,17 +20,35 @@ npm run dev
 
 Open `http://127.0.0.1:4173`.
 
+The Node server is optional local tooling. The deployable app is the static site in `docs/`, which can be hosted by GitHub Pages.
+
+## Deploy
+
+This repository is configured for GitHub Pages from the `main` branch and `/docs` folder.
+
+The published URL is:
+
+```text
+https://evcatalyst.github.io/menugraph/
+```
+
+Regenerate the committed Pages snapshot with:
+
+```bash
+npm run build:data
+```
+
 ## Data Strategy
 
 The collection is exposed through CONTENTdm's read-only web services. MenuGraph uses `dmQuery` to page through all public records, then merges several five-field metadata passes because CONTENTdm limits each query response to five returned fields. Item detail is loaded only when a user selects a record.
 
-The local server proxies API calls and images because the archive currently presents a certificate chain that local command-line clients may reject. The app does not store or redistribute images; it requests them from the CIA Digital Collections on demand.
+The Pages build reads committed snapshots from `docs/data/menus.json` and `docs/data/ontology.json`, then tries live CONTENTdm calls only for enhancement paths such as full record OCR. The local Node server remains useful as a development proxy because command-line clients and some browser contexts reject the archive certificate chain, but it is not required for hosting the core interface.
 
 ## Ontology Index
 
-MenuGraph builds an instant metadata-derived ontology from titles, places, cuisine terms, menu types, and collection metadata. Use the in-app `Index Text` control to enrich that index with transcript evidence. The text build samples records across decades, fetches their page-level transcript text, separates dish/course lines from beverage lines, and persists the result to `.cache/ontology.json`.
+MenuGraph builds an instant metadata-derived ontology from titles, places, cuisine terms, menu types, and collection metadata. The committed Pages ontology includes a small OCR-backed transcript sample. The in-app `Index Text` control can enrich that index further when the browser can reach the live CONTENTdm item endpoints.
 
-Useful endpoints:
+Optional local server endpoints:
 
 - `GET /api/ontology`
 - `GET /api/ontology/build?limit=300`

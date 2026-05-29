@@ -87,6 +87,28 @@ function compact(value, fallback = "Unknown") {
   return text || fallback;
 }
 
+function placeholderImage(label = "Menu") {
+  const text = titleCase(compact(label, "Menu")).slice(0, 28);
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 420">
+      <rect width="320" height="420" fill="#f5f0e7"/>
+      <rect x="54" y="46" width="212" height="328" rx="8" fill="#fffaf0" stroke="#c9b88f" stroke-width="6"/>
+      <path d="M92 118h136M92 156h136M92 194h136M92 232h104M92 282h136" stroke="#6f7f74" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="160" cy="84" r="18" fill="#b6573c"/>
+      <text x="160" y="340" text-anchor="middle" font-family="Georgia, serif" font-size="24" fill="#2f3a3f">${text}</text>
+    </svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function setImageSource(img, src, label) {
+  if (!img) return;
+  img.onerror = () => {
+    img.onerror = null;
+    img.src = placeholderImage(label);
+  };
+  img.src = src || placeholderImage(label);
+}
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
@@ -105,7 +127,10 @@ function uniqueCount(menus, getter) {
   return [...map.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
-async function getJson(url) {
+async function getJson(url, options = {}) {
+  if (window.MenuGraphArchive && url.startsWith("/api/")) {
+    return window.MenuGraphArchive.handle(url, options);
+  }
   const response = await fetch(url);
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: response.statusText }));
@@ -123,7 +148,9 @@ async function loadMenus(refresh = false) {
     indeterminate: true,
   });
   els.viz.innerHTML = '<div class="loading">Pulling published metadata from CONTENTdm...</div>';
-  const payload = await getJson(`/api/menus${refresh ? "?refresh=1" : ""}`);
+  const payload = await getJson(`/api/menus${refresh ? "?refresh=1" : ""}`, {
+    onProgress: (progress) => setActivity(progress),
+  });
   state.allMenus = payload.menus;
   state.fullMenus = payload.menus;
   state.fullRecordLabel = `${payload.summary.total.toLocaleString()} menus loaded`;
@@ -596,12 +623,13 @@ function renderResults() {
       button.className = "result-item";
       button.type = "button";
       button.innerHTML = `
-        <img src="${menu.imageUrl}" alt="" loading="lazy" />
+        <img alt="" loading="lazy" />
         <span>
           <strong>${menu.title}</strong>
           <span>${compact(menu.date, "Undated")} ${compact(menu.city || menu.country, "")}</span>
         </span>
       `;
+      setImageSource(button.querySelector("img"), menu.imageUrl, menu.title);
       button.addEventListener("click", () => selectMenu(menu.id));
       return button;
     })
@@ -625,8 +653,8 @@ async function selectMenu(id) {
 function renderDetailSkeleton(menu) {
   els.detailEmpty.classList.add("hidden");
   els.detailCard.classList.remove("hidden");
-  els.detailImage.src = menu?.imageUrl || "";
   els.detailImage.alt = menu?.title || "Selected menu";
+  setImageSource(els.detailImage, menu?.imageUrl, menu?.title);
   els.detailKicker.textContent = [compact(menu?.date, "Undated"), compact(menu?.country, "")].filter(Boolean).join(" / ");
   els.detailTitle.textContent = menu?.title || "Loading menu";
   els.detailMeta.replaceChildren();
@@ -636,8 +664,8 @@ function renderDetailSkeleton(menu) {
 }
 
 function renderDetail(detail, menu) {
-  els.detailImage.src = detail.imageUrl;
   els.detailImage.alt = detail.title;
+  setImageSource(els.detailImage, detail.imageUrl, detail.title || menu?.title);
   els.detailTitle.textContent = detail.title || menu?.title || "Menu";
   els.detailKicker.textContent = [fieldValue(detail, "date") || menu?.date || "Undated", fieldValue(detail, "countr") || menu?.country]
     .filter(Boolean)
@@ -676,9 +704,9 @@ function renderPageStrip(detail) {
     ...pages.map((page) => {
       const img = document.createElement("img");
       img.className = `page-thumb${page.id === detail.id ? " active" : ""}`;
-      img.src = page.imageUrl;
       img.alt = page.title;
       img.loading = "lazy";
+      setImageSource(img, page.imageUrl, page.title);
       img.addEventListener("click", () => selectMenu(page.id));
       return img;
     })
@@ -705,17 +733,22 @@ async function runArchiveSearch() {
   state.archiveMode = true;
   const loadedMatches = payload.menus.length;
   els.recordCount.textContent =
-    payload.total > loadedMatches
-      ? `${loadedMatches.toLocaleString()} of ${payload.total.toLocaleString()} archive matches`
-      : `${payload.total.toLocaleString()} archive matches`;
+    payload.remote === false
+      ? `${payload.total.toLocaleString()} static metadata matches`
+      : payload.total > loadedMatches
+        ? `${loadedMatches.toLocaleString()} of ${payload.total.toLocaleString()} archive matches`
+        : `${payload.total.toLocaleString()} archive matches`;
   state.filters.search = "";
   state.filters.decade = null;
   state.filters.type = null;
   state.filters.place = null;
   setActivity({
-    label: "Search Complete",
+    label: payload.remote === false ? "Static Search" : "Search Complete",
     title: `${loadedMatches.toLocaleString()} records loaded from ${payload.total.toLocaleString()} archive matches`,
-    detail: "Local filters now operate on this search result set; clear filters to return to the full collection.",
+    detail:
+      payload.remote === false
+        ? "GitHub Pages searched the committed metadata snapshot. Live transcript search is available when a proxy/server can reach CONTENTdm."
+        : "Local filters now operate on this search result set; clear filters to return to the full collection.",
     progress: 1,
   });
   update();
@@ -734,6 +767,24 @@ function updateOntologyStatus(job = state.ontology?.job) {
 async function buildOntologyTextIndex() {
   els.ontologyBuild.disabled = true;
   els.ontologyBuild.textContent = "Indexing...";
+  if (window.MenuGraphArchive?.buildTextIndex) {
+    try {
+      const ontology = await window.MenuGraphArchive.buildTextIndex({
+        limit: 300,
+        onProgress: updateOntologyStatus,
+      });
+      state.ontology = ontology;
+      updateOntologyStatus(ontology.job);
+      renderOntologyControls();
+      renderInsights();
+      describeOntologyLoaded(ontology);
+      if (state.activeLens === "ontology") renderViz();
+    } finally {
+      els.ontologyBuild.disabled = false;
+      els.ontologyBuild.textContent = "Index Text";
+    }
+    return;
+  }
   const status = await getJson("/api/ontology/build?limit=300");
   updateOntologyStatus(status);
   startOntologyPolling();

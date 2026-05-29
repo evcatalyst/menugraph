@@ -2,13 +2,13 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
-const { buildMetadataOntology, buildOntology } = require("./ontology");
+const { buildMetadataOntology, buildOntology } = require("./docs/ontology");
 
 const PORT = Number(process.env.PORT || 4173);
 const HOST = "127.0.0.1";
 const CONTENTDM_HOST = "ciadigitalcollections.culinary.edu";
 const COLLECTION = "p16940coll1";
-const PUBLIC_DIR = path.join(__dirname, "public");
+const PUBLIC_DIR = path.join(__dirname, "docs");
 const CACHE_TTL_MS = 1000 * 60 * 30;
 const PAGE_SIZE = 1024;
 const ONTOLOGY_CACHE_PATH = path.join(__dirname, ".cache", "ontology.json");
@@ -706,6 +706,16 @@ const server = http.createServer(async (req, res) => {
   serveStatic(req, res, url.pathname);
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(`MenuGraph running at http://${HOST}:${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, HOST, () => {
+    console.log(`MenuGraph running at http://${HOST}:${PORT}`);
+  });
+}
+
+module.exports = {
+  getMenus,
+  getOntology,
+  ontologyStatus,
+  searchMenus,
+  startOntologyBuild,
+};

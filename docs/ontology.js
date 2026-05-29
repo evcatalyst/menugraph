@@ -451,8 +451,16 @@ function titleCase(value) {
     .join(" ");
 }
 
-module.exports = {
+const api = {
   VERSION,
   buildMetadataOntology,
   buildOntology,
 };
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = api;
+}
+
+if (typeof window !== "undefined") {
+  window.MenuGraphOntology = api;
+}

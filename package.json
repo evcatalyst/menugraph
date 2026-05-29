@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "test": "node --check server.js && node --check ontology.js && node --check public/app.js"
+    "build:data": "node scripts/build-static-data.js --text=25",
+    "test": "node --check server.js && node --check docs/ontology.js && node --check docs/archive-client.js && node --check docs/app.js"
   },
   "engines": {
     "node": ">=20"
