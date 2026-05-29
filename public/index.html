@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MenuGraph</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="workspace" aria-label="Historical menu explorer">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">CIA Historical Menus</p>
+            <h1>MenuGraph</h1>
+          </div>
+          <div class="topbar__meta">
+            <span id="record-count">Loading archive...</span>
+            <a href="https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1" target="_blank" rel="noreferrer">Source</a>
+          </div>
+        </header>
+
+        <aside class="panel filters" aria-label="Filters">
+          <label class="search-field">
+            <span>Search collection</span>
+            <input id="search-input" type="search" placeholder="Try oysters, railroads, Paris, dinner..." />
+          </label>
+
+          <div class="search-tools">
+            <select id="field-select" aria-label="Search field">
+              <option value="transc">Transcript</option>
+              <option value="title">Title</option>
+              <option value="restau">Restaurant</option>
+              <option value="descri">Description</option>
+              <option value="typea">Type</option>
+              <option value="locati">City</option>
+              <option value="state">State</option>
+              <option value="countr">Country</option>
+            </select>
+            <button id="archive-search" type="button">Archive Search</button>
+          </div>
+
+          <div class="lens-switch" role="tablist" aria-label="Visualization lens">
+            <button class="active" type="button" data-lens="time">Time</button>
+            <button type="button" data-lens="place">Place</button>
+            <button type="button" data-lens="type">Type</button>
+            <button type="button" data-lens="lineage">Source</button>
+            <button type="button" data-lens="ontology">Food</button>
+          </div>
+
+          <div class="range-block">
+            <div class="range-label">
+              <span>Known year span</span>
+              <strong id="year-label">...</strong>
+            </div>
+            <input id="year-min" type="range" min="1800" max="2020" value="1800" />
+            <input id="year-max" type="range" min="1800" max="2020" value="2020" />
+          </div>
+
+          <section class="facet-section">
+            <div class="section-title">
+              <span>Decade</span>
+              <button id="clear-filters" type="button">Clear</button>
+            </div>
+            <div id="decade-facets" class="facet-list"></div>
+          </section>
+
+          <section class="facet-section">
+            <div class="section-title">
+              <span>Menu Type</span>
+            </div>
+            <div id="type-facets" class="facet-list"></div>
+          </section>
+
+          <section class="facet-section">
+            <div class="section-title">
+              <span>Place</span>
+            </div>
+            <div id="place-facets" class="facet-list"></div>
+          </section>
+
+          <section class="facet-section">
+            <div class="section-title">
+              <span>Ontology</span>
+              <small id="ontology-status">metadata</small>
+            </div>
+            <div class="ontology-tabs" role="tablist" aria-label="Ontology category">
+              <button class="active" type="button" data-category="ingredients">Ingredients</button>
+              <button type="button" data-category="dishes">Dishes</button>
+              <button type="button" data-category="beverages">Beverages</button>
+              <button type="button" data-category="meals">Meals</button>
+              <button type="button" data-category="styles">Styles</button>
+              <button type="button" data-category="clusters">Clusters</button>
+            </div>
+            <div id="ontology-terms" class="facet-list"></div>
+          </section>
+
+          <section class="facet-section">
+            <div class="section-title">
+              <span>Insights</span>
+            </div>
+            <div id="insights-list" class="insights-list"></div>
+          </section>
+        </aside>
+
+        <section class="canvas-panel" aria-label="Knowledge map">
+          <div class="canvas-toolbar">
+            <div>
+              <p id="lens-label">Time Lens</p>
+              <h2 id="result-title">Menus Across Time</h2>
+            </div>
+            <div class="toolbar-actions">
+              <button id="sample-button" type="button">Surprise Me</button>
+              <button id="ontology-build" type="button">Index Text</button>
+              <button id="refresh-button" type="button">Refresh Data</button>
+            </div>
+          </div>
+          <div id="viz" class="viz" role="img" aria-label="Interactive collection visualization"></div>
+        </section>
+
+        <section class="panel detail" aria-label="Selected menu">
+          <div id="detail-empty" class="empty-state">
+            <h2>Select a menu</h2>
+            <p>Dots and bars are live records from the CIA Digital Collections. Select one to open its image, OCR text, and metadata.</p>
+          </div>
+          <article id="detail-card" class="detail-card hidden">
+            <div class="detail-image-wrap">
+              <img id="detail-image" alt="" />
+            </div>
+            <div class="detail-body">
+              <p id="detail-kicker" class="eyebrow"></p>
+              <h2 id="detail-title"></h2>
+              <dl id="detail-meta"></dl>
+              <div id="page-strip" class="page-strip"></div>
+              <p id="detail-text" class="transcript"></p>
+              <a id="detail-link" target="_blank" rel="noreferrer">Open in CIA Digital Collections</a>
+            </div>
+          </article>
+        </section>
+
+        <section class="results-strip" aria-label="Filtered records">
+          <div id="activity-panel" class="activity-panel" aria-live="polite">
+            <div class="activity-copy">
+              <span id="activity-label">Ready</span>
+              <strong id="activity-title">Loading MenuGraph</strong>
+              <p id="activity-detail">Preparing the collection workspace.</p>
+            </div>
+            <div class="activity-meter">
+              <span id="activity-progress-text">0%</span>
+              <div class="progress-track" aria-hidden="true">
+                <div id="activity-progress" class="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="section-title">
+            <span id="results-label">Records</span>
+            <span id="results-count">0</span>
+          </div>
+          <div id="result-list" class="result-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

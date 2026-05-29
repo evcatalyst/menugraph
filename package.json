@@ -1,0 +1,14 @@
+{
+  "name": "menugraph",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Exploratory visualization interface for the CIA historical menu collection.",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "node --check server.js && node --check ontology.js && node --check public/app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
