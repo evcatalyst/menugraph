@@ -14,6 +14,7 @@
   let menusCache = null;
   let ontologyCache = null;
   let pricesCache = null;
+  let dateEstimatesCache = null;
 
   function sourceUrl(id) {
     return `https://${CONTENTDM_HOST}/digital/collection/${COLLECTION}/id/${id}`;
@@ -537,6 +538,12 @@
     return pricesCache;
   }
 
+  async function getDateEstimates({ refresh = false } = {}) {
+    if (!refresh && dateEstimatesCache) return dateEstimatesCache;
+    dateEstimatesCache = await requestStaticJson("date-estimates.json", refresh);
+    return dateEstimatesCache;
+  }
+
   function selectOntologySample(menus, rawLimit) {
     const limit =
       rawLimit === "all"
@@ -669,6 +676,9 @@
     if (url.pathname === "/api/prices") {
       return getPrices({ refresh: url.searchParams.get("refresh") === "1" });
     }
+    if (url.pathname === "/api/date-estimates") {
+      return getDateEstimates({ refresh: url.searchParams.get("refresh") === "1" });
+    }
     if (url.pathname === "/api/search") {
       return searchMenus(
         url.searchParams.get("term"),
@@ -692,6 +702,7 @@
   window.MenuGraphArchive = {
     buildTextIndex,
     getItem,
+    getDateEstimates,
     getMenus,
     getOntology,
     getPrices,

@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "source": "MenuGraph date clue dictionary distilled from local agent notes",
+  "note": "Rules provide conservative lower bounds or soft era cues. They should not overwrite CIA metadata.",
+  "lowerBounds": [
+    {
+      "id": "diners-club",
+      "label": "Diners Club accepted",
+      "type": "payment_clue",
+      "terms": ["diners club"],
+      "notBefore": 1950,
+      "confidence": "B",
+      "method": "payment-clue",
+      "source": "agent notes: charge-card launch marker"
+    },
+    {
+      "id": "american-express",
+      "label": "American Express accepted",
+      "type": "payment_clue",
+      "terms": ["american express"],
+      "notBefore": 1958,
+      "confidence": "B",
+      "method": "payment-clue",
+      "source": "agent notes: charge-card launch marker"
+    },
+    {
+      "id": "bankamericard",
+      "label": "BankAmericard accepted",
+      "type": "payment_clue",
+      "terms": ["bankamericard", "bank america card"],
+      "notBefore": 1958,
+      "confidence": "B",
+      "method": "payment-clue",
+      "source": "agent notes: charge-card launch marker"
+    },
+    {
+      "id": "master-charge",
+      "label": "Master Charge accepted",
+      "type": "payment_clue",
+      "terms": ["master charge"],
+      "notBefore": 1969,
+      "confidence": "B",
+      "method": "payment-clue",
+      "source": "agent notes: charge-card launch marker"
+    },
+    {
+      "id": "visa",
+      "label": "Visa accepted",
+      "type": "payment_clue",
+      "patterns": ["\\bVisa\\b"],
+      "notBefore": 1976,
+      "confidence": "B",
+      "method": "payment-clue",
+      "source": "agent notes: Visa branding marker"
+    },
+    {
+      "id": "mastercard",
+      "label": "MasterCard accepted",
+      "type": "payment_clue",
+      "terms": ["mastercard", "master card"],
+      "notBefore": 1979,
+      "confidence": "B",
+      "method": "payment-clue",
+      "source": "agent notes: MasterCard branding marker"
+    },
+    {
+      "id": "fax",
+      "label": "Fax number printed",
+      "type": "business_contact_clue",
+      "patterns": ["\\bfax\\b"],
+      "notBefore": 1970,
+      "confidence": "C",
+      "method": "business-contact"
+    },
+    {
+      "id": "toll-free-800",
+      "label": "Toll-free 800 number",
+      "type": "phone_clue",
+      "patterns": ["\\b1[- ]?800[- ]", "\\(800\\)"],
+      "notBefore": 1967,
+      "confidence": "C",
+      "method": "phone-clue"
+    }
+  ]
+}

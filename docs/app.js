@@ -7,6 +7,7 @@ const state = {
   archiveMode: false,
   ontology: null,
   prices: null,
+  dateEstimates: null,
   ontologyCategory: "ingredients",
   priceMode: "todayUsd",
   priceCurrency: null,
@@ -135,6 +136,80 @@ function uniqueCount(menus, getter) {
   return [...map.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
+function isUnknownDecade(value) {
+  const text = compact(value, "").toLowerCase();
+  return !text || text === "unknown";
+}
+
+function decadeFromYear(value) {
+  const year = Number(value);
+  return Number.isFinite(year) ? `${Math.floor(year / 10) * 10}s` : null;
+}
+
+function mergeDateEstimates(menus, estimates = state.dateEstimates) {
+  const byId = new Map((estimates?.records || []).map((record) => [Number(record.menuId), record]));
+  return menus.map((menu) => enrichMenuDate(menu, byId.get(Number(menu.id))));
+}
+
+function enrichMenuDate(menu, estimate) {
+  const sourceYear = Number(menu.year) || null;
+  const sourceDecade = !isUnknownDecade(menu.decade) ? menu.decade : sourceYear ? decadeFromYear(sourceYear) : null;
+  const estimatedYear = Number(estimate?.estimatedCenterYear) || null;
+  const estimatedDecade = estimate?.estimatedDecade || null;
+  const dateBasis = sourceYear ? "source" : sourceDecade ? "source-decade" : estimatedDecade ? "estimated" : "unknown";
+  return {
+    ...menu,
+    dateEstimate: estimate || null,
+    displayYear: sourceYear || estimatedYear || null,
+    displayDecade: sourceDecade || estimatedDecade || "unknown",
+    dateBasis,
+  };
+}
+
+function menuYear(menu) {
+  return Number(menu?.displayYear || menu?.year) || null;
+}
+
+function menuDecade(menu) {
+  return menu?.displayDecade || menu?.decade || "unknown";
+}
+
+function isEstimatedMenuDate(menu) {
+  return menu?.dateBasis === "estimated";
+}
+
+function dateRangeLabel(estimate) {
+  if (!estimate) return "";
+  const min = estimate.estimatedNotBefore;
+  const max = estimate.estimatedNotAfter;
+  if (min && max && min === max) return String(min);
+  if (min && max) return `${min}-${max}`;
+  if (min) return `after ${min}`;
+  if (max) return `before ${max}`;
+  return "";
+}
+
+function menuDateLabel(menu) {
+  if (!menu) return "Undated";
+  if (menu.year) return compact(menu.date, String(menu.year));
+  if (menu.dateBasis === "source-decade") return `Catalog ${menuDecade(menu)}`;
+  const estimate = menu.dateEstimate;
+  if (estimate?.estimatedDecade || estimate?.estimatedNotBefore || estimate?.estimatedNotAfter) {
+    const range = dateRangeLabel(estimate);
+    const label = range || estimate.estimatedDecade;
+    return `Est. ${label}${estimate.confidence ? ` (${estimate.confidence})` : ""}`;
+  }
+  return "Undated";
+}
+
+function menuDateEvidenceLabel(menu) {
+  const estimate = menu?.dateEstimate;
+  if (!estimate || estimate.dateBasis === "source") return "";
+  const leading = estimate.evidence?.[0];
+  if (!leading) return estimate.methods?.length ? estimate.methods.join(", ") : "";
+  return `${leading.type.replace(/_/g, " ")}: ${leading.effect}`;
+}
+
 async function getJson(url, options = {}) {
   if (window.MenuGraphArchive && url.startsWith("/api/")) {
     return window.MenuGraphArchive.handle(url, options);
@@ -159,13 +234,29 @@ async function loadMenus(refresh = false) {
   const payload = await getJson(`/api/menus${refresh ? "?refresh=1" : ""}`, {
     onProgress: (progress) => setActivity(progress),
   });
-  state.allMenus = payload.menus;
-  state.fullMenus = payload.menus;
+  let menus = payload.menus;
+  let dateSummary = null;
+  try {
+    setActivity({
+      label: "Date Estimates",
+      title: "Loading inferred date ranges",
+      detail: "Reading the auditable estimate layer for unknown and source-decade records.",
+      indeterminate: true,
+    });
+    const dateEstimates = await loadDateEstimates(refresh);
+    dateSummary = dateEstimates.summary;
+    menus = mergeDateEstimates(payload.menus, dateEstimates);
+  } catch (error) {
+    menus = mergeDateEstimates(payload.menus, null);
+  }
+  state.allMenus = menus;
+  state.fullMenus = menus;
   state.fullRecordLabel = `${payload.summary.total.toLocaleString()} menus loaded`;
   state.archiveMode = false;
   const summary = payload.summary;
-  const min = summary.yearMin || 1800;
-  const max = summary.yearMax || new Date().getFullYear();
+  const years = menus.map(menuYear).filter(Boolean);
+  const min = years.length ? Math.min(...years) : summary.yearMin || 1800;
+  const max = years.length ? Math.max(...years) : summary.yearMax || new Date().getFullYear();
   state.filters.minYear = min;
   state.filters.maxYear = max;
   for (const slider of [els.yearMin, els.yearMax]) {
@@ -178,7 +269,9 @@ async function loadMenus(refresh = false) {
   setActivity({
     label: "Archive Ready",
     title: `${summary.total.toLocaleString()} records mapped`,
-    detail: `Known dates run ${min} - ${max}. Facets are ready for decade, place, type, and ontology exploration.`,
+    detail: dateSummary
+      ? `Known and inferred dates run ${min} - ${max}. ${Number(dateSummary.enrichedUnknowns || dateSummary.inferredUnknowns || 0).toLocaleString()} previously undated records now carry caveated ranges.`
+      : `Known dates run ${min} - ${max}. Facets are ready for decade, place, type, and ontology exploration.`,
     progress: 1,
   });
   update();
@@ -188,6 +281,12 @@ async function loadMenus(refresh = false) {
   loadPrices().catch(() => {
     if (els.priceStatus) els.priceStatus.textContent = "offline";
   });
+}
+
+async function loadDateEstimates(refresh = false) {
+  const dateEstimates = await getJson(`/api/date-estimates${refresh ? "?refresh=1" : ""}`);
+  state.dateEstimates = dateEstimates;
+  return dateEstimates;
 }
 
 async function loadOntology(refresh = false) {
@@ -226,9 +325,9 @@ async function loadPrices(refresh = false) {
 function filteredMenus() {
   const search = state.filters.search.trim().toLowerCase();
   return state.allMenus.filter((menu) => {
-    const menuYear = menu.year;
-    if (menuYear && (menuYear < state.filters.minYear || menuYear > state.filters.maxYear)) return false;
-    if (state.filters.decade && compact(menu.decade).toLowerCase() !== state.filters.decade) return false;
+    const year = menuYear(menu);
+    if (year && (year < state.filters.minYear || year > state.filters.maxYear)) return false;
+    if (state.filters.decade && compact(menuDecade(menu)).toLowerCase() !== state.filters.decade) return false;
     if (state.filters.type && !menu.types.some((type) => type.toLowerCase() === state.filters.type)) return false;
     if (state.selectedOntologyIds && !state.selectedOntologyIds.has(menu.id)) return false;
     if (state.selectedPriceMenuIds && !state.selectedPriceMenuIds.has(menu.id)) return false;
@@ -279,7 +378,7 @@ function makeFacetButton(item, selected, onClick) {
 
 function renderFacets() {
   const base = filteredMenusWithoutFacet();
-  const decadeCounts = uniqueCount(base.decade, (menu) => menu.decade).slice(0, 12);
+  const decadeCounts = uniqueCount(base.decade, (menu) => menuDecade(menu)).slice(0, 12);
   const typeCounts = uniqueCount(base.type, (menu) => menu.types).slice(0, 10);
   const placeCounts = uniqueCount(base.place, (menu) => [menu.city, menu.state, menu.country]).slice(0, 14);
 
@@ -484,7 +583,7 @@ function renderTimeLens(svg, width, height) {
   const pad = { top: 38, right: 28, bottom: 52, left: 58 };
   const minYear = state.filters.minYear;
   const maxYear = state.filters.maxYear;
-  const known = menus.filter((menu) => menu.year);
+  const known = menus.filter((menu) => menuYear(menu));
   const rows = ["A la carte menus", "Set menus", "Drink lists", "Wine lists", "Other"];
   const rowFor = (menu) => rows.find((row) => menu.types.some((type) => type.toLowerCase().includes(row.toLowerCase().split(" ")[0]))) || "Other";
   const x = (year) => pad.left + ((year - minYear) / Math.max(maxYear - minYear, 1)) * (width - pad.left - pad.right);
@@ -509,15 +608,21 @@ function renderTimeLens(svg, width, height) {
 
   const jitter = new Map();
   known.slice(0, 1600).forEach((menu) => {
+    const year = menuYear(menu);
     const row = rowFor(menu);
-    const key = `${menu.year}-${row}`;
+    const key = `${year}-${row}`;
     const offset = (jitter.get(key) || 0) + 1;
     jitter.set(key, offset);
+    const estimated = isEstimatedMenuDate(menu);
     const dot = svgEl("circle", {
-      cx: x(menu.year),
+      cx: x(year),
       cy: y(row) + ((offset % 11) - 5) * 3.5,
       r: state.selectedId === menu.id ? 7 : 4.6,
       fill: colorFor(menu.country || row),
+      opacity: estimated ? 0.62 : 0.88,
+      stroke: estimated ? "#2f3a3f" : "transparent",
+      "stroke-width": estimated ? 1.4 : 0,
+      "stroke-dasharray": estimated ? "2 2" : "",
       class: "menu-dot",
       tabindex: 0,
     });
@@ -525,15 +630,15 @@ function renderTimeLens(svg, width, height) {
     svg.appendChild(dot);
   });
 
-  drawUnknownBadge(svg, menus.length - known.length, width, height);
+  drawUnknownBadge(svg, menus.length - known.length, width, height, "undated after estimates");
 }
 
-function drawUnknownBadge(svg, count, width, height) {
+function drawUnknownBadge(svg, count, width, height, label = "undated") {
   if (!count) return;
   const group = svgEl("g");
-  group.appendChild(svgEl("rect", { x: width - 182, y: 16, width: 158, height: 34, rx: 7, fill: "rgba(47,58,63,0.08)" }));
-  const text = svgEl("text", { x: width - 103, y: 38, "text-anchor": "middle", class: "axis-label" });
-  text.textContent = `${count.toLocaleString()} undated`;
+  group.appendChild(svgEl("rect", { x: width - 226, y: 16, width: 202, height: 34, rx: 7, fill: "rgba(47,58,63,0.08)" }));
+  const text = svgEl("text", { x: width - 125, y: 38, "text-anchor": "middle", class: "axis-label" });
+  text.textContent = `${count.toLocaleString()} ${label}`;
   group.appendChild(text);
   svg.appendChild(group);
 }
@@ -797,9 +902,10 @@ function bindMenuNode(node, menu) {
   });
   node.addEventListener("mousemove", (event) => {
     const where = [menu.city, menu.state, menu.country].filter(Boolean).join(", ");
+    const evidence = menuDateEvidenceLabel(menu);
     showTooltip(
       event,
-      `<strong>${menu.title}</strong>${compact(menu.date, "Undated")} ${where ? `- ${titleCase(where)}` : ""}`
+      `<strong>${menu.title}</strong>${menuDateLabel(menu)} ${where ? `- ${titleCase(where)}` : ""}${evidence ? `<br><em>${evidence}</em>` : ""}`
     );
   });
   node.addEventListener("mouseleave", removeTooltip);
@@ -839,7 +945,7 @@ function renderResults() {
         <img alt="" loading="lazy" />
         <span>
           <strong>${menu.title}</strong>
-          <span>${compact(menu.date, "Undated")} ${compact(menu.city || menu.country, "")}</span>
+          <span>${menuDateLabel(menu)} ${compact(menu.city || menu.country, "")}</span>
         </span>
       `;
       setImageSource(button.querySelector("img"), menu.imageUrl, menu.title);
@@ -868,7 +974,7 @@ function renderDetailSkeleton(menu) {
   els.detailCard.classList.remove("hidden");
   els.detailImage.alt = menu?.title || "Selected menu";
   setImageSource(els.detailImage, menu?.imageUrl, menu?.title);
-  els.detailKicker.textContent = [compact(menu?.date, "Undated"), compact(menu?.country, "")].filter(Boolean).join(" / ");
+  els.detailKicker.textContent = [menuDateLabel(menu), compact(menu?.country, "")].filter(Boolean).join(" / ");
   els.detailTitle.textContent = menu?.title || "Loading menu";
   els.detailMeta.replaceChildren();
   els.detailText.textContent = "Loading full record...";
@@ -880,12 +986,15 @@ function renderDetail(detail, menu) {
   els.detailImage.alt = detail.title;
   setImageSource(els.detailImage, detail.imageUrl, detail.title || menu?.title);
   els.detailTitle.textContent = detail.title || menu?.title || "Menu";
-  els.detailKicker.textContent = [fieldValue(detail, "date") || menu?.date || "Undated", fieldValue(detail, "countr") || menu?.country]
+  els.detailKicker.textContent = [menuDateLabel(menu), fieldValue(detail, "countr") || menu?.country]
     .filter(Boolean)
     .join(" / ");
   els.detailLink.href = detail.sourceUrl;
 
   const rows = [
+    ["Source Date", fieldValue(detail, "date") || menu?.date],
+    ["Date Estimate", menu?.dateBasis === "source" ? "" : menuDateLabel(menu)],
+    ["Date Evidence", menuDateEvidenceLabel(menu)],
     ["Restaurant", fieldValue(detail, "restau") || menu?.restaurant],
     ["Type", fieldValue(detail, "typea") || menu?.types?.join(", ")],
     ["Place", [fieldValue(detail, "locati") || menu?.city, fieldValue(detail, "state") || menu?.state, fieldValue(detail, "countr") || menu?.country].filter(Boolean).join(", ")],
@@ -942,9 +1051,9 @@ async function runArchiveSearch() {
   });
   els.viz.innerHTML = '<div class="loading">Asking CONTENTdm for transcript matches...</div>';
   const payload = await getJson(`/api/search?term=${encodeURIComponent(term)}&field=${els.fieldSelect.value}&limit=600`);
-  state.allMenus = payload.menus;
+  state.allMenus = mergeDateEstimates(payload.menus);
   state.archiveMode = true;
-  const loadedMatches = payload.menus.length;
+  const loadedMatches = state.allMenus.length;
   els.recordCount.textContent =
     payload.remote === false
       ? `${payload.total.toLocaleString()} static metadata matches`

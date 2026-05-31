@@ -343,6 +343,12 @@ async function getOntology(refresh = false) {
   return withOntologyStatus(ontology);
 }
 
+async function readStaticData(filename) {
+  const safeName = path.basename(filename);
+  const raw = await fs.promises.readFile(path.join(PUBLIC_DIR, "data", safeName), "utf8");
+  return JSON.parse(raw);
+}
+
 function withOntologyStatus(ontology) {
   const { recordTexts, termIndex, ...publicOntology } = ontology;
   return {
@@ -648,6 +654,11 @@ async function handleApi(req, res, url) {
 
     if (url.pathname === "/api/ontology") {
       sendJson(res, await getOntology(url.searchParams.get("refresh") === "1"));
+      return;
+    }
+
+    if (url.pathname === "/api/date-estimates") {
+      sendJson(res, await readStaticData("date-estimates.json"));
       return;
     }
 

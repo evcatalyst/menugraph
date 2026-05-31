@@ -1,5 +1,6 @@
 const fs = require("fs/promises");
 const path = require("path");
+const { buildDateEstimateSnapshot } = require("../docs/date-utils");
 const { buildPriceSnapshot } = require("../docs/price-utils");
 const { fetchMenuText, getMenus, getOntology, ontologyStatus, selectOntologySample, startOntologyBuild } = require("../server");
 
@@ -259,6 +260,18 @@ async function readReference(filename) {
   }
 }
 
+async function readDateReferences() {
+  const [dateClues, restaurantRangesPayload] = await Promise.all([
+    readReference("date-clues.json"),
+    readReference("restaurant-ranges.json"),
+  ]);
+  return {
+    dateClues: dateClues || { lowerBounds: [] },
+    restaurantRanges: restaurantRangesPayload?.ranges || [],
+    restaurantRangesSource: restaurantRangesPayload?.source || "Curated restaurant ranges",
+  };
+}
+
 async function mapLimit(items, limit, mapper) {
   const results = [];
   let index = 0;
@@ -311,6 +324,16 @@ async function main() {
   }
   await fs.writeFile(path.join(DATA_DIR, "menus.json"), JSON.stringify(publicMenusPayload), "utf8");
   console.log(`Wrote ${publicMenusPayload.menus.length.toLocaleString()} menus.`);
+
+  const dateReferences = await readDateReferences();
+  const dateSnapshot = buildDateEstimateSnapshot({
+    menus: publicMenusPayload.menus,
+    references: dateReferences,
+  });
+  await fs.writeFile(path.join(DATA_DIR, "date-estimates.json"), JSON.stringify(dateSnapshot), "utf8");
+  console.log(
+    `Wrote ${dateSnapshot.records.length.toLocaleString()} date estimates; ${dateSnapshot.summary.inferredUnknowns.toLocaleString()} previously undated records now have inferred ranges.`
+  );
 
   const textLimit = argValue("text");
   let ontology = null;
