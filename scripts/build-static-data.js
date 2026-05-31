@@ -1,7 +1,16 @@
 const fs = require("fs/promises");
 const path = require("path");
+const { buildDateEstimateSnapshot } = require("../docs/date-estimates");
+const { buildMetadataOntology, buildOntology } = require("../docs/ontology");
 const { buildPriceSnapshot } = require("../docs/price-utils");
+const { summarizeMenus } = require("../docs/multisource");
 const { fetchMenuText, getMenus, getOntology, ontologyStatus, selectOntologySample, startOntologyBuild } = require("../server");
+const {
+  buildAnalytics,
+  buildNyplFromRows,
+  combineSources,
+  loadNyplExport,
+} = require("./nypl-source");
 
 const CONTENTDM_HOST = "ciadigitalcollections.culinary.edu";
 const COLLECTION = "p16940coll1";
@@ -291,7 +300,52 @@ async function buildPrices(menus, references, rawLimit) {
       console.log(`price transcripts: ${fetched}/${selected.length}`);
     }
   });
-  return buildPriceSnapshot({ menus, textsById, references, contextEvents });
+  return {
+    snapshot: buildPriceSnapshot({ menus, textsById, references, contextEvents }),
+    textsById,
+  };
+}
+
+async function buildDateEstimates(menus, textsById, priceSnapshot) {
+  const [dateClues, restaurantRanges] = await Promise.all([readReference("date-clues.json"), readReference("restaurant-ranges.json")]);
+  const snapshot = buildDateEstimateSnapshot({
+    menus,
+    textsById,
+    dateClues: dateClues || {},
+    restaurantRanges: restaurantRanges || {},
+    priceSnapshot,
+  });
+  await fs.writeFile(path.join(DATA_DIR, "date-estimates.json"), JSON.stringify(snapshot), "utf8");
+  return snapshot;
+}
+
+async function buildMultiSourceTextOntology(menus, rawLimit) {
+  const ciaMenus = menus.filter((menu) => !menu.sourceKey || menu.sourceKey === "cia");
+  const selected = selectOntologySample(ciaMenus, rawLimit);
+  const textById = new Map();
+  let fetched = 0;
+  console.log(`Building multi-source ontology with ${selected.length.toLocaleString()} CIA transcript samples plus NYPL dish metadata...`);
+  await mapLimit(selected, 4, async (menu) => {
+    try {
+      const text = await fetchMenuText(menu.id);
+      if (text) textById.set(menu.uid || menu.id, text);
+    } catch (error) {
+      // Keep NYPL metadata and available CIA records in the ontology even when OCR misses.
+    }
+    fetched += 1;
+    if (fetched % 25 === 0 || fetched === selected.length) {
+      console.log(`ontology transcripts: ${fetched}/${selected.length}`);
+    }
+  });
+  const ontology = buildOntology(menus, textById, { mode: "transcript" });
+  ontology.coverage = {
+    selectedRecords: selected.length,
+    transcriptRecords: textById.size,
+    totalRecords: menus.length,
+    sampleMode: selected.length >= ciaMenus.length ? "full-cia" : "stratified-cia",
+  };
+  ontology.recordTexts = Object.fromEntries(textById);
+  return ontology;
 }
 
 async function main() {
@@ -299,23 +353,100 @@ async function main() {
 
   console.log("Building static menu snapshot...");
   let publicMenusPayload = null;
+  let combinedMatches = { matches: {}, relationships: [] };
+  let analyticsSnapshot = null;
   try {
     const menusPayload = await getMenus(true);
+    const ciaMenus = menusPayload.menus.map(publicMenu);
     publicMenusPayload = {
       ...menusPayload,
-      menus: menusPayload.menus.map(publicMenu),
+      menus: ciaMenus,
     };
+
   } catch (error) {
     console.warn(`CONTENTdm metadata refresh failed; reusing committed menus.json. ${error.message}`);
     publicMenusPayload = JSON.parse(await fs.readFile(path.join(DATA_DIR, "menus.json"), "utf8"));
   }
+  try {
+    console.log("Reading NYPL What's on the Menu export from .cache/nypl/extract...");
+    const ciaMenus = publicMenusPayload.menus.filter((menu) => !menu.sourceKey || menu.sourceKey === "cia");
+    const nyplRows = await loadNyplExport();
+    const nypl = buildNyplFromRows(nyplRows);
+    const combined = combineSources({ ciaMenus, nyplMenus: nypl.nyplMenus });
+    combinedMatches = {
+      matches: combined.matchMap,
+      relationships: combined.relationships,
+    };
+    analyticsSnapshot = buildAnalytics({
+      menus: combined.menus,
+      dishStats: nypl.dishStats,
+      priceStats: nypl.priceStats,
+      relationships: combined.relationships,
+    });
+    publicMenusPayload = {
+      collection: {
+        alias: "menugraph-multisource",
+        name: "MenuGraph Multi-Source Corpus",
+        sourceUrl: publicMenusPayload.collection?.sourceUrl || "https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1",
+        sources: [
+          publicMenusPayload.collection || {
+            alias: "p16940coll1",
+            name: "CIA Menu Collection",
+            sourceUrl: "https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1",
+          },
+          {
+            alias: "nypl-wotm",
+            name: "NYPL What's on the Menu?",
+            sourceUrl: "https://www.nypl.org/research/support/whats-on-the-menu",
+          },
+        ],
+      },
+      fetchedAt: new Date().toISOString(),
+      summary: summarizeMenus(combined.menus, publicMenusPayload.summary?.facets || []),
+      menus: combined.menus,
+    };
+    console.log(`Merged ${nypl.nyplMenus.length.toLocaleString()} NYPL menu records into the static corpus.`);
+  } catch (error) {
+    console.warn(`NYPL export unavailable; keeping CIA-only snapshot. ${error.message}`);
+  }
   await fs.writeFile(path.join(DATA_DIR, "menus.json"), JSON.stringify(publicMenusPayload), "utf8");
   console.log(`Wrote ${publicMenusPayload.menus.length.toLocaleString()} menus.`);
+
+  const matchesPayload = {
+    version: 1,
+    createdAt: new Date().toISOString(),
+    source: "Cross-source venue matching between CIA CONTENTdm and NYPL WOTM CSV export",
+    ...combinedMatches,
+  };
+  await fs.writeFile(path.join(DATA_DIR, "matches.json"), JSON.stringify(matchesPayload), "utf8");
+  await fs.writeFile(
+    path.join(DATA_DIR, "analytics.json"),
+    JSON.stringify(
+      analyticsSnapshot || {
+        version: 1,
+        createdAt: new Date().toISOString(),
+        summary: {
+          totalMenus: publicMenusPayload.menus.length,
+          sourceCounts: summarizeMenus(publicMenusPayload.menus).sources,
+          matchedRelationships: 0,
+        },
+        topDishes: [],
+        priceStats: { byDecade: {}, byDish: {} },
+        graph: { nodes: [], relationships: [] },
+      }
+    ),
+    "utf8"
+  );
+  console.log(`Wrote ${Object.keys(matchesPayload.matches || {}).length.toLocaleString()} matched menu evidence sets.`);
 
   const textLimit = argValue("text");
   let ontology = null;
   try {
-    ontology = textLimit ? await buildTextOntology(textLimit) : await getOntology(true);
+    if (textLimit) {
+      ontology = await buildMultiSourceTextOntology(publicMenusPayload.menus, textLimit);
+    } else {
+      ontology = buildMetadataOntology(publicMenusPayload.menus);
+    }
   } catch (error) {
     console.warn(`Ontology refresh failed; reusing committed ontology.json. ${error.message}`);
     ontology = JSON.parse(await fs.readFile(path.join(DATA_DIR, "ontology.json"), "utf8"));
@@ -324,9 +455,20 @@ async function main() {
   console.log(`Wrote ${ontology.mode} ontology with ${Number(ontology.transcriptRecords || 0).toLocaleString()} transcript records.`);
 
   const references = await buildReferences();
-  const priceSnapshot = await buildPrices(publicMenusPayload.menus, references, argValue("prices"));
+  const ciaPriceMenus = publicMenusPayload.menus.filter((menu) => !menu.sourceKey || menu.sourceKey === "cia");
+  const priceBuild = await buildPrices(ciaPriceMenus, references, argValue("prices"));
+  const priceSnapshot = priceBuild.snapshot;
   await fs.writeFile(path.join(DATA_DIR, "prices.json"), JSON.stringify(priceSnapshot), "utf8");
   console.log(`Wrote ${priceSnapshot.records.length.toLocaleString()} price observations.`);
+
+  const textById = {
+    ...(ontology.recordTexts || {}),
+    ...(priceBuild.textsById || {}),
+  };
+  const dateSnapshot = await buildDateEstimates(publicMenusPayload.menus, textById, priceSnapshot);
+  console.log(
+    `Wrote ${dateSnapshot.records.length.toLocaleString()} date estimates; ${dateSnapshot.summary.plottableEstimated.toLocaleString()} estimated unknowns are plottable by default.`
+  );
 }
 
 main().catch((error) => {

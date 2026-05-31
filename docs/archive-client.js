@@ -3,7 +3,7 @@
   const COLLECTION = "p16940coll1";
   const PAGE_SIZE = 1024;
   const CACHE_TTL_MS = 1000 * 60 * 30;
-  const ONTOLOGY_STORAGE_KEY = "menugraph:ontology:v1";
+  const ONTOLOGY_STORAGE_KEY = "menugraph:ontology:v2";
 
   const fieldBundles = [
     "title!date!restau!typea!decade",
@@ -14,6 +14,29 @@
   let menusCache = null;
   let ontologyCache = null;
   let pricesCache = null;
+  let dateEstimatesCache = null;
+  let matchesCache = null;
+  let analyticsCache = null;
+
+  function multiSource() {
+    return window.MenuGraphMultiSource || null;
+  }
+
+  function recordUid(menu) {
+    return multiSource()?.recordUid(menu) || menu?.uid || menu?.id;
+  }
+
+  function normalizeCia(menu) {
+    return multiSource()?.normalizeCiaMenu(menu) || menu;
+  }
+
+  function summarizeMenus(menus, facets = []) {
+    return multiSource()?.summarizeMenus(menus, facets) || summarize(menus, facets);
+  }
+
+  function filterMenusBySource(payload, source) {
+    return multiSource()?.filterMenusBySource(payload, source) || payload;
+  }
 
   function sourceUrl(id) {
     return `https://${CONTENTDM_HOST}/digital/collection/${COLLECTION}/id/${id}`;
@@ -96,7 +119,8 @@
     const pointer = Number(record.pointer || record.dmrecord);
     const title = cleanValue(record.title) || "Untitled menu";
     const date = cleanValue(record.date);
-    const decade = splitTerms(record.decade)[0] || decadeFromDate(date) || "unknown";
+    const rawDecade = splitTerms(record.decade)[0];
+    const decade = rawDecade && rawDecade.toLowerCase() !== "unknown" ? rawDecade : decadeFromDate(date) || rawDecade || "unknown";
     const country = splitTerms(record.countr)[0] || "unknown";
     const state = splitTerms(record.state)[0] || "";
     const city = splitTerms(record.locati)[0] || "";
@@ -202,6 +226,8 @@
         progress: 0.18,
       });
       const payload = await requestStaticJson("menus.json", refresh);
+      payload.menus = (payload.menus || []).map((menu) => (menu.sourceKey ? menu : normalizeCia(menu)));
+      payload.summary = payload.summary || summarizeMenus(payload.menus);
       menusCache = { createdAt: Date.now(), payload };
       return payload;
     } catch (error) {
@@ -266,7 +292,7 @@
       }
     }
 
-    const menus = [...merged.values()].sort((a, b) => {
+    const menus = [...merged.values()].map(normalizeCia).sort((a, b) => {
       const aYear = a.year || 9999;
       const bYear = b.year || 9999;
       return aYear - bYear || a.title.localeCompare(b.title);
@@ -280,7 +306,7 @@
         apiUrl: `https://${CONTENTDM_HOST}/digital/bl/dmwebservices/index.php`,
       },
       fetchedAt: new Date().toISOString(),
-      summary: summarize(menus, firstPage.facets || []),
+      summary: summarizeMenus(menus, firstPage.facets || []),
       menus,
     };
 
@@ -315,7 +341,7 @@
         facets: "decade!typea!locati!state!countr",
       });
 
-      const menus = (page.records || []).map(coerceRecord);
+      const menus = (page.records || []).map(coerceRecord).map(normalizeCia);
       return {
         term,
         field: safeField,
@@ -369,7 +395,7 @@
       term,
       field,
       total: matches.length,
-      summary: summarize(menus),
+      summary: summarizeMenus(menus),
       menus,
       remote: false,
     };
@@ -394,8 +420,16 @@
     }
   }
 
+  function sourceIdParts(id) {
+    const decoded = decodeURIComponent(String(id || ""));
+    const match = decoded.match(/^([a-z]+):(.*)$/i);
+    return match ? { sourceKey: match[1].toLowerCase(), id: match[2], uid: decoded } : { sourceKey: "cia", id: decoded, uid: decoded };
+  }
+
   async function getItem(id) {
-    const pointer = Number(id);
+    const parts = sourceIdParts(id);
+    if (parts.sourceKey !== "cia") return getStaticItem(parts.uid);
+    const pointer = Number(parts.id);
     if (!Number.isFinite(pointer)) throw new Error("Invalid item id");
     let item = null;
     try {
@@ -426,6 +460,8 @@
 
     return {
       id: pointer,
+      uid: `cia:${pointer}`,
+      sourceKey: "cia",
       parentId,
       title: fields.title?.value || item.title || "Menu",
       text,
@@ -439,14 +475,29 @@
   }
 
   async function getStaticItem(pointer) {
+    const parts = sourceIdParts(pointer);
     const payload = await getMenus({ refresh: false });
-    const menu = payload.menus.find((item) => Number(item.id) === Number(pointer));
+    const menu = payload.menus.find((item) => recordUid(item) === parts.uid || String(item.id) === String(parts.id));
     if (!menu) throw new Error("Menu detail unavailable in static snapshot");
+    const topDishes = (menu.topDishes || []).slice(0, 12);
+    const text =
+      menu.sourceKey === "nypl"
+        ? [
+            "NYPL What's on the Menu? provides crowdsourced dish transcription and price rows for this menu-level record.",
+            topDishes.length ? `Top transcribed dishes: ${topDishes.join("; ")}.` : "",
+            menu.priceCount ? `${Number(menu.priceCount).toLocaleString()} item prices are available in the NYPL source export.` : "",
+            menu.notes,
+          ]
+            .filter(Boolean)
+            .join(" ")
+        : "Full OCR text requires live access to the CIA Digital Collections item endpoint. The static Pages snapshot keeps the metadata, ontology, source link, and image pointer available without a server.";
     return {
-      id: pointer,
-      parentId: pointer,
+      id: menu.id,
+      uid: recordUid(menu),
+      sourceKey: menu.sourceKey || "cia",
+      parentId: menu.pointer || menu.id,
       title: menu.title,
-      text: "Full OCR text requires live access to the CIA Digital Collections item endpoint. The static Pages snapshot keeps the metadata, ontology, source link, and image pointer available without a server.",
+      text,
       fields: {
         title: { label: "Title", value: menu.title },
         date: { label: "Date", value: menu.date },
@@ -455,8 +506,11 @@
         locati: { label: "City", value: menu.city },
         state: { label: "State", value: menu.state },
         countr: { label: "Country", value: menu.country },
+        sourceLabel: { label: "Corpus", value: menu.sourceLabel },
         source: { label: "Source", value: menu.source },
         donor: { label: "Donor", value: menu.donor },
+        rights: { label: "Rights", value: menu.rights },
+        callNumber: { label: "Call Number", value: menu.callNumber },
       },
       contentType: menu.filetype,
       imageUrl: menu.imageUrl,
@@ -537,6 +591,28 @@
     return pricesCache;
   }
 
+  async function getDateEstimates({ refresh = false } = {}) {
+    if (!refresh && dateEstimatesCache) return dateEstimatesCache;
+    dateEstimatesCache = await requestStaticJson("date-estimates.json", refresh);
+    return dateEstimatesCache;
+  }
+
+  async function getMatches(uid, { refresh = false } = {}) {
+    if (!matchesCache || refresh) matchesCache = await requestStaticJson("matches.json", refresh);
+    const decoded = decodeURIComponent(String(uid || ""));
+    return {
+      uid: decoded,
+      matches: matchesCache.matches?.[decoded] || [],
+      relationships: matchesCache.relationships || [],
+      source: matchesCache.source,
+    };
+  }
+
+  async function getAnalytics({ refresh = false } = {}) {
+    if (!analyticsCache || refresh) analyticsCache = await requestStaticJson("analytics.json", refresh);
+    return analyticsCache;
+  }
+
   function selectOntologySample(menus, rawLimit) {
     const limit =
       rawLimit === "all"
@@ -588,7 +664,8 @@
 
   async function buildTextIndex({ limit = 300, refresh = false, onProgress } = {}) {
     const payload = await getMenus({ refresh: false });
-    const selected = selectOntologySample(payload.menus, limit);
+    const ciaMenus = payload.menus.filter((menu) => !menu.sourceKey || menu.sourceKey === "cia");
+    const selected = selectOntologySample(ciaMenus, limit);
     const textById = new Map();
     const startedAt = new Date().toISOString();
 
@@ -599,7 +676,7 @@
         indexed: index,
         total: selected.length,
         transcriptRecords: textById.size,
-        currentId: menu.id,
+        currentId: recordUid(menu),
         currentTitle: menu.title,
         message: refresh ? "Refreshing transcript text from CONTENTdm." : "Fetching transcript text and page structure for this menu.",
         startedAt,
@@ -609,7 +686,7 @@
       reportProgress(onProgress, baseJob);
       try {
         const text = await fetchMenuText(menu.id);
-        if (text) textById.set(menu.id, text);
+        if (text) textById.set(recordUid(menu), text);
       } catch (error) {
         // Continue the sample; failed records should not stop the full ontology build.
       }
@@ -639,7 +716,7 @@
       selectedRecords: selected.length,
       transcriptRecords: textById.size,
       totalRecords: payload.menus.length,
-      sampleMode: selected.length >= payload.menus.length ? "full" : "stratified",
+      sampleMode: selected.length >= ciaMenus.length ? "full-cia" : "stratified-cia",
     };
     storeOntology(ontology);
 
@@ -661,13 +738,20 @@
   async function handle(pathname, options = {}) {
     const url = new URL(pathname, "https://menugraph.local");
     if (url.pathname === "/api/menus") {
-      return getMenus({ refresh: url.searchParams.get("refresh") === "1", onProgress: options.onProgress });
+      const payload = await getMenus({ refresh: url.searchParams.get("refresh") === "1", onProgress: options.onProgress });
+      return filterMenusBySource(payload, url.searchParams.get("source") || "all");
     }
     if (url.pathname === "/api/ontology") {
       return getOntology({ refresh: url.searchParams.get("refresh") === "1" });
     }
     if (url.pathname === "/api/prices") {
       return getPrices({ refresh: url.searchParams.get("refresh") === "1" });
+    }
+    if (url.pathname === "/api/date-estimates") {
+      return getDateEstimates({ refresh: url.searchParams.get("refresh") === "1" });
+    }
+    if (url.pathname === "/api/analytics/dishes") {
+      return getAnalytics({ refresh: url.searchParams.get("refresh") === "1" });
     }
     if (url.pathname === "/api/search") {
       return searchMenus(
@@ -677,8 +761,10 @@
         url.searchParams.get("limit") || 300
       );
     }
-    const itemMatch = url.pathname.match(/^\/api\/item\/(\d+)$/);
+    const itemMatch = url.pathname.match(/^\/api\/item\/(.+)$/);
     if (itemMatch) return getItem(itemMatch[1]);
+    const matchesMatch = url.pathname.match(/^\/api\/matches\/(.+)$/);
+    if (matchesMatch) return getMatches(matchesMatch[1]);
     if (url.pathname === "/api/ontology/build") {
       return buildTextIndex({
         limit: url.searchParams.get("limit") || 300,
@@ -692,9 +778,12 @@
   window.MenuGraphArchive = {
     buildTextIndex,
     getItem,
+    getAnalytics,
+    getMatches,
     getMenus,
     getOntology,
     getPrices,
+    getDateEstimates,
     handle,
     imageUrl,
     searchMenus,

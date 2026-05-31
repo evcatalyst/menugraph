@@ -3,6 +3,7 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const { buildMetadataOntology, buildOntology } = require("./docs/ontology");
+const { filterMenusBySource, normalizeCiaMenu, recordUid, summarizeMenus } = require("./docs/multisource");
 
 const PORT = Number(process.env.PORT || 4173);
 const HOST = "127.0.0.1";
@@ -12,6 +13,7 @@ const PUBLIC_DIR = path.join(__dirname, "docs");
 const CACHE_TTL_MS = 1000 * 60 * 30;
 const PAGE_SIZE = 1024;
 const ONTOLOGY_CACHE_PATH = path.join(__dirname, ".cache", "ontology.json");
+const DATA_DIR = path.join(PUBLIC_DIR, "data");
 
 const fieldBundles = [
   "title!date!restau!typea!decade",
@@ -22,6 +24,8 @@ const fieldBundles = [
 let menusCache = null;
 let schemaCache = null;
 let ontologyCache = null;
+let dateEstimatesCache = null;
+let staticJsonCache = new Map();
 let ontologyJob = {
   active: false,
   phase: "idle",
@@ -56,6 +60,14 @@ function sendText(res, text, status = 200) {
 
 function notFound(res) {
   sendJson(res, { error: "Not found" }, 404);
+}
+
+async function readStaticJson(filename, refresh = false) {
+  const filePath = path.join(DATA_DIR, filename);
+  if (!refresh && staticJsonCache.has(filePath)) return staticJsonCache.get(filePath);
+  const payload = JSON.parse(await fs.promises.readFile(filePath, "utf8"));
+  staticJsonCache.set(filePath, payload);
+  return payload;
 }
 
 function normalizeQueryParam(value) {
@@ -131,7 +143,8 @@ function coerceRecord(record) {
   const pointer = Number(record.pointer || record.dmrecord);
   const title = cleanValue(record.title) || "Untitled menu";
   const date = cleanValue(record.date);
-  const decade = splitTerms(record.decade)[0] || decadeFromDate(date) || "unknown";
+  const rawDecade = splitTerms(record.decade)[0];
+  const decade = rawDecade && rawDecade.toLowerCase() !== "unknown" ? rawDecade : decadeFromDate(date) || rawDecade || "unknown";
   const country = splitTerms(record.countr)[0] || "unknown";
   const state = splitTerms(record.state)[0] || "";
   const city = splitTerms(record.locati)[0] || "";
@@ -341,6 +354,13 @@ async function getOntology(refresh = false) {
   const ontology = buildMetadataOntology(payload.menus);
   ontologyCache = ontology;
   return withOntologyStatus(ontology);
+}
+
+async function getDateEstimates(refresh = false) {
+  if (!refresh && dateEstimatesCache) return dateEstimatesCache;
+  const raw = await fs.promises.readFile(path.join(PUBLIC_DIR, "data", "date-estimates.json"), "utf8");
+  dateEstimatesCache = JSON.parse(raw);
+  return dateEstimatesCache;
 }
 
 function withOntologyStatus(ontology) {
@@ -629,10 +649,106 @@ async function proxyImage(req, res, id) {
   res.end(upstream.body);
 }
 
+async function getPublicMenus({ refresh = false, source = "all" } = {}) {
+  if (!refresh) {
+    try {
+      const payload = await readStaticJson("menus.json");
+      const menus = (payload.menus || []).map((menu) => (menu.sourceKey ? menu : normalizeCiaMenu(menu)));
+      return filterMenusBySource(
+        {
+          ...payload,
+          menus,
+          summary: payload.summary || summarizeMenus(menus),
+        },
+        source
+      );
+    } catch (error) {
+      // Fall through to live CIA data when the committed Pages snapshot is absent.
+    }
+  }
+  const payload = await getMenus(refresh);
+  const menus = payload.menus.map(normalizeCiaMenu);
+  return filterMenusBySource({ ...payload, menus, summary: summarizeMenus(menus, payload.summary?.facets || []) }, source);
+}
+
+function sourceIdParts(id) {
+  const decoded = decodeURIComponent(String(id || ""));
+  const match = decoded.match(/^([a-z]+):(.*)$/i);
+  return match ? { sourceKey: match[1].toLowerCase(), id: match[2], uid: decoded } : { sourceKey: "cia", id: decoded, uid: decoded };
+}
+
+async function getStaticItem(uid) {
+  const parts = sourceIdParts(uid);
+  const payload = await getPublicMenus({ source: "all" });
+  const menu = payload.menus.find((item) => recordUid(item) === parts.uid || String(item.id) === String(parts.id));
+  if (!menu) throw new Error("Menu detail unavailable in static snapshot");
+  const topDishes = (menu.topDishes || []).slice(0, 12);
+  const text =
+    menu.sourceKey === "nypl"
+      ? [
+          "NYPL What's on the Menu? provides crowdsourced dish transcription and price rows for this menu-level record.",
+          topDishes.length ? `Top transcribed dishes: ${topDishes.join("; ")}.` : "",
+          menu.priceCount ? `${Number(menu.priceCount).toLocaleString()} item prices are available in the NYPL source export.` : "",
+          menu.notes,
+        ]
+          .filter(Boolean)
+          .join(" ")
+      : "Full OCR text requires live access to the CIA Digital Collections item endpoint. The static Pages snapshot keeps the metadata, ontology, source link, and image pointer available without a server.";
+  return {
+    id: menu.id,
+    uid: recordUid(menu),
+    sourceKey: menu.sourceKey || "cia",
+    parentId: menu.pointer || menu.id,
+    title: menu.title,
+    text,
+    fields: {
+      title: { label: "Title", value: menu.title },
+      date: { label: "Date", value: menu.date },
+      restau: { label: "Restaurant", value: menu.restaurant },
+      typea: { label: "Type", value: menu.types?.join("; ") },
+      locati: { label: "City", value: menu.city },
+      state: { label: "State", value: menu.state },
+      countr: { label: "Country", value: menu.country },
+      sourceLabel: { label: "Corpus", value: menu.sourceLabel },
+      source: { label: "Source", value: menu.source },
+      donor: { label: "Donor", value: menu.donor },
+      rights: { label: "Rights", value: menu.rights },
+      callNumber: { label: "Call Number", value: menu.callNumber },
+    },
+    contentType: menu.filetype,
+    imageUrl: menu.imageUrl,
+    iiifInfoUri: "",
+    sourceUrl: menu.itemUrl,
+    pages: [],
+  };
+}
+
+async function getPublicItem(id) {
+  const parts = sourceIdParts(id);
+  if (parts.sourceKey !== "cia") return getStaticItem(parts.uid);
+  try {
+    const detail = await getItem(parts.id);
+    return { ...detail, uid: `cia:${parts.id}`, sourceKey: "cia" };
+  } catch (error) {
+    return getStaticItem(parts.uid);
+  }
+}
+
+async function getMatchesFor(uid, refresh = false) {
+  const payload = await readStaticJson("matches.json", refresh);
+  const decoded = decodeURIComponent(String(uid || ""));
+  return {
+    uid: decoded,
+    source: payload.source,
+    matches: payload.matches?.[decoded] || [],
+    relationships: payload.relationships || [],
+  };
+}
+
 async function handleApi(req, res, url) {
   try {
     if (url.pathname === "/api/health") {
-      sendJson(res, { ok: true, collection: COLLECTION });
+      sendJson(res, { ok: true, collection: COLLECTION, sources: ["cia", "nypl"] });
       return;
     }
 
@@ -642,12 +758,23 @@ async function handleApi(req, res, url) {
     }
 
     if (url.pathname === "/api/menus") {
-      sendJson(res, await getMenus(url.searchParams.get("refresh") === "1"));
+      sendJson(
+        res,
+        await getPublicMenus({
+          refresh: url.searchParams.get("refresh") === "1",
+          source: url.searchParams.get("source") || "all",
+        })
+      );
       return;
     }
 
     if (url.pathname === "/api/ontology") {
       sendJson(res, await getOntology(url.searchParams.get("refresh") === "1"));
+      return;
+    }
+
+    if (url.pathname === "/api/date-estimates") {
+      sendJson(res, await getDateEstimates(url.searchParams.get("refresh") === "1"));
       return;
     }
 
@@ -658,6 +785,16 @@ async function handleApi(req, res, url) {
 
     if (url.pathname === "/api/ontology/status") {
       sendJson(res, ontologyStatus());
+      return;
+    }
+
+    if (url.pathname === "/api/prices") {
+      sendJson(res, await readStaticJson("prices.json", url.searchParams.get("refresh") === "1"));
+      return;
+    }
+
+    if (url.pathname === "/api/analytics/dishes") {
+      sendJson(res, await readStaticJson("analytics.json", url.searchParams.get("refresh") === "1"));
       return;
     }
 
@@ -674,9 +811,15 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    const itemMatch = url.pathname.match(/^\/api\/item\/(\d+)$/);
+    const matchesMatch = url.pathname.match(/^\/api\/matches\/(.+)$/);
+    if (matchesMatch) {
+      sendJson(res, await getMatchesFor(matchesMatch[1], url.searchParams.get("refresh") === "1"));
+      return;
+    }
+
+    const itemMatch = url.pathname.match(/^\/api\/item\/(.+)$/);
     if (itemMatch) {
-      sendJson(res, await getItem(itemMatch[1]));
+      sendJson(res, await getPublicItem(itemMatch[1]));
       return;
     }
 
@@ -716,6 +859,7 @@ module.exports = {
   fetchMenuText,
   getMenus,
   getOntology,
+  getDateEstimates,
   ontologyStatus,
   searchMenus,
   selectOntologySample,

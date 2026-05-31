@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "generatedFrom": "Unknown Date Enrichment Plan",
+  "rules": [
+    {
+      "id": "zip-plus-four",
+      "method": "postal_format",
+      "label": "ZIP+4 printed",
+      "notBefore": 1983,
+      "confidence": "B",
+      "hard": true,
+      "sourceUrl": "https://postalmuseum.si.edu/the-20th-century-from-zone-codes-to-zip-codes",
+      "note": "USPS introduced ZIP+4 in 1983; treat as a lower bound."
+    },
+    {
+      "id": "us-zip",
+      "method": "postal_format",
+      "label": "U.S. ZIP code printed",
+      "notBefore": 1963,
+      "confidence": "B",
+      "hard": true,
+      "sourceUrl": "https://postalmuseum.si.edu/the-20th-century-from-zone-codes-to-zip-codes",
+      "note": "ZIP Code launched July 1, 1963; adoption lag means absence is not evidence."
+    },
+    {
+      "id": "phone-exchange",
+      "method": "phone_format",
+      "label": "Telephone exchange name",
+      "notBefore": 1940,
+      "notAfter": 1975,
+      "confidence": "C",
+      "hard": false,
+      "sourceUrl": "https://en.wikipedia.org/wiki/Telephone_exchange_names",
+      "note": "Named exchanges such as PLaza or SO 2-4550 are mid-century cues, not exact dates."
+    },
+    {
+      "id": "area-code",
+      "method": "phone_format",
+      "label": "North American area code",
+      "notBefore": 1951,
+      "confidence": "C",
+      "hard": true,
+      "sourceUrl": "https://www.nanpa.com/about",
+      "note": "NANP area-code implementation began in the early 1950s; use as a lower bound."
+    },
+    {
+      "id": "diners-club",
+      "method": "payment_marker",
+      "label": "Diners Club accepted",
+      "notBefore": 1950,
+      "confidence": "B",
+      "hard": true,
+      "sourceUrl": "https://www.dinersclub.com/about-us/history/",
+      "note": "Diners Club launched the first multipurpose charge card in 1950."
+    },
+    {
+      "id": "american-express",
+      "method": "payment_marker",
+      "label": "American Express accepted",
+      "notBefore": 1958,
+      "confidence": "B",
+      "hard": true,
+      "sourceUrl": "https://www.americanexpress.com/",
+      "note": "American Express charge-card acceptance is a post-1958 marker."
+    },
+    {
+      "id": "bankamericard",
+      "method": "payment_marker",
+      "label": "BankAmericard accepted",
+      "notBefore": 1958,
+      "notAfter": 1976,
+      "confidence": "B",
+      "hard": false,
+      "sourceUrl": "https://www.si.edu/object/credit-card:nmah_1448554",
+      "note": "BankAmericard was introduced in 1958 and became Visa in 1976."
+    },
+    {
+      "id": "visa",
+      "method": "payment_marker",
+      "label": "Visa accepted",
+      "notBefore": 1976,
+      "confidence": "B",
+      "hard": true,
+      "sourceUrl": "https://www.si.edu/object/credit-card:nmah_1448554",
+      "note": "Visa branding begins in 1976."
+    },
+    {
+      "id": "master-charge",
+      "method": "payment_marker",
+      "label": "Master Charge accepted",
+      "notBefore": 1969,
+      "notAfter": 1979,
+      "confidence": "B",
+      "hard": false,
+      "sourceUrl": "https://www.si.edu/object/credit-card:nmah_1448554",
+      "note": "Interbank became Master Charge in 1969 and MasterCard in 1979."
+    },
+    {
+      "id": "mastercard",
+      "method": "payment_marker",
+      "label": "MasterCard accepted",
+      "notBefore": 1979,
+      "confidence": "B",
+      "hard": true,
+      "sourceUrl": "https://www.si.edu/object/credit-card:nmah_1448554",
+      "note": "MasterCard branding is a post-1979 marker."
+    },
+    {
+      "id": "web-or-email",
+      "method": "postal_format",
+      "label": "Website or email printed",
+      "notBefore": 1993,
+      "confidence": "C",
+      "hard": true,
+      "sourceUrl": "https://www.w3.org/History.html",
+      "note": "Public website/email presentation is treated as a conservative 1990s-or-later marker."
+    }
+  ]
+}

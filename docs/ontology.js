@@ -179,7 +179,8 @@ function buildOntology(menus, textById = new Map(), options = {}) {
   const mode = options.mode || (textById.size ? "transcript" : "metadata");
 
   for (const menu of menus) {
-    const transcript = textById.get(menu.id) || "";
+    const recordId = menu.uid || menu.id;
+    const transcript = textById.get(recordId) || textById.get(menu.id) || "";
     const text = normalizeText(
       [
         menu.title,
@@ -189,6 +190,8 @@ function buildOntology(menus, textById = new Map(), options = {}) {
         menu.illustrations?.join(" "),
         menu.digitalCollection,
         menu.source,
+        menu.sourceLabel,
+        menu.topDishes?.join("\n"),
         transcript,
       ].join("\n")
     );
@@ -229,7 +232,8 @@ function buildOntology(menus, textById = new Map(), options = {}) {
 
     if (recordTermKeys.size) {
       indexedRecords.push({
-        id: menu.id,
+        id: recordId,
+        sourceKey: menu.sourceKey || "cia",
         year: menu.year,
         decade: cleanDimension(menu.decade),
         place: placeFor(menu),
@@ -272,24 +276,28 @@ function addTerm(terms, category, rawTerm, menu, source) {
       term,
       count: 0,
       recordIds: new Set(),
+      sourceCounts: new Map(),
       decades: new Map(),
       places: new Map(),
       examples: [],
       sources: new Set(),
     }).get(key);
 
-  if (existing.recordIds.has(menu.id)) return;
-  existing.recordIds.add(menu.id);
+  const recordId = menu.uid || menu.id;
+  if (existing.recordIds.has(recordId)) return;
+  existing.recordIds.add(recordId);
   existing.count += 1;
   existing.sources.add(source);
+  increment(existing.sourceCounts, menu.sourceKey || "cia");
   increment(existing.decades, cleanDimension(menu.decade));
   increment(existing.places, placeFor(menu));
   if (existing.examples.length < 4) {
     existing.examples.push({
-      id: menu.id,
+      id: recordId,
       title: menu.title,
       date: menu.date,
       place: placeFor(menu),
+      sourceKey: menu.sourceKey || "cia",
     });
   }
 }
@@ -298,6 +306,7 @@ function finalizeTerm(term) {
   return {
     ...term,
     recordIds: [...term.recordIds].slice(0, 120),
+    sourceCounts: Object.fromEntries([...term.sourceCounts.entries()].sort()),
     decades: Object.fromEntries([...term.decades.entries()].sort()),
     places: Object.fromEntries([...term.places.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12)),
     sources: [...term.sources],

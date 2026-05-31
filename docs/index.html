@@ -49,14 +49,37 @@
             <button type="button" data-lens="prices">Prices</button>
           </div>
 
+          <section class="facet-section">
+            <div class="section-title">
+              <span>Source</span>
+            </div>
+            <div class="source-switch" role="tablist" aria-label="Source filter">
+              <button class="active" type="button" data-source="all">All</button>
+              <button type="button" data-source="cia">CIA</button>
+              <button type="button" data-source="nypl">NYPL</button>
+              <button type="button" data-source="matched">Matched</button>
+            </div>
+          </section>
+
           <div class="range-block">
             <div class="range-label">
-              <span>Known year span</span>
+              <span>Year span</span>
               <strong id="year-label">...</strong>
             </div>
             <input id="year-min" type="range" min="1800" max="2020" value="1800" />
             <input id="year-max" type="range" min="1800" max="2020" value="2020" />
           </div>
+
+          <section class="facet-section">
+            <div class="section-title">
+              <span>Date Estimates</span>
+              <small id="date-estimate-status">loading</small>
+            </div>
+            <label class="toggle-row">
+              <input id="estimated-toggle" type="checkbox" checked />
+              <span>Include A-C estimates</span>
+            </label>
+          </section>
 
           <section class="facet-section">
             <div class="section-title">
@@ -146,6 +169,7 @@
               <h2 id="detail-title"></h2>
               <dl id="detail-meta"></dl>
               <div id="page-strip" class="page-strip"></div>
+              <div id="detail-evidence" class="evidence-panel hidden"></div>
               <p id="detail-text" class="transcript"></p>
               <a id="detail-link" target="_blank" rel="noreferrer">Open in CIA Digital Collections</a>
             </div>
@@ -175,6 +199,7 @@
       </section>
     </main>
 
+    <script src="./multisource.js"></script>
     <script src="./ontology.js"></script>
     <script src="./price-utils.js"></script>
     <script src="./archive-client.js"></script>
