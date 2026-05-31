@@ -1,5 +1,5 @@
 const MenuGraphPrices = (() => {
-  const VERSION = 1;
+  const VERSION = 2;
 
   const COUNTRY_TO_ISO3 = {
     "united states": "USA",
@@ -68,6 +68,12 @@ const MenuGraphPrices = (() => {
     return Number.isFinite(number) ? number : null;
   }
 
+  const FOOD_SIGNAL =
+    /\b(?:appetizers?|bacon|bass|beef|beer|bisque|brandy|bread|breakfast|brie|broiled|brut|burgundy|cake|cakes|caviar|champagne|cheese|chicken|chop|chops|chowder|clam|clams|cocktail|coffee|consomme|crab|cream|dessert|dinner|duck|egg|eggs|fish|filet|fillet|fried|fruit|glace|grilled|ham|ice cream|lamb|lobster|luncheon|mackerels?|meal|mignon|milk|oil|oyster|oysters|pie|port|potatoes|pudding|rice|roast|salad|salmon|sandwich|sauce|sauterne|sherry|shrimp|sirloin|soup|steak|stew|tea|tenderloin|tomato|tomatoes|trout|turkey|veal|vegetable|vegetables|wine)\b/i;
+
+  const NON_MENU_SIGNAL =
+    /\b(?:address|avenue|birth rate|copyright|departure|fare|health|highway|miles|passenger|population|production|publisher|railroad|railway|street|telephone|ticket|timetable|travel|value production)\b/i;
+
   function countryKey(menu) {
     return String(menu?.country || "").trim().toLowerCase();
   }
@@ -119,18 +125,27 @@ const MenuGraphPrices = (() => {
 
   function pricePatterns(menu) {
     const patterns = [
-      /US\$\s*\d+(?:[.,]\d+)?|\$\s*\d+(?:[.,]\d+)?/gi,
-      /\b\d+(?:[.,]\d+)?\s*(?:¢|cents?|cts?\.?|c\.)\b/gi,
-      /\b(?:frs?\.?|francs?)\s*\d+(?:[.,]\d+)?/gi,
-      /€\s*\d+(?:[.,]\d+)?/gi,
-      /£\s*\d+(?:[.,]\d+)?/gi,
+      { kind: "explicit-currency", priority: 1, pattern: /US\$\s*\d+(?:\.\d{1,2})?(?![,\d])|\$\s*\d+(?:\.\d{1,2})?(?![,\d])/gi },
+      { kind: "explicit-cents", priority: 1, pattern: /\b\d+(?:[.,]\d+)?\s*(?:¢|cents?|cts?\.?|c\.)\b/gi },
+      { kind: "explicit-currency", priority: 1, pattern: /\b(?:frs?\.?|francs?)\s*\d+(?:[.,]\d+)?/gi },
+      { kind: "explicit-currency", priority: 1, pattern: /€\s*\d+(?:[.,]\d+)?/gi },
+      { kind: "explicit-currency", priority: 1, pattern: /£\s*\d+(?:[.,]\d+)?/gi },
     ];
     const key = countryKey(menu);
-    if (/germany|austria/.test(key)) patterns.push(/\b(?:mk\.?|marks?)\s*\d+(?:[.,]\d+)?/gi);
-    if (/united kingdom|england|scotland/.test(key)) {
-      patterns.push(/\b\d+\s*s(?:\s*\d+\s*d)?\b/gi, /\b\d+\/\d+\b/g);
+    if (/germany|austria/.test(key)) {
+      patterns.push({ kind: "explicit-currency", priority: 1, pattern: /\b(?:mk\.?|marks?)\s*\d+(?:[.,]\d+)?/gi });
     }
-    patterns.push(/\s\d+[.,]\d{2}\s*$/g);
+    if (/united kingdom|england|scotland/.test(key)) {
+      patterns.push(
+        { kind: "explicit-currency", priority: 1, pattern: /\b\d+\s*s(?:\s*\d+\s*d)?\b/gi },
+        { kind: "explicit-currency", priority: 1, pattern: /\b\d+\/\d+\b/g }
+      );
+    }
+    patterns.push(
+      { kind: "leading-decimal", priority: 3, pattern: /(?:^|\s)\.\d{2}(?=\s|$)/g },
+      { kind: "bare-decimal", priority: 4, pattern: /(?:^|\s)\d+[.,]\d{2}(?=\s|$)/g },
+      { kind: "bare-integer", priority: 5, pattern: /(?:^|\s)\d{1,2}(?=\s|$)/g }
+    );
     return patterns;
   }
 
@@ -138,7 +153,11 @@ const MenuGraphPrices = (() => {
     const without = cleanText(line)
       .replace(token, " ")
       .replace(/[_.,;:\-]{2,}/g, " ")
+      .replace(/\b\d+(?:[.,]\d+)?\s*(?:¢|cents?|cts?\.?|c\.)\b/gi, " ")
+      .replace(/\s+\.\d{2}\b/g, " ")
+      .replace(/\s+\d+[.,]\d{2}\b/g, " ")
       .replace(/\s+\d+[.,]\d{2}\s*$/g, " ")
+      .replace(/\s+\d{1,2}\s*$/g, " ")
       .replace(/\b(price|prix|preis)\b/gi, " ")
       .replace(/\s+/g, " ")
       .trim();
@@ -153,12 +172,191 @@ const MenuGraphPrices = (() => {
     return true;
   }
 
+  function hasFoodSignal(value) {
+    return FOOD_SIGNAL.test(cleanText(value));
+  }
+
+  function hasNonMenuSignal(value) {
+    return NON_MENU_SIGNAL.test(cleanText(value));
+  }
+
+  function allCapsShortLabel(value) {
+    const text = cleanText(value).replace(/[^A-Za-z\s]/g, " ").replace(/\s+/g, " ").trim();
+    if (!text || text.length > 32) return false;
+    const words = text.split(/\s+/);
+    if (words.length > 4) return false;
+    return text === text.toUpperCase() || words.every((word) => /^[A-Z][a-z]+$/.test(word));
+  }
+
+  function isExplicitToken(token) {
+    return /\b(?:frs?\.?|francs?|mk\.?|marks?)\b|[£$€¢]|\b(?:cents?|cts?\.?|c\.)\b|\b\d+\s*s(?:\s*\d+\s*d)?\b|\b\d+\/\d+\b/i.test(token);
+  }
+
+  function collectPriceCandidates(line, menu) {
+    const candidates = [];
+    for (const spec of pricePatterns(menu)) {
+      spec.pattern.lastIndex = 0;
+      let match = spec.pattern.exec(line);
+      while (match) {
+        const matched = match[0];
+        const leading = matched.match(/^\s*/)?.[0]?.length || 0;
+        const rawPrice = cleanText(matched);
+        const index = match.index + leading;
+        candidates.push({
+          kind: spec.kind,
+          priority: spec.priority,
+          rawPrice,
+          rawMatch: matched,
+          index,
+          end: index + rawPrice.length,
+        });
+        match = spec.pattern.exec(line);
+      }
+    }
+
+    return candidates
+      .sort((a, b) => a.index - b.index || a.priority - b.priority || b.rawPrice.length - a.rawPrice.length)
+      .reduce((accepted, candidate) => {
+        if (!candidate.rawPrice || accepted.some((current) => candidate.index < current.end && current.index < candidate.end)) return accepted;
+        accepted.push(candidate);
+        return accepted;
+      }, []);
+  }
+
+  function inferMenuScale(lines, menu) {
+    let foodBareIntegers = 0;
+    let foodDecimals = 0;
+    let explicitCurrency = 0;
+    let explicitCents = 0;
+    for (const line of lines) {
+      if (hasNonMenuSignal(line)) continue;
+      const foodLine = hasFoodSignal(line);
+      for (const candidate of collectPriceCandidates(line, menu)) {
+        if (candidate.kind === "explicit-cents") explicitCents += 1;
+        if (candidate.kind === "explicit-currency") explicitCurrency += 1;
+        if (candidate.kind === "bare-integer" && foodLine && Number(candidate.rawPrice) >= 5) foodBareIntegers += 1;
+        if ((candidate.kind === "bare-decimal" || candidate.kind === "leading-decimal") && foodLine) foodDecimals += 1;
+      }
+    }
+    return {
+      integerCentsMode: foodBareIntegers >= 3 && foodBareIntegers >= foodDecimals,
+      foodBareIntegers,
+      foodDecimals,
+      explicitCurrency,
+      explicitCents,
+    };
+  }
+
+  function candidateItemLabel(line, candidates, index, menu) {
+    const candidate = candidates[index];
+    const previous = candidates[index - 1];
+    const segmentStart = previous ? previous.end : 0;
+    const segment = cleanText(line.slice(segmentStart, candidate.index))
+      .replace(/^[;:,\-.]+/, "")
+      .replace(/[;:,\-.]+$/, "")
+      .trim();
+    if (segment && /[A-Za-z]/.test(segment)) return segment.slice(0, 86);
+    return cleanItemLabel(line, candidate.rawPrice) || menu.title || "Menu item";
+  }
+
+  function parsePriceCandidate(candidate, line, item, menu, scaleContext) {
+    const raw = candidate.rawPrice;
+    const bareNumber = numeric(raw);
+    const foodLine = hasFoodSignal(`${item} ${line}`);
+
+    if (/\$\s*\d{1,3}(?:,\d{3})+/.test(raw) || /\$\s*\d{1,3}(?:,\d{3})+/.test(line)) {
+      return null;
+    }
+
+    if (/£|\b\d+\s*s|\b\d+\/\d+\b|\b\d+\s*d\b/i.test(raw)) {
+      const amount = parseSterling(raw);
+      return amount ? { amount, scale: "explicit-currency", scaleConfidence: "high", scaleReason: "Sterling token" } : null;
+    }
+
+    const cents = raw.match(/(\d+(?:[.,]\d+)?)\s*(?:¢|cents?|cts?\.?|c\.)\b/i);
+    if (cents) {
+      return {
+        amount: Number(cents[1].replace(",", ".")) / 100,
+        scale: "explicit-cents",
+        scaleConfidence: "high",
+        scaleReason: "Explicit cents marker",
+      };
+    }
+
+    const symbol = raw.match(/(?:US\$|\$|€|frs?\.?|francs?|mk\.?|marks?)\s*(\d+(?:[.,]\d+)?)/i);
+    if (symbol) {
+      const amount = numeric(symbol[1]);
+      return amount ? { amount, scale: "explicit-currency", scaleConfidence: "high", scaleReason: "Explicit currency marker" } : null;
+    }
+
+    if (candidate.kind === "leading-decimal") {
+      return {
+        amount: bareNumber,
+        scale: "decimal-dollars",
+        scaleConfidence: "high",
+        scaleReason: "Leading decimal price",
+      };
+    }
+
+    if (candidate.kind === "bare-integer") {
+      const value = Number(raw);
+      if (!Number.isFinite(value) || value <= 0 || value > 99) return null;
+      if (scaleContext.integerCentsMode || (foodLine && value >= 5)) {
+        return {
+          amount: value / 100,
+          scale: "inferred-cents",
+          scaleConfidence: scaleContext.integerCentsMode ? "high" : "medium",
+          scaleReason: scaleContext.integerCentsMode ? "Menu uses repeated bare cent prices" : "Dish line has bare integer price",
+        };
+      }
+      return null;
+    }
+
+    if (candidate.kind === "bare-decimal") {
+      if (!Number.isFinite(bareNumber) || bareNumber <= 0) return null;
+      const decimalLooksLikePaddedCents = bareNumber >= 10 && bareNumber <= 99 && /\.00$/.test(raw) && scaleContext.integerCentsMode && foodLine;
+      if (decimalLooksLikePaddedCents) {
+        return {
+          amount: bareNumber / 100,
+          scale: "inferred-cents",
+          scaleConfidence: "medium",
+          scaleReason: "Bare .00 value in cents-style menu",
+        };
+      }
+      return {
+        amount: bareNumber,
+        scale: "decimal-dollars",
+        scaleConfidence: bareNumber >= 10 && !foodLine ? "low" : "medium",
+        scaleReason: "Bare decimal price",
+      };
+    }
+
+    const amount = amountForToken(raw, menu);
+    return amount ? { amount, scale: "explicit-currency", scaleConfidence: "medium", scaleReason: "Parsed price token" } : null;
+  }
+
+  function isNonMenuPriceLine(line, item, candidate, parsed) {
+    if (hasNonMenuSignal(line)) return true;
+    const strippedLine = cleanItemLabel(line, candidate.rawPrice);
+    if (allCapsShortLabel(item) && !hasFoodSignal(item) && strippedLine.toLowerCase() === cleanText(item).toLowerCase()) return true;
+    if (!isExplicitToken(candidate.rawPrice) && Number(parsed.amount) >= 10 && !hasFoodSignal(`${item} ${line}`)) return true;
+    if (Number(parsed.amount) >= 10 && allCapsShortLabel(item) && !hasFoodSignal(item)) return true;
+    return false;
+  }
+
   function confidenceFor(entry, line) {
     let score = 0.48;
     const reasons = [];
-    if (/[£$€¢]|\b(?:frs?\.?|francs?|marks?|mk\.?)\b/i.test(entry.rawPrice)) {
+    if (entry.scale === "explicit-cents") {
+      score += 0.28;
+      reasons.push("explicit cents");
+    } else if (/[£$€¢]|\b(?:frs?\.?|francs?|marks?|mk\.?)\b/i.test(entry.rawPrice)) {
       score += 0.25;
       reasons.push("currency token");
+    }
+    if (entry.scale === "inferred-cents") {
+      score += entry.scaleConfidence === "high" ? 0.18 : 0.1;
+      reasons.push("inferred cents");
     }
     if (entry.year >= 1913 && entry.currency === "USD") {
       score += 0.12;
@@ -168,9 +366,13 @@ const MenuGraphPrices = (() => {
       score += 0.08;
       reasons.push("dish label");
     }
-    if (/\s\d+[.,]\d{2}\s*$/.test(line) && !/[£$€¢]/.test(entry.rawPrice)) {
+    if (entry.scale === "decimal-dollars" && !/[£$€¢]/.test(entry.rawPrice)) {
       score -= 0.18;
       reasons.push("bare decimal");
+    }
+    if (entry.scaleConfidence === "low") {
+      score -= 0.18;
+      reasons.push("low scale confidence");
     }
     if (entry.currency === "UNKNOWN") score -= 0.18;
     const confidence = score >= 0.78 ? "high" : score >= 0.58 ? "medium" : "low";
@@ -185,50 +387,45 @@ const MenuGraphPrices = (() => {
       .map(cleanText)
       .filter(isLikelyMenuLine)
       .slice(0, 700);
+    const scaleContext = inferMenuScale(lines, menu);
 
     for (const [lineIndex, line] of lines.entries()) {
-      for (const pattern of pricePatterns(menu)) {
-        pattern.lastIndex = 0;
-        let match = pattern.exec(line);
-        while (match) {
-          const rawPrice = cleanText(match[0]);
-          if (
-            /\b(?:frs?\.?|francs?|mk\.?|marks?)\b|[£$€¢]/i.test(line) &&
-            !/\b(?:frs?\.?|francs?|mk\.?|marks?)\b|[£$€¢]|\b(?:cents?|cts?\.?|c\.)\b/i.test(rawPrice)
-          ) {
-            match = pattern.exec(line);
-            continue;
-          }
-          const amount = amountForToken(rawPrice, menu);
-          if (amount && amount > 0 && amount < 10000) {
-            const currency = currencyForToken(rawPrice, menu);
-            const item = cleanItemLabel(line, match[0]) || menu.title || "Menu item";
-            const key = `${lineIndex}:${rawPrice}:${item.toLowerCase()}`;
-            if (!seen.has(key)) {
-              const entry = {
-                id: `${menu.id}-${lineIndex}-${records.length}`,
-                menuId: menu.id,
-                item,
-                rawLine: line,
-                rawPrice,
-                amount: Number(amount.toFixed(4)),
-                currency,
-                currencyLabel: CURRENCY_LABELS[currency] || currency,
-                country: menu.country || "unknown",
-                iso3: iso3ForMenu(menu),
-                place: [menu.city, menu.state, menu.country].filter(Boolean).join(", "),
-                year: menu.year || null,
-                decade: menu.decade || "unknown",
-                menuTitle: menu.title,
-                menuType: menu.types || [],
-                sourceUrl: menu.itemUrl,
-              };
-              Object.assign(entry, confidenceFor(entry, line));
-              records.push(entry);
-              seen.add(key);
-            }
-          }
-          match = pattern.exec(line);
+      const candidates = collectPriceCandidates(line, menu);
+      for (const [candidateIndex, candidate] of candidates.entries()) {
+        if (/\b(?:frs?\.?|francs?|mk\.?|marks?)\b|[£$€¢]/i.test(line) && !isExplicitToken(candidate.rawPrice)) continue;
+        const item = candidateItemLabel(line, candidates, candidateIndex, menu);
+        const parsed = parsePriceCandidate(candidate, line, item, menu, scaleContext);
+        if (!parsed || !parsed.amount || parsed.amount <= 0 || parsed.amount >= 10000) continue;
+        if (isNonMenuPriceLine(line, item, candidate, parsed)) continue;
+
+        const currency = currencyForToken(candidate.rawPrice, menu);
+        const key = `${lineIndex}:${candidate.index}:${candidate.rawPrice}:${item.toLowerCase()}`;
+        if (!seen.has(key)) {
+          const entry = {
+            id: `${menu.id}-${lineIndex}-${records.length}`,
+            menuId: menu.id,
+            item,
+            rawLine: line,
+            rawPrice: candidate.rawPrice,
+            rawAmount: numeric(candidate.rawPrice),
+            amount: Number(parsed.amount.toFixed(4)),
+            scale: parsed.scale,
+            scaleConfidence: parsed.scaleConfidence,
+            scaleReason: parsed.scaleReason,
+            currency,
+            currencyLabel: CURRENCY_LABELS[currency] || currency,
+            country: menu.country || "unknown",
+            iso3: iso3ForMenu(menu),
+            place: [menu.city, menu.state, menu.country].filter(Boolean).join(", "),
+            year: menu.year || null,
+            decade: menu.decade || "unknown",
+            menuTitle: menu.title,
+            menuType: menu.types || [],
+            sourceUrl: menu.itemUrl,
+          };
+          Object.assign(entry, confidenceFor(entry, line));
+          records.push(entry);
+          seen.add(key);
         }
       }
     }
@@ -322,18 +519,24 @@ const MenuGraphPrices = (() => {
 
   function summarizePrices(records, references = {}) {
     const normalized = records.filter((record) => record.normalized?.todayUsd);
+    const defaultNormalized = normalized.filter((record) => record.confidence !== "low");
     const byCurrency = countBy(records, (record) => record.currency);
     const byConfidence = countBy(records, (record) => record.confidence);
+    const byScale = countBy(records, (record) => record.scale);
     const years = records.map((record) => record.year).filter(Boolean);
     const medianToday = median(normalized.map((record) => record.normalized.todayUsd));
+    const medianDefaultToday = median(defaultNormalized.map((record) => record.normalized.todayUsd));
     return {
       total: records.length,
       normalizedUsd: normalized.length,
+      defaultNormalizedUsd: defaultNormalized.length,
       yearMin: years.length ? Math.min(...years) : null,
       yearMax: years.length ? Math.max(...years) : null,
       currencies: byCurrency,
       confidence: byConfidence,
+      scale: byScale,
       medianTodayUsd: medianToday,
+      medianDefaultTodayUsd: medianDefaultToday || medianToday,
       referenceYear: references?.cpiUs?.latestReferenceDate || null,
     };
   }
@@ -372,7 +575,7 @@ const MenuGraphPrices = (() => {
     return {
       version: VERSION,
       generatedAt,
-      methodology: "OCR menu prices are extracted with conservative regexes, inferred from currency symbols and menu location, then indexed with official CPI snapshots when coverage exists.",
+      methodology: "OCR menu prices are extracted with conservative regexes, scaled from explicit currency or inferred cents when menu context supports it, then indexed with official CPI snapshots when coverage exists.",
       records,
       summary: summarizePrices(records, references),
       sources: {

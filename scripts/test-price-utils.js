@@ -38,6 +38,32 @@ assert.strictEqual(prices.length, 2);
 assert.strictEqual(prices[0].currency, "USD");
 assert.strictEqual(prices[0].amount, 0.35);
 assert.strictEqual(prices[1].amount, 0.05);
+assert.strictEqual(prices[1].scale, "explicit-cents");
+
+const cents = extractPricesFromText("SIRLOIN STEAK 50\nCoffee .50\nPie 0.50\nChicken 50 cents\nNEW YORK 52.70", usMenu);
+assert.strictEqual(cents.length, 4);
+assert.strictEqual(cents[0].amount, 0.5);
+assert.strictEqual(cents[0].scale, "inferred-cents");
+assert.strictEqual(cents[1].amount, 0.5);
+assert.strictEqual(cents[1].scale, "decimal-dollars");
+assert.strictEqual(cents[2].amount, 0.5);
+assert.strictEqual(cents[3].amount, 0.5);
+
+const nonMenuNumbers = extractPricesFromText("NEW YORK 44\nKANSAS CITY 37\nMENU du 13 Mai 1883.", usMenu);
+assert.strictEqual(nonMenuNumbers.length, 0);
+
+const explicitDollar = extractPricesFromText("Celebration dinner $50.00", usMenu);
+assert.strictEqual(explicitDollar.length, 1);
+assert.strictEqual(explicitDollar[0].amount, 50);
+assert.strictEqual(explicitDollar[0].scale, "explicit-currency");
+
+const mixedRow = extractPricesFromText("Baby Mackerels in Oil 50 Baby Mackerels au Vin Blanc 1.00", usMenu);
+assert.strictEqual(mixedRow.length, 2);
+assert.strictEqual(mixedRow[0].item, "Baby Mackerels in Oil");
+assert.strictEqual(mixedRow[0].amount, 0.5);
+assert.strictEqual(mixedRow[0].scale, "inferred-cents");
+assert.strictEqual(mixedRow[1].item, "Baby Mackerels au Vin Blanc");
+assert.strictEqual(mixedRow[1].amount, 1);
 
 const sterling = extractPricesFromText("Tea and cake 1/6\nRoast beef 2s 6d", ukMenu);
 assert.strictEqual(sterling.length, 2);

@@ -332,6 +332,7 @@ function priceRecordsForVisibleMenus() {
     if (!visibleIds.has(record.menuId)) return false;
     if (state.priceCurrency && record.currency !== state.priceCurrency) return false;
     if (state.priceConfidence && record.confidence !== state.priceConfidence) return false;
+    if (!state.priceConfidence && record.confidence === "low") return false;
     if (record.year && (record.year < state.filters.minYear || record.year > state.filters.maxYear)) return false;
     return valueForPriceRecord(record) !== null;
   });
@@ -637,6 +638,22 @@ function priceValueLabel(record) {
   return "Not safely indexed";
 }
 
+function formatRecordAmount(record) {
+  const amount = Number(record.amount);
+  if (!Number.isFinite(amount)) return "";
+  return record.currency === "USD" ? formatMoney(amount) : `${record.currency} ${formatNumber(amount)}`;
+}
+
+function priceScaleLabel(record) {
+  const interpretedAmount = formatRecordAmount(record);
+  const interpreted = interpretedAmount ? ` as ${interpretedAmount}` : "";
+  if (record.scale === "inferred-cents") return `${record.rawPrice} interpreted${interpreted}; inferred cents`;
+  if (record.scale === "explicit-cents") return `${record.rawPrice} interpreted${interpreted}; explicit cents`;
+  if (record.scale === "decimal-dollars") return `${record.rawPrice} read${interpreted}; bare decimal`;
+  if (record.scale === "explicit-currency") return `${record.rawPrice} read${interpreted}; explicit currency`;
+  return record.scaleReason || "Scale not inferred";
+}
+
 function formatMoney(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return "...";
@@ -718,7 +735,7 @@ function renderPriceLens(svg, width, height) {
       const context = record.context?.[0]?.label ? `<br><em>${record.context[0].label}: ${record.context[0].note}</em>` : "";
       showTooltip(
         event,
-        `<strong>${titleCase(record.item)}</strong>${record.rawPrice} in ${record.year} (${record.currency})<br>${priceValueLabel(record)}<br>${record.confidence} confidence - ${record.normalized?.method || "raw"}${context}`
+        `<strong>${titleCase(record.item)}</strong>${record.rawPrice} in ${record.year} (${record.currency})<br>${priceScaleLabel(record)}<br>${priceValueLabel(record)}<br>${record.confidence} confidence - ${record.normalized?.method || "raw"}${context}`
       );
     });
     dot.addEventListener("mouseleave", removeTooltip);
@@ -726,7 +743,7 @@ function renderPriceLens(svg, width, height) {
   });
 
   const note = svgEl("text", { x: width - pad.right, y: pad.top - 16, "text-anchor": "end", class: "price-note" });
-  note.textContent = `${records.length.toLocaleString()} observations; estimates use bands and CPI snapshots`;
+  note.textContent = `${records.length.toLocaleString()} observations; low confidence hidden until selected`;
   svg.appendChild(note);
 }
 
@@ -1037,12 +1054,12 @@ function describePricesLoaded() {
         ? "Relative Value"
         : "Raw Prices";
   const title =
-    state.priceMode === "todayUsd" && summary.medianTodayUsd
-      ? `${formatMoney(summary.medianTodayUsd)} median indexed price`
+    state.priceMode === "todayUsd" && (summary.medianDefaultTodayUsd || summary.medianTodayUsd)
+      ? `${formatMoney(summary.medianDefaultTodayUsd || summary.medianTodayUsd)} median indexed price`
       : `${Number(summary.total || 0).toLocaleString()} extracted price observations`;
   const detail =
     state.priceMode === "todayUsd"
-      ? `${Number(summary.normalizedUsd || 0).toLocaleString()} prices have U.S. CPI-U bands; non-U.S. prices remain caveated unless local CPI coverage exists.`
+      ? `${Number(summary.defaultNormalizedUsd || summary.normalizedUsd || 0).toLocaleString()} default prices have U.S. CPI-U bands; inferred cents and low-confidence rows are caveated.`
       : "Currency, place, and confidence filters keep uncertain values visible without presenting them as exact.";
   setActivity({
     label,

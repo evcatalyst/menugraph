@@ -155,7 +155,7 @@ async function fetchBlsCpi() {
     .filter((item) => Number.isFinite(item.value))
     .sort((a, b) => b.year - a.year || Number(b.period.slice(1)) - Number(a.period.slice(1)))[0];
 
-  return {
+  const snapshot = {
     source: "U.S. Bureau of Labor Statistics",
     sourceUrl: "https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0",
     seriesId: BLS_SERIES,
@@ -165,6 +165,10 @@ async function fetchBlsCpi() {
     latestReferenceDate: latest ? `${latest.year}-${latest.period.slice(1).padStart(2, "0")}` : null,
     annual,
   };
+  if (!snapshot.latestReferenceDate || Object.keys(snapshot.annual).length < 10) {
+    throw new Error("BLS CPI response did not include usable monthly data");
+  }
+  return snapshot;
 }
 
 async function fetchWorldBankCpi() {
@@ -191,7 +195,7 @@ async function fetchWorldBankCpi() {
       .filter(([, value]) => Number.isFinite(value))
       .sort((a, b) => b[0] - a[0])[0]?.[0] || null;
   }
-  return {
+  const snapshot = {
     source: "World Bank",
     sourceUrl: "https://api.worldbank.org/v2/country/{countries}/indicator/FP.CPI.TOTL",
     indicator: "FP.CPI.TOTL",
@@ -199,6 +203,10 @@ async function fetchWorldBankCpi() {
     fetchedAt: new Date().toISOString(),
     countries: output,
   };
+  if (!Object.keys(snapshot.countries).length) {
+    throw new Error("World Bank CPI response did not include usable country data");
+  }
+  return snapshot;
 }
 
 function fxReference() {
@@ -214,13 +222,41 @@ function fxReference() {
 async function buildReferences() {
   await fs.mkdir(REFERENCE_DIR, { recursive: true });
   console.log("Fetching official price reference data...");
-  const [cpiUs, cpiCountry] = await Promise.all([fetchBlsCpi(), fetchWorldBankCpi()]);
+  const [cpiUs, cpiCountry] = await Promise.all([
+    referenceWithFallback("cpi-us.json", fetchBlsCpi),
+    referenceWithFallback("cpi-country.json", fetchWorldBankCpi),
+  ]);
   const fx = fxReference();
   await fs.writeFile(path.join(REFERENCE_DIR, "cpi-us.json"), JSON.stringify(cpiUs), "utf8");
   await fs.writeFile(path.join(REFERENCE_DIR, "cpi-country.json"), JSON.stringify(cpiCountry), "utf8");
   await fs.writeFile(path.join(REFERENCE_DIR, "fx.json"), JSON.stringify(fx), "utf8");
   await fs.writeFile(path.join(REFERENCE_DIR, "context-events.json"), JSON.stringify(contextEvents), "utf8");
   return { cpiUs, cpiCountry, fx };
+}
+
+async function referenceWithFallback(filename, fetcher) {
+  try {
+    return await fetcher();
+  } catch (error) {
+    const fallback = await readReference(filename);
+    if (fallback) {
+      console.warn(`Reference refresh failed for ${filename}; reusing committed snapshot. ${error.message}`);
+      return fallback;
+    }
+    throw error;
+  }
+}
+
+async function readReference(filename) {
+  try {
+    const raw = await fs.readFile(path.join(REFERENCE_DIR, filename), "utf8");
+    const parsed = JSON.parse(raw);
+    if (filename === "cpi-us.json" && (!parsed.latestReferenceDate || Object.keys(parsed.annual || {}).length < 10)) return null;
+    if (filename === "cpi-country.json" && !Object.keys(parsed.countries || {}).length) return null;
+    return parsed;
+  } catch (error) {
+    return null;
+  }
 }
 
 async function mapLimit(items, limit, mapper) {
