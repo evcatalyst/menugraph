@@ -373,6 +373,15 @@ async function main() {
     const nyplRows = await loadNyplExport();
     const nypl = buildNyplFromRows(nyplRows);
     const combined = combineSources({ ciaMenus, nyplMenus: nypl.nyplMenus });
+    const ciaCollection =
+      (publicMenusPayload.collection?.sources || []).find((source) => source.alias === "p16940coll1" || source.name === "CIA Menu Collection") ||
+      (publicMenusPayload.collection?.alias === "p16940coll1" ? publicMenusPayload.collection : null) ||
+      {
+        alias: "p16940coll1",
+        name: "CIA Menu Collection",
+        sourceUrl: "https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1",
+        apiUrl: "https://ciadigitalcollections.culinary.edu/digital/bl/dmwebservices/index.php",
+      };
     combinedMatches = {
       matches: combined.matchMap,
       relationships: combined.relationships,
@@ -389,11 +398,7 @@ async function main() {
         name: "MenuGraph Multi-Source Corpus",
         sourceUrl: publicMenusPayload.collection?.sourceUrl || "https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1",
         sources: [
-          publicMenusPayload.collection || {
-            alias: "p16940coll1",
-            name: "CIA Menu Collection",
-            sourceUrl: "https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1",
-          },
+          ciaCollection,
           {
             alias: "nypl-wotm",
             name: "NYPL What's on the Menu?",
