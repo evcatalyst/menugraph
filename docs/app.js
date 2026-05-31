@@ -7,6 +7,8 @@ const state = {
   archiveMode: false,
   ontology: null,
   prices: null,
+  chatMessages: [],
+  chatBusy: false,
   dateEstimates: null,
   dateEstimateByMenu: new Map(),
   includeEstimatedDates: true,
@@ -19,6 +21,7 @@ const state = {
   selectedOntologyIds: null,
   selectedPriceMenuIds: null,
   ontologyPoll: null,
+  filterDrawerOpen: false,
   filters: {
     search: "",
     decade: null,
@@ -80,6 +83,11 @@ const els = {
   activityDetail: document.querySelector("#activity-detail"),
   activityProgress: document.querySelector("#activity-progress"),
   activityProgressText: document.querySelector("#activity-progress-text"),
+  filterPanel: document.querySelector("#filter-panel"),
+  filterToggle: document.querySelector("#filter-toggle"),
+  filterClose: document.querySelector("#filter-close"),
+  filterBackdrop: document.querySelector("#filter-backdrop"),
+  detailPanel: document.querySelector(".detail"),
 };
 
 const palette = ["#327c87", "#b6573c", "#5f7d4f", "#c49a47", "#b76075", "#2f3a3f"];
@@ -91,6 +99,12 @@ const categoryLabels = {
   styles: "Styles",
   clusters: "Clusters",
 };
+const chatSuggestions = window.MenuGraphChat?.suggestedQuestions || [
+  "beef or steak dishes that are stew with carrots and potatoes, no mushrooms",
+  "oysters and champagne in New York before 1920",
+  "lobster prices in Boston and New York",
+  "estimated 1980s French restaurants with desserts",
+];
 
 function titleCase(value) {
   return String(value || "")
@@ -111,6 +125,12 @@ function menuKey(menu) {
 
 function sourceLabel(menu) {
   return menu?.sourceShortLabel || menu?.sourceLabel || (menu?.sourceKey ? menu.sourceKey.toUpperCase() : "CIA");
+}
+
+function sourceCollectionLabel(sourceKey) {
+  if (sourceKey === "nypl") return "NYPL Digital Collections";
+  if (sourceKey === "cia") return "CIA Digital Collections";
+  return "Source Collection";
 }
 
 function dateEstimateKeys(menu) {
@@ -197,6 +217,11 @@ function setImageSource(img, src, label) {
     img.src = placeholderImage(label);
   };
   img.src = src || placeholderImage(label);
+}
+
+function detailImageSource(src, sourceKey) {
+  if (sourceKey === "nypl" && src) return src.replace(/([?&]t=)[a-z]\b/i, "$1v");
+  return src;
 }
 
 function clamp(value, min, max) {
@@ -336,7 +361,9 @@ async function loadMatches(refresh = false) {
   state.matches = payload?.relationships ? payload : state.matches;
 }
 
-function filteredMenus() {
+function filteredMenus(options = {}) {
+  const includeOntology = options.includeOntology !== false;
+  const includePriceSelection = options.includePriceSelection !== false;
   const search = state.filters.search.trim().toLowerCase();
   return state.allMenus.filter((menu) => {
     const menuYear = effectiveYear(menu);
@@ -345,8 +372,8 @@ function filteredMenus() {
     if (menuYear && (menuYear < state.filters.minYear || menuYear > state.filters.maxYear)) return false;
     if (state.filters.decade && compact(effectiveDecade(menu)).toLowerCase() !== state.filters.decade) return false;
     if (state.filters.type && !menu.types.some((type) => type.toLowerCase() === state.filters.type)) return false;
-    if (state.selectedOntologyIds && !state.selectedOntologyIds.has(menuKey(menu))) return false;
-    if (state.selectedPriceMenuIds && !state.selectedPriceMenuIds.has(menu.id)) return false;
+    if (includeOntology && state.selectedOntologyIds && !state.selectedOntologyIds.has(menuKey(menu))) return false;
+    if (includePriceSelection && state.selectedPriceMenuIds && !state.selectedPriceMenuIds.has(menu.id)) return false;
     if (
       state.filters.place &&
       ![menu.city, menu.state, menu.country].some((place) => compact(place, "").toLowerCase() === state.filters.place)
@@ -449,15 +476,39 @@ function renderOntologyControls() {
 }
 
 function priceRecordsForVisibleMenus() {
-  const visibleIds = new Set(state.visibleMenus.map((menu) => menu.id));
+  const menuPool = state.selectedOntologyTerm ? filteredMenus({ includeOntology: false, includePriceSelection: false }) : state.visibleMenus;
+  const visibleIds = new Set(menuPool.map((menu) => String(menu.id)));
   return (state.prices?.records || []).filter((record) => {
-    if (!visibleIds.has(record.menuId)) return false;
+    if (!visibleIds.has(String(record.menuId))) return false;
+    if (state.selectedOntologyTerm && !priceRecordMatchesOntologyTerm(record, state.selectedOntologyTerm.term)) return false;
     if (state.priceCurrency && record.currency !== state.priceCurrency) return false;
     if (state.priceConfidence && record.confidence !== state.priceConfidence) return false;
     if (!state.priceConfidence && record.confidence === "low") return false;
     if (record.year && (record.year < state.filters.minYear || record.year > state.filters.maxYear)) return false;
     return valueForPriceRecord(record) !== null;
   });
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function termBoundaryPattern(term) {
+  const normalized = compact(term, "").toLowerCase();
+  if (!normalized) return null;
+  if (/^[a-z0-9]+$/.test(normalized)) {
+    const pluralLike = normalized.length > 3 && normalized.endsWith("s") && !normalized.endsWith("ss") && !normalized.endsWith("us");
+    const stem = pluralLike ? normalized.slice(0, -1) : normalized;
+    return new RegExp(`(^|[^a-z0-9])${escapeRegExp(stem)}s?([^a-z0-9]|$)`, "i");
+  }
+  const phrase = normalized.split(/\s+/).map(escapeRegExp).join("\\s+");
+  return new RegExp(`(^|[^a-z0-9])${phrase}([^a-z0-9]|$)`, "i");
+}
+
+function priceRecordMatchesOntologyTerm(record, term) {
+  const pattern = termBoundaryPattern(term);
+  if (!pattern) return true;
+  return pattern.test(String(record.item || "").toLowerCase());
 }
 
 function renderPriceControls() {
@@ -550,6 +601,281 @@ function filteredMenusWithoutFacet() {
   return value;
 }
 
+async function requestChatAnswer(question) {
+  const payload = { question };
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
+      return response.json();
+    }
+  } catch (error) {
+    // Static GitHub Pages has no /api/chat route; fall through to the in-browser index.
+  }
+  if (window.MenuGraphArchive?.handle) {
+    return window.MenuGraphArchive.handle("/api/chat", { body: payload });
+  }
+  throw new Error("Chat index is not available");
+}
+
+async function askChat(question) {
+  const text = compact(question, "");
+  if (!text || state.chatBusy) return;
+  state.activeLens = "chat";
+  activateLensButton("chat");
+  state.chatMessages.push({ role: "user", content: text });
+  state.chatBusy = true;
+  renderViz();
+  setActivity({
+    label: "Chat Query",
+    title: "Searching menu, dish, price, and date indexes",
+    detail: "Retrieving candidate records first; the local server can synthesize with Grok when an API key is configured.",
+    indeterminate: true,
+  });
+  try {
+    const answer = await requestChatAnswer(text);
+    state.chatMessages.push({
+      role: "assistant",
+      content: answer.answer,
+      matches: answer.matches || [],
+      facets: answer.facets || null,
+      engine: answer.engine || "local-retrieval",
+      model: answer.model,
+      error: answer.llmError,
+      searched: answer.searched,
+      caveats: answer.caveats || [],
+    });
+    setActivity({
+      label: answer.engine === "grok" ? "Grok Synthesis" : "Static Retrieval",
+      title: `${Number(answer.matches?.length || 0).toLocaleString()} candidate records returned`,
+      detail: answer.llmError || "Results are grounded in committed MenuGraph snapshots and source-linked records.",
+      progress: 1,
+    });
+  } catch (error) {
+    state.chatMessages.push({
+      role: "assistant",
+      content: error.message,
+      matches: [],
+      engine: "error",
+    });
+    setActivity({
+      label: "Chat Error",
+      title: "Question could not be answered",
+      detail: error.message,
+      progress: 1,
+    });
+  } finally {
+    state.chatBusy = false;
+    if (state.activeLens === "chat") renderViz();
+  }
+}
+
+function renderChatPanel() {
+  const panel = document.createElement("div");
+  panel.className = "chat-panel";
+
+  const header = document.createElement("div");
+  header.className = "chat-header";
+  const title = document.createElement("div");
+  title.innerHTML = "<strong>Ask MenuGraph</strong><span>Queries run across menus, dish summaries, price rows, places, and date estimates.</span>";
+  const status = document.createElement("span");
+  status.className = "chat-engine";
+  const lastAssistant = [...state.chatMessages].reverse().find((message) => message.role === "assistant");
+  status.textContent = lastAssistant?.engine === "grok" ? `Grok ${lastAssistant.model || ""}`.trim() : "Static retrieval";
+  header.append(title, status);
+
+  const form = document.createElement("form");
+  form.className = "chat-form";
+  const input = document.createElement("input");
+  input.type = "search";
+  input.placeholder = "Ask about dishes, ingredients, prices, places, or date ranges";
+  input.autocomplete = "off";
+  const button = document.createElement("button");
+  button.type = "submit";
+  button.textContent = state.chatBusy ? "Searching" : "Ask";
+  button.disabled = state.chatBusy;
+  form.append(input, button);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    askChat(input.value);
+  });
+
+  const suggestions = document.createElement("div");
+  suggestions.className = "chat-suggestions";
+  chatSuggestions.slice(0, 4).forEach((suggestion) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.textContent = suggestion;
+    chip.addEventListener("click", () => askChat(suggestion));
+    suggestions.appendChild(chip);
+  });
+
+  const messages = document.createElement("div");
+  messages.className = "chat-messages";
+  if (!state.chatMessages.length) {
+    const empty = document.createElement("div");
+    empty.className = "chat-empty";
+    empty.textContent = "Try a constrained culinary question, then open candidate menus from the result list.";
+    messages.appendChild(empty);
+  }
+  for (const message of state.chatMessages) {
+    messages.appendChild(renderChatMessage(message));
+  }
+  if (state.chatBusy) {
+    const busy = document.createElement("div");
+    busy.className = "chat-message chat-message--assistant";
+    busy.textContent = "Searching the static corpus...";
+    messages.appendChild(busy);
+  }
+
+  panel.append(header, form, suggestions, messages);
+  requestAnimationFrame(() => {
+    const latest = messages.querySelector(".chat-message:last-child");
+    if (latest) {
+      messages.scrollTop = state.chatBusy ? messages.scrollHeight : Math.max(0, latest.offsetTop - messages.offsetTop - 6);
+    }
+    if (!state.chatMessages.length) input.focus({ preventScroll: true });
+  });
+  return panel;
+}
+
+function renderChatMessage(message) {
+  const wrapper = document.createElement("div");
+  wrapper.className = `chat-message chat-message--${message.role}`;
+  const body = document.createElement("div");
+  body.className = "chat-message__body";
+  body.textContent = message.role === "assistant" && message.matches?.length ? String(message.content || "").split("\n\n")[0] : message.content;
+  wrapper.appendChild(body);
+
+  if (message.error) {
+    const warning = document.createElement("small");
+    warning.className = "chat-warning";
+    warning.textContent = message.error;
+    wrapper.appendChild(warning);
+  }
+
+  if (message.role === "assistant" && message.matches?.length) {
+    wrapper.appendChild(renderChatOverview(message));
+    const results = document.createElement("div");
+    results.className = "chat-results";
+    message.matches.slice(0, 36).forEach((match) => results.appendChild(renderChatResult(match)));
+    wrapper.appendChild(results);
+  }
+  return wrapper;
+}
+
+function chatDecade(match) {
+  const year = Number(match.year);
+  return Number.isFinite(year) ? `${Math.floor(year / 10) * 10}s` : "Undated";
+}
+
+function applyChatResultFilter(wrapper, kind, value) {
+  const activeKind = wrapper.dataset.filterKind;
+  const activeValue = wrapper.dataset.filterValue;
+  const nextActive = activeKind === kind && activeValue === value ? null : { kind, value };
+  if (nextActive) {
+    wrapper.dataset.filterKind = nextActive.kind;
+    wrapper.dataset.filterValue = nextActive.value;
+  } else {
+    delete wrapper.dataset.filterKind;
+    delete wrapper.dataset.filterValue;
+  }
+  let visible = 0;
+  wrapper.querySelectorAll(".chat-result").forEach((result) => {
+    const show = !nextActive || result.dataset[nextActive.kind] === nextActive.value;
+    result.hidden = !show;
+    if (show) visible += 1;
+  });
+  wrapper.querySelectorAll(".chat-facet-button").forEach((button) => {
+    button.classList.toggle("active", Boolean(nextActive && button.dataset.kind === nextActive.kind && button.dataset.value === nextActive.value));
+  });
+  const label = wrapper.querySelector(".chat-result-count");
+  if (label) label.textContent = nextActive ? `${visible} shown` : `${wrapper.querySelectorAll(".chat-result").length} shown`;
+}
+
+function renderChatOverview(message) {
+  const overview = document.createElement("div");
+  overview.className = "chat-overview";
+
+  const stats = document.createElement("div");
+  stats.className = "chat-stats";
+  const span = message.facets?.yearMin && message.facets?.yearMax ? `${message.facets.yearMin}-${message.facets.yearMax}` : "mixed dates";
+  const duplicates = Number(message.searched?.duplicateCandidates || 0);
+  const parts = [
+    `${message.matches.length.toLocaleString()} diversified results`,
+    span,
+    duplicates ? `${duplicates.toLocaleString()} near-duplicates collapsed` : "",
+  ].filter(Boolean);
+  stats.textContent = parts.join(" / ");
+  overview.appendChild(stats);
+
+  const timeline = message.facets?.timeline || [];
+  if (timeline.length) {
+    const chart = document.createElement("div");
+    chart.className = "chat-timeline";
+    const max = Math.max(...timeline.map((item) => item.count), 1);
+    timeline.forEach((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "chat-facet-button chat-timeline-bar";
+      button.dataset.kind = "decade";
+      button.dataset.value = item.name;
+      button.title = `${item.name}: ${item.count} result${item.count === 1 ? "" : "s"}`;
+      button.style.setProperty("--bar", `${Math.max(12, (item.count / max) * 100)}%`);
+      button.innerHTML = `<span>${item.name.replace("s", "")}</span><strong>${item.count}</strong>`;
+      button.addEventListener("click", () => applyChatResultFilter(overview.closest(".chat-message"), "decade", item.name));
+      chart.appendChild(button);
+    });
+    overview.appendChild(chart);
+  }
+
+  const places = message.facets?.places || [];
+  if (places.length) {
+    const placeRow = document.createElement("div");
+    placeRow.className = "chat-place-row";
+    places.slice(0, 8).forEach((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "chat-facet-button";
+      button.dataset.kind = "placeKey";
+      button.dataset.value = item.name;
+      button.textContent = `${item.name} ${item.count}`;
+      button.addEventListener("click", () => applyChatResultFilter(overview.closest(".chat-message"), "placeKey", item.name));
+      placeRow.appendChild(button);
+    });
+    const count = document.createElement("span");
+    count.className = "chat-result-count";
+    count.textContent = `${message.matches.length} shown`;
+    placeRow.appendChild(count);
+    overview.appendChild(placeRow);
+  }
+  return overview;
+}
+
+function renderChatResult(match) {
+  const button = document.createElement("button");
+  button.className = "chat-result";
+  button.type = "button";
+  button.dataset.decade = chatDecade(match);
+  button.dataset.placeKey = match.place || "Unknown";
+  const title = document.createElement("strong");
+  title.textContent = match.item || match.snippet || match.title;
+  const meta = document.createElement("span");
+  meta.textContent = [match.title, match.year || match.date, match.place, match.source].filter(Boolean).join(" / ");
+  const reason = document.createElement("small");
+  const price = match.price?.rawPrice ? ` / ${match.price.rawPrice} ${match.price.currency || ""}` : "";
+  const duplicate = Number(match.duplicateCount || 0) > 1 ? `collapsed ${match.duplicateCount}` : "";
+  reason.textContent = [...(match.reasons || []).slice(0, 4), duplicate, price].filter(Boolean).join(", ");
+  button.append(title, meta, reason);
+  button.addEventListener("click", () => {
+    if (match.uid) selectMenu(match.uid);
+  });
+  return button;
+}
+
 function svgEl(name, attrs = {}) {
   const node = document.createElementNS("http://www.w3.org/2000/svg", name);
   for (const [key, value] of Object.entries(attrs)) {
@@ -559,6 +885,12 @@ function svgEl(name, attrs = {}) {
 }
 
 function renderViz() {
+  if (state.activeLens === "chat") {
+    removeTooltip();
+    lensCopy();
+    els.viz.replaceChildren(renderChatPanel());
+    return;
+  }
   const rect = els.viz.getBoundingClientRect();
   const width = Math.max(rect.width, 320);
   const height = Math.max(rect.height, 360);
@@ -585,6 +917,7 @@ function lensCopy() {
     lineage: ["Lineage Lens", "Collectors and Collection Memory"],
     ontology: ["Food Lens", `${categoryLabels[state.ontologyCategory]} Across Time`],
     prices: ["Price Lens", priceLensTitle()],
+    chat: ["Ask Lens", "Ask Across The MenuGraph"],
   };
   const [label, title] = copies[state.activeLens];
   els.lensLabel.textContent = label;
@@ -592,9 +925,10 @@ function lensCopy() {
 }
 
 function priceLensTitle() {
-  if (state.priceMode === "raw") return "Historical Menu Prices";
-  if (state.priceMode === "relative") return "Relative Local Value";
-  return "Prices Indexed To Today";
+  const prefix = state.selectedOntologyTerm?.term ? `${titleCase(state.selectedOntologyTerm.term)} ` : "";
+  if (state.priceMode === "raw") return `${prefix}Historical Menu Prices`;
+  if (state.priceMode === "relative") return `${prefix}Relative Local Value`;
+  return `${prefix}Prices Indexed To Today`;
 }
 
 function colorFor(value) {
@@ -606,7 +940,7 @@ function colorFor(value) {
 function renderTimeLens(svg, width, height) {
   lensCopy();
   const menus = state.visibleMenus;
-  const pad = { top: 38, right: 28, bottom: 52, left: 58 };
+  const pad = { top: 42, right: 28, bottom: 56, left: 76 };
   const minYear = state.filters.minYear;
   const maxYear = state.filters.maxYear;
   const plotted = menus
@@ -621,16 +955,37 @@ function renderTimeLens(svg, width, height) {
       };
     })
     .filter((item) => item.year);
-  const rows = ["A la carte menus", "Set menus", "Drink lists", "Wine lists", "Other"];
-  const rowFor = (menu) => rows.find((row) => menu.types.some((type) => type.toLowerCase().includes(row.toLowerCase().split(" ")[0]))) || "Other";
+  const rowDefs = [
+    { key: "a-la-carte", label: "A la carte", terms: ["a la carte", "ala carte", "à la carte"] },
+    { key: "set", label: "Set", terms: ["set menu", "set menus", "table d'hote", "table d’hote", "prix fixe"] },
+    { key: "drinks", label: "Drink lists", terms: ["drink", "beverage", "cocktail", "liquor", "bar menu"] },
+    { key: "wine", label: "Wine lists", terms: ["wine"] },
+  ];
+  const otherRow = { key: "other", label: "Other", terms: [] };
+  const rowFor = (menu) => {
+    const text = (menu.types || []).join(" | ").toLowerCase();
+    return rowDefs.find((row) => row.terms.some((term) => text.includes(term))) || otherRow;
+  };
+  const rowCounts = new Map();
+  plotted.forEach(({ menu }) => {
+    const row = rowFor(menu);
+    rowCounts.set(row.key, (rowCounts.get(row.key) || 0) + 1);
+  });
+  const rows = [...rowDefs, otherRow].filter((row) => rowCounts.has(row.key));
+  if (!rows.length) rows.push(otherRow);
+  const rowIndex = new Map(rows.map((row, index) => [row.key, index]));
+  const availableH = Math.max(180, height - pad.top - pad.bottom);
+  const rowH = Math.min(76, Math.max(42, availableH / rows.length));
+  const plotH = Math.min(availableH, rowH * rows.length);
+  const axisY = pad.top + plotH;
   const x = (year) => pad.left + ((year - minYear) / Math.max(maxYear - minYear, 1)) * (width - pad.left - pad.right);
-  const y = (row) => pad.top + (rows.indexOf(row) + 0.5) * ((height - pad.top - pad.bottom) / rows.length);
+  const y = (row) => pad.top + (rowIndex.get(row.key) + 0.5) * rowH;
 
   for (let i = 0; i <= 5; i++) {
     const year = Math.round(minYear + ((maxYear - minYear) * i) / 5);
     const gx = x(year);
-    svg.appendChild(svgEl("line", { x1: gx, y1: pad.top, x2: gx, y2: height - pad.bottom, class: "grid-line" }));
-    const text = svgEl("text", { x: gx, y: height - 22, "text-anchor": "middle", class: "axis-label" });
+    svg.appendChild(svgEl("line", { x1: gx, y1: pad.top, x2: gx, y2: axisY, class: "grid-line" }));
+    const text = svgEl("text", { x: gx, y: Math.min(height - 22, axisY + 30), "text-anchor": "middle", class: "axis-label" });
     text.textContent = year;
     svg.appendChild(text);
   }
@@ -639,7 +994,7 @@ function renderTimeLens(svg, width, height) {
     const yy = y(row);
     svg.appendChild(svgEl("line", { x1: pad.left, y1: yy, x2: width - pad.right, y2: yy, class: "grid-line" }));
     const text = svgEl("text", { x: 16, y: yy + 4, class: "axis-label" });
-    text.textContent = row.replace(" menus", "");
+    text.textContent = row.label;
     svg.appendChild(text);
   });
 
@@ -647,14 +1002,16 @@ function renderTimeLens(svg, width, height) {
   const sample = [...plotted.filter((item) => !item.estimated).slice(0, 1400), ...plotted.filter((item) => item.estimated).slice(0, 400)];
   sample.forEach(({ menu, year, estimated }) => {
     const row = rowFor(menu);
-    const key = `${year}-${row}`;
+    const key = `${year}-${row.key}`;
     const offset = (jitter.get(key) || 0) + 1;
     jitter.set(key, offset);
+    const jitterSlots = Math.max(5, Math.min(13, Math.floor(rowH / 5)));
+    const jitterStep = Math.min(3.4, Math.max(2.2, rowH / (jitterSlots + 4)));
     const dot = svgEl("circle", {
       cx: x(year),
-      cy: y(row) + ((offset % 11) - 5) * 3.5,
+      cy: y(row) + ((offset % jitterSlots) - Math.floor(jitterSlots / 2)) * jitterStep,
       r: state.selectedId === menuKey(menu) ? 7 : 4.6,
-      fill: colorFor(menu.sourceKey || menu.country || row),
+      fill: colorFor(menu.sourceKey || menu.country || row.key),
       opacity: estimated ? 0.58 : 0.9,
       class: estimated ? "menu-dot estimate-dot" : "menu-dot",
       tabindex: 0,
@@ -807,6 +1164,12 @@ function priceScaleLabel(record) {
   return record.scaleReason || "Scale not inferred";
 }
 
+function priceRecordMenuUid(record) {
+  if (record.menuUid) return record.menuUid;
+  if (record.sourceKey === "nypl") return String(record.menuId || "");
+  return `cia:${record.menuId}`;
+}
+
 function formatMoney(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return "...";
@@ -880,9 +1243,9 @@ function renderPriceLens(svg, width, height) {
       class: "price-dot",
       tabindex: 0,
     });
-    dot.addEventListener("click", () => selectMenu(`cia:${record.menuId}`));
+    dot.addEventListener("click", () => selectMenu(priceRecordMenuUid(record)));
     dot.addEventListener("keyup", (event) => {
-      if (event.key === "Enter") selectMenu(`cia:${record.menuId}`);
+      if (event.key === "Enter") selectMenu(priceRecordMenuUid(record));
     });
     dot.addEventListener("mousemove", (event) => {
       const context = record.context?.[0]?.label ? `<br><em>${record.context[0].label}: ${record.context[0].note}</em>` : "";
@@ -977,6 +1340,31 @@ function removeTooltip() {
   document.querySelector(".tooltip")?.remove();
 }
 
+function isMobileLayout() {
+  return window.matchMedia("(max-width: 759px)").matches;
+}
+
+function setFilterDrawerOpen(open) {
+  state.filterDrawerOpen = Boolean(open);
+  document.body.classList.toggle("filter-drawer-open", state.filterDrawerOpen);
+  els.filterToggle?.setAttribute("aria-expanded", String(state.filterDrawerOpen));
+  els.filterPanel?.setAttribute("aria-hidden", String(isMobileLayout() && !state.filterDrawerOpen));
+  if (els.filterBackdrop) els.filterBackdrop.hidden = !state.filterDrawerOpen;
+}
+
+function syncResponsiveState() {
+  if (!isMobileLayout() && state.filterDrawerOpen) {
+    setFilterDrawerOpen(false);
+  } else if (els.filterPanel) {
+    els.filterPanel.setAttribute("aria-hidden", String(isMobileLayout() && !state.filterDrawerOpen));
+  }
+}
+
+function scrollDetailIntoViewOnMobile() {
+  if (!isMobileLayout() || !els.detailPanel) return;
+  requestAnimationFrame(() => els.detailPanel.scrollIntoView({ behavior: "smooth", block: "start" }));
+}
+
 function renderResults() {
   const menus = state.visibleMenus.slice(0, 80);
   els.resultsCount.textContent = state.visibleMenus.length.toLocaleString();
@@ -1009,6 +1397,7 @@ async function selectMenu(id) {
   renderViz();
   const summary = state.allMenus.find((menu) => menuKey(menu) === state.selectedId || String(menu.id) === state.selectedId) || state.visibleMenus.find((menu) => menuKey(menu) === state.selectedId);
   renderDetailSkeleton(summary);
+  scrollDetailIntoViewOnMobile();
   try {
     const detail = state.detailCache.get(state.selectedId) || (await getJson(`/api/item/${encodeURIComponent(state.selectedId)}`));
     state.detailCache.set(state.selectedId, detail);
@@ -1024,12 +1413,13 @@ function renderDetailSkeleton(menu) {
   els.detailEmpty.classList.add("hidden");
   els.detailCard.classList.remove("hidden");
   els.detailImage.alt = menu?.title || "Selected menu";
-  setImageSource(els.detailImage, menu?.imageUrl, menu?.title);
+  setImageSource(els.detailImage, detailImageSource(menu?.imageUrl, menu?.sourceKey || "cia"), menu?.title);
   els.detailKicker.textContent = [displayDateLabel(menu), compact(menu?.country, "")].filter(Boolean).join(" / ");
   els.detailTitle.textContent = menu?.title || "Loading menu";
   els.detailMeta.replaceChildren();
   els.detailText.textContent = "Loading full record...";
   els.detailLink.href = menu?.itemUrl || "#";
+  els.detailLink.textContent = `Open in ${sourceCollectionLabel(menu?.sourceKey || "cia")}`;
   els.pageStrip.replaceChildren();
   if (els.detailEvidence) {
     els.detailEvidence.classList.add("hidden");
@@ -1039,7 +1429,7 @@ function renderDetailSkeleton(menu) {
 
 function renderDetail(detail, menu) {
   els.detailImage.alt = detail.title;
-  setImageSource(els.detailImage, detail.imageUrl, detail.title || menu?.title);
+  setImageSource(els.detailImage, detailImageSource(detail.imageUrl, detail.sourceKey || menu?.sourceKey || "cia"), detail.title || menu?.title);
   els.detailTitle.textContent = detail.title || menu?.title || "Menu";
   const estimate = dateEstimateFor(menu);
   const sourceDate = fieldValue(detail, "date") || menu?.date || "";
@@ -1047,6 +1437,7 @@ function renderDetail(detail, menu) {
     .filter(Boolean)
     .join(" / ");
   els.detailLink.href = detail.sourceUrl;
+  els.detailLink.textContent = `Open in ${sourceCollectionLabel(detail.sourceKey || menu?.sourceKey || "cia")}`;
 
   const rows = [
     ["Corpus", fieldValue(detail, "sourceLabel") || menu?.sourceLabel],
@@ -1321,6 +1712,13 @@ function describeOntologyJob(job) {
 }
 
 function bindEvents() {
+  els.filterToggle?.addEventListener("click", () => setFilterDrawerOpen(true));
+  els.filterClose?.addEventListener("click", () => setFilterDrawerOpen(false));
+  els.filterBackdrop?.addEventListener("click", () => setFilterDrawerOpen(false));
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && state.filterDrawerOpen) setFilterDrawerOpen(false);
+  });
+
   els.searchInput.addEventListener("input", () => {
     state.filters.search = els.searchInput.value;
     update();
@@ -1375,6 +1773,14 @@ function bindEvents() {
       renderViz();
       if (state.activeLens === "prices") describePricesLoaded();
       if (state.activeLens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
+      if (state.activeLens === "chat") {
+        setActivity({
+          label: "Ask Lens",
+          title: "Natural-language corpus questions",
+          detail: "Static retrieval works on GitHub Pages; a local server can add Grok synthesis when GROK_API_KEY or XAI_API_KEY is set.",
+          progress: 1,
+        });
+      }
     });
   });
 
@@ -1415,6 +1821,7 @@ function bindEvents() {
     state.selectedPriceMenuIds = null;
     els.searchInput.value = "";
     update();
+    if (isMobileLayout()) setFilterDrawerOpen(false);
   });
 
   els.sampleButton.addEventListener("click", () => {
@@ -1425,7 +1832,14 @@ function bindEvents() {
 
   els.refreshButton.addEventListener("click", () => loadMenus(true).catch(showFatal));
   els.ontologyBuild.addEventListener("click", () => buildOntologyTextIndex().catch(showFatal));
-  window.addEventListener("resize", debounce(renderViz, 100));
+  window.addEventListener(
+    "resize",
+    debounce(() => {
+      syncResponsiveState();
+      renderViz();
+    }, 100)
+  );
+  syncResponsiveState();
 }
 
 function activateLensButton(lens) {

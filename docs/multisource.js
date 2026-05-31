@@ -198,7 +198,7 @@
     return { city: titleCase(raw), state: "", country: "unknown" };
   }
 
-  function nyplImageUrl(imageId, size = "r") {
+  function nyplImageUrl(imageId, size = "w") {
     const id = cleanValue(imageId);
     return id ? `https://images.nypl.org/index.php?id=${encodeURIComponent(id)}&t=${size}` : "";
   }
@@ -241,7 +241,7 @@
     const occasion = titleCase(row.occasion || "");
     const title = cleanValue(row.name) || [restaurant, event || occasion || "menu"].filter(Boolean).join(", ");
     const firstPage = extras.firstPage || {};
-    const imageUrl = nyplImageUrl(firstPage.image_id, "r");
+    const imageUrl = nyplImageUrl(firstPage.image_id, "w");
     const itemUrl = firstPage.uuid ? `https://digitalcollections.nypl.org/items/${firstPage.uuid}` : "https://www.nypl.org/research/support/whats-on-the-menu";
 
     return {

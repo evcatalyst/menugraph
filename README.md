@@ -12,6 +12,7 @@ The app uses a committed snapshot of the public CONTENTdm API for the CIA Menu C
 - On-demand item detail with images, page thumbnails, OCR text, source links, and cross-source evidence.
 - A culinary ontology index for meals, dishes, ingredients, beverages, styles, and discovered clusters, with NYPL dish transcription signals.
 - A price lens for extracted menu prices, conservative confidence bands, and today-indexed relative value signals.
+- An Ask lens for natural-language questions across menu metadata, dish summaries, structured price rows, and date estimates.
 - A bottom activity rail that reports archive loading, OCR search, transcript indexing progress, current menu titles, and ontology coverage.
 
 ## Run Locally
@@ -23,6 +24,21 @@ npm run dev
 Open `http://127.0.0.1:4173`.
 
 The Node server is optional local tooling. The deployable app is the static site in `docs/`, which can be hosted by GitHub Pages.
+
+The Ask lens works on GitHub Pages with deterministic static retrieval. To add local Grok synthesis without exposing a secret in the browser, start the server with an xAI key:
+
+```bash
+XAI_API_KEY=... npm run dev
+```
+
+`GROK_API_KEY` is also accepted. Set `GROK_MODEL` to override the default `grok-4.3` model.
+
+Run static checks and responsive browser smoke tests with:
+
+```bash
+npm test
+npm run test:e2e
+```
 
 ## Deploy
 
@@ -39,6 +55,24 @@ Regenerate the committed Pages snapshot with:
 ```bash
 npm run build:data
 ```
+
+## Netlify
+
+`netlify.toml` is configured to publish `docs/` and serve `POST /api/chat` through `netlify/functions/chat.js`.
+
+Use these settings when creating the Netlify site:
+
+- Build command: leave blank, or use `npm test` if you want deploy-time validation.
+- Publish directory: `docs`
+- Functions directory: `netlify/functions`
+- Environment variables: set `XAI_API_KEY` or `GROK_API_KEY` in the Netlify UI, not in `netlify.toml`.
+- Optional environment variables: `GROK_MODEL` and `GROK_API_BASE`.
+
+The same Ask lens URL path works in all modes:
+
+- Netlify: `/api/chat` rewrites to the serverless function and can use Grok privately.
+- GitHub Pages: `/api/chat` is unavailable, so the browser falls back to static retrieval.
+- Local Node server: `/api/chat` is served by `server.js`.
 
 ## Data Strategy
 
@@ -69,6 +103,7 @@ Optional local server endpoints:
 - `GET /api/matches/:uid`
 - `GET /api/analytics/dishes`
 - `GET /api/date-estimates`
+- `POST /api/chat`
 
 ## Useful Sources
 

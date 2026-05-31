@@ -2,6 +2,7 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
+const chatApi = require("./docs/chat-utils");
 const { buildMetadataOntology, buildOntology } = require("./docs/ontology");
 const { filterMenusBySource, normalizeCiaMenu, recordUid, summarizeMenus } = require("./docs/multisource");
 
@@ -68,6 +69,39 @@ async function readStaticJson(filename, refresh = false) {
   const payload = JSON.parse(await fs.promises.readFile(filePath, "utf8"));
   staticJsonCache.set(filePath, payload);
   return payload;
+}
+
+function readJsonBody(req, limitBytes = 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    if (req.method === "GET" || req.method === "HEAD") {
+      resolve({});
+      return;
+    }
+    let body = "";
+    let rejected = false;
+    req.on("data", (chunk) => {
+      if (rejected) return;
+      body += chunk;
+      if (body.length > limitBytes) {
+        rejected = true;
+        reject(new Error("Request body too large"));
+        req.destroy();
+      }
+    });
+    req.on("end", () => {
+      if (rejected) return;
+      if (!body.trim()) {
+        resolve({});
+        return;
+      }
+      try {
+        resolve(JSON.parse(body));
+      } catch (error) {
+        reject(new Error("Request body must be valid JSON"));
+      }
+    });
+    req.on("error", reject);
+  });
 }
 
 function normalizeQueryParam(value) {
@@ -682,17 +716,9 @@ async function getStaticItem(uid) {
   const payload = await getPublicMenus({ source: "all" });
   const menu = payload.menus.find((item) => recordUid(item) === parts.uid || String(item.id) === String(parts.id));
   if (!menu) throw new Error("Menu detail unavailable in static snapshot");
-  const topDishes = (menu.topDishes || []).slice(0, 12);
   const text =
     menu.sourceKey === "nypl"
-      ? [
-          "NYPL What's on the Menu? provides crowdsourced dish transcription and price rows for this menu-level record.",
-          topDishes.length ? `Top transcribed dishes: ${topDishes.join("; ")}.` : "",
-          menu.priceCount ? `${Number(menu.priceCount).toLocaleString()} item prices are available in the NYPL source export.` : "",
-          menu.notes,
-        ]
-          .filter(Boolean)
-          .join(" ")
+      ? nyplTranscriptText(menu, await nyplPriceRowsForMenu(menu))
       : "Full OCR text requires live access to the CIA Digital Collections item endpoint. The static Pages snapshot keeps the metadata, ontology, source link, and image pointer available without a server.";
   return {
     id: menu.id,
@@ -723,6 +749,55 @@ async function getStaticItem(uid) {
   };
 }
 
+async function nyplPriceRowsForMenu(menu) {
+  const uid = recordUid(menu);
+  try {
+    const snapshot = await readStaticJson("prices.json");
+    return (snapshot.records || [])
+      .filter((row) => row.sourceKey === "nypl" && (row.menuUid === uid || row.menuId === uid || String(row.sourceRecordId) === String(menu.pointer)))
+      .sort((a, b) => String(a.item || "").localeCompare(String(b.item || "")))
+      .slice(0, 18);
+  } catch (error) {
+    return [];
+  }
+}
+
+function nyplTranscriptText(menu, priceRows) {
+  const seen = new Set();
+  const sampleItems = [];
+  for (const row of priceRows) {
+    const item = cleanValue(row.item);
+    if (!item) continue;
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    sampleItems.push(row.rawPrice ? `${item} - ${row.rawPrice}` : item);
+  }
+  for (const dish of menu.topDishes || []) {
+    const item = cleanValue(dish);
+    const key = item.toLowerCase();
+    if (!item || seen.has(key)) continue;
+    seen.add(key);
+    sampleItems.push(item);
+    if (sampleItems.length >= 18) break;
+  }
+
+  const counts = [
+    menu.itemCount ? `${Number(menu.itemCount).toLocaleString()} transcribed item rows` : "",
+    menu.priceCount ? `${Number(menu.priceCount).toLocaleString()} priced rows` : "",
+    menu.pageCount ? `${Number(menu.pageCount).toLocaleString()} pages` : "",
+  ].filter(Boolean);
+
+  return [
+    "NYPL crowdsourced transcription sample",
+    counts.length ? counts.join(" / ") : "",
+    sampleItems.length ? `Sample item rows:\n${sampleItems.map((item) => `- ${item}`).join("\n")}` : "",
+    menu.notes ? `Notes: ${menu.notes}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 async function getPublicItem(id) {
   const parts = sourceIdParts(id);
   if (parts.sourceKey !== "cia") return getStaticItem(parts.uid);
@@ -743,6 +818,117 @@ async function getMatchesFor(uid, refresh = false) {
     matches: payload.matches?.[decoded] || [],
     relationships: payload.relationships || [],
   };
+}
+
+async function readOptionalStaticJson(filename, fallback) {
+  try {
+    return await readStaticJson(filename);
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function compactChatMatches(matches) {
+  return (matches || []).slice(0, 12).map((match) => ({
+    title: match.title,
+    item: match.item,
+    snippet: match.snippet,
+    date: match.date,
+    year: match.year,
+    place: match.place,
+    source: match.source,
+    reasons: match.reasons,
+    price: match.price,
+    url: match.url,
+  }));
+}
+
+async function grokSynthesis(question, localAnswer) {
+  const apiKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
+  if (!apiKey) return null;
+
+  const base = (process.env.GROK_API_BASE || "https://api.x.ai/v1").replace(/\/+$/, "");
+  const model = process.env.GROK_MODEL || "grok-4.3";
+  const context = {
+    question,
+    retrievalAnswer: localAnswer.answer,
+    parsed: localAnswer.parsed,
+    searched: localAnswer.searched,
+    caveats: localAnswer.caveats,
+    matches: compactChatMatches(localAnswer.matches),
+  };
+
+  const response = await fetch(`${base}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.2,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You answer questions about historical menu data using only the supplied retrieval context. Be concise, cite candidate menu titles/dates in prose, preserve uncertainty, and do not invent external facts.",
+        },
+        {
+          role: "user",
+          content: JSON.stringify(context),
+        },
+      ],
+    }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = payload.error?.message || payload.message || response.statusText;
+    throw new Error(`Grok request failed: ${detail}`);
+  }
+  const content = payload.choices?.[0]?.message?.content;
+  if (!content) throw new Error("Grok response did not include an answer");
+  return { answer: content, model };
+}
+
+async function answerChat(req, url) {
+  const body = req.method === "GET" ? {} : await readJsonBody(req);
+  const question = cleanValue(body.question || body.q || url.searchParams.get("q") || url.searchParams.get("question"));
+  if (!question) return { error: "Chat question is required" };
+
+  const [menus, ontology, prices, dateEstimates, analytics] = await Promise.all([
+    readStaticJson("menus.json"),
+    readOptionalStaticJson("ontology.json", null),
+    readOptionalStaticJson("prices.json", { records: [] }),
+    readOptionalStaticJson("date-estimates.json", { records: [] }),
+    readOptionalStaticJson("analytics.json", null),
+  ]);
+  const localAnswer = chatApi.answerQuestion({
+    question,
+    menus,
+    ontology,
+    prices,
+    dateEstimates,
+    analytics,
+  });
+
+  try {
+    const grok = await grokSynthesis(question, localAnswer);
+    if (!grok) return localAnswer;
+    return {
+      ...localAnswer,
+      engine: "grok",
+      model: grok.model,
+      answer: grok.answer,
+      localAnswer: localAnswer.answer,
+    };
+  } catch (error) {
+    return {
+      ...localAnswer,
+      engine: "local-retrieval",
+      llmError: error.message,
+    };
+  }
 }
 
 async function handleApi(req, res, url) {
@@ -795,6 +981,12 @@ async function handleApi(req, res, url) {
 
     if (url.pathname === "/api/analytics/dishes") {
       sendJson(res, await readStaticJson("analytics.json", url.searchParams.get("refresh") === "1"));
+      return;
+    }
+
+    if (url.pathname === "/api/chat") {
+      const answer = await answerChat(req, url);
+      sendJson(res, answer.error ? answer : answer, answer.error ? 400 : 200);
       return;
     }
 

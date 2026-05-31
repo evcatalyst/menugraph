@@ -9,11 +9,13 @@ const {
   recordUid,
   summarizeMenus,
   titleCase,
+  uidFor,
   yearFromDate,
 } = require("../docs/multisource");
 
 const DEFAULT_EXPORT_DIR = path.join(__dirname, "..", ".cache", "nypl", "extract");
 const WOTM_SOURCE_URL = "https://www.nypl.org/research/support/whats-on-the-menu";
+const PRICE_RECORDS_PER_DECADE = 1600;
 
 function argValue(args, name) {
   const prefix = `--${name}=`;
@@ -232,6 +234,8 @@ function buildNyplFromRows({ menus, pages, dishes, items }) {
 
   const dishStats = new Map();
   const priceStats = { byDecade: new Map(), byDish: new Map() };
+  const priceRecordsByDecade = new Map();
+  const priceRecordBuckets = new Map();
   const menuExtras = new Map();
 
   for (const item of items) {
@@ -289,6 +293,43 @@ function buildNyplFromRows({ menus, pages, dishes, items }) {
       const dishBucket = priceStats.byDish.get(normalizedDish) || statBucket();
       addStat(dishBucket, price);
       priceStats.byDish.set(normalizedDish, dishBucket);
+
+      const recordBucket = `${decade}:${normalizedDish.slice(0, 24)}`;
+      const bucketCount = priceRecordBuckets.get(recordBucket) || 0;
+      const decadeRecords = priceRecordsByDecade.get(decade) || [];
+      if (decadeRecords.length < PRICE_RECORDS_PER_DECADE && bucketCount < 8) {
+        priceRecordBuckets.set(recordBucket, bucketCount + 1);
+        decadeRecords.push({
+          id: `nypl-${item.id}`,
+          menuId: uidFor("nypl", menuId),
+          menuUid: uidFor("nypl", menuId),
+          sourceKey,
+          sourceRecordId: menuId,
+          item: dishName,
+          rawLine: `${dishName} ${item.price}${item.high_price ? `-${item.high_price}` : ""}`,
+          rawPrice: item.price,
+          rawAmount: price,
+          amount: Number(price.toFixed(4)),
+          scale: "structured-nypl",
+          scaleConfidence: "high",
+          scaleReason: "NYPL What's on the Menu? structured transcription",
+          currency: "USD",
+          currencyLabel: "U.S. dollars",
+          country: "United States",
+          iso3: "USA",
+          place: cleanValue(menu.place) || "unknown",
+          year,
+          decade,
+          menuTitle: cleanValue(menu.name) || "NYPL menu",
+          menuType: [cleanValue(menu.event), cleanValue(menu.venue), cleanValue(menu.occasion)].filter(Boolean),
+          sourceUrl: WOTM_SOURCE_URL,
+          score: 0.92,
+          confidence: "high",
+          reasons: ["NYPL structured row", "transcribed dish", "source price"],
+          context: [],
+        });
+        priceRecordsByDecade.set(decade, decadeRecords);
+      }
     }
   }
 
@@ -306,7 +347,16 @@ function buildNyplFromRows({ menus, pages, dishes, items }) {
     });
   });
 
-  return { nyplMenus, dishStats, priceStats };
+  const priceRecords = [...priceRecordsByDecade.entries()]
+    .sort((a, b) => decadeSortValue(a[0]) - decadeSortValue(b[0]))
+    .flatMap(([, records]) => records);
+
+  return { nyplMenus, dishStats, priceStats, priceRecords };
+}
+
+function decadeSortValue(decade) {
+  const match = String(decade || "").match(/\d{4}/);
+  return match ? Number(match[0]) : 9999;
 }
 
 function withMatchCounts(menus, matchMap) {

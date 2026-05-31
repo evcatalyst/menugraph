@@ -593,6 +593,7 @@ const MenuGraphPrices = (() => {
     contextForEntry,
     extractPricesFromText,
     normalizePrice,
+    summarizePrices,
   };
 })();
 

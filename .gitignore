@@ -1,4 +1,7 @@
 node_modules/
 .DS_Store
 .cache/
+.netlify/
 *.log
+test-results/
+playwright-report/

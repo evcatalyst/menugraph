@@ -1,0 +1,19 @@
+[build]
+  publish = "docs"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = [
+    "docs/chat-utils.js",
+    "docs/data/analytics.json",
+    "docs/data/date-estimates.json",
+    "docs/data/menus.json",
+    "docs/data/ontology.json",
+    "docs/data/prices.json"
+  ]
+
+[[redirects]]
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
+  status = 200

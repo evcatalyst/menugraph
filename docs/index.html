@@ -20,7 +20,31 @@
           </div>
         </header>
 
-        <aside class="panel filters" aria-label="Filters">
+        <section class="mobile-controls" aria-label="Mobile collection controls">
+          <button id="filter-toggle" class="filter-toggle" type="button" aria-controls="filter-panel" aria-expanded="false">Filters</button>
+          <div class="lens-switch" role="tablist" aria-label="Mobile visualization lens">
+            <button class="active" type="button" data-lens="time">Time</button>
+            <button type="button" data-lens="place">Place</button>
+            <button type="button" data-lens="type">Type</button>
+            <button type="button" data-lens="lineage">Source</button>
+            <button type="button" data-lens="ontology">Food</button>
+            <button type="button" data-lens="prices">Prices</button>
+            <button type="button" data-lens="chat">Ask</button>
+          </div>
+          <div class="source-switch" role="tablist" aria-label="Mobile source filter">
+            <button class="active" type="button" data-source="all">All</button>
+            <button type="button" data-source="cia">CIA</button>
+            <button type="button" data-source="nypl">NYPL</button>
+            <button type="button" data-source="matched">Matched</button>
+          </div>
+        </section>
+
+        <aside id="filter-panel" class="panel filters" aria-label="Filters">
+          <div class="drawer-header">
+            <p class="eyebrow">Filters</p>
+            <button id="filter-close" type="button" aria-controls="filter-panel">Close</button>
+          </div>
+
           <label class="search-field">
             <span>Search collection</span>
             <input id="search-input" type="search" placeholder="Try oysters, railroads, Paris, dinner..." />
@@ -40,16 +64,17 @@
             <button id="archive-search" type="button">Archive Search</button>
           </div>
 
-          <div class="lens-switch" role="tablist" aria-label="Visualization lens">
+          <div class="lens-switch drawer-lens-controls" role="tablist" aria-label="Visualization lens">
             <button class="active" type="button" data-lens="time">Time</button>
             <button type="button" data-lens="place">Place</button>
             <button type="button" data-lens="type">Type</button>
             <button type="button" data-lens="lineage">Source</button>
             <button type="button" data-lens="ontology">Food</button>
             <button type="button" data-lens="prices">Prices</button>
+            <button type="button" data-lens="chat">Ask</button>
           </div>
 
-          <section class="facet-section">
+          <section class="facet-section drawer-source-section">
             <div class="section-title">
               <span>Source</span>
             </div>
@@ -139,6 +164,7 @@
             <div id="price-facets" class="facet-list"></div>
           </section>
         </aside>
+        <button id="filter-backdrop" class="filter-backdrop" type="button" aria-label="Close filters" hidden></button>
 
         <section class="canvas-panel" aria-label="Knowledge map">
           <div class="canvas-toolbar">
@@ -158,7 +184,7 @@
         <section class="panel detail" aria-label="Selected menu">
           <div id="detail-empty" class="empty-state">
             <h2>Select a menu</h2>
-            <p>Dots and bars are live records from the CIA Digital Collections. Select one to open its image, OCR text, and metadata.</p>
+            <p>Dots and bars are records from the enabled menu sources. Select one to open its image, transcription sample, source metadata, and matches.</p>
           </div>
           <article id="detail-card" class="detail-card hidden">
             <div class="detail-image-wrap">
@@ -202,6 +228,7 @@
     <script src="./multisource.js"></script>
     <script src="./ontology.js"></script>
     <script src="./price-utils.js"></script>
+    <script src="./chat-utils.js"></script>
     <script src="./archive-client.js"></script>
     <script src="./app.js"></script>
   </body>

@@ -474,22 +474,63 @@
     };
   }
 
+  async function nyplPriceRowsForMenu(menu) {
+    const uid = recordUid(menu);
+    try {
+      const snapshot = await getPrices({ refresh: false });
+      return (snapshot.records || [])
+        .filter((row) => row.sourceKey === "nypl" && (row.menuUid === uid || row.menuId === uid || String(row.sourceRecordId) === String(menu.pointer)))
+        .sort((a, b) => String(a.item || "").localeCompare(String(b.item || "")))
+        .slice(0, 18);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function nyplTranscriptText(menu, priceRows) {
+    const seen = new Set();
+    const sampleItems = [];
+    for (const row of priceRows) {
+      const item = cleanValue(row.item);
+      if (!item) continue;
+      const key = item.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      sampleItems.push(row.rawPrice ? `${item} - ${row.rawPrice}` : item);
+    }
+    for (const dish of menu.topDishes || []) {
+      const item = cleanValue(dish);
+      const key = item.toLowerCase();
+      if (!item || seen.has(key)) continue;
+      seen.add(key);
+      sampleItems.push(item);
+      if (sampleItems.length >= 18) break;
+    }
+
+    const counts = [
+      menu.itemCount ? `${Number(menu.itemCount).toLocaleString()} transcribed item rows` : "",
+      menu.priceCount ? `${Number(menu.priceCount).toLocaleString()} priced rows` : "",
+      menu.pageCount ? `${Number(menu.pageCount).toLocaleString()} pages` : "",
+    ].filter(Boolean);
+
+    return [
+      "NYPL crowdsourced transcription sample",
+      counts.length ? counts.join(" / ") : "",
+      sampleItems.length ? `Sample item rows:\n${sampleItems.map((item) => `- ${item}`).join("\n")}` : "",
+      menu.notes ? `Notes: ${menu.notes}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  }
+
   async function getStaticItem(pointer) {
     const parts = sourceIdParts(pointer);
     const payload = await getMenus({ refresh: false });
     const menu = payload.menus.find((item) => recordUid(item) === parts.uid || String(item.id) === String(parts.id));
     if (!menu) throw new Error("Menu detail unavailable in static snapshot");
-    const topDishes = (menu.topDishes || []).slice(0, 12);
     const text =
       menu.sourceKey === "nypl"
-        ? [
-            "NYPL What's on the Menu? provides crowdsourced dish transcription and price rows for this menu-level record.",
-            topDishes.length ? `Top transcribed dishes: ${topDishes.join("; ")}.` : "",
-            menu.priceCount ? `${Number(menu.priceCount).toLocaleString()} item prices are available in the NYPL source export.` : "",
-            menu.notes,
-          ]
-            .filter(Boolean)
-            .join(" ")
+        ? nyplTranscriptText(menu, await nyplPriceRowsForMenu(menu))
         : "Full OCR text requires live access to the CIA Digital Collections item endpoint. The static Pages snapshot keeps the metadata, ontology, source link, and image pointer available without a server.";
     return {
       id: menu.id,
@@ -544,6 +585,11 @@
   function ontologyApi() {
     if (!window.MenuGraphOntology) throw new Error("Ontology library did not load");
     return window.MenuGraphOntology;
+  }
+
+  function chatApi() {
+    if (!window.MenuGraphChat) throw new Error("Chat query library did not load");
+    return window.MenuGraphChat;
   }
 
   function readStoredOntology() {
@@ -611,6 +657,39 @@
   async function getAnalytics({ refresh = false } = {}) {
     if (!analyticsCache || refresh) analyticsCache = await requestStaticJson("analytics.json", refresh);
     return analyticsCache;
+  }
+
+  function requestBody(options) {
+    if (!options?.body) return {};
+    if (typeof options.body === "string") {
+      try {
+        return JSON.parse(options.body);
+      } catch (error) {
+        return {};
+      }
+    }
+    return options.body;
+  }
+
+  async function getChatAnswer(options = {}) {
+    const body = requestBody(options);
+    const question = cleanValue(body.question || body.q);
+    if (!question) throw new Error("Chat question is required");
+    const [menus, ontology, prices, dateEstimates, analytics] = await Promise.all([
+      getMenus({ refresh: false }),
+      getOntology({ refresh: false }).catch(() => null),
+      getPrices({ refresh: false }).catch(() => ({ records: [] })),
+      getDateEstimates({ refresh: false }).catch(() => ({ records: [] })),
+      getAnalytics({ refresh: false }).catch(() => null),
+    ]);
+    return chatApi().answerQuestion({
+      question,
+      menus,
+      ontology,
+      prices,
+      dateEstimates,
+      analytics,
+    });
   }
 
   function selectOntologySample(menus, rawLimit) {
@@ -753,6 +832,14 @@
     if (url.pathname === "/api/analytics/dishes") {
       return getAnalytics({ refresh: url.searchParams.get("refresh") === "1" });
     }
+    if (url.pathname === "/api/chat") {
+      return getChatAnswer({
+        ...options,
+        body: options.body || {
+          question: url.searchParams.get("q") || url.searchParams.get("question"),
+        },
+      });
+    }
     if (url.pathname === "/api/search") {
       return searchMenus(
         url.searchParams.get("term"),
@@ -784,6 +871,7 @@
     getOntology,
     getPrices,
     getDateEstimates,
+    getChatAnswer,
     handle,
     imageUrl,
     searchMenus,

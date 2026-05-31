@@ -2,7 +2,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const { buildDateEstimateSnapshot } = require("../docs/date-estimates");
 const { buildMetadataOntology, buildOntology } = require("../docs/ontology");
-const { buildPriceSnapshot } = require("../docs/price-utils");
+const { buildPriceSnapshot, contextForEntry, normalizePrice, summarizePrices } = require("../docs/price-utils");
 const { summarizeMenus } = require("../docs/multisource");
 const { fetchMenuText, getMenus, getOntology, ontologyStatus, selectOntologySample, startOntologyBuild } = require("../server");
 const {
@@ -306,6 +306,24 @@ async function buildPrices(menus, references, rawLimit) {
   };
 }
 
+function mergeNyplPriceRecords(priceSnapshot, nyplPriceRecords, references) {
+  if (!nyplPriceRecords?.length) return priceSnapshot;
+  const records = [
+    ...(priceSnapshot.records || []),
+    ...nyplPriceRecords.map((record) => ({
+      ...record,
+      normalized: normalizePrice(record, references),
+      context: contextForEntry(record, contextEvents),
+    })),
+  ].sort((a, b) => (a.year || 9999) - (b.year || 9999) || String(a.item || "").localeCompare(String(b.item || "")));
+  return {
+    ...priceSnapshot,
+    methodology: `${priceSnapshot.methodology} NYPL What's on the Menu? structured item prices are included as bounded source-transcribed observations for dollar-denominated menus.`,
+    records,
+    summary: summarizePrices(records, references),
+  };
+}
+
 async function buildDateEstimates(menus, textsById, priceSnapshot) {
   const [dateClues, restaurantRanges] = await Promise.all([readReference("date-clues.json"), readReference("restaurant-ranges.json")]);
   const snapshot = buildDateEstimateSnapshot({
@@ -355,6 +373,7 @@ async function main() {
   let publicMenusPayload = null;
   let combinedMatches = { matches: {}, relationships: [] };
   let analyticsSnapshot = null;
+  let nyplPriceRecords = [];
   try {
     const menusPayload = await getMenus(true);
     const ciaMenus = menusPayload.menus.map(publicMenu);
@@ -372,6 +391,7 @@ async function main() {
     const ciaMenus = publicMenusPayload.menus.filter((menu) => !menu.sourceKey || menu.sourceKey === "cia");
     const nyplRows = await loadNyplExport();
     const nypl = buildNyplFromRows(nyplRows);
+    nyplPriceRecords = nypl.priceRecords || [];
     const combined = combineSources({ ciaMenus, nyplMenus: nypl.nyplMenus });
     const ciaCollection =
       (publicMenusPayload.collection?.sources || []).find((source) => source.alias === "p16940coll1" || source.name === "CIA Menu Collection") ||
@@ -462,7 +482,7 @@ async function main() {
   const references = await buildReferences();
   const ciaPriceMenus = publicMenusPayload.menus.filter((menu) => !menu.sourceKey || menu.sourceKey === "cia");
   const priceBuild = await buildPrices(ciaPriceMenus, references, argValue("prices"));
-  const priceSnapshot = priceBuild.snapshot;
+  const priceSnapshot = mergeNyplPriceRecords(priceBuild.snapshot, nyplPriceRecords, references);
   await fs.writeFile(path.join(DATA_DIR, "prices.json"), JSON.stringify(priceSnapshot), "utf8");
   console.log(`Wrote ${priceSnapshot.records.length.toLocaleString()} price observations.`);
 
