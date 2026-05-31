@@ -713,9 +713,11 @@ if (require.main === module) {
 }
 
 module.exports = {
+  fetchMenuText,
   getMenus,
   getOntology,
   ontologyStatus,
   searchMenus,
+  selectOntologySample,
   startOntologyBuild,
 };

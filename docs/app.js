@@ -6,9 +6,14 @@ const state = {
   activeLens: "time",
   archiveMode: false,
   ontology: null,
+  prices: null,
   ontologyCategory: "ingredients",
+  priceMode: "todayUsd",
+  priceCurrency: null,
+  priceConfidence: null,
   selectedOntologyTerm: null,
   selectedOntologyIds: null,
+  selectedPriceMenuIds: null,
   ontologyPoll: null,
   filters: {
     search: "",
@@ -55,6 +60,9 @@ const els = {
   ontologyStatus: document.querySelector("#ontology-status"),
   ontologyTerms: document.querySelector("#ontology-terms"),
   ontologyCategoryButtons: [...document.querySelectorAll(".ontology-tabs button")],
+  priceStatus: document.querySelector("#price-status"),
+  priceFacets: document.querySelector("#price-facets"),
+  priceModeButtons: [...document.querySelectorAll(".price-tabs button")],
   ontologyBuild: document.querySelector("#ontology-build"),
   insightsList: document.querySelector("#insights-list"),
   activityPanel: document.querySelector("#activity-panel"),
@@ -177,6 +185,9 @@ async function loadMenus(refresh = false) {
   loadOntology().catch(() => {
     els.ontologyStatus.textContent = "offline";
   });
+  loadPrices().catch(() => {
+    if (els.priceStatus) els.priceStatus.textContent = "offline";
+  });
 }
 
 async function loadOntology(refresh = false) {
@@ -197,6 +208,21 @@ async function loadOntology(refresh = false) {
   if (state.activeLens === "ontology") renderViz();
 }
 
+async function loadPrices(refresh = false) {
+  if (els.priceStatus) els.priceStatus.textContent = "loading";
+  const prices = await getJson(`/api/prices${refresh ? "?refresh=1" : ""}`);
+  state.prices = prices;
+  renderPriceControls();
+  if (els.priceStatus) {
+    const count = Number(prices.summary?.total || 0);
+    els.priceStatus.textContent = count ? `${count.toLocaleString()} prices` : "none";
+  }
+  if (state.activeLens === "prices") {
+    describePricesLoaded();
+    renderViz();
+  }
+}
+
 function filteredMenus() {
   const search = state.filters.search.trim().toLowerCase();
   return state.allMenus.filter((menu) => {
@@ -205,6 +231,7 @@ function filteredMenus() {
     if (state.filters.decade && compact(menu.decade).toLowerCase() !== state.filters.decade) return false;
     if (state.filters.type && !menu.types.some((type) => type.toLowerCase() === state.filters.type)) return false;
     if (state.selectedOntologyIds && !state.selectedOntologyIds.has(menu.id)) return false;
+    if (state.selectedPriceMenuIds && !state.selectedPriceMenuIds.has(menu.id)) return false;
     if (
       state.filters.place &&
       ![menu.city, menu.state, menu.country].some((place) => compact(place, "").toLowerCase() === state.filters.place)
@@ -226,6 +253,7 @@ function update() {
   updateYearLabel();
   renderFacets();
   renderOntologyControls();
+  renderPriceControls();
   renderViz();
   renderResults();
 }
@@ -298,6 +326,56 @@ function renderOntologyControls() {
   );
 }
 
+function priceRecordsForVisibleMenus() {
+  const visibleIds = new Set(state.visibleMenus.map((menu) => menu.id));
+  return (state.prices?.records || []).filter((record) => {
+    if (!visibleIds.has(record.menuId)) return false;
+    if (state.priceCurrency && record.currency !== state.priceCurrency) return false;
+    if (state.priceConfidence && record.confidence !== state.priceConfidence) return false;
+    if (record.year && (record.year < state.filters.minYear || record.year > state.filters.maxYear)) return false;
+    return valueForPriceRecord(record) !== null;
+  });
+}
+
+function renderPriceControls() {
+  if (!els.priceFacets) return;
+  els.priceModeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.priceMode === state.priceMode);
+  });
+  const records = state.prices?.records || [];
+  const currencies = uniqueCount(records, (record) => record.currency).slice(0, 5);
+  const confidence = uniqueCount(records, (record) => record.confidence).slice(0, 3);
+  const buttons = [
+    ...currencies.map((item) =>
+      makeFacetButton(
+        { name: item.name, count: item.count },
+        state.priceCurrency === item.name,
+        () => {
+          state.priceCurrency = state.priceCurrency === item.name ? null : item.name;
+          state.activeLens = "prices";
+          activateLensButton("prices");
+          describePricesLoaded();
+          update();
+        }
+      )
+    ),
+    ...confidence.map((item) =>
+      makeFacetButton(
+        { name: item.name, count: item.count },
+        state.priceConfidence === item.name,
+        () => {
+          state.priceConfidence = state.priceConfidence === item.name ? null : item.name;
+          state.activeLens = "prices";
+          activateLensButton("prices");
+          describePricesLoaded();
+          update();
+        }
+      )
+    ),
+  ];
+  els.priceFacets.replaceChildren(...buttons);
+}
+
 function renderInsights() {
   if (!els.insightsList) return;
   const insights = state.ontology?.insights || [];
@@ -368,6 +446,7 @@ function renderViz() {
     type: renderTypeLens,
     lineage: renderLineageLens,
     ontology: renderOntologyLens,
+    prices: renderPriceLens,
   };
   lenses[state.activeLens](svg, width, height);
 }
@@ -379,10 +458,17 @@ function lensCopy() {
     type: ["Type Lens", "Formats, Courses, and Occasions"],
     lineage: ["Lineage Lens", "Collectors and Collection Memory"],
     ontology: ["Food Lens", `${categoryLabels[state.ontologyCategory]} Across Time`],
+    prices: ["Price Lens", priceLensTitle()],
   };
   const [label, title] = copies[state.activeLens];
   els.lensLabel.textContent = label;
   els.resultTitle.textContent = title;
+}
+
+function priceLensTitle() {
+  if (state.priceMode === "raw") return "Historical Menu Prices";
+  if (state.priceMode === "relative") return "Relative Local Value";
+  return "Prices Indexed To Today";
 }
 
 function colorFor(value) {
@@ -532,6 +618,116 @@ function renderOntologyLens(svg, width, height) {
       svg.appendChild(rect);
     });
   });
+}
+
+function valueForPriceRecord(record) {
+  if (state.priceMode === "raw") return Number(record.amount) || null;
+  if (state.priceMode === "relative") return record.normalized?.relativeIndex || null;
+  return record.normalized?.todayUsd || null;
+}
+
+function priceValueLabel(record) {
+  if (state.priceMode === "raw") return `${record.rawPrice} ${record.currency}`;
+  if (state.priceMode === "relative" && record.normalized?.localToday && !record.normalized?.todayUsd) {
+    return `${record.currency} ${formatNumber(record.normalized.localToday)} local CPI index`;
+  }
+  if (record.normalized?.todayUsd) {
+    return `${formatMoney(record.normalized.todayLow)}-${formatMoney(record.normalized.todayHigh)} today USD`;
+  }
+  return "Not safely indexed";
+}
+
+function formatMoney(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "...";
+  return `$${number.toLocaleString(undefined, { maximumFractionDigits: number >= 100 ? 0 : 2 })}`;
+}
+
+function formatNumber(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "...";
+  return number.toLocaleString(undefined, { maximumFractionDigits: number >= 100 ? 0 : 2 });
+}
+
+function renderPriceLens(svg, width, height) {
+  lensCopy();
+  const records = priceRecordsForVisibleMenus();
+  if (!state.prices) {
+    const text = svgEl("text", { x: width / 2, y: height / 2, "text-anchor": "middle", class: "axis-label" });
+    text.textContent = "Price data loading";
+    svg.appendChild(text);
+    return;
+  }
+  if (!records.length) {
+    const text = svgEl("text", { x: width / 2, y: height / 2, "text-anchor": "middle", class: "axis-label" });
+    text.textContent = "No safely indexed prices in this view";
+    svg.appendChild(text);
+    return;
+  }
+
+  const pad = { top: 44, right: 38, bottom: 58, left: 72 };
+  const minYear = Math.min(...records.map((record) => record.year).filter(Boolean), state.filters.minYear);
+  const maxYear = Math.max(...records.map((record) => record.year).filter(Boolean), state.filters.maxYear);
+  const values = records.map(valueForPriceRecord).filter((value) => value !== null && value > 0);
+  const minValue = Math.max(Math.min(...values), 0.01);
+  const maxValue = Math.max(...values);
+  const logMin = Math.log10(minValue);
+  const logMax = Math.log10(maxValue || minValue + 1);
+  const x = (year) => pad.left + ((year - minYear) / Math.max(maxYear - minYear, 1)) * (width - pad.left - pad.right);
+  const y = (value) => {
+    const log = Math.log10(Math.max(value, minValue));
+    return height - pad.bottom - ((log - logMin) / Math.max(logMax - logMin, 0.001)) * (height - pad.top - pad.bottom);
+  };
+
+  for (let i = 0; i <= 5; i++) {
+    const year = Math.round(minYear + ((maxYear - minYear) * i) / 5);
+    const gx = x(year);
+    svg.appendChild(svgEl("line", { x1: gx, y1: pad.top, x2: gx, y2: height - pad.bottom, class: "grid-line" }));
+    const text = svgEl("text", { x: gx, y: height - 22, "text-anchor": "middle", class: "axis-label" });
+    text.textContent = year;
+    svg.appendChild(text);
+  }
+
+  const ticks = [minValue, Math.sqrt(minValue * maxValue), maxValue].filter((value, index, arr) => index === 0 || Math.abs(value - arr[index - 1]) > 0.01);
+  ticks.forEach((value) => {
+    const yy = y(value);
+    svg.appendChild(svgEl("line", { x1: pad.left, y1: yy, x2: width - pad.right, y2: yy, class: "grid-line" }));
+    const label = svgEl("text", { x: 16, y: yy + 4, class: "axis-label" });
+    label.textContent =
+      state.priceMode === "raw" ? value.toFixed(value >= 10 ? 0 : 2) : state.priceMode === "relative" ? formatNumber(value) : formatMoney(value);
+    svg.appendChild(label);
+  });
+
+  records.slice(0, 1800).forEach((record, index) => {
+    const value = valueForPriceRecord(record);
+    if (!value || !record.year) return;
+    const dot = svgEl("circle", {
+      cx: x(record.year),
+      cy: y(value) + ((index % 9) - 4) * 1.8,
+      r: record.confidence === "high" ? 5.6 : record.confidence === "medium" ? 4.8 : 4,
+      fill: colorFor(record.currency),
+      opacity: record.confidence === "low" ? 0.58 : 0.88,
+      class: "price-dot",
+      tabindex: 0,
+    });
+    dot.addEventListener("click", () => selectMenu(record.menuId));
+    dot.addEventListener("keyup", (event) => {
+      if (event.key === "Enter") selectMenu(record.menuId);
+    });
+    dot.addEventListener("mousemove", (event) => {
+      const context = record.context?.[0]?.label ? `<br><em>${record.context[0].label}: ${record.context[0].note}</em>` : "";
+      showTooltip(
+        event,
+        `<strong>${titleCase(record.item)}</strong>${record.rawPrice} in ${record.year} (${record.currency})<br>${priceValueLabel(record)}<br>${record.confidence} confidence - ${record.normalized?.method || "raw"}${context}`
+      );
+    });
+    dot.addEventListener("mouseleave", removeTooltip);
+    svg.appendChild(dot);
+  });
+
+  const note = svgEl("text", { x: width - pad.right, y: pad.top - 16, "text-anchor": "end", class: "price-note" });
+  note.textContent = `${records.length.toLocaleString()} observations; estimates use bands and CPI snapshots`;
+  svg.appendChild(note);
 }
 
 function decadeSortValue(decade) {
@@ -831,6 +1027,31 @@ function describeOntologyLoaded(ontology) {
   });
 }
 
+function describePricesLoaded() {
+  const summary = state.prices?.summary;
+  if (!summary) return;
+  const label =
+    state.priceMode === "todayUsd"
+      ? "Today Index"
+      : state.priceMode === "relative"
+        ? "Relative Value"
+        : "Raw Prices";
+  const title =
+    state.priceMode === "todayUsd" && summary.medianTodayUsd
+      ? `${formatMoney(summary.medianTodayUsd)} median indexed price`
+      : `${Number(summary.total || 0).toLocaleString()} extracted price observations`;
+  const detail =
+    state.priceMode === "todayUsd"
+      ? `${Number(summary.normalizedUsd || 0).toLocaleString()} prices have U.S. CPI-U bands; non-U.S. prices remain caveated unless local CPI coverage exists.`
+      : "Currency, place, and confidence filters keep uncertain values visible without presenting them as exact.";
+  setActivity({
+    label,
+    title,
+    detail,
+    progress: 1,
+  });
+}
+
 function describeOntologyJob(job) {
   const total = Number(job.total || 0);
   const indexed = Number(job.indexed || 0);
@@ -874,18 +1095,31 @@ function bindEvents() {
     button.addEventListener("click", () => {
       state.ontologyCategory = button.dataset.category;
       state.activeLens = "ontology";
-      els.lensButtons.forEach((item) => item.classList.toggle("active", item.dataset.lens === "ontology"));
+      activateLensButton("ontology");
       renderOntologyControls();
       renderViz();
       if (state.ontology) describeOntologyLoaded(state.ontology);
     });
   });
 
+  els.priceModeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.priceMode = button.dataset.priceMode;
+      state.activeLens = "prices";
+      activateLensButton("prices");
+      renderPriceControls();
+      renderViz();
+      describePricesLoaded();
+    });
+  });
+
   els.lensButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.activeLens = button.dataset.lens;
-      els.lensButtons.forEach((item) => item.classList.toggle("active", item === button));
+      activateLensButton(state.activeLens);
       renderViz();
+      if (state.activeLens === "prices") describePricesLoaded();
+      if (state.activeLens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
     });
   });
 
@@ -904,6 +1138,9 @@ function bindEvents() {
     state.filters.place = null;
     state.selectedOntologyTerm = null;
     state.selectedOntologyIds = null;
+    state.priceCurrency = null;
+    state.priceConfidence = null;
+    state.selectedPriceMenuIds = null;
     els.searchInput.value = "";
     update();
   });
@@ -917,6 +1154,10 @@ function bindEvents() {
   els.refreshButton.addEventListener("click", () => loadMenus(true).catch(showFatal));
   els.ontologyBuild.addEventListener("click", () => buildOntologyTextIndex().catch(showFatal));
   window.addEventListener("resize", debounce(renderViz, 100));
+}
+
+function activateLensButton(lens) {
+  els.lensButtons.forEach((item) => item.classList.toggle("active", item.dataset.lens === lens));
 }
 
 function debounce(fn, wait) {

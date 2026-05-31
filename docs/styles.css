@@ -382,19 +382,42 @@ input[type="range"] {
   opacity: 0.65;
 }
 
-.ontology-tabs {
+.ontology-tabs,
+.price-tabs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
   margin-top: 10px;
 }
 
-.ontology-tabs button {
+.ontology-tabs button,
+.price-tabs button {
   min-width: 0;
   padding: 0 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.price-tabs {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.price-note {
+  fill: #7a6750;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.price-dot {
+  cursor: pointer;
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 1.2;
+}
+
+.price-dot:hover {
+  stroke: var(--ink);
+  stroke-width: 2;
 }
 
 .insights-list {

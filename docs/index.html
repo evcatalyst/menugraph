@@ -46,6 +46,7 @@
             <button type="button" data-lens="type">Type</button>
             <button type="button" data-lens="lineage">Source</button>
             <button type="button" data-lens="ontology">Food</button>
+            <button type="button" data-lens="prices">Prices</button>
           </div>
 
           <div class="range-block">
@@ -100,6 +101,19 @@
               <span>Insights</span>
             </div>
             <div id="insights-list" class="insights-list"></div>
+          </section>
+
+          <section class="facet-section">
+            <div class="section-title">
+              <span>Price Lens</span>
+              <small id="price-status">loading</small>
+            </div>
+            <div class="price-tabs" role="tablist" aria-label="Price display mode">
+              <button class="active" type="button" data-price-mode="todayUsd">Today USD</button>
+              <button type="button" data-price-mode="raw">Raw</button>
+              <button type="button" data-price-mode="relative">Relative</button>
+            </div>
+            <div id="price-facets" class="facet-list"></div>
           </section>
         </aside>
 
@@ -162,6 +176,7 @@
     </main>
 
     <script src="./ontology.js"></script>
+    <script src="./price-utils.js"></script>
     <script src="./archive-client.js"></script>
     <script src="./app.js"></script>
   </body>

@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "build:data": "node scripts/build-static-data.js --text=25",
-    "test": "node --check server.js && node --check docs/ontology.js && node --check docs/archive-client.js && node --check docs/app.js"
+    "build:data": "node scripts/build-static-data.js --text=25 --prices=180",
+    "test": "node --check server.js && node --check docs/ontology.js && node --check docs/price-utils.js && node --check docs/archive-client.js && node --check docs/app.js && node scripts/test-price-utils.js"
   },
   "engines": {
     "node": ">=20"

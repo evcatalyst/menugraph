@@ -13,6 +13,7 @@
 
   let menusCache = null;
   let ontologyCache = null;
+  let pricesCache = null;
 
   function sourceUrl(id) {
     return `https://${CONTENTDM_HOST}/digital/collection/${COLLECTION}/id/${id}`;
@@ -530,6 +531,12 @@
     return publicOntology(ontology);
   }
 
+  async function getPrices({ refresh = false } = {}) {
+    if (!refresh && pricesCache) return pricesCache;
+    pricesCache = await requestStaticJson("prices.json", refresh);
+    return pricesCache;
+  }
+
   function selectOntologySample(menus, rawLimit) {
     const limit =
       rawLimit === "all"
@@ -659,6 +666,9 @@
     if (url.pathname === "/api/ontology") {
       return getOntology({ refresh: url.searchParams.get("refresh") === "1" });
     }
+    if (url.pathname === "/api/prices") {
+      return getPrices({ refresh: url.searchParams.get("refresh") === "1" });
+    }
     if (url.pathname === "/api/search") {
       return searchMenus(
         url.searchParams.get("term"),
@@ -684,6 +694,7 @@
     getItem,
     getMenus,
     getOntology,
+    getPrices,
     handle,
     imageUrl,
     searchMenus,
