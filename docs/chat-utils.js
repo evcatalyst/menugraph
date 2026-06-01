@@ -685,6 +685,106 @@
     };
   }
 
+  function median(values) {
+    const numbers = values.map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    if (!numbers.length) return null;
+    const middle = Math.floor(numbers.length / 2);
+    return numbers.length % 2 ? numbers[middle] : (numbers[middle - 1] + numbers[middle]) / 2;
+  }
+
+  function roundMoney(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? Number(number.toFixed(2)) : null;
+  }
+
+  function steakType(value) {
+    const text = normalizeText(value);
+    if (!text) return null;
+    if (/\b(cod|fish|halibut|salmon|tuna|swordfish|steak fried|rabbit)\b/.test(text)) return null;
+    if (/\b(filet mignon|fillet mignon|filet de boeuf|filets de boeuf)\b/.test(text)) return "Filet mignon";
+    if (/\b(tenderloin|tartare)\b/.test(text) && /\b(beef|steak|boeuf)\b/.test(text)) return "Tenderloin / tartare";
+    if (/\bsirloin\b/.test(text)) return "Sirloin";
+    if (/\b(porterhouse|t bone|t-bone)\b/.test(text)) return "Porterhouse / T-bone";
+    if (/\b(ribeye|rib eye|prime rib|rib steak)\b/.test(text)) return "Rib / prime rib";
+    if (/\b(new york steak|new york strip|ny strip|strip steak)\b/.test(text)) return "New York strip";
+    if (/\b(hamburger steak|salisbury)\b/.test(text)) return "Hamburger / Salisbury";
+    if (/\bpepper steak\b/.test(text)) return "Pepper steak";
+    if (/\bsteak\b/.test(text)) return "Generic steak";
+    if (/\b(beef|boeuf|roast beef)\b/.test(text)) return "Other beef";
+    return null;
+  }
+
+  function regionLabel(match) {
+    const place = normalizeText([match.place, match.country].join(" "));
+    if (/\b(new york|ny|massachusetts|connecticut|pennsylvania|new jersey|boston|philadelphia|maine|vermont|rhode island)\b/.test(place)) return "US Northeast";
+    if (/\b(california|oregon|washington|hawaii|nevada|arizona|colorado|idaho|utah)\b/.test(place)) return "US West";
+    if (/\b(illinois|chicago|indiana|iowa|kansas|michigan|minnesota|missouri|ohio|wisconsin|nebraska)\b/.test(place)) return "US Midwest";
+    if (/\b(louisiana|florida|texas|georgia|maryland|virginia|carolina|alabama|tennessee|kentucky)\b/.test(place)) return "US South";
+    if (/united states|usa/.test(place)) return "US unspecified";
+    if (!place || /unknown/.test(place)) return "Unknown";
+    return "International / other";
+  }
+
+  function groupedRows(rows, keyFn) {
+    const groups = new Map();
+    for (const row of rows) {
+      const key = cleanValue(keyFn(row));
+      if (!key) continue;
+      const group = groups.get(key) || [];
+      group.push(row);
+      groups.set(key, group);
+    }
+    return [...groups.entries()]
+      .map(([label, items]) => ({
+        label,
+        count: items.length,
+        medianRaw: roundMoney(median(items.map((item) => item.price?.amount))),
+        medianTodayUsd: roundMoney(median(items.map((item) => item.price?.todayUsd))),
+      }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  }
+
+  function buildAdaptiveAnalysis(matches, parsed) {
+    const priceMatches = (matches || []).filter((match) => match.price);
+    if (!priceMatches.length) {
+      return {
+        title: "Evidence Browser",
+        subtitle: "Browse the strongest records by timeline, place, and source.",
+        summary: [
+          { label: "Records", value: String((matches || []).length) },
+          { label: "Date span", value: buildResultFacets(matches).yearMin ? `${buildResultFacets(matches).yearMin}-${buildResultFacets(matches).yearMax}` : "Mixed" },
+        ],
+        timeline: groupedRows(matches || [], (match) => decadeForYear(match.year)),
+        regions: groupedRows(matches || [], (match) => match.place || "Unknown"),
+      };
+    }
+
+    const isSteakQuestion = parsed.requiredGroups?.includes("beef") && /\bsteak\b/.test(parsed.normalized || "");
+    const analyticRows = isSteakQuestion
+      ? priceMatches
+          .map((match) => ({ ...match, adaptiveType: steakType(match.item || match.snippet || match.title) }))
+          .filter((match) => match.adaptiveType)
+      : priceMatches.map((match) => ({ ...match, adaptiveType: match.reasons?.[0] || match.item || "Price row" }));
+    const facets = buildResultFacets(analyticRows);
+
+    return {
+      title: parsed.wantsPrices ? "Price Evidence Browser" : "Evidence Browser",
+      subtitle: isSteakQuestion
+        ? "Steak-like price rows are grouped by cut/type, region, and decade; false-positive fish/rabbit steak rows are excluded from this browser."
+        : "Price rows are grouped by source evidence, region, and decade.",
+      summary: [
+        { label: "Rows", value: analyticRows.length.toLocaleString() },
+        { label: "Date span", value: facets.yearMin && facets.yearMax ? `${facets.yearMin}-${facets.yearMax}` : "Mixed" },
+        { label: "Median raw", value: `$${roundMoney(median(analyticRows.map((match) => match.price?.amount))) || "n/a"}` },
+        { label: "Median today", value: `$${roundMoney(median(analyticRows.map((match) => match.price?.todayUsd))) || "n/a"}` },
+      ],
+      types: groupedRows(analyticRows, (match) => match.adaptiveType),
+      regions: groupedRows(analyticRows, regionLabel),
+      timeline: groupedRows(analyticRows, (match) => decadeForYear(match.year)),
+      warning: analyticRows.length < priceMatches.length ? `${priceMatches.length - analyticRows.length} broad price matches were excluded from the adaptive breakdown.` : "",
+    };
+  }
+
   function answerQuestion(inputs = {}) {
     const question = cleanValue(inputs.question);
     const parsed = parseQuestion(question);
@@ -714,6 +814,7 @@
       answer: body,
       matches,
       facets: buildResultFacets(matches),
+      analysis: buildAdaptiveAnalysis(matches, parsed),
       parsed,
       searched: {
         documents: docs.length,

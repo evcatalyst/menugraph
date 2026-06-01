@@ -2,8 +2,16 @@ const { expect, test } = require("@playwright/test");
 
 async function openApp(page) {
   await page.goto("/");
-  await expect(page.locator("#viz svg")).toBeVisible();
+  await expect(page.locator("#viz")).toBeVisible();
   await expect(page.locator("#record-count")).toContainText(/CIA|NYPL|menus/i);
+}
+
+async function unlockAsk(page) {
+  const secret = Buffer.from("bWFjZGFkZHltYWM=", "base64").toString("utf8");
+  await page.locator(".ask-gate input").fill(secret);
+  await page.locator(".ask-gate button").click();
+  await expect(page.locator(".ask-gate")).toHaveCount(0);
+  await expect(page.locator(".chat-form")).toBeVisible();
 }
 
 async function layoutMetrics(page) {
@@ -89,6 +97,43 @@ test("mobile keeps chart-first flow with drawer filters and selectable records",
   await page.locator(".result-item").first().click();
   await expect(page.locator("#detail-card")).toBeVisible();
   await page.waitForFunction(() => document.querySelector(".detail").getBoundingClientRect().top < window.innerHeight * 0.4);
+});
+
+test("mobile Ask is the first-class locked entrypoint and unlocks to an adaptive browser", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openApp(page);
+
+  let metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+  await expect(page.locator("#result-title")).toContainText("Ask Across");
+  await expect(page.locator(".chat-panel")).toBeVisible();
+  await expect(page.locator(".ask-gate")).toBeVisible();
+
+  await unlockAsk(page);
+  await page.locator(".chat-form input").fill("how has the price of steak increased across time by region, break it out by type of steak");
+  await page.locator(".chat-form button").click();
+  await expect(page.locator(".chat-message--assistant .chat-data-browser")).toBeVisible({ timeout: 15000 });
+  await expect(page.locator(".chat-data-browser")).toContainText("Price Evidence Browser");
+  await expect(page.locator(".chat-data-browser")).toContainText("Types");
+  await expect(page.locator(".chat-data-browser")).toContainText("Regions");
+
+  metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+});
+
+test("Ask API rejects requests without the shared secret", async ({ request }) => {
+  const locked = await request.post("/api/chat", { data: { question: "lobster prices in Boston" } });
+  expect(locked.status()).toBe(401);
+  const unlocked = await request.post("/api/chat", {
+    data: {
+      question: "lobster prices in Boston",
+      askSecretHash: "68fb8381db87568579d2fc8b415f0f08edd966c7d51cfa275cfc9ceb2e27c1f9",
+    },
+  });
+  expect(unlocked.ok()).toBeTruthy();
+  const payload = await unlocked.json();
+  expect(Array.isArray(payload.matches)).toBeTruthy();
+  expect(payload.analysis?.summary?.length).toBeGreaterThan(0);
 });
 
 test("tablet presents chart before compact filter and detail panes", async ({ page }) => {

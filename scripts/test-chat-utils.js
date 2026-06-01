@@ -121,6 +121,7 @@ assert(!answer.matches.some((match) => match.uid === "nypl:2"), "mushroom match 
 assert(answer.matches.filter((match) => /beef stew with carrots and potatoes/i.test(match.item || "")).length === 1, "duplicate dish rows should collapse");
 assert(answer.matches.some((match) => Number(match.duplicateCount || 0) > 1), "collapsed duplicate count should be retained");
 assert(answer.facets?.timeline?.length, "answer should include timeline facets");
+assert(answer.analysis?.timeline?.length, "answer should include adaptive analysis timeline");
 
 const priceAnswer = chat.answerQuestion({
   question: "lobster prices in Boston before 1920",
@@ -128,5 +129,6 @@ const priceAnswer = chat.answerQuestion({
   prices,
 });
 assert(priceAnswer.matches.some((match) => match.uid === "nypl:3" && match.kind === "price"), "expected lobster price match");
+assert(priceAnswer.analysis?.summary?.length, "price answer should include adaptive data browser summary");
 
 console.log("chat-utils tests passed");

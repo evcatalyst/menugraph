@@ -3,12 +3,15 @@ const state = {
   fullMenus: [],
   fullRecordLabel: "",
   visibleMenus: [],
-  activeLens: "time",
+  activeLens: "chat",
   archiveMode: false,
   ontology: null,
   prices: null,
   chatMessages: [],
   chatBusy: false,
+  askUnlocked: false,
+  askSecretHash: "",
+  askError: "",
   dateEstimates: null,
   dateEstimateByMenu: new Map(),
   includeEstimatedDates: true,
@@ -37,6 +40,8 @@ const state = {
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 const DEFAULT_REMOTE_CHAT_API_BASE = "https://gitbrain-menugraph.netlify.app";
+const ASK_SECRET_HASH = "68fb8381db87568579d2fc8b415f0f08edd966c7d51cfa275cfc9ceb2e27c1f9";
+const ASK_SECRET_STORAGE_KEY = "menugraph:ask-secret-hash:v1";
 
 const els = {
   recordCount: document.querySelector("#record-count"),
@@ -109,6 +114,14 @@ const chatSuggestions = window.MenuGraphChat?.suggestedQuestions || [
   "estimated 1980s French restaurants with desserts",
 ];
 
+try {
+  state.askSecretHash = sessionStorage.getItem(ASK_SECRET_STORAGE_KEY) || "";
+  state.askUnlocked = state.askSecretHash === ASK_SECRET_HASH;
+} catch (error) {
+  state.askSecretHash = "";
+  state.askUnlocked = false;
+}
+
 function titleCase(value) {
   return String(value || "")
     .split(/\s+/)
@@ -119,6 +132,35 @@ function titleCase(value) {
 function compact(value, fallback = "Unknown") {
   const text = String(value || "").replace(/\s+/g, " ").trim();
   return text || fallback;
+}
+
+async function sha256Hex(value) {
+  if (!window.crypto?.subtle || !window.TextEncoder) throw new Error("This browser cannot verify the Ask secret.");
+  const bytes = new TextEncoder().encode(String(value || ""));
+  const digest = await window.crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function unlockAsk(secret) {
+  const hash = await sha256Hex(secret);
+  if (hash !== ASK_SECRET_HASH) {
+    state.askError = "Shared secret did not match.";
+    state.askUnlocked = false;
+    state.askSecretHash = "";
+    throw new Error(state.askError);
+  }
+  state.askError = "";
+  state.askUnlocked = true;
+  state.askSecretHash = hash;
+  try {
+    sessionStorage.setItem(ASK_SECRET_STORAGE_KEY, hash);
+  } catch (error) {
+    // Session storage can be unavailable in restrictive browser modes; the current in-memory unlock still works.
+  }
+}
+
+function askCredentialPayload() {
+  return state.askUnlocked && state.askSecretHash ? { askSecretHash: state.askSecretHash } : {};
 }
 
 function menuKey(menu) {
@@ -626,7 +668,7 @@ function filteredMenusWithoutFacet() {
 }
 
 async function requestChatAnswer(question) {
-  const payload = { question };
+  const payload = { question, ...askCredentialPayload() };
   try {
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -663,6 +705,13 @@ async function requestChatAnswer(question) {
 async function askChat(question) {
   const text = compact(question, "");
   if (!text || state.chatBusy) return;
+  if (!state.askUnlocked) {
+    state.activeLens = "chat";
+    activateLensButton("chat");
+    state.askError = "Enter the shared secret to use Ask MenuGraph.";
+    renderViz();
+    return;
+  }
   state.activeLens = "chat";
   activateLensButton("chat");
   state.chatMessages.push({ role: "user", content: text });
@@ -681,6 +730,8 @@ async function askChat(question) {
       content: answer.answer,
       matches: answer.matches || [],
       facets: answer.facets || null,
+      analysis: answer.analysis || null,
+      parsed: answer.parsed || null,
       engine: answer.engine || "local-retrieval",
       model: answer.model,
       error: answer.llmError,
@@ -719,12 +770,17 @@ function renderChatPanel() {
   const header = document.createElement("div");
   header.className = "chat-header";
   const title = document.createElement("div");
-  title.innerHTML = "<strong>Ask MenuGraph</strong><span>Queries run across menus, dish summaries, price rows, places, and date estimates.</span>";
+  title.innerHTML = "<strong>Ask MenuGraph</strong><span>Start with a natural-language question; the browser adapts to prices, places, time, dishes, and source evidence.</span>";
   const status = document.createElement("span");
   status.className = "chat-engine";
   const lastAssistant = [...state.chatMessages].reverse().find((message) => message.role === "assistant");
-  status.textContent = lastAssistant?.engine === "grok" ? `Grok ${lastAssistant.model || ""}`.trim() : "Static retrieval";
+  status.textContent = state.askUnlocked ? (lastAssistant?.engine === "grok" ? `Grok ${lastAssistant.model || ""}`.trim() : "Static retrieval") : "Locked";
   header.append(title, status);
+
+  if (!state.askUnlocked) {
+    panel.append(header, renderAskGate());
+    return panel;
+  }
 
   const form = document.createElement("form");
   form.className = "chat-form";
@@ -781,6 +837,59 @@ function renderChatPanel() {
   return panel;
 }
 
+function renderAskGate() {
+  const gate = document.createElement("form");
+  gate.className = "ask-gate";
+  gate.innerHTML = `
+    <div>
+      <strong>Unlock Ask</strong>
+      <span>Ask is a shared workspace entrypoint. Enter the shared secret once per session.</span>
+    </div>
+  `;
+  const row = document.createElement("div");
+  row.className = "ask-gate__row";
+  const input = document.createElement("input");
+  input.type = "password";
+  input.autocomplete = "current-password";
+  input.placeholder = "Shared secret";
+  const button = document.createElement("button");
+  button.type = "submit";
+  button.textContent = "Enter";
+  row.append(input, button);
+  gate.appendChild(row);
+  if (state.askError) {
+    const error = document.createElement("small");
+    error.className = "chat-warning";
+    error.textContent = state.askError;
+    gate.appendChild(error);
+  }
+  gate.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    button.disabled = true;
+    button.textContent = "Checking";
+    try {
+      await unlockAsk(input.value);
+      setActivity({
+        label: "Ask Unlocked",
+        title: "Ask MenuGraph is ready",
+        detail: "Questions now search the committed menu, dish, price, place, and date indexes.",
+        progress: 1,
+      });
+    } catch (error) {
+      setActivity({
+        label: "Ask Locked",
+        title: "Shared secret required",
+        detail: error.message,
+        progress: 1,
+      });
+    } finally {
+      renderViz();
+    }
+  });
+  requestAnimationFrame(() => input.focus({ preventScroll: true }));
+  return gate;
+}
+
 function renderChatMessage(message) {
   const wrapper = document.createElement("div");
   wrapper.className = `chat-message chat-message--${message.role}`;
@@ -798,6 +907,7 @@ function renderChatMessage(message) {
 
   if (message.role === "assistant" && message.matches?.length) {
     wrapper.appendChild(renderChatOverview(message));
+    if (message.analysis) wrapper.appendChild(renderAdaptiveBrowser(message.analysis));
     const results = document.createElement("div");
     results.className = "chat-results";
     message.matches.slice(0, 36).forEach((match) => results.appendChild(renderChatResult(match)));
@@ -892,6 +1002,65 @@ function renderChatOverview(message) {
     overview.appendChild(placeRow);
   }
   return overview;
+}
+
+function renderAdaptiveBrowser(analysis) {
+  const browser = document.createElement("div");
+  browser.className = "chat-data-browser";
+  const heading = document.createElement("div");
+  heading.className = "chat-data-browser__heading";
+  const title = document.createElement("strong");
+  title.textContent = analysis.title || "Adaptive Data Browser";
+  const note = document.createElement("span");
+  note.textContent = analysis.subtitle || "Breakdowns are computed from the retrieved evidence rows.";
+  heading.append(title, note);
+  browser.appendChild(heading);
+
+  if (analysis.summary?.length) {
+    const summary = document.createElement("div");
+    summary.className = "chat-data-browser__summary";
+    analysis.summary.slice(0, 4).forEach((item) => {
+      const card = document.createElement("div");
+      card.className = "chat-summary-card";
+      card.innerHTML = `<span>${item.label}</span><strong>${item.value}</strong>`;
+      summary.appendChild(card);
+    });
+    browser.appendChild(summary);
+  }
+
+  const sections = [
+    ["Types", analysis.types],
+    ["Regions", analysis.regions],
+    ["Timeline", analysis.timeline],
+  ].filter(([, rows]) => rows?.length);
+
+  sections.forEach(([label, rows]) => {
+    const section = document.createElement("section");
+    section.className = "chat-data-section";
+    const sectionTitle = document.createElement("h3");
+    sectionTitle.textContent = label;
+    section.appendChild(sectionTitle);
+    const max = Math.max(...rows.map((row) => row.count || 0), 1);
+    rows.slice(0, 12).forEach((row) => {
+      const item = document.createElement("div");
+      item.className = "chat-data-row";
+      item.style.setProperty("--bar", `${Math.max(6, ((row.count || 0) / max) * 100)}%`);
+      const metric = [row.count ? `${row.count} rows` : "", row.medianTodayUsd ? `$${row.medianTodayUsd} today` : "", row.medianRaw ? `$${row.medianRaw} raw` : ""]
+        .filter(Boolean)
+        .join(" / ");
+      item.innerHTML = `<span>${row.label}</span><strong>${metric}</strong>`;
+      section.appendChild(item);
+    });
+    browser.appendChild(section);
+  });
+
+  if (analysis.warning) {
+    const warning = document.createElement("small");
+    warning.className = "chat-warning";
+    warning.textContent = analysis.warning;
+    browser.appendChild(warning);
+  }
+  return browser;
 }
 
 function renderChatResult(match) {

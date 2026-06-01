@@ -1,6 +1,8 @@
 const assert = require("assert");
 const { handler } = require("../netlify/functions/chat");
 
+const ASK_HASH = "68fb8381db87568579d2fc8b415f0f08edd966c7d51cfa275cfc9ceb2e27c1f9";
+
 async function run() {
   const savedGrok = process.env.GROK_API_KEY;
   const savedXai = process.env.XAI_API_KEY;
@@ -14,9 +16,15 @@ async function run() {
     const missing = await handler({ httpMethod: "POST", body: JSON.stringify({}) });
     assert.strictEqual(missing.statusCode, 400, "missing question should return 400");
 
-    const answered = await handler({
+    const locked = await handler({
       httpMethod: "POST",
       body: JSON.stringify({ question: "lobster prices in Boston" }),
+    });
+    assert.strictEqual(locked.statusCode, 401, "chat should require the shared Ask secret");
+
+    const answered = await handler({
+      httpMethod: "POST",
+      body: JSON.stringify({ question: "lobster prices in Boston", askSecretHash: ASK_HASH }),
     });
     assert.strictEqual(answered.statusCode, 200, "valid question should return 200");
     const payload = JSON.parse(answered.body);

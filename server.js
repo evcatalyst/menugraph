@@ -1,5 +1,6 @@
 const http = require("http");
 const https = require("https");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const chatApi = require("./docs/chat-utils");
@@ -15,6 +16,7 @@ const CACHE_TTL_MS = 1000 * 60 * 30;
 const PAGE_SIZE = 1024;
 const ONTOLOGY_CACHE_PATH = path.join(__dirname, ".cache", "ontology.json");
 const DATA_DIR = path.join(PUBLIC_DIR, "data");
+const DEFAULT_ASK_SECRET_HASH = "68fb8381db87568579d2fc8b415f0f08edd966c7d51cfa275cfc9ceb2e27c1f9";
 
 const fieldBundles = [
   "title!date!restau!typea!decade",
@@ -171,6 +173,30 @@ function splitTerms(value) {
 function cleanValue(value) {
   if (Array.isArray(value)) return value.join("; ");
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function sha256Hex(value) {
+  return crypto.createHash("sha256").update(String(value || "")).digest("hex");
+}
+
+function timingSafeEqualText(a, b) {
+  const left = Buffer.from(String(a || ""), "utf8");
+  const right = Buffer.from(String(b || ""), "utf8");
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+function askSecretHash() {
+  if (process.env.MENUGRAPH_ASK_SECRET_HASH) return cleanValue(process.env.MENUGRAPH_ASK_SECRET_HASH);
+  if (process.env.MENUGRAPH_ASK_SECRET) return sha256Hex(process.env.MENUGRAPH_ASK_SECRET);
+  return DEFAULT_ASK_SECRET_HASH;
+}
+
+function hasValidAskSecret(body, headers = {}) {
+  const expected = askSecretHash();
+  const providedHash = cleanValue(body.askSecretHash || headers["x-menugraph-ask-secret-hash"]);
+  if (providedHash && timingSafeEqualText(providedHash, expected)) return true;
+  const providedSecret = cleanValue(body.askSecret || body.secret || headers["x-menugraph-ask-secret"]);
+  return Boolean(providedSecret && timingSafeEqualText(sha256Hex(providedSecret), expected));
 }
 
 function coerceRecord(record) {
@@ -895,6 +921,7 @@ async function answerChat(req, url) {
   const body = req.method === "GET" ? {} : await readJsonBody(req);
   const question = cleanValue(body.question || body.q || url.searchParams.get("q") || url.searchParams.get("question"));
   if (!question) return { error: "Chat question is required" };
+  if (!hasValidAskSecret(body, req.headers || {})) return { error: "Ask secret required", statusCode: 401 };
 
   const [menus, ontology, prices, dateEstimates, analytics] = await Promise.all([
     readStaticJson("menus.json"),
@@ -986,7 +1013,7 @@ async function handleApi(req, res, url) {
 
     if (url.pathname === "/api/chat") {
       const answer = await answerChat(req, url);
-      sendJson(res, answer.error ? answer : answer, answer.error ? 400 : 200);
+      sendJson(res, answer.error ? answer : answer, answer.statusCode || (answer.error ? 400 : 200));
       return;
     }
 

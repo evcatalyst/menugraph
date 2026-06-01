@@ -4,6 +4,7 @@
   const PAGE_SIZE = 1024;
   const CACHE_TTL_MS = 1000 * 60 * 30;
   const ONTOLOGY_STORAGE_KEY = "menugraph:ontology:v2";
+  const ASK_SECRET_HASH = "68fb8381db87568579d2fc8b415f0f08edd966c7d51cfa275cfc9ceb2e27c1f9";
 
   const fieldBundles = [
     "title!date!restau!typea!decade",
@@ -675,6 +676,7 @@
     const body = requestBody(options);
     const question = cleanValue(body.question || body.q);
     if (!question) throw new Error("Chat question is required");
+    if (cleanValue(body.askSecretHash) !== ASK_SECRET_HASH) throw new Error("Ask secret required");
     const [menus, ontology, prices, dateEstimates, analytics] = await Promise.all([
       getMenus({ refresh: false }),
       getOntology({ refresh: false }).catch(() => null),
