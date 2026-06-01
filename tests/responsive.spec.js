@@ -204,6 +204,46 @@ test("mobile Ask is the first-class locked entrypoint and unlocks to an adaptive
   expectNoHorizontalOverflow(metrics);
 });
 
+test("mobile Ask unlock state keeps prompt suggestions inside the panel", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await openApp(page);
+  await expect(page.locator("#result-title")).toContainText("Ask Across");
+  await unlockAsk(page);
+  await expect(page.locator(".chat-suggestions button").last()).toBeVisible();
+
+  const metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+
+  const askBounds = await page.evaluate(() => {
+    const bounds = (selector) => {
+      const el = document.querySelector(selector);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      return {
+        top: Math.round(rect.top),
+        bottom: Math.round(rect.bottom),
+      };
+    };
+    const suggestions = document.querySelectorAll(".chat-suggestions button");
+    const lastSuggestion = suggestions[suggestions.length - 1]?.getBoundingClientRect();
+    return {
+      canvas: bounds(".canvas-panel"),
+      panel: bounds(".chat-panel"),
+      results: bounds(".results-strip"),
+      lastSuggestion: lastSuggestion
+        ? {
+            top: Math.round(lastSuggestion.top),
+            bottom: Math.round(lastSuggestion.bottom),
+          }
+        : null,
+    };
+  });
+
+  expect(askBounds.lastSuggestion.bottom).toBeLessThanOrEqual(askBounds.canvas.bottom + 2);
+  expect(askBounds.panel.bottom).toBeLessThanOrEqual(askBounds.canvas.bottom + 2);
+  expect(askBounds.results.top).toBeGreaterThanOrEqual(askBounds.canvas.bottom - 2);
+});
+
 test("Ask API rejects requests without the shared secret", async ({ request }) => {
   const locked = await request.post("/api/chat", { data: { question: "lobster prices in Boston" } });
   expect(locked.status()).toBe(401);
