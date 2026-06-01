@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "build:data": "node scripts/build-static-data.js --text=25 --prices=180",
+    "prepare:nypl": "node scripts/prepare-nypl-cache.js",
+    "build:data": "node scripts/build-static-data.js --text=300 --prices=600",
+    "build:data:sample": "node scripts/build-static-data.js --text=25 --prices=180",
+    "build:data:full": "node scripts/build-static-data.js --text=all --prices=all",
     "test:e2e": "playwright test",
-    "test": "node --check server.js && node --check docs/multisource.js && node --check docs/ontology.js && node --check docs/price-utils.js && node --check docs/date-estimates.js && node --check docs/chat-utils.js && node --check docs/archive-client.js && node --check docs/app.js && node --check netlify/functions/chat.js && node --check scripts/nypl-source.js && node scripts/test-multisource.js && node scripts/test-price-utils.js && node scripts/test-date-estimates.js && node scripts/test-chat-utils.js && node scripts/test-netlify-chat.js"
+    "test": "node --check server.js && node --check docs/multisource.js && node --check docs/ontology.js && node --check docs/price-utils.js && node --check docs/date-estimates.js && node --check docs/chat-utils.js && node --check docs/archive-client.js && node --check docs/app.js && node --check netlify/functions/chat.js && node --check scripts/nypl-source.js && node --check scripts/prepare-nypl-cache.js && node scripts/test-multisource.js && node scripts/test-price-utils.js && node scripts/test-date-estimates.js && node scripts/test-chat-utils.js && node scripts/test-netlify-chat.js"
   },
   "engines": {
     "node": ">=20"

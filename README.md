@@ -56,6 +56,8 @@ Regenerate the committed Pages snapshot with:
 npm run build:data
 ```
 
+For a quick local smoke build, use `npm run build:data:sample`. For the full published index, use `npm run prepare:nypl` followed by `npm run build:data:full`.
+
 ## Netlify
 
 `netlify.toml` is configured to publish `docs/` and serve `POST /api/chat` through `netlify/functions/chat.js`.
@@ -71,14 +73,14 @@ Use these settings when creating the Netlify site:
 The same Ask lens URL path works in all modes:
 
 - Netlify: `/api/chat` rewrites to the serverless function and can use Grok privately.
-- GitHub Pages: `/api/chat` is unavailable, so the browser falls back to static retrieval.
+- GitHub Pages: the browser first calls the Netlify chat function so the key stays private, then falls back to static retrieval if the function is unavailable.
 - Local Node server: `/api/chat` is served by `server.js`.
 
 ## Data Strategy
 
 The CIA collection is exposed through CONTENTdm's read-only web services. MenuGraph uses `dmQuery` to page through all public records, then merges several five-field metadata passes because CONTENTdm limits each query response to five returned fields. Item detail is loaded only when a user selects a record.
 
-NYPL What's on the Menu? is ingested from the public CSV export in `.cache/nypl/extract` when available. The raw CSVs are not committed; the build writes bounded derived artifacts:
+NYPL What's on the Menu? is ingested from the public CSV export in `.cache/nypl/extract` when available. `npm run prepare:nypl` downloads the retired NYPL export into that ignored cache. The raw CSVs are not committed; the build writes bounded derived artifacts:
 
 - `docs/data/menus.json` for normalized CIA and NYPL menu records with stable IDs such as `cia:1812` and `nypl:21075`.
 - `docs/data/matches.json` for explainable cross-source venue candidates.
@@ -87,11 +89,15 @@ NYPL What's on the Menu? is ingested from the public CSV export in `.cache/nypl/
 
 The Pages build reads committed snapshots from `docs/data/menus.json`, `docs/data/ontology.json`, `docs/data/matches.json`, and related static artifacts, then tries live CONTENTdm calls only for enhancement paths such as full record OCR. The local Node server remains useful as a development proxy because command-line clients and some browser contexts reject the archive certificate chain, but it is not required for hosting the core interface.
 
-Price trends are generated into `docs/data/prices.json` from a stratified OCR transcript sample. The build also snapshots reference inputs under `docs/data/reference/`: BLS CPI-U for U.S. today-value estimates, World Bank country CPI for local relative indexes, a Federal Reserve H.10 metadata placeholder for future FX conversion, and curated context events for subtle historical caveats. These values are estimates, not exact historical purchasing-power claims.
+Price trends are generated into `docs/data/prices.json` from OCR transcripts and NYPL structured item rows. The full data build reuses transcript text between ontology, price, and date-estimate steps so GitHub Actions does not crawl the same CIA records twice. The build also snapshots reference inputs under `docs/data/reference/`: BLS CPI-U for U.S. today-value estimates, World Bank country CPI for local relative indexes, a Federal Reserve H.10 metadata placeholder for future FX conversion, and curated context events for subtle historical caveats. These values are estimates, not exact historical purchasing-power claims.
 
 ## Ontology Index
 
-MenuGraph builds an instant metadata-derived ontology from titles, places, cuisine terms, menu types, and collection metadata. The committed Pages ontology includes a small OCR-backed transcript sample. The in-app `Index Text` control can enrich that index further when the browser can reach the live CONTENTdm item endpoints.
+MenuGraph builds an instant metadata-derived ontology from titles, places, cuisine terms, menu types, and collection metadata. The committed Pages ontology can also include OCR-backed transcript evidence generated at build time.
+
+In public deployments the toolbar shows `Published Index`; it does not crawl CONTENTdm from the visitor's browser. On `localhost`, the same control becomes `Rebuild Index` and calls the local Node server endpoint for development sampling.
+
+`.github/workflows/sync-data.yml` runs weekly and can also be started manually from GitHub Actions. It downloads the ignored NYPL CSV cache, rebuilds static JSON with `npm run build:data:full`, runs tests, and commits changed snapshots back to `main`. GitHub Pages and Netlify can then redeploy from the committed data.
 
 Optional local server endpoints:
 

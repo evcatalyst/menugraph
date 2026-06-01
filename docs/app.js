@@ -35,6 +35,9 @@ const state = {
   detailCache: new Map(),
 };
 
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+const DEFAULT_REMOTE_CHAT_API_BASE = "https://gitbrain-menugraph.netlify.app";
+
 const els = {
   recordCount: document.querySelector("#record-count"),
   searchInput: document.querySelector("#search-input"),
@@ -254,6 +257,26 @@ async function getJson(url, options = {}) {
   return response.json();
 }
 
+async function fetchJsonDirect(url, options = {}) {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: response.statusText }));
+    throw new Error(error.error || response.statusText);
+  }
+  return response.json();
+}
+
+function isLocalHost() {
+  return LOCAL_HOSTS.has(window.location.hostname);
+}
+
+function remoteChatApiBase() {
+  const explicit = window.MENUGRAPH_CHAT_API_BASE || window.MenuGraphConfig?.chatApiBase;
+  if (explicit) return String(explicit).replace(/\/+$/, "");
+  if (window.location.hostname.endsWith("github.io")) return DEFAULT_REMOTE_CHAT_API_BASE;
+  return "";
+}
+
 async function loadMenus(refresh = false) {
   els.recordCount.textContent = refresh ? "Refreshing archive..." : "Loading archive...";
   setActivity({
@@ -313,6 +336,7 @@ async function loadOntology(refresh = false) {
   const ontology = await getJson(`/api/ontology${refresh ? "?refresh=1" : ""}`);
   state.ontology = ontology;
   updateOntologyStatus(ontology.job);
+  configureOntologyBuildButton();
   renderOntologyControls();
   renderInsights();
   describeOntologyLoaded(ontology);
@@ -613,7 +637,22 @@ async function requestChatAnswer(question) {
       return response.json();
     }
   } catch (error) {
-    // Static GitHub Pages has no /api/chat route; fall through to the in-browser index.
+    // Static hosts may not have a same-origin API route.
+  }
+  const remoteBase = remoteChatApiBase();
+  if (remoteBase) {
+    try {
+      const response = await fetch(`${remoteBase}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
+        return response.json();
+      }
+    } catch (error) {
+      // Fall through to the committed static index when the remote function is unavailable.
+    }
   }
   if (window.MenuGraphArchive?.handle) {
     return window.MenuGraphArchive.handle("/api/chat", { body: payload });
@@ -1592,43 +1631,58 @@ function updateOntologyStatus(job = state.ontology?.job) {
   els.ontologyStatus.textContent = transcriptRecords ? `${transcriptRecords} text` : "metadata";
 }
 
-async function buildOntologyTextIndex() {
-  els.ontologyBuild.disabled = true;
-  els.ontologyBuild.textContent = "Indexing...";
-  if (window.MenuGraphArchive?.buildTextIndex) {
-    try {
-      const ontology = await window.MenuGraphArchive.buildTextIndex({
-        limit: 300,
-        onProgress: updateOntologyStatus,
-      });
-      state.ontology = ontology;
-      updateOntologyStatus(ontology.job);
-      renderOntologyControls();
-      renderInsights();
-      describeOntologyLoaded(ontology);
-      if (state.activeLens === "ontology") renderViz();
-    } finally {
-      els.ontologyBuild.disabled = false;
-      els.ontologyBuild.textContent = "Index Text";
-    }
+function configureOntologyBuildButton() {
+  if (!els.ontologyBuild) return;
+  if (isLocalHost()) {
+    els.ontologyBuild.disabled = false;
+    els.ontologyBuild.textContent = "Rebuild Index";
+    els.ontologyBuild.title = "Rebuild the transcript ontology through the local Node server.";
     return;
   }
-  const status = await getJson("/api/ontology/build?limit=300");
-  updateOntologyStatus(status);
-  startOntologyPolling();
+  els.ontologyBuild.disabled = true;
+  els.ontologyBuild.textContent = "Published Index";
+  els.ontologyBuild.title = "The transcript index is generated during data sync and published as static JSON.";
 }
 
-function startOntologyPolling() {
+async function buildOntologyTextIndex() {
+  if (!isLocalHost()) {
+    configureOntologyBuildButton();
+    setActivity({
+      label: "Published Index",
+      title: "Using committed transcript index",
+      detail: "Public deployments read the generated ontology snapshot; transcript crawling is handled by the build workflow.",
+      progress: 1,
+    });
+    return;
+  }
+  els.ontologyBuild.disabled = true;
+  els.ontologyBuild.textContent = "Indexing...";
+  const status = await fetchJsonDirect("/api/ontology/build?limit=300");
+  updateOntologyStatus(status);
+  startOntologyPolling(true);
+}
+
+function startOntologyPolling(useDirectServer = false) {
   clearInterval(state.ontologyPoll);
   state.ontologyPoll = setInterval(async () => {
-    const next = await getJson("/api/ontology/status");
+    const next = useDirectServer ? await fetchJsonDirect("/api/ontology/status") : await getJson("/api/ontology/status");
     updateOntologyStatus(next);
     if (!next.active) {
       clearInterval(state.ontologyPoll);
       state.ontologyPoll = null;
       els.ontologyBuild.disabled = false;
-      els.ontologyBuild.textContent = "Index Text";
-      await loadOntology();
+      configureOntologyBuildButton();
+      if (useDirectServer) {
+        const ontology = await fetchJsonDirect("/api/ontology");
+        state.ontology = ontology;
+        updateOntologyStatus(ontology.job);
+        renderOntologyControls();
+        renderInsights();
+        describeOntologyLoaded(ontology);
+        if (state.activeLens === "ontology") renderViz();
+      } else {
+        await loadOntology();
+      }
     }
   }, 1500);
 }
@@ -1830,6 +1884,7 @@ function bindEvents() {
     if (menu) selectMenu(menuKey(menu));
   });
 
+  configureOntologyBuildButton();
   els.refreshButton.addEventListener("click", () => loadMenus(true).catch(showFatal));
   els.ontologyBuild.addEventListener("click", () => buildOntologyTextIndex().catch(showFatal));
   window.addEventListener(

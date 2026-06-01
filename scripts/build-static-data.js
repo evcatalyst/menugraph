@@ -83,7 +83,7 @@ const contextEvents = [
 
 function argValue(name) {
   const prefix = `--${name}=`;
-  const match = process.argv.find((arg) => arg.startsWith(prefix));
+  const match = process.argv.filter((arg) => arg.startsWith(prefix)).pop();
   return match ? match.slice(prefix.length) : null;
 }
 
@@ -282,7 +282,7 @@ async function mapLimit(items, limit, mapper) {
   return results;
 }
 
-async function buildPrices(menus, references, rawLimit) {
+async function buildPrices(menus, references, rawLimit, existingTextsById = {}) {
   const limit = rawLimit === "all" ? "all" : Math.max(Number(rawLimit) || 180, 25);
   const selected = selectOntologySample(menus, limit);
   const textsById = {};
@@ -290,7 +290,12 @@ async function buildPrices(menus, references, rawLimit) {
   console.log(`Extracting prices from ${selected.length.toLocaleString()} transcript samples...`);
   await mapLimit(selected, 4, async (menu) => {
     try {
-      const text = await fetchMenuText(menu.id);
+      const text =
+        existingTextsById[menu.id] ||
+        existingTextsById[String(menu.id)] ||
+        existingTextsById[menu.uid] ||
+        existingTextsById[String(menu.uid || "")] ||
+        (await fetchMenuText(menu.id));
       if (text) textsById[menu.id] = text;
     } catch (error) {
       // OCR availability is uneven; skipped menus still leave the static build usable.
@@ -346,7 +351,7 @@ async function buildMultiSourceTextOntology(menus, rawLimit) {
   await mapLimit(selected, 4, async (menu) => {
     try {
       const text = await fetchMenuText(menu.id);
-      if (text) textById.set(menu.uid || menu.id, text);
+      if (text) textById.set(menu.id, text);
     } catch (error) {
       // Keep NYPL metadata and available CIA records in the ontology even when OCR misses.
     }
@@ -481,7 +486,7 @@ async function main() {
 
   const references = await buildReferences();
   const ciaPriceMenus = publicMenusPayload.menus.filter((menu) => !menu.sourceKey || menu.sourceKey === "cia");
-  const priceBuild = await buildPrices(ciaPriceMenus, references, argValue("prices"));
+  const priceBuild = await buildPrices(ciaPriceMenus, references, argValue("prices"), ontology?.recordTexts || {});
   const priceSnapshot = mergeNyplPriceRecords(priceBuild.snapshot, nyplPriceRecords, references);
   await fs.writeFile(path.join(DATA_DIR, "prices.json"), JSON.stringify(priceSnapshot), "utf8");
   console.log(`Wrote ${priceSnapshot.records.length.toLocaleString()} price observations.`);
