@@ -95,6 +95,7 @@ const els = {
   filterToggle: document.querySelector("#filter-toggle"),
   filterClose: document.querySelector("#filter-close"),
   filterBackdrop: document.querySelector("#filter-backdrop"),
+  canvasPanel: document.querySelector(".canvas-panel"),
   detailPanel: document.querySelector(".detail"),
 };
 
@@ -1093,6 +1094,9 @@ function svgEl(name, attrs = {}) {
 }
 
 function renderViz() {
+  document.body.dataset.activeLens = state.activeLens;
+  document.body.classList.toggle("chat-expanded", state.activeLens === "chat" && state.chatMessages.length > 0);
+  if (els.canvasPanel) els.canvasPanel.dataset.lens = state.activeLens;
   if (state.activeLens === "chat") {
     removeTooltip();
     lensCopy();

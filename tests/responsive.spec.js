@@ -50,6 +50,7 @@ async function layoutMetrics(page) {
         results: box(".results-strip"),
         topbar: box(".topbar"),
         toolbar: box(".canvas-toolbar"),
+        chatDataBrowser: box(".chat-data-browser"),
       },
     };
   });
@@ -65,6 +66,11 @@ function expectDesktopWorkbenchFitsPage(metrics) {
 
 function expectNoResultClipping(metrics) {
   expect(metrics.resultScroll.scrollHeight).toBeLessThanOrEqual(metrics.resultScroll.clientHeight + 2);
+}
+
+function expectBoxWithinViewport(box, viewport, allowance = 1) {
+  expect(box.x).toBeGreaterThanOrEqual(-allowance);
+  expect(box.right).toBeLessThanOrEqual(viewport.width + allowance);
 }
 
 test("mobile keeps chart-first flow with drawer filters and selectable records", async ({ page }) => {
@@ -134,6 +140,26 @@ test("Ask API rejects requests without the shared secret", async ({ request }) =
   const payload = await unlocked.json();
   expect(Array.isArray(payload.matches)).toBeTruthy();
   expect(payload.analysis?.summary?.length).toBeGreaterThan(0);
+});
+
+test("medium desktop Ask evidence browser is not cropped", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await openApp(page);
+
+  await unlockAsk(page);
+  await page.locator(".chat-form input").fill("how has the price of steak increased across time by region, break it out by type of steak");
+  await page.locator(".chat-form button").click();
+  await expect(page.locator(".chat-data-browser")).toBeVisible({ timeout: 15000 });
+
+  const metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+  expectBoxWithinViewport(metrics.boxes.filters, metrics.viewport);
+  expectBoxWithinViewport(metrics.boxes.canvas, metrics.viewport);
+  expectBoxWithinViewport(metrics.boxes.results, metrics.viewport);
+  expect(metrics.boxes.detail.x).toBeGreaterThanOrEqual(metrics.boxes.canvas.x - 1);
+  expect(metrics.boxes.detail.y).toBeGreaterThan(metrics.boxes.results.y);
+  expect(metrics.boxes.chatDataBrowser.bottom).toBeLessThanOrEqual(metrics.boxes.canvas.bottom + 2);
+  expect(metrics.boxes.chatDataBrowser.right).toBeLessThanOrEqual(metrics.boxes.canvas.right + 2);
 });
 
 test("tablet presents chart before compact filter and detail panes", async ({ page }) => {
