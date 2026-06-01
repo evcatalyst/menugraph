@@ -348,6 +348,14 @@ function remoteChatApiBase() {
   return "";
 }
 
+function hasRemoteChatApiOverride() {
+  return Boolean(window.MENUGRAPH_CHAT_API_BASE || window.MenuGraphConfig?.chatApiBase);
+}
+
+function shouldUseRemoteChatFirst() {
+  return Boolean(remoteChatApiBase() && (hasRemoteChatApiOverride() || window.location.hostname.endsWith("github.io")));
+}
+
 async function loadMenus(refresh = false) {
   els.recordCount.textContent = refresh ? "Refreshing archive..." : "Loading archive...";
   setActivity({
@@ -699,22 +707,15 @@ function filteredMenusWithoutFacet() {
 
 async function requestChatAnswer(question) {
   const payload = { question, ...askCredentialPayload() };
-  try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
-      return response.json();
-    }
-  } catch (error) {
-    // Static hosts may not have a same-origin API route.
-  }
   const remoteBase = remoteChatApiBase();
-  if (remoteBase) {
+  const remoteUrl = remoteBase ? `${remoteBase}/api/chat` : "";
+  const endpoints = shouldUseRemoteChatFirst()
+    ? [remoteUrl, ...(window.location.hostname.endsWith("github.io") ? [] : ["/api/chat"])]
+    : ["/api/chat", ...(remoteUrl ? [remoteUrl] : [])];
+  for (const endpoint of endpoints) {
+    if (!endpoint) continue;
     try {
-      const response = await fetch(`${remoteBase}/api/chat`, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -723,7 +724,7 @@ async function requestChatAnswer(question) {
         return response.json();
       }
     } catch (error) {
-      // Fall through to the committed static index when the remote function is unavailable.
+      // Fall through to the next endpoint or the committed static index.
     }
   }
   if (window.MenuGraphArchive?.handle) {
@@ -3311,7 +3312,7 @@ function bindEvents() {
         setActivity({
           label: "Ask Lens",
           title: "Natural-language corpus questions",
-          detail: "Static retrieval works on GitHub Pages; a local server can add Grok synthesis when GROK_API_KEY or XAI_API_KEY is set.",
+          detail: "GitHub Pages uses the private Netlify Ask function for Grok synthesis, then falls back to static retrieval if the function is unavailable.",
           progress: 1,
         });
       }

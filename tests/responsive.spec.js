@@ -259,6 +259,51 @@ test("Ask API rejects requests without the shared secret", async ({ request }) =
   expect(payload.analysis?.summary?.length).toBeGreaterThan(0);
 });
 
+test("Ask uses a configured remote Grok endpoint before same-origin fallback", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const chatRequests = [];
+  await page.addInitScript(() => {
+    window.MenuGraphConfig = { chatApiBase: "https://remote-chat.test" };
+  });
+  await page.route("**/api/chat", async (route) => {
+    const url = route.request().url();
+    chatRequests.push(url);
+    if (url === "https://remote-chat.test/api/chat") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json; charset=utf-8",
+        body: JSON.stringify({
+          engine: "grok",
+          model: "grok-test",
+          answer: "Remote Grok answer",
+          matches: [],
+          facets: {},
+          analysis: null,
+          chartRecommendation: null,
+          caveats: [],
+          parsed: null,
+          searched: { documents: 0 },
+        }),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 500,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({ error: "same-origin chat should not be called before the configured remote endpoint" }),
+    });
+  });
+
+  await openApp(page);
+  await unlockAsk(page);
+  await page.locator(".chat-form input").fill("compare lobster prices in Boston and New York");
+  await page.locator(".chat-form button").click();
+  await expect(page.locator(".chat-engine")).toContainText("Grok grok-test", { timeout: 15000 });
+  await expect(page.locator(".chat-message--assistant .chat-message__body")).toContainText("Remote Grok answer");
+  expect(chatRequests[0]).toBe("https://remote-chat.test/api/chat");
+  expect(chatRequests).not.toContain("http://127.0.0.1:4173/api/chat");
+});
+
 test("Ask recommends toggleable charts for general comparisons", async ({ page }) => {
   await page.setViewportSize({ width: 834, height: 1112 });
   await openApp(page);
