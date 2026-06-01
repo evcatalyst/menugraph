@@ -280,6 +280,11 @@
       .split(/\s+/)
       .filter((token) => token.length > 2 && !STOP_WORDS.has(token) && !aliasWords.has(token) && !/^\d+$/.test(token))
       .slice(0, 10);
+    const wantsPrices = /\b(price|prices|cost|costs|priced|cheap|cheaper|expensive|value|inflation)\b/.test(normalizedQuestion);
+    const explicitComparison = /\b(compare|comparison|versus|vs|difference|trend|trends|across|over time|by region|by place|by source|by type|break it out|breakout|breakdown)\b/.test(
+      normalizedQuestion
+    );
+    const implicitPricePlaceComparison = wantsPrices && /\bin\s+.+\band\b/.test(normalizedQuestion) && keywords.length >= 2;
 
     return {
       raw: cleanValue(question),
@@ -287,9 +292,10 @@
       requiredGroups: mentionedGroups,
       excludedGroups,
       keywords,
-      wantsPrices: /\b(price|prices|cost|costs|priced|cheap|cheaper|expensive|value|inflation)\b/.test(normalizedQuestion),
+      wantsPrices,
       wantsDish: /\b(dish|dishes|item|items|course|courses)\b/.test(normalizedQuestion),
       wantsDates: /\b(date|dates|dated|when|decade|year|estimated)\b/.test(normalizedQuestion),
+      wantsComparison: explicitComparison || implicitPricePlaceComparison,
       date: extractYears(normalizedQuestion),
     };
   }
@@ -507,6 +513,7 @@
           amount: record.amount,
           currency: record.currency,
           todayUsd: record.normalized?.todayUsd,
+          relativeIndex: record.normalized?.relativeIndex,
           confidence: record.confidence,
         },
       });
@@ -744,6 +751,192 @@
       .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
   }
 
+  function labelForComparison(match, parsed) {
+    if (parsed.normalized.includes("type") || parsed.normalized.includes("break")) {
+      if (parsed.requiredGroups?.includes("beef")) return steakType(match.item || match.snippet || match.title) || match.reasons?.[0] || match.kind || "Evidence";
+      return match.reasons?.[0] || match.kind || "Evidence";
+    }
+    if (parsed.normalized.includes("source")) return match.source || "Source";
+    if (parsed.normalized.includes("region")) return regionLabel(match);
+    if (parsed.normalized.includes("place") || parsed.normalized.includes("where")) return match.place || "Unknown";
+    return match.place || match.source || match.reasons?.[0] || "Evidence";
+  }
+
+  function chartRow(label, items, { x = "label", y = "count", series = "" } = {}) {
+    const priceRows = items.filter((item) => item.price);
+    const medianTodayUsd = roundMoney(median(priceRows.map((item) => item.price?.todayUsd)));
+    const medianRaw = roundMoney(median(priceRows.map((item) => item.price?.amount)));
+    const medianRelative = roundMoney(median(priceRows.map((item) => item.price?.relativeIndex)));
+    const first = items.find((item) => item.uid) || {};
+    return {
+      [x]: label,
+      label,
+      series,
+      [y]: y === "medianTodayUsd" ? medianTodayUsd : y === "medianRaw" ? medianRaw : y === "medianRelative" ? medianRelative : items.length,
+      count: items.length,
+      medianTodayUsd,
+      medianRaw,
+      medianRelative,
+      menuUid: first.uid || "",
+      filterKind: "placeKey",
+      filterValue: first.place || label,
+      evidence: items
+        .slice(0, 3)
+        .map((item) => item.item || item.snippet || item.title)
+        .filter(Boolean),
+    };
+  }
+
+  function groupComparisonRows(matches, parsed, keyFn, options = {}) {
+    const groups = new Map();
+    for (const match of matches || []) {
+      const label = cleanValue(keyFn(match));
+      if (!label) continue;
+      const group = groups.get(label) || [];
+      group.push(match);
+      groups.set(label, group);
+    }
+    const y = options.metric === "medianTodayUsd" || options.metric === "medianRaw" || options.metric === "medianRelative" ? options.metric : "count";
+    return [...groups.entries()]
+      .map(([label, items]) => chartRow(label, items, { y, series: options.series || "" }))
+      .filter((row) => (y === "medianTodayUsd" || y === "medianRaw" || y === "medianRelative" ? row[y] !== null : row.count > 0))
+      .sort((a, b) => Number(b[y] || 0) - Number(a[y] || 0) || a.label.localeCompare(b.label))
+      .slice(0, options.limit || 10);
+  }
+
+  function buildMatrixRows(matches, parsed, metric) {
+    const groups = new Map();
+    for (const match of matches || []) {
+      const label = labelForComparison(match, parsed);
+      const series = decadeForYear(match.year);
+      if (!label || !series) continue;
+      const key = `${label}|${series}`;
+      const group = groups.get(key) || { label, series, items: [] };
+      group.items.push(match);
+      groups.set(key, group);
+    }
+    return [...groups.values()]
+      .map((group) => chartRow(group.label, group.items, { y: metric, series: group.series }))
+      .filter((row) =>
+        metric === "medianTodayUsd" || metric === "medianRaw" || metric === "medianRelative" ? row[metric] !== null : row.count > 0
+      )
+      .sort((a, b) => decadeSortValue(a.series) - decadeSortValue(b.series) || Number(b[metric] || 0) - Number(a[metric] || 0))
+      .slice(0, 18);
+  }
+
+  function makeChartOption({ id, label, chartType, reason, rows, x, y, color = "", facet = null }) {
+    return {
+      id,
+      label,
+      chartType,
+      reason,
+      spec: {
+        title: label,
+        description: reason,
+        chartType,
+        x,
+        y,
+        color,
+        facet,
+        groupBy: { columns: [x, color].filter(Boolean), aggregations: { [y]: { func: y === "count" ? "count" : "median" } } },
+        sort: { column: y, order: "desc" },
+        limit: rows.length,
+        config: { responsive: true },
+      },
+      rows,
+    };
+  }
+
+  function buildChartRecommendation(matches, parsed) {
+    if (!parsed.wantsComparison || !matches?.length) return null;
+    const priceMatches = matches.filter((match) => match.price);
+    const hasTodayUsd = priceMatches.some((match) => Number.isFinite(Number(match.price?.todayUsd)));
+    const metric = priceMatches.length ? (hasTodayUsd ? "medianTodayUsd" : "medianRaw") : "count";
+    const metricLabel = metric === "medianTodayUsd" ? "median price indexed to today" : metric === "medianRaw" ? "median raw price" : "result count";
+    const scopedRows = priceMatches.length ? priceMatches : matches;
+    const options = [];
+
+    const barRows = groupComparisonRows(scopedRows, parsed, (match) => labelForComparison(match, parsed), { metric, limit: 8 });
+    if (barRows.length) {
+      options.push(
+        makeChartOption({
+          id: "grouped-bar",
+          label: metric === "count" ? "Category Comparison" : "Median Price Comparison",
+          chartType: "bar",
+          reason: `Recommended because the question asks for comparison; bars compare ${metricLabel} across the strongest available groups.`,
+          rows: barRows,
+          x: "label",
+          y: metric,
+        })
+      );
+    }
+
+    const timelineRows = groupComparisonRows(scopedRows, parsed, (match) => decadeForYear(match.year), { metric, limit: 12 });
+    if (timelineRows.length) {
+      options.push(
+        makeChartOption({
+          id: "timeline",
+          label: metric === "count" ? "Results Over Time" : "Price Over Time",
+          chartType: "line",
+          reason: `Shows ${metricLabel} by decade for temporal comparison.`,
+          rows: timelineRows.sort((a, b) => decadeSortValue(a.label) - decadeSortValue(b.label)),
+          x: "label",
+          y: metric,
+        })
+      );
+    }
+
+    const matrixRows = buildMatrixRows(scopedRows, parsed, metric);
+    if (matrixRows.length >= 2) {
+      options.push(
+        makeChartOption({
+          id: "matrix",
+          label: "Group By Decade Matrix",
+          chartType: "heatmap",
+          reason: `Crosses comparison groups with decades to expose where evidence clusters.`,
+          rows: matrixRows,
+          x: "series",
+          y: metric,
+          color: "label",
+          facet: { column: "label", wrap: 3 },
+        })
+      );
+    }
+
+    const tableRows = scopedRows.slice(0, 12).map((match) => ({
+      label: match.item || match.snippet || match.title,
+      series: [match.year || match.date || "Undated", match.place || "Unknown", match.source || "Source"].filter(Boolean).join(" / "),
+      count: 1,
+      medianTodayUsd: roundMoney(match.price?.todayUsd),
+      medianRaw: roundMoney(match.price?.amount),
+      medianRelative: roundMoney(match.price?.relativeIndex),
+      menuUid: match.uid || "",
+      filterKind: "placeKey",
+      filterValue: match.place || "Unknown",
+      evidence: [match.title].filter(Boolean),
+    }));
+    if (tableRows.length) {
+      options.push(
+        makeChartOption({
+          id: "table",
+          label: "Evidence Table",
+          chartType: "table",
+          reason: "Keeps the underlying source-linked evidence visible when chart groupings are sparse or mixed.",
+          rows: tableRows,
+          x: "label",
+          y: metric,
+        })
+      );
+    }
+
+    if (!options.length) return null;
+    return {
+      intent: "comparison",
+      defaultOptionId: options.some((option) => option.id === "grouped-bar") ? "grouped-bar" : options[0].id,
+      options,
+    };
+  }
+
   function buildAdaptiveAnalysis(matches, parsed) {
     const priceMatches = (matches || []).filter((match) => match.price);
     if (!priceMatches.length) {
@@ -815,6 +1008,7 @@
       matches,
       facets: buildResultFacets(matches),
       analysis: buildAdaptiveAnalysis(matches, parsed),
+      chartRecommendation: buildChartRecommendation(matches, parsed),
       parsed,
       searched: {
         documents: docs.length,

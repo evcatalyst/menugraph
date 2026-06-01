@@ -6,6 +6,14 @@ async function openApp(page) {
   await expect(page.locator("#record-count")).toContainText(/CIA|NYPL|menus/i);
 }
 
+async function openMobileLab(page, variant = "hybrid") {
+  await page.goto(`/?mobileLab=1&mobileVariant=${variant}`);
+  await expect(page.locator("#mobile-lab-root")).toBeVisible();
+  await expect(page.locator("#mobile-lab-root")).toHaveAttribute("data-variant", variant);
+  await expect(page.locator(".mobile-bottom-nav")).toBeVisible();
+  await expect(page.locator(".mobile-lab-loading")).toHaveCount(0, { timeout: 15000 });
+}
+
 async function unlockAsk(page) {
   const secret = Buffer.from("bWFjZGFkZHk=", "base64").toString("utf8");
   await page.locator(".ask-gate input").fill(secret);
@@ -51,6 +59,10 @@ async function layoutMetrics(page) {
         topbar: box(".topbar"),
         toolbar: box(".canvas-toolbar"),
         chatDataBrowser: box(".chat-data-browser"),
+        chatChartRecommendation: box(".chat-chart-recommendation"),
+        mobileLabRoot: box("#mobile-lab-root"),
+        mobileBottomNav: box(".mobile-bottom-nav"),
+        mobileDetailSheet: box(".mobile-detail-sheet"),
       },
     };
   });
@@ -105,6 +117,61 @@ test("mobile keeps chart-first flow with drawer filters and selectable records",
   await page.waitForFunction(() => document.querySelector(".detail").getBoundingClientRect().top < window.innerHeight * 0.4);
 });
 
+test("mobile lab hybrid supports mode switching, detail sheets, gated Ask, and provenance-backed inspiration", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openMobileLab(page, "hybrid");
+  await expect(page.locator(".mobile-hero")).toBeVisible({ timeout: 15000 });
+
+  let metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+  expectBoxWithinViewport(metrics.boxes.mobileLabRoot, metrics.viewport);
+  expectBoxWithinViewport(metrics.boxes.mobileBottomNav, metrics.viewport);
+  await expect(page.locator('.mobile-bottom-nav button[data-mobile-mode="discover"]')).toHaveAttribute("aria-current", "page");
+
+  await page.locator('.mobile-bottom-nav button[data-mobile-mode="menus"]').click();
+  await expect(page.locator('.mobile-bottom-nav button[data-mobile-mode="menus"]')).toHaveAttribute("aria-current", "page");
+  await expect(page.locator(".mobile-menu-card").first()).toBeVisible();
+  await page.locator(".mobile-menu-card").first().click();
+  await expect(page.locator(".mobile-detail-sheet")).toBeVisible();
+  await expect(page.locator(".mobile-detail-sheet .mobile-provenance span").first()).toBeVisible();
+  metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+  expectBoxWithinViewport(metrics.boxes.mobileDetailSheet, metrics.viewport);
+  await page.locator(".mobile-detail-sheet button").filter({ hasText: "Close" }).click();
+  await expect(page.locator(".mobile-detail-sheet")).toHaveCount(0);
+
+  await page.locator('.mobile-bottom-nav button[data-mobile-mode="ask"]').click();
+  await expect(page.locator(".mobile-lab-ask .ask-gate")).toBeVisible();
+  await expect(page.locator(".mobile-lab-ask .chat-form")).toHaveCount(0);
+
+  await page.locator('.mobile-bottom-nav button[data-mobile-mode="inspire"]').click();
+  await expect(page.locator(".mobile-inspiration-card").first()).toContainText("Inspired by menu evidence");
+  await expect(page.locator(".mobile-inspiration-card").first()).toContainText("No exact recipe");
+  await expect(page.locator(".mobile-inspiration-card .mobile-provenance").first()).toBeVisible();
+
+  metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+});
+
+test("mobile lab variants deep-link to distinct starting modes", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const variants = [
+    ["cards", "menus", ".mobile-menu-card"],
+    ["journey", "discover", ".mobile-hero"],
+    ["chat", "ask", ".mobile-lab-ask .ask-gate"],
+    ["recipe", "inspire", ".mobile-inspiration-card"],
+    ["hybrid", "discover", ".mobile-hero"],
+  ];
+
+  for (const [variant, mode, selector] of variants) {
+    await openMobileLab(page, variant);
+    await expect(page.locator(`.mobile-bottom-nav button[data-mobile-mode="${mode}"]`)).toHaveAttribute("aria-current", "page");
+    await expect(page.locator(selector).first()).toBeVisible({ timeout: 15000 });
+    const metrics = await layoutMetrics(page);
+    expectNoHorizontalOverflow(metrics);
+  }
+});
+
 test("mobile Ask is the first-class locked entrypoint and unlocks to an adaptive browser", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openApp(page);
@@ -118,6 +185,16 @@ test("mobile Ask is the first-class locked entrypoint and unlocks to an adaptive
   await unlockAsk(page);
   await page.locator(".chat-form input").fill("how has the price of steak increased across time by region, break it out by type of steak");
   await page.locator(".chat-form button").click();
+  await expect(page.locator(".chat-chart-recommendation")).toBeVisible({ timeout: 15000 });
+  await expect(page.locator(".chat-chart-recommendation")).toContainText("Recommended visualization");
+  await expect(page.locator(".chat-chart-recommendation")).not.toContainText("ChartSpec");
+  await expect(page.locator(".chat-price-lens-toggle button").filter({ hasText: "Today USD" })).toBeVisible();
+  await expect(page.locator(".chat-price-lens-toggle button").filter({ hasText: "Raw" })).toBeVisible();
+  await page.locator(".chat-price-lens-toggle button").filter({ hasText: "Raw" }).click();
+  await expect(page.locator(".chat-price-lens-toggle button").filter({ hasText: "Raw" })).toHaveClass(/active/);
+  expect(await page.locator(".chat-chart-toggle button").count()).toBeGreaterThanOrEqual(2);
+  await page.locator(".chat-chart-toggle button").nth(1).click();
+  await expect(page.locator(".chat-chart-toggle button").nth(1)).toHaveClass(/active/);
   await expect(page.locator(".chat-message--assistant .chat-data-browser")).toBeVisible({ timeout: 15000 });
   await expect(page.locator(".chat-data-browser")).toContainText("Price Evidence Browser");
   await expect(page.locator(".chat-data-browser")).toContainText("Types");
@@ -142,6 +219,38 @@ test("Ask API rejects requests without the shared secret", async ({ request }) =
   expect(payload.analysis?.summary?.length).toBeGreaterThan(0);
 });
 
+test("Ask recommends toggleable charts for general comparisons", async ({ page }) => {
+  await page.setViewportSize({ width: 834, height: 1112 });
+  await openApp(page);
+
+  await unlockAsk(page);
+  await page.locator(".chat-form input").fill("compare dinner menus by source over time");
+  await page.locator(".chat-form button").click();
+  await expect(page.locator(".chat-chart-recommendation")).toBeVisible({ timeout: 15000 });
+  await expect(page.locator(".chat-chart-recommendation")).toContainText("Recommended visualization");
+  await expect(page.locator(".chat-chart-recommendation")).not.toContainText("ChartSpec");
+  await expect(page.locator(".chat-diagnostics").first()).toContainText("Query details");
+  await expect(page.locator(".chat-diagnostics").first()).toContainText("local-retrieval");
+  await expect(page.locator(".chat-diagnostics").first()).toContainText("$0.00");
+  await expect(page.locator(".chat-facet-menu--decade .chat-facet-summary__dist i").first()).toBeVisible();
+  const decadeOptions = await page.locator(".chat-facet-menu--decade .chat-facet-option span").allTextContents();
+  const datedOptions = decadeOptions.filter((label) => /\d{4}s/.test(label));
+  const sortedDatedOptions = [...datedOptions].sort((a, b) => Number(a.slice(0, 4)) - Number(b.slice(0, 4)));
+  expect(datedOptions).toEqual(sortedDatedOptions);
+  await expect(page.locator(".chat-chart-toggle button").filter({ hasText: "Category Comparison" })).toBeVisible();
+  await expect(page.locator(".chat-chart-toggle button").filter({ hasText: "Evidence Table" })).toBeVisible();
+  await page.locator(".chat-chart-toggle button").filter({ hasText: "Evidence Table" }).click();
+  await expect(page.locator(".chat-chart-toggle button").filter({ hasText: "Evidence Table" })).toHaveClass(/active/);
+  await expect(page.locator(".chat-chart-table-row").first()).toBeVisible();
+  await page.locator(".chat-form input").fill("compare lobster prices in Boston and New York");
+  await page.locator(".chat-form button").click();
+  await expect(page.locator(".chat-message--user")).toHaveCount(2);
+  await expect(page.locator(".chat-message--assistant .chat-diagnostics")).toHaveCount(2, { timeout: 15000 });
+
+  const metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+});
+
 test("medium desktop Ask evidence browser is not cropped", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 900 });
   await openApp(page);
@@ -149,6 +258,7 @@ test("medium desktop Ask evidence browser is not cropped", async ({ page }) => {
   await unlockAsk(page);
   await page.locator(".chat-form input").fill("how has the price of steak increased across time by region, break it out by type of steak");
   await page.locator(".chat-form button").click();
+  await expect(page.locator(".chat-chart-recommendation")).toBeVisible({ timeout: 15000 });
   await expect(page.locator(".chat-data-browser")).toBeVisible({ timeout: 15000 });
 
   const metrics = await layoutMetrics(page);
@@ -158,6 +268,7 @@ test("medium desktop Ask evidence browser is not cropped", async ({ page }) => {
   expectBoxWithinViewport(metrics.boxes.results, metrics.viewport);
   expect(metrics.boxes.detail.x).toBeGreaterThanOrEqual(metrics.boxes.canvas.x - 1);
   expect(metrics.boxes.detail.y).toBeGreaterThan(metrics.boxes.results.y);
+  expect(metrics.boxes.chatChartRecommendation.right).toBeLessThanOrEqual(metrics.boxes.canvas.right + 2);
   expect(metrics.boxes.chatDataBrowser.bottom).toBeLessThanOrEqual(metrics.boxes.canvas.bottom + 2);
   expect(metrics.boxes.chatDataBrowser.right).toBeLessThanOrEqual(metrics.boxes.canvas.right + 2);
 });
@@ -212,6 +323,12 @@ test("NYPL detail uses NYPL source links, larger images, and item transcriptions
   await expect(page.locator("#detail-link")).toContainText("Open in NYPL Digital Collections");
   await expect(page.locator("#detail-link")).toHaveAttribute("href", /digitalcollections\.nypl\.org/);
   await expect(page.locator("#detail-image")).toHaveAttribute("src", /images\.nypl\.org.*[?&]t=v/);
+  await expect(page.locator("#detail-image-zoom")).toBeVisible();
+  await page.locator("#detail-image-zoom").click();
+  await expect(page.locator(".image-zoomer")).toBeVisible();
+  await expect(page.locator(".image-zoomer img")).toHaveAttribute("src", /images\.nypl\.org.*[?&]t=w/);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".image-zoomer")).toHaveCount(0);
   await expect(page.locator("#detail-text")).toContainText("NYPL crowdsourced transcription sample");
   await expect(page.locator("#detail-text")).toContainText("Sample item rows");
 });

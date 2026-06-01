@@ -81,6 +81,10 @@ const prices = {
       rawPrice: "0.50",
       amount: 0.5,
       currency: "USD",
+      normalized: {
+        todayUsd: 15,
+        relativeIndex: 15,
+      },
       year: 1912,
       place: "New York",
       country: "United States",
@@ -95,6 +99,10 @@ const prices = {
       rawPrice: "1.25",
       amount: 1.25,
       currency: "USD",
+      normalized: {
+        todayUsd: 37.5,
+        relativeIndex: 37.5,
+      },
       year: 1910,
       place: "Boston",
       country: "United States",
@@ -109,6 +117,10 @@ assert(parsed.requiredGroups.includes("stew"), "stew should be required");
 assert(parsed.requiredGroups.includes("carrot"), "carrots should be required");
 assert(parsed.requiredGroups.includes("potato"), "potatoes should be required");
 assert(parsed.excludedGroups.includes("mushroom"), "mushrooms should be excluded");
+const comparisonParsed = chat.parseQuestion("Compare dinner menus by source over time");
+assert(comparisonParsed.wantsComparison, "comparison language should be detected");
+const implicitPriceComparisonParsed = chat.parseQuestion("lobster prices in Boston and New York");
+assert(implicitPriceComparisonParsed.wantsComparison, "multi-place price questions should be treated as comparisons");
 
 const answer = chat.answerQuestion({
   question: "Are there beef/steak dishes without mushrooms that are a stew with carrots and potatoes?",
@@ -130,5 +142,57 @@ const priceAnswer = chat.answerQuestion({
 });
 assert(priceAnswer.matches.some((match) => match.uid === "nypl:3" && match.kind === "price"), "expected lobster price match");
 assert(priceAnswer.analysis?.summary?.length, "price answer should include adaptive data browser summary");
+
+const comparisonAnswer = chat.answerQuestion({
+  question: "Compare dinner menus by source over time",
+  menus,
+  prices,
+});
+assert(comparisonAnswer.chartRecommendation?.options?.length >= 2, "general comparisons should include chart options");
+assert(
+  comparisonAnswer.chartRecommendation.options.some((option) => option.id === "grouped-bar"),
+  "general comparisons should include a grouped bar option"
+);
+assert(
+  comparisonAnswer.chartRecommendation.options.some((option) => option.id === "table"),
+  "general comparisons should include a table fallback"
+);
+
+const priceComparisonAnswer = chat.answerQuestion({
+  question: "compare lobster prices in Boston before 1920",
+  menus,
+  prices,
+});
+const priceChart = priceComparisonAnswer.chartRecommendation?.options?.find((option) => option.id === "grouped-bar");
+assert(priceChart, "price comparisons should include grouped bar recommendations");
+assert(
+  priceChart.rows.some((row) => row.medianTodayUsd !== null || row.medianRaw !== null),
+  "price comparison rows should include median price metrics when available"
+);
+assert(
+  priceChart.rows.some((row) => row.medianRelative !== null),
+  "price comparison rows should include relative price metrics when available"
+);
+
+const implicitPriceComparisonAnswer = chat.answerQuestion({
+  question: "lobster prices in Boston and New York",
+  menus,
+  prices,
+});
+assert(
+  implicitPriceComparisonAnswer.chartRecommendation?.options?.length,
+  "multi-place price questions should include chart recommendations"
+);
+
+const sparseComparisonAnswer = chat.answerQuestion({
+  question: "compare lobster prices",
+  menus,
+  prices,
+  limit: 1,
+});
+assert(
+  sparseComparisonAnswer.chartRecommendation?.options?.some((option) => option.id === "table"),
+  "sparse comparisons should still include an evidence table fallback"
+);
 
 console.log("chat-utils tests passed");
