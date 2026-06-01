@@ -762,7 +762,7 @@
     return match.place || match.source || match.reasons?.[0] || "Evidence";
   }
 
-  function chartRow(label, items, { x = "label", y = "count", series = "" } = {}) {
+  function chartRow(label, items, { x = "label", y = "count", series = "", filterKind = "", filterValue = "" } = {}) {
     const priceRows = items.filter((item) => item.price);
     const medianTodayUsd = roundMoney(median(priceRows.map((item) => item.price?.todayUsd)));
     const medianRaw = roundMoney(median(priceRows.map((item) => item.price?.amount)));
@@ -778,13 +778,21 @@
       medianRaw,
       medianRelative,
       menuUid: first.uid || "",
-      filterKind: "placeKey",
-      filterValue: first.place || label,
+      filterKind,
+      filterValue,
       evidence: items
         .slice(0, 3)
         .map((item) => item.item || item.snippet || item.title)
         .filter(Boolean),
     };
+  }
+
+  function comparisonFilterForGroup(parsed, label, items) {
+    if (parsed.normalized.includes("source")) return { filterKind: "sourceKey", filterValue: label };
+    if (parsed.normalized.includes("place") || parsed.normalized.includes("where")) return { filterKind: "placeKey", filterValue: label };
+    if (parsed.normalized.includes("region") || parsed.normalized.includes("type") || parsed.normalized.includes("break")) return {};
+    const firstPlace = items.find((item) => item.place)?.place;
+    return firstPlace ? { filterKind: "placeKey", filterValue: firstPlace } : {};
   }
 
   function groupComparisonRows(matches, parsed, keyFn, options = {}) {
@@ -798,7 +806,9 @@
     }
     const y = options.metric === "medianTodayUsd" || options.metric === "medianRaw" || options.metric === "medianRelative" ? options.metric : "count";
     return [...groups.entries()]
-      .map(([label, items]) => chartRow(label, items, { y, series: options.series || "" }))
+      .map(([label, items]) =>
+        chartRow(label, items, { y, series: options.series || "", ...comparisonFilterForGroup(parsed, label, items) })
+      )
       .filter((row) => (y === "medianTodayUsd" || y === "medianRaw" || y === "medianRelative" ? row[y] !== null : row.count > 0))
       .sort((a, b) => Number(b[y] || 0) - Number(a[y] || 0) || a.label.localeCompare(b.label))
       .slice(0, options.limit || 10);
@@ -911,8 +921,8 @@
       medianRaw: roundMoney(match.price?.amount),
       medianRelative: roundMoney(match.price?.relativeIndex),
       menuUid: match.uid || "",
-      filterKind: "placeKey",
-      filterValue: match.place || "Unknown",
+      filterKind: match.place ? "placeKey" : "",
+      filterValue: match.place || "",
       evidence: [match.title].filter(Boolean),
     }));
     if (tableRows.length) {

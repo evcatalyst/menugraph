@@ -2846,7 +2846,6 @@ body.mobile-lab .shell {
   overflow: visible;
 }
 
-.mobile-lab-ask .chat-discovery-workspace,
 .mobile-lab-ask .chat-discovery-workspace {
   grid-template-columns: 1fr;
 }

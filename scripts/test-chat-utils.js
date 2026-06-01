@@ -157,6 +157,11 @@ assert(
   comparisonAnswer.chartRecommendation.options.some((option) => option.id === "table"),
   "general comparisons should include a table fallback"
 );
+const sourceChart = comparisonAnswer.chartRecommendation.options.find((option) => option.id === "grouped-bar");
+assert(
+  sourceChart.rows.every((row) => row.filterKind === "sourceKey" && row.filterValue),
+  "source comparison chart rows should carry source filters"
+);
 
 const priceComparisonAnswer = chat.answerQuestion({
   question: "compare lobster prices in Boston before 1920",

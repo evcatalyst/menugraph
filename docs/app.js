@@ -803,7 +803,9 @@ function buildChatDiagnostics(question, answer, elapsedMs) {
   const engine = answer.engine || "local-retrieval";
   const model = answer.model || (engine === "local-retrieval" ? "Static retrieval index" : "Not reported");
   const usage = answer.usage || answer.tokenUsage || null;
-  const cost = engine === "local-retrieval" ? "$0.00" : answer.costUsd ? `$${Number(answer.costUsd).toFixed(6)}` : "Not reported";
+  const rawCost = answer.costUsd;
+  const numericCost = rawCost === null || rawCost === undefined || rawCost === "" ? NaN : Number(rawCost);
+  const cost = engine === "local-retrieval" ? "$0.00" : Number.isFinite(numericCost) ? `$${numericCost.toFixed(6)}` : "Not reported";
   return {
     engine,
     model,
@@ -1004,13 +1006,14 @@ function renderChatDiagnostics(diagnostics) {
   details.className = "chat-diagnostics";
   const summary = document.createElement("summary");
   const elapsed = Number.isFinite(Number(diagnostics.elapsedMs)) ? `${(diagnostics.elapsedMs / 1000).toFixed(1)}s` : "n/a";
-  summary.innerHTML = `
-    <span>Query details</span>
-    <strong>${diagnostics.engine}</strong>
-    <strong>${diagnostics.model}</strong>
-    <strong>${diagnostics.cost}</strong>
-    <strong>${elapsed}</strong>
-  `;
+  const summaryLabel = document.createElement("span");
+  summaryLabel.textContent = "Query details";
+  summary.appendChild(summaryLabel);
+  [diagnostics.engine, diagnostics.model, diagnostics.cost, elapsed].forEach((value) => {
+    const item = document.createElement("strong");
+    item.textContent = String(value || "");
+    summary.appendChild(item);
+  });
   details.appendChild(summary);
 
   const grid = document.createElement("div");
@@ -1023,7 +1026,11 @@ function renderChatDiagnostics(diagnostics) {
     ["Usage", diagnostics.usage ? JSON.stringify(diagnostics.usage) : "Not reported"],
   ].forEach(([label, value]) => {
     const item = document.createElement("div");
-    item.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+    const labelNode = document.createElement("span");
+    labelNode.textContent = label;
+    const valueNode = document.createElement("strong");
+    valueNode.textContent = String(value || "");
+    item.append(labelNode, valueNode);
     grid.appendChild(item);
   });
   details.appendChild(grid);
@@ -1274,7 +1281,7 @@ function chartValueKey(option, activePriceMetric) {
 
 function chartFilterKind(option, row) {
   if (option.id === "timeline" || option.id === "matrix") return "decade";
-  return row.filterKind || "placeKey";
+  return row.filterKind || "";
 }
 
 function chartFilterValue(option, row) {
@@ -1290,7 +1297,9 @@ function handleChartRowClick(node, option, row) {
       return;
     }
     const wrapper = node.closest(".chat-message");
-    if (wrapper) applyChatResultFilter(wrapper, chartFilterKind(option, row), chartFilterValue(option, row));
+    const filterKind = chartFilterKind(option, row);
+    const filterValue = chartFilterValue(option, row);
+    if (wrapper && filterKind && filterValue) applyChatResultFilter(wrapper, filterKind, filterValue);
   });
 }
 
@@ -2109,23 +2118,32 @@ function openImageZoomer(src, title) {
   overlay.setAttribute("role", "dialog");
   overlay.setAttribute("aria-modal", "true");
   overlay.setAttribute("aria-label", "Menu image zoom viewer");
-  overlay.innerHTML = `
-    <div class="image-zoomer__bar">
-      <strong>${title || "Menu image"}</strong>
-      <div>
-        <button type="button" data-action="out" aria-label="Zoom out">-</button>
-        <button type="button" data-action="reset" aria-label="Reset zoom">100%</button>
-        <button type="button" data-action="in" aria-label="Zoom in">+</button>
-        <button type="button" data-action="close" aria-label="Close image viewer">Close</button>
-      </div>
-    </div>
-    <div class="image-zoomer__stage">
-      <img alt="${title || "Menu image"}" />
-    </div>
-  `;
-  const stage = overlay.querySelector(".image-zoomer__stage");
-  const img = overlay.querySelector("img");
+  const bar = document.createElement("div");
+  bar.className = "image-zoomer__bar";
+  const titleNode = document.createElement("strong");
+  titleNode.textContent = title || "Menu image";
+  const controls = document.createElement("div");
+  [
+    ["out", "Zoom out", "-"],
+    ["reset", "Reset zoom", "100%"],
+    ["in", "Zoom in", "+"],
+    ["close", "Close image viewer", "Close"],
+  ].forEach(([action, label, text]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.action = action;
+    button.setAttribute("aria-label", label);
+    button.textContent = text;
+    controls.appendChild(button);
+  });
+  bar.append(titleNode, controls);
+  const stage = document.createElement("div");
+  stage.className = "image-zoomer__stage";
+  const img = document.createElement("img");
+  img.alt = title || "Menu image";
   img.src = src;
+  stage.appendChild(img);
+  overlay.append(bar, stage);
 
   function applyTransform() {
     img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
