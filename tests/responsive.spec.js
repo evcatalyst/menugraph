@@ -7,7 +7,7 @@ async function openApp(page) {
 }
 
 async function unlockAsk(page) {
-  const secret = Buffer.from("bWFjZGFkZHltYWM=", "base64").toString("utf8");
+  const secret = Buffer.from("bWFjZGFkZHk=", "base64").toString("utf8");
   await page.locator(".ask-gate input").fill(secret);
   await page.locator(".ask-gate button").click();
   await expect(page.locator(".ask-gate")).toHaveCount(0);
@@ -127,7 +127,7 @@ test("Ask API rejects requests without the shared secret", async ({ request }) =
   const unlocked = await request.post("/api/chat", {
     data: {
       question: "lobster prices in Boston",
-      askSecretHash: "68fb8381db87568579d2fc8b415f0f08edd966c7d51cfa275cfc9ceb2e27c1f9",
+      askSecretHash: "8f388ed94f5ff3d417b9b3f897bf9fc4d56a2d0dd6778905d8440a938558d30a",
     },
   });
   expect(unlocked.ok()).toBeTruthy();

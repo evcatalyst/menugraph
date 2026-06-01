@@ -16,7 +16,7 @@ const CACHE_TTL_MS = 1000 * 60 * 30;
 const PAGE_SIZE = 1024;
 const ONTOLOGY_CACHE_PATH = path.join(__dirname, ".cache", "ontology.json");
 const DATA_DIR = path.join(PUBLIC_DIR, "data");
-const DEFAULT_ASK_SECRET_HASH = "68fb8381db87568579d2fc8b415f0f08edd966c7d51cfa275cfc9ceb2e27c1f9";
+const DEFAULT_ASK_SECRET_HASH = "8f388ed94f5ff3d417b9b3f897bf9fc4d56a2d0dd6778905d8440a938558d30a";
 
 const fieldBundles = [
   "title!date!restau!typea!decade",
