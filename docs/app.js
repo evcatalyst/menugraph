@@ -9,6 +9,7 @@ const state = {
   prices: null,
   chatMessages: [],
   chatBusy: false,
+  chatDraft: "",
   askUnlocked: false,
   askSecretHash: "",
   askError: "",
@@ -36,12 +37,33 @@ const state = {
   },
   selectedId: null,
   detailCache: new Map(),
+  mobileLab: {
+    enabled: false,
+    variant: "hybrid",
+    mode: "discover",
+    command: "",
+    trayIds: [],
+    detailId: null,
+    detailMenu: null,
+    detailData: null,
+    detailError: "",
+    detailOpen: false,
+    sheetState: "half",
+  },
 };
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 const DEFAULT_REMOTE_CHAT_API_BASE = "https://gitbrain-menugraph.netlify.app";
 const ASK_SECRET_HASH = "8f388ed94f5ff3d417b9b3f897bf9fc4d56a2d0dd6778905d8440a938558d30a";
 const ASK_SECRET_STORAGE_KEY = "menugraph:ask-secret-hash:v1";
+const MOBILE_LAB_VARIANTS = new Set(["cards", "journey", "chat", "recipe", "hybrid"]);
+const MOBILE_LAB_MODE_BY_VARIANT = {
+  cards: "menus",
+  journey: "discover",
+  chat: "ask",
+  recipe: "inspire",
+  hybrid: "discover",
+};
 
 const els = {
   recordCount: document.querySelector("#record-count"),
@@ -76,6 +98,7 @@ const els = {
   detailEvidence: document.querySelector("#detail-evidence"),
   detailText: document.querySelector("#detail-text"),
   detailLink: document.querySelector("#detail-link"),
+  detailImageZoom: document.querySelector("#detail-image-zoom"),
   pageStrip: document.querySelector("#page-strip"),
   ontologyStatus: document.querySelector("#ontology-status"),
   ontologyTerms: document.querySelector("#ontology-terms"),
@@ -268,6 +291,11 @@ function setImageSource(img, src, label) {
 function detailImageSource(src, sourceKey) {
   if (sourceKey === "nypl" && src) return src.replace(/([?&]t=)[a-z]\b/i, "$1v");
   return src;
+}
+
+function zoomableImageSource(src, sourceKey) {
+  if (sourceKey === "nypl" && src) return src.replace(/([?&]t=)[a-z]\b/i, "$1w");
+  return detailImageSource(src, sourceKey);
 }
 
 function clamp(value, min, max) {
@@ -466,6 +494,7 @@ function update() {
   renderPriceControls();
   renderViz();
   renderResults();
+  renderMobileLab();
 }
 
 function renderSourceControls() {
@@ -715,7 +744,9 @@ async function askChat(question) {
   }
   state.activeLens = "chat";
   activateLensButton("chat");
+  const startedAt = performance.now();
   state.chatMessages.push({ role: "user", content: text });
+  state.chatDraft = "";
   state.chatBusy = true;
   renderViz();
   setActivity({
@@ -726,18 +757,21 @@ async function askChat(question) {
   });
   try {
     const answer = await requestChatAnswer(text);
+    const elapsedMs = Math.round(performance.now() - startedAt);
     state.chatMessages.push({
       role: "assistant",
       content: answer.answer,
       matches: answer.matches || [],
       facets: answer.facets || null,
       analysis: answer.analysis || null,
+      chartRecommendation: answer.chartRecommendation || null,
       parsed: answer.parsed || null,
       engine: answer.engine || "local-retrieval",
       model: answer.model,
       error: answer.llmError,
       searched: answer.searched,
       caveats: answer.caveats || [],
+      diagnostics: buildChatDiagnostics(text, answer, elapsedMs),
     });
     setActivity({
       label: answer.engine === "grok" ? "Grok Synthesis" : "Static Retrieval",
@@ -761,7 +795,39 @@ async function askChat(question) {
   } finally {
     state.chatBusy = false;
     if (state.activeLens === "chat") renderViz();
+    renderMobileLab();
   }
+}
+
+function buildChatDiagnostics(question, answer, elapsedMs) {
+  const engine = answer.engine || "local-retrieval";
+  const model = answer.model || (engine === "local-retrieval" ? "Static retrieval index" : "Not reported");
+  const usage = answer.usage || answer.tokenUsage || null;
+  const rawCost = answer.costUsd;
+  const numericCost = rawCost === null || rawCost === undefined || rawCost === "" ? NaN : Number(rawCost);
+  const cost = engine === "local-retrieval" ? "$0.00" : Number.isFinite(numericCost) ? `$${numericCost.toFixed(6)}` : "Not reported";
+  return {
+    engine,
+    model,
+    cost,
+    elapsedMs,
+    usage,
+    rawInput: {
+      question,
+      parsed: answer.parsed || null,
+    },
+    rawOutput: {
+      answer: answer.answer || "",
+      localAnswer: answer.localAnswer || null,
+      searched: answer.searched || null,
+      chartOptions: (answer.chartRecommendation?.options || []).map((option) => ({
+        id: option.id,
+        chartType: option.chartType,
+        rows: option.rows?.length || 0,
+      })),
+      caveats: answer.caveats || [],
+    },
+  };
 }
 
 function renderChatPanel() {
@@ -789,6 +855,10 @@ function renderChatPanel() {
   input.type = "search";
   input.placeholder = "Ask about dishes, ingredients, prices, places, or date ranges";
   input.autocomplete = "off";
+  input.value = state.chatDraft;
+  input.addEventListener("input", () => {
+    state.chatDraft = input.value;
+  });
   const button = document.createElement("button");
   button.type = "submit";
   button.textContent = state.chatBusy ? "Searching" : "Ask";
@@ -833,7 +903,7 @@ function renderChatPanel() {
     if (latest) {
       messages.scrollTop = state.chatBusy ? messages.scrollHeight : Math.max(0, latest.offsetTop - messages.offsetTop - 6);
     }
-    if (!state.chatMessages.length) input.focus({ preventScroll: true });
+    if (!state.chatMessages.length || document.activeElement === document.body) input.focus({ preventScroll: true });
   });
   return panel;
 }
@@ -899,6 +969,10 @@ function renderChatMessage(message) {
   body.textContent = message.role === "assistant" && message.matches?.length ? String(message.content || "").split("\n\n")[0] : message.content;
   wrapper.appendChild(body);
 
+  if (message.role === "assistant" && message.diagnostics) {
+    wrapper.appendChild(renderChatDiagnostics(message.diagnostics));
+  }
+
   if (message.error) {
     const warning = document.createElement("small");
     warning.className = "chat-warning";
@@ -907,14 +981,76 @@ function renderChatMessage(message) {
   }
 
   if (message.role === "assistant" && message.matches?.length) {
-    wrapper.appendChild(renderChatOverview(message));
-    if (message.analysis) wrapper.appendChild(renderAdaptiveBrowser(message.analysis));
+    const workspace = document.createElement("div");
+    workspace.className = "chat-discovery-workspace";
+    const main = document.createElement("div");
+    main.className = "chat-discovery-main";
+    const rail = document.createElement("aside");
+    rail.className = "chat-discovery-rail";
+
+    rail.appendChild(renderChatOverview(message));
+    if (message.chartRecommendation) main.appendChild(renderChartRecommendation(message.chartRecommendation));
+    if (message.analysis) rail.appendChild(renderAdaptiveBrowser(message.analysis));
     const results = document.createElement("div");
     results.className = "chat-results";
     message.matches.slice(0, 36).forEach((match) => results.appendChild(renderChatResult(match)));
-    wrapper.appendChild(results);
+    main.appendChild(results);
+    workspace.append(main, rail);
+    wrapper.appendChild(workspace);
   }
   return wrapper;
+}
+
+function renderChatDiagnostics(diagnostics) {
+  const details = document.createElement("details");
+  details.className = "chat-diagnostics";
+  const summary = document.createElement("summary");
+  const elapsed = Number.isFinite(Number(diagnostics.elapsedMs)) ? `${(diagnostics.elapsedMs / 1000).toFixed(1)}s` : "n/a";
+  const summaryLabel = document.createElement("span");
+  summaryLabel.textContent = "Query details";
+  summary.appendChild(summaryLabel);
+  [diagnostics.engine, diagnostics.model, diagnostics.cost, elapsed].forEach((value) => {
+    const item = document.createElement("strong");
+    item.textContent = String(value || "");
+    summary.appendChild(item);
+  });
+  details.appendChild(summary);
+
+  const grid = document.createElement("div");
+  grid.className = "chat-diagnostics__grid";
+  [
+    ["Engine", diagnostics.engine],
+    ["Model", diagnostics.model],
+    ["Cost", diagnostics.cost],
+    ["Latency", elapsed],
+    ["Usage", diagnostics.usage ? JSON.stringify(diagnostics.usage) : "Not reported"],
+  ].forEach(([label, value]) => {
+    const item = document.createElement("div");
+    const labelNode = document.createElement("span");
+    labelNode.textContent = label;
+    const valueNode = document.createElement("strong");
+    valueNode.textContent = String(value || "");
+    item.append(labelNode, valueNode);
+    grid.appendChild(item);
+  });
+  details.appendChild(grid);
+
+  const raw = document.createElement("div");
+  raw.className = "chat-diagnostics__raw";
+  raw.appendChild(renderRawDiagnosticBlock("Raw input", diagnostics.rawInput));
+  raw.appendChild(renderRawDiagnosticBlock("Raw output", diagnostics.rawOutput));
+  details.appendChild(raw);
+  return details;
+}
+
+function renderRawDiagnosticBlock(label, value) {
+  const block = document.createElement("div");
+  const title = document.createElement("span");
+  title.textContent = label;
+  const pre = document.createElement("pre");
+  pre.textContent = JSON.stringify(value, null, 2);
+  block.append(title, pre);
+  return block;
 }
 
 function chatDecade(match) {
@@ -939,19 +1075,22 @@ function applyChatResultFilter(wrapper, kind, value) {
     result.hidden = !show;
     if (show) visible += 1;
   });
-  wrapper.querySelectorAll(".chat-facet-button").forEach((button) => {
+  wrapper.querySelectorAll(".chat-facet-button, .chat-facet-option").forEach((button) => {
     button.classList.toggle("active", Boolean(nextActive && button.dataset.kind === nextActive.kind && button.dataset.value === nextActive.value));
   });
   const label = wrapper.querySelector(".chat-result-count");
   if (label) label.textContent = nextActive ? `${visible} shown` : `${wrapper.querySelectorAll(".chat-result").length} shown`;
+  const activeLabel = wrapper.querySelector(".chat-active-filter");
+  if (activeLabel) activeLabel.textContent = nextActive ? `${nextActive.value}` : "All results";
 }
 
 function renderChatOverview(message) {
   const overview = document.createElement("div");
   overview.className = "chat-overview";
 
-  const stats = document.createElement("div");
-  stats.className = "chat-stats";
+  const head = document.createElement("div");
+  head.className = "chat-refine-head";
+  const stats = document.createElement("strong");
   const span = message.facets?.yearMin && message.facets?.yearMax ? `${message.facets.yearMin}-${message.facets.yearMax}` : "mixed dates";
   const duplicates = Number(message.searched?.duplicateCandidates || 0);
   const parts = [
@@ -960,49 +1099,306 @@ function renderChatOverview(message) {
     duplicates ? `${duplicates.toLocaleString()} near-duplicates collapsed` : "",
   ].filter(Boolean);
   stats.textContent = parts.join(" / ");
-  overview.appendChild(stats);
+  const active = document.createElement("span");
+  active.className = "chat-active-filter";
+  active.textContent = "All results";
+  const count = document.createElement("span");
+  count.className = "chat-result-count";
+  count.textContent = `${message.matches.length} shown`;
+  head.append(stats, active, count);
+  overview.appendChild(head);
+
+  const nav = document.createElement("div");
+  nav.className = "chat-refine-nav";
 
   const timeline = message.facets?.timeline || [];
   if (timeline.length) {
-    const chart = document.createElement("div");
-    chart.className = "chat-timeline";
-    const max = Math.max(...timeline.map((item) => item.count), 1);
-    timeline.forEach((item) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "chat-facet-button chat-timeline-bar";
-      button.dataset.kind = "decade";
-      button.dataset.value = item.name;
-      button.title = `${item.name}: ${item.count} result${item.count === 1 ? "" : "s"}`;
-      button.style.setProperty("--bar", `${Math.max(12, (item.count / max) * 100)}%`);
-      button.innerHTML = `<span>${item.name.replace("s", "")}</span><strong>${item.count}</strong>`;
-      button.addEventListener("click", () => applyChatResultFilter(overview.closest(".chat-message"), "decade", item.name));
-      chart.appendChild(button);
-    });
-    overview.appendChild(chart);
+    nav.appendChild(renderChatFacetMenu("Dates", "decade", timeline, overview));
   }
 
   const places = message.facets?.places || [];
   if (places.length) {
-    const placeRow = document.createElement("div");
-    placeRow.className = "chat-place-row";
-    places.slice(0, 8).forEach((item) => {
+    nav.appendChild(renderChatFacetMenu("Locations", "placeKey", places.slice(0, 10), overview));
+  }
+
+  const sources = message.facets?.sources || [];
+  if (sources.length) {
+    nav.appendChild(renderChatFacetMenu("Sources", "sourceKey", sources.slice(0, 6), overview));
+  }
+
+  if (nav.childElementCount) overview.appendChild(nav);
+  return overview;
+}
+
+function renderChatFacetMenu(label, kind, items, overview) {
+  const menu = document.createElement("details");
+  const orderedItems = orderChatFacetItems(kind, items).slice(0, kind === "decade" ? 16 : 10);
+  menu.className = `chat-facet-menu chat-facet-menu--${kind}`;
+  const summary = document.createElement("summary");
+  summary.className = "chat-facet-summary";
+  summary.appendChild(renderChatFacetDistribution(orderedItems));
+  const total = orderedItems.reduce((sum, item) => sum + Number(item.count || 0), 0);
+  const labelNode = document.createElement("span");
+  labelNode.className = "chat-facet-summary__label";
+  labelNode.textContent = label;
+  const detail = document.createElement("span");
+  detail.className = "chat-facet-summary__detail";
+  detail.textContent = chatFacetSummaryDetail(kind, orderedItems);
+  const count = document.createElement("strong");
+  count.textContent = total.toLocaleString();
+  summary.append(labelNode, detail, count);
+  menu.appendChild(summary);
+
+  const list = document.createElement("div");
+  list.className = "chat-facet-menu__list";
+  orderedItems.forEach((item) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "chat-facet-option";
+    button.dataset.kind = kind;
+    button.dataset.value = item.name;
+    button.innerHTML = `<span>${item.name}</span><strong>${Number(item.count || 0).toLocaleString()}</strong>`;
+    button.addEventListener("click", () => {
+      applyChatResultFilter(overview.closest(".chat-message"), kind, item.name);
+      menu.open = false;
+    });
+    list.appendChild(button);
+  });
+  menu.appendChild(list);
+  return menu;
+}
+
+function decadeSortValue(name) {
+  if (name === "Undated") return Number.MAX_SAFE_INTEGER;
+  const year = Number(String(name || "").match(/\d{4}/)?.[0]);
+  return Number.isFinite(year) ? year : Number.MAX_SAFE_INTEGER - 1;
+}
+
+function orderChatFacetItems(kind, items) {
+  const rows = [...(items || [])];
+  if (kind === "decade") return rows.sort((a, b) => decadeSortValue(a.name) - decadeSortValue(b.name));
+  return rows.sort((a, b) => Number(b.count || 0) - Number(a.count || 0) || String(a.name || "").localeCompare(String(b.name || "")));
+}
+
+function chatFacetSummaryDetail(kind, items) {
+  if (!items.length) return "";
+  if (kind === "decade") {
+    const dated = items.map((item) => item.name).filter((name) => name !== "Undated");
+    return dated.length ? `${dated[0].replace("s", "")}-${dated[dated.length - 1].replace("s", "")}` : "Undated";
+  }
+  const top = items[0];
+  return top?.name ? String(top.name).slice(0, 22) : "";
+}
+
+function renderChatFacetDistribution(items) {
+  const distribution = document.createElement("span");
+  distribution.className = "chat-facet-summary__dist";
+  const max = Math.max(...(items || []).map((item) => Number(item.count || 0)), 1);
+  (items || []).slice(0, 16).forEach((item) => {
+    const bar = document.createElement("i");
+    bar.style.setProperty("--bar", `${Math.max(4, (Number(item.count || 0) / max) * 22)}px`);
+    bar.title = `${item.name}: ${Number(item.count || 0).toLocaleString()}`;
+    distribution.appendChild(bar);
+  });
+  return distribution;
+}
+
+function renderChartRecommendation(recommendation) {
+  const panel = document.createElement("div");
+  panel.className = "chat-chart-recommendation";
+  const options = recommendation.options || [];
+  let activeId = recommendation.defaultOptionId || options[0]?.id || "";
+  let activePriceMetric = null;
+
+  const heading = document.createElement("div");
+  heading.className = "chat-chart-recommendation__heading";
+  const title = document.createElement("strong");
+  title.textContent = "Recommended visualization";
+  heading.append(title);
+
+  const toggleRow = document.createElement("div");
+  toggleRow.className = "chat-chart-toggle";
+  const chartSlot = document.createElement("div");
+  chartSlot.className = "chat-chart-slot";
+
+  function draw() {
+    const option = options.find((item) => item.id === activeId) || options[0];
+    toggleRow.querySelectorAll("button").forEach((button) => {
+      button.classList.toggle("active", button.dataset.optionId === option?.id);
+    });
+    if (option) {
+      const metrics = priceMetricsForRows(option.rows || []);
+      if (metrics.length && !metrics.some((metric) => metric.key === activePriceMetric)) activePriceMetric = option.spec?.y || metrics[0].key;
+      chartSlot.replaceChildren(renderComparisonChart(option, activePriceMetric, (metric) => {
+        activePriceMetric = metric;
+        draw();
+      }));
+    } else {
+      chartSlot.replaceChildren(document.createTextNode(""));
+    }
+  }
+
+  options.forEach((option) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.optionId = option.id;
+    button.textContent = option.label;
+    button.addEventListener("click", () => {
+      activeId = option.id;
+      draw();
+    });
+    toggleRow.appendChild(button);
+  });
+
+  panel.append(heading, toggleRow, chartSlot);
+  draw();
+  return panel;
+}
+
+function formatChartValue(value, key) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "n/a";
+  if (/relative/i.test(key)) return number.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  if (/price|usd|raw/i.test(key)) return `$${number.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  return number.toLocaleString();
+}
+
+function priceMetricsForRows(rows) {
+  const metrics = [
+    { key: "medianTodayUsd", label: "Today USD" },
+    { key: "medianRaw", label: "Raw" },
+    { key: "medianRelative", label: "Relative" },
+  ];
+  return metrics.filter((metric) => rows.some((row) => Number.isFinite(Number(row[metric.key]))));
+}
+
+function chartValueKey(option, activePriceMetric) {
+  const yKey = option.spec?.y || "count";
+  if (yKey === "count") return "count";
+  const metrics = priceMetricsForRows(option.rows || []);
+  return metrics.some((metric) => metric.key === activePriceMetric) ? activePriceMetric : yKey;
+}
+
+function chartFilterKind(option, row) {
+  if (option.id === "timeline" || option.id === "matrix") return "decade";
+  return row.filterKind || "";
+}
+
+function chartFilterValue(option, row) {
+  if (option.id === "timeline") return row.label;
+  if (option.id === "matrix") return row.series;
+  return row.filterValue || row.label;
+}
+
+function handleChartRowClick(node, option, row) {
+  node.addEventListener("click", () => {
+    if (row.menuUid) {
+      selectMenu(row.menuUid);
+      return;
+    }
+    const wrapper = node.closest(".chat-message");
+    const filterKind = chartFilterKind(option, row);
+    const filterValue = chartFilterValue(option, row);
+    if (wrapper && filterKind && filterValue) applyChatResultFilter(wrapper, filterKind, filterValue);
+  });
+}
+
+function renderComparisonChart(option, activePriceMetric, onPriceMetricChange) {
+  const wrap = document.createElement("div");
+  wrap.className = `chat-chart chat-chart--${option.chartType || "bar"}`;
+  const metrics = priceMetricsForRows(option.rows || []);
+  if (metrics.length) {
+    const metricRow = document.createElement("div");
+    metricRow.className = "chat-price-lens-toggle";
+    metrics.forEach((metric) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "chat-facet-button";
-      button.dataset.kind = "placeKey";
-      button.dataset.value = item.name;
-      button.textContent = `${item.name} ${item.count}`;
-      button.addEventListener("click", () => applyChatResultFilter(overview.closest(".chat-message"), "placeKey", item.name));
-      placeRow.appendChild(button);
+      button.textContent = metric.label;
+      button.classList.toggle("active", metric.key === chartValueKey(option, activePriceMetric));
+      button.addEventListener("click", () => onPriceMetricChange(metric.key));
+      metricRow.appendChild(button);
     });
-    const count = document.createElement("span");
-    count.className = "chat-result-count";
-    count.textContent = `${message.matches.length} shown`;
-    placeRow.appendChild(count);
-    overview.appendChild(placeRow);
+    wrap.appendChild(metricRow);
   }
-  return overview;
+  const reason = document.createElement("p");
+  reason.className = "chat-chart__reason";
+  reason.textContent = option.reason || "";
+  wrap.appendChild(reason);
+
+  const rows = option.rows || [];
+  if (!rows.length) return wrap;
+  if (option.chartType === "table") {
+    wrap.appendChild(renderComparisonTable(option, rows, activePriceMetric));
+    return wrap;
+  }
+  if (option.chartType === "heatmap") {
+    wrap.appendChild(renderComparisonMatrix(option, rows, activePriceMetric));
+    return wrap;
+  }
+  wrap.appendChild(renderComparisonBars(option, rows, activePriceMetric));
+  return wrap;
+}
+
+function renderComparisonBars(option, rows, activePriceMetric) {
+  const chart = document.createElement("div");
+  chart.className = "chat-chart-bars";
+  const yKey = chartValueKey(option, activePriceMetric);
+  const max = Math.max(...rows.map((row) => Number(row[yKey] || 0)), 1);
+  rows.forEach((row) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "chat-chart-bar";
+    button.style.setProperty("--bar", `${Math.max(4, (Number(row[yKey] || 0) / max) * 100)}%`);
+    const label = document.createElement("span");
+    label.textContent = row.label;
+    const value = document.createElement("strong");
+    value.textContent = formatChartValue(row[yKey], yKey);
+    button.append(label, value);
+    handleChartRowClick(button, option, row);
+    chart.appendChild(button);
+  });
+  return chart;
+}
+
+function renderComparisonMatrix(option, rows, activePriceMetric) {
+  const chart = document.createElement("div");
+  chart.className = "chat-chart-matrix";
+  const yKey = chartValueKey(option, activePriceMetric);
+  const max = Math.max(...rows.map((row) => Number(row[yKey] || 0)), 1);
+  rows.forEach((row) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "chat-chart-cell";
+    button.style.setProperty("--heat", String(Math.max(0.12, Number(row[yKey] || 0) / max)));
+    const label = document.createElement("span");
+    label.textContent = `${row.label} / ${row.series}`;
+    const value = document.createElement("strong");
+    value.textContent = formatChartValue(row[yKey], yKey);
+    button.append(label, value);
+    handleChartRowClick(button, option, row);
+    chart.appendChild(button);
+  });
+  return chart;
+}
+
+function renderComparisonTable(option, rows, activePriceMetric) {
+  const table = document.createElement("div");
+  table.className = "chat-chart-table";
+  const yKey = chartValueKey(option, activePriceMetric);
+  rows.forEach((row) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "chat-chart-table-row";
+    const label = document.createElement("strong");
+    label.textContent = row.label;
+    const meta = document.createElement("span");
+    const price = yKey !== "count" && row[yKey] ? formatChartValue(row[yKey], yKey) : "";
+    meta.textContent = [row.series, price, row.evidence?.[0]].filter(Boolean).join(" / ");
+    button.append(label, meta);
+    handleChartRowClick(button, option, row);
+    table.appendChild(button);
+  });
+  return table;
 }
 
 function renderAdaptiveBrowser(analysis) {
@@ -1070,6 +1466,7 @@ function renderChatResult(match) {
   button.type = "button";
   button.dataset.decade = chatDecade(match);
   button.dataset.placeKey = match.place || "Unknown";
+  button.dataset.sourceKey = match.source || "Source";
   const title = document.createElement("strong");
   title.textContent = match.item || match.snippet || match.title;
   const meta = document.createElement("span");
@@ -1626,6 +2023,7 @@ function renderDetailSkeleton(menu) {
   els.detailCard.classList.remove("hidden");
   els.detailImage.alt = menu?.title || "Selected menu";
   setImageSource(els.detailImage, detailImageSource(menu?.imageUrl, menu?.sourceKey || "cia"), menu?.title);
+  configureDetailImageZoom(detailImageSource(menu?.imageUrl, menu?.sourceKey || "cia"), menu?.title, menu?.sourceKey || "cia");
   els.detailKicker.textContent = [displayDateLabel(menu), compact(menu?.country, "")].filter(Boolean).join(" / ");
   els.detailTitle.textContent = menu?.title || "Loading menu";
   els.detailMeta.replaceChildren();
@@ -1642,6 +2040,7 @@ function renderDetailSkeleton(menu) {
 function renderDetail(detail, menu) {
   els.detailImage.alt = detail.title;
   setImageSource(els.detailImage, detailImageSource(detail.imageUrl, detail.sourceKey || menu?.sourceKey || "cia"), detail.title || menu?.title);
+  configureDetailImageZoom(zoomableImageSource(detail.imageUrl, detail.sourceKey || menu?.sourceKey || "cia"), detail.title || menu?.title, detail.sourceKey || menu?.sourceKey || "cia");
   els.detailTitle.textContent = detail.title || menu?.title || "Menu";
   const estimate = dateEstimateFor(menu);
   const sourceDate = fieldValue(detail, "date") || menu?.date || "";
@@ -1677,6 +2076,136 @@ function renderDetail(detail, menu) {
 
   els.detailText.textContent = detail.text || "No transcript text available for this page.";
   renderPageStrip(detail);
+}
+
+function configureDetailImageZoom(src, title, sourceKey) {
+  const imageSrc = src || "";
+  els.detailImage.dataset.zoomSrc = imageSrc;
+  els.detailImage.dataset.zoomTitle = title || "Menu image";
+  els.detailImage.dataset.zoomSource = sourceKey || "";
+  const canZoom = Boolean(imageSrc && !imageSrc.startsWith("data:image/svg+xml"));
+  els.detailImage.classList.toggle("zoomable", canZoom);
+  if (els.detailImageZoom) {
+    els.detailImageZoom.hidden = !canZoom;
+    els.detailImageZoom.disabled = !canZoom;
+    els.detailImageZoom.onclick = canZoom ? () => openImageZoomer(imageSrc, title || "Menu image") : null;
+  }
+}
+
+els.detailImage?.addEventListener("click", () => {
+  if (!els.detailImage.classList.contains("zoomable")) return;
+  openImageZoomer(els.detailImage.dataset.zoomSrc || els.detailImage.src, els.detailImage.dataset.zoomTitle || els.detailImage.alt);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") document.querySelector(".image-zoomer")?.remove();
+});
+
+function openImageZoomer(src, title) {
+  if (!src) return;
+  document.querySelector(".image-zoomer")?.remove();
+  let scale = 1;
+  let x = 0;
+  let y = 0;
+  let dragging = false;
+  let startX = 0;
+  let startY = 0;
+  let originX = 0;
+  let originY = 0;
+
+  const overlay = document.createElement("div");
+  overlay.className = "image-zoomer";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", "Menu image zoom viewer");
+  const bar = document.createElement("div");
+  bar.className = "image-zoomer__bar";
+  const titleNode = document.createElement("strong");
+  titleNode.textContent = title || "Menu image";
+  const controls = document.createElement("div");
+  [
+    ["out", "Zoom out", "-"],
+    ["reset", "Reset zoom", "100%"],
+    ["in", "Zoom in", "+"],
+    ["close", "Close image viewer", "Close"],
+  ].forEach(([action, label, text]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.action = action;
+    button.setAttribute("aria-label", label);
+    button.textContent = text;
+    controls.appendChild(button);
+  });
+  bar.append(titleNode, controls);
+  const stage = document.createElement("div");
+  stage.className = "image-zoomer__stage";
+  const img = document.createElement("img");
+  img.alt = title || "Menu image";
+  img.src = src;
+  stage.appendChild(img);
+  overlay.append(bar, stage);
+
+  function applyTransform() {
+    img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  }
+
+  function setScale(nextScale) {
+    scale = clamp(nextScale, 0.6, 5);
+    if (scale === 1) {
+      x = 0;
+      y = 0;
+    }
+    applyTransform();
+  }
+
+  overlay.addEventListener("click", (event) => {
+    const action = event.target?.dataset?.action;
+    if (!action) {
+      if (event.target === overlay) overlay.remove();
+      return;
+    }
+    if (action === "close") overlay.remove();
+    if (action === "reset") setScale(1);
+    if (action === "in") setScale(scale * 1.25);
+    if (action === "out") setScale(scale / 1.25);
+  });
+
+  stage.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    setScale(scale * (event.deltaY < 0 ? 1.12 : 0.88));
+  }, { passive: false });
+
+  stage.addEventListener("pointerdown", (event) => {
+    dragging = true;
+    stage.setPointerCapture(event.pointerId);
+    startX = event.clientX;
+    startY = event.clientY;
+    originX = x;
+    originY = y;
+    stage.classList.add("dragging");
+  });
+
+  stage.addEventListener("pointermove", (event) => {
+    if (!dragging) return;
+    x = originX + event.clientX - startX;
+    y = originY + event.clientY - startY;
+    applyTransform();
+  });
+
+  stage.addEventListener("pointerup", (event) => {
+    dragging = false;
+    stage.releasePointerCapture(event.pointerId);
+    stage.classList.remove("dragging");
+  });
+
+  stage.addEventListener("pointercancel", () => {
+    dragging = false;
+    stage.classList.remove("dragging");
+  });
+
+  document.body.appendChild(overlay);
+  overlay.querySelector("[data-action='close']").focus({ preventScroll: true });
+  applyTransform();
 }
 
 function fieldValue(detail, key) {
@@ -1869,6 +2398,784 @@ function setActivity({ label, title, detail, progress = 0, indeterminate = false
   const percent = indeterminate ? 0 : Math.round(clamp(progress, 0, 1) * 100);
   els.activityProgress.style.width = `${percent}%`;
   els.activityProgressText.textContent = indeterminate ? "Working" : `${percent}%`;
+}
+
+function setupMobileLab() {
+  const params = new URLSearchParams(window.location.search);
+  state.mobileLab.enabled = params.get("mobileLab") === "1";
+  if (!state.mobileLab.enabled) return;
+  const requestedVariant = params.get("mobileVariant") || "hybrid";
+  state.mobileLab.variant = MOBILE_LAB_VARIANTS.has(requestedVariant) ? requestedVariant : "hybrid";
+  state.mobileLab.mode = MOBILE_LAB_MODE_BY_VARIANT[state.mobileLab.variant] || "discover";
+  document.body.classList.add("mobile-lab");
+  document.body.dataset.mobileVariant = state.mobileLab.variant;
+  mobileLabRoot();
+  renderMobileLab();
+}
+
+function mobileLabRoot() {
+  let root = document.querySelector("#mobile-lab-root");
+  if (!root) {
+    root = document.createElement("section");
+    root.id = "mobile-lab-root";
+    root.className = "mobile-lab-root";
+    root.setAttribute("aria-label", "MenuGraph mobile lab");
+    document.body.appendChild(root);
+  }
+  root.dataset.variant = state.mobileLab.variant;
+  root.dataset.mode = state.mobileLab.mode;
+  return root;
+}
+
+function mobileEl(tag, className = "", text = "") {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function mobileLabHref(variant) {
+  const params = new URLSearchParams(window.location.search);
+  params.set("mobileLab", "1");
+  params.set("mobileVariant", variant);
+  return `${window.location.pathname}?${params.toString()}`;
+}
+
+function setMobileLabMode(mode) {
+  state.mobileLab.mode = mode;
+  renderMobileLab();
+}
+
+function mobileLabMenus() {
+  return (state.visibleMenus.length ? state.visibleMenus : state.allMenus).filter(Boolean);
+}
+
+function mobileFindMenuById(id) {
+  const key = String(id || "");
+  return (
+    state.allMenus.find((menu) => menuKey(menu) === key || String(menu.id) === key) ||
+    state.visibleMenus.find((menu) => menuKey(menu) === key || String(menu.id) === key) ||
+    null
+  );
+}
+
+function mobileFeaturedMenus(limit = 24) {
+  return [...mobileLabMenus()]
+    .sort((a, b) => mobileMenuScore(b) - mobileMenuScore(a) || String(a.title || "").localeCompare(String(b.title || "")))
+    .slice(0, limit);
+}
+
+function mobileMenuScore(menu) {
+  return (
+    (menu?.imageUrl ? 6 : 0) +
+    Math.min(Number(menu?.topDishes?.length || 0), 8) +
+    Math.min(Number(menu?.priceCount || 0), 8) +
+    Math.min(Number(menu?.matchCount || 0), 5) +
+    (effectiveYear(menu) ? 2 : 0)
+  );
+}
+
+function mobilePlaceLabel(menu) {
+  return [menu?.city, menu?.state, menu?.country].filter(Boolean).join(", ") || "Place unknown";
+}
+
+function mobileDateConfidence(menu) {
+  if (menu?.date) return menu.dateConfidence && menu.dateConfidence !== "unknown" ? menu.dateConfidence : "source date";
+  const estimate = dateEstimateFor(menu);
+  if (estimate) return `${estimate.confidence} estimate`;
+  return "date unknown";
+}
+
+function mobileProvenanceParts(menu) {
+  return [sourceLabel(menu), displayDateLabel(menu), mobilePlaceLabel(menu), mobileDateConfidence(menu)].filter(Boolean);
+}
+
+function renderMobileLab() {
+  if (!state.mobileLab.enabled) return;
+  const root = mobileLabRoot();
+  root.replaceChildren();
+
+  const screen = mobileEl("div", "mobile-lab-screen");
+  screen.append(renderMobileLabHeader(), renderMobileLabContext(), renderMobileLabView());
+  root.append(screen, renderMobileEvidenceTray(), renderMobileBottomNav());
+  if (state.mobileLab.detailOpen) {
+    root.append(renderMobileDetailBackdrop(), renderMobileDetailSheet());
+  }
+}
+
+function renderMobileLabHeader() {
+  const header = mobileEl("header", "mobile-lab-header");
+  const copy = mobileEl("div", "mobile-lab-header__copy");
+  const eyebrow = mobileEl("p", "mobile-lab-eyebrow", "Mobile Lab");
+  const title = mobileEl("h1", "", "MenuGraph");
+  const subtitle = mobileEl("span", "", "Pocket culinary time machine");
+  copy.append(eyebrow, title, subtitle);
+
+  const variants = mobileEl("nav", "mobile-variant-switcher");
+  variants.setAttribute("aria-label", "Mobile lab variants");
+  ["hybrid", "cards", "journey", "chat", "recipe"].forEach((variant) => {
+    const link = mobileEl("a", "mobile-variant-chip", titleCase(variant));
+    link.href = mobileLabHref(variant);
+    link.setAttribute("aria-current", state.mobileLab.variant === variant ? "page" : "false");
+    variants.appendChild(link);
+  });
+
+  header.append(copy, variants);
+  return header;
+}
+
+function renderMobileLabContext() {
+  const bar = mobileEl("div", "mobile-context-bar");
+  const menus = mobileLabMenus();
+  const datedYears = menus.map(effectiveYear).filter((year) => Number.isFinite(Number(year)));
+  const sourceText = state.filters.source === "all" ? "All sources" : state.filters.source === "matched" ? "Matched records" : state.filters.source.toUpperCase();
+  const chips = [
+    `${menus.length.toLocaleString()} visible`,
+    sourceText,
+    datedYears.length ? `${Math.min(...datedYears)}-${Math.max(...datedYears)}` : "dates mixed",
+    state.selectedOntologyTerm?.term ? titleCase(state.selectedOntologyTerm.term) : "",
+    state.mobileLab.trayIds.length ? `${state.mobileLab.trayIds.length} in tray` : "",
+  ].filter(Boolean);
+  chips.forEach((chip) => bar.appendChild(mobileEl("span", "mobile-context-chip", chip)));
+  if (state.filters.search || state.filters.decade || state.filters.type || state.filters.place || state.selectedOntologyTerm) {
+    const clear = mobileEl("button", "mobile-context-clear", "Clear");
+    clear.type = "button";
+    clear.addEventListener("click", () => {
+      state.filters.search = "";
+      state.filters.decade = null;
+      state.filters.type = null;
+      state.filters.place = null;
+      state.selectedOntologyTerm = null;
+      state.selectedOntologyIds = null;
+      els.searchInput.value = "";
+      update();
+    });
+    bar.appendChild(clear);
+  }
+  return bar;
+}
+
+function renderMobileLabView() {
+  const view = mobileEl("main", `mobile-lab-view mobile-lab-view--${state.mobileLab.mode}`);
+  if (!state.allMenus.length) {
+    const loading = mobileEl("div", "mobile-lab-loading");
+    loading.append(mobileEl("strong", "", "Loading archive"));
+    loading.append(mobileEl("span", "", "Preparing mobile experiment surfaces from static MenuGraph data."));
+    view.appendChild(loading);
+    return view;
+  }
+  const renderers = {
+    discover: renderMobileDiscover,
+    data: renderMobileData,
+    menus: renderMobileMenus,
+    ask: renderMobileAsk,
+    inspire: renderMobileInspire,
+  };
+  view.appendChild((renderers[state.mobileLab.mode] || renderMobileDiscover)());
+  return view;
+}
+
+function renderMobileCommandForm(compactMode = false) {
+  const form = mobileEl("form", compactMode ? "mobile-command mobile-command--compact" : "mobile-command");
+  const input = document.createElement("input");
+  input.type = "search";
+  input.value = state.mobileLab.command;
+  input.placeholder = compactMode ? "Search menus, places, dishes..." : "lobster boston 1900 / ask oysters / inspire dinner";
+  input.setAttribute("aria-label", "Mobile lab command");
+  input.addEventListener("input", () => {
+    state.mobileLab.command = input.value;
+  });
+  const button = mobileEl("button", "", compactMode ? "Go" : "Explore");
+  button.type = "submit";
+  form.append(input, button);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handleMobileCommand(input.value);
+  });
+  return form;
+}
+
+function handleMobileCommand(value) {
+  const text = compact(value, "");
+  state.mobileLab.command = text;
+  if (!text) return;
+  const normalized = text.toLowerCase();
+  if (/\b(ask|why|how|compare|what)\b/.test(normalized)) {
+    state.chatDraft = text.replace(/^ask\s+/i, "");
+    state.mobileLab.mode = "ask";
+    renderMobileLab();
+    return;
+  }
+  if (/\b(inspire|cook|recipe|dinner|menu)\b/.test(normalized)) {
+    state.filters.search = text.replace(/\b(inspire|cook|recipe|dinner|menu)\b/gi, "").trim();
+    els.searchInput.value = state.filters.search;
+    state.mobileLab.mode = "inspire";
+    update();
+    return;
+  }
+  if (/\b(price|prices|cost|costs|value)\b/.test(normalized)) {
+    state.filters.search = text.replace(/\b(show|price|prices|cost|costs|value)\b/gi, "").trim();
+    els.searchInput.value = state.filters.search;
+    state.activeLens = "prices";
+    activateLensButton("prices");
+    state.mobileLab.mode = "data";
+    update();
+    return;
+  }
+  state.filters.search = text;
+  els.searchInput.value = text;
+  state.mobileLab.mode = "menus";
+  update();
+}
+
+function renderMobileDiscover() {
+  const wrap = mobileEl("section", "mobile-discover");
+  const hero = mobileEl("div", "mobile-hero");
+  const title = mobileEl("h2", "", "Start with a craving, a city, a decade, or a price mystery.");
+  const stats = mobileEl("p", "", mobileCorpusLine());
+  hero.append(title, stats, renderMobileCommandForm(false));
+
+  const actions = mobileEl("div", "mobile-primary-actions");
+  [
+    ["Surprise me", () => openMobileLabDetail(randomMobileMenu())],
+    ["Price shockers", () => activateMobileLabLens("prices")],
+    ["Cook from evidence", () => setMobileLabMode("inspire")],
+  ].forEach(([label, action]) => {
+    const button = mobileEl("button", "", label);
+    button.type = "button";
+    button.addEventListener("click", action);
+    actions.appendChild(button);
+  });
+  hero.appendChild(actions);
+  wrap.appendChild(hero);
+
+  const sparks = mobileEl("section", "mobile-section");
+  sparks.appendChild(renderMobileSectionHeader("Archive sparks", "Fast routes into evidence, not generated facts."));
+  const grid = mobileEl("div", "mobile-story-grid");
+  mobileStoryCards().forEach((card) => grid.appendChild(renderMobileStoryCard(card)));
+  sparks.appendChild(grid);
+  wrap.appendChild(sparks);
+
+  const preview = mobileEl("section", "mobile-section");
+  preview.appendChild(renderMobileSectionHeader("Image-led finds", "Tap a card for a bottom-sheet inspection."));
+  const rail = mobileEl("div", "mobile-card-rail");
+  mobileFeaturedMenus(8).forEach((menu) => rail.appendChild(renderMobileMenuCard(menu, true)));
+  preview.appendChild(rail);
+  wrap.appendChild(preview);
+  return wrap;
+}
+
+function mobileCorpusLine() {
+  const menus = state.allMenus;
+  const sources = uniqueCount(menus, (menu) => sourceLabel(menu))
+    .slice(0, 2)
+    .map((item) => `${item.name} ${item.count.toLocaleString()}`)
+    .join(" / ");
+  const years = menus.map(effectiveYear).filter((year) => Number.isFinite(Number(year)));
+  const span = years.length ? `${Math.min(...years)}-${Math.max(...years)}` : "mixed dates";
+  return `${menus.length.toLocaleString()} menus / ${sources || "source mix"} / ${span}`;
+}
+
+function randomMobileMenu() {
+  const menus = mobileFeaturedMenus(80);
+  return menus[Math.floor(Math.random() * Math.max(menus.length, 1))] || state.allMenus[0];
+}
+
+function mobileStoryCards() {
+  const term = state.ontology?.categories?.ingredients?.[0] || state.ontology?.categories?.dishes?.[0];
+  const priceCount = Number(state.prices?.summary?.total || 0);
+  const matched = state.allMenus.filter((menu) => Number(menu.matchCount || 0)).length;
+  return [
+    {
+      kicker: "Story mode",
+      title: "What counted as luxury?",
+      body: priceCount ? `${priceCount.toLocaleString()} extracted price observations can be browsed without treating fuzzy OCR as exact.` : "Use the price lens once the static price index loads.",
+      actionLabel: "Open prices",
+      action: () => activateMobileLabLens("prices"),
+    },
+    {
+      kicker: "Food graph",
+      title: term ? `Follow ${titleCase(term.term)}` : "Follow an ingredient trail",
+      body: term ? `${Number(term.count || 0).toLocaleString()} indexed records carry this term across menus, decades, and sources.` : "Ontology terms become tappable trails as the food index loads.",
+      actionLabel: "Open food",
+      action: () => {
+        if (term) selectOntologyTerm(term);
+        activateMobileLabLens("ontology");
+      },
+    },
+    {
+      kicker: "Archive twins",
+      title: "Compare cross-source echoes",
+      body: matched ? `${matched.toLocaleString()} menus have candidate cross-source matches with caveats carried into detail sheets.` : "Matched menus will surface here when source relationships are available.",
+      actionLabel: "Matched menus",
+      action: () => {
+        state.filters.source = "matched";
+        state.mobileLab.mode = "menus";
+        update();
+      },
+    },
+  ];
+}
+
+function renderMobileStoryCard(card) {
+  const item = mobileEl("article", "mobile-story-card");
+  item.append(mobileEl("span", "mobile-kicker", card.kicker), mobileEl("h3", "", card.title), mobileEl("p", "", card.body));
+  const button = mobileEl("button", "", card.actionLabel);
+  button.type = "button";
+  button.addEventListener("click", card.action);
+  item.appendChild(button);
+  return item;
+}
+
+function renderMobileData() {
+  const wrap = mobileEl("section", "mobile-data");
+  wrap.appendChild(renderMobileSectionHeader("Data lenses", "Swipe-sized summaries that can become filters or deeper views."));
+  const grid = mobileEl("div", "mobile-lens-grid");
+  [
+    {
+      lens: "time",
+      title: "Time",
+      body: "Decades and uncertain dates stay visible.",
+      rows: uniqueCount(mobileLabMenus(), (menu) => effectiveDecade(menu)).slice(0, 8),
+    },
+    {
+      lens: "place",
+      title: "Place",
+      body: "Cities, states, and countries are entry points.",
+      rows: uniqueCount(mobileLabMenus(), (menu) => [menu.city, menu.state, menu.country]).slice(0, 8),
+    },
+    {
+      lens: "ontology",
+      title: "Food",
+      body: "Ingredients and dishes act like knowledge-graph handles.",
+      rows: (state.ontology?.categories?.[state.ontologyCategory] || []).slice(0, 8).map((term) => ({ name: titleCase(term.term), count: term.count })),
+    },
+    {
+      lens: "prices",
+      title: "Prices",
+      body: "Indexed observations carry scale and confidence caveats.",
+      rows: mobilePriceSummaryRows(),
+    },
+  ].forEach((card) => grid.appendChild(renderMobileLensCard(card)));
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+function mobilePriceSummaryRows() {
+  const records = priceRecordsForVisibleMenus();
+  if (!records.length) return [{ name: "No indexed prices in view", count: 0 }];
+  return uniqueCount(records, (record) => record.currency || "currency").slice(0, 8);
+}
+
+function renderMobileLensCard(card) {
+  const item = mobileEl("article", "mobile-lens-card");
+  item.dataset.mobileLens = card.lens;
+  const head = mobileEl("div", "mobile-lens-card__head");
+  head.append(mobileEl("span", "mobile-kicker", "Lens"), mobileEl("h3", "", card.title));
+  const body = mobileEl("p", "", card.body);
+  const bars = mobileEl("div", "mobile-mini-bars");
+  const max = Math.max(...card.rows.map((row) => Number(row.count || 0)), 1);
+  card.rows.forEach((row) => {
+    const button = mobileEl("button", "", "");
+    button.type = "button";
+    button.style.setProperty("--bar", `${Math.max(6, (Number(row.count || 0) / max) * 100)}%`);
+    const label = mobileEl("span", "", row.name || row.term || "Unknown");
+    const count = mobileEl("strong", "", Number(row.count || 0).toLocaleString());
+    button.append(label, count);
+    button.addEventListener("click", () => {
+      if (card.lens === "place") {
+        state.filters.place = String(row.name || "").toLowerCase();
+        state.mobileLab.mode = "menus";
+        update();
+      } else {
+        activateMobileLabLens(card.lens);
+      }
+    });
+    bars.appendChild(button);
+  });
+  const open = mobileEl("button", "mobile-lens-open", `Open ${card.title}`);
+  open.type = "button";
+  open.addEventListener("click", () => activateMobileLabLens(card.lens));
+  item.append(head, body, bars, open);
+  return item;
+}
+
+function activateMobileLabLens(lens) {
+  state.activeLens = lens;
+  activateLensButton(lens);
+  renderViz();
+  state.mobileLab.mode = "data";
+  if (lens === "prices") describePricesLoaded();
+  if (lens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
+  renderMobileLab();
+}
+
+function renderMobileMenus() {
+  const wrap = mobileEl("section", "mobile-menus");
+  wrap.append(renderMobileSectionHeader("Menu cards", "Image, provenance, evidence actions, then detail sheet."), renderMobileCommandForm(true));
+  const deck = mobileEl("div", "mobile-menu-deck");
+  mobileFeaturedMenus(28).forEach((menu) => deck.appendChild(renderMobileMenuCard(menu, false)));
+  wrap.appendChild(deck);
+  return wrap;
+}
+
+function renderMobileMenuCard(menu, compactCard = false) {
+  const card = mobileEl("article", compactCard ? "mobile-menu-card mobile-menu-card--compact" : "mobile-menu-card");
+  card.tabIndex = 0;
+  card.addEventListener("click", (event) => {
+    if (event.target.closest("button, a")) return;
+    openMobileLabDetail(menu);
+  });
+  card.addEventListener("keyup", (event) => {
+    if (event.key === "Enter") openMobileLabDetail(menu);
+  });
+
+  const img = document.createElement("img");
+  img.alt = "";
+  img.loading = "lazy";
+  setImageSource(img, menu.imageUrl, menu.title);
+  const body = mobileEl("div", "mobile-menu-card__body");
+  body.append(mobileEl("h3", "", menu.title || "Untitled menu"), renderMobileProvenance(menu));
+  const dishes = (menu.topDishes || []).slice(0, compactCard ? 2 : 4);
+  if (dishes.length) {
+    const dishRow = mobileEl("div", "mobile-term-row");
+    dishes.forEach((dish) => dishRow.appendChild(mobileEl("span", "", dish)));
+    body.appendChild(dishRow);
+  }
+  const actions = mobileEl("div", "mobile-card-actions");
+  const open = mobileEl("button", "", "Open");
+  open.type = "button";
+  open.addEventListener("click", () => openMobileLabDetail(menu));
+  const tray = mobileEl("button", "", mobileTrayHas(menu) ? "Saved" : "Tray");
+  tray.type = "button";
+  tray.addEventListener("click", () => toggleMobileTray(menu));
+  actions.append(open, tray);
+  body.appendChild(actions);
+  card.append(img, body);
+  return card;
+}
+
+function renderMobileProvenance(menu) {
+  const list = mobileEl("div", "mobile-provenance");
+  mobileProvenanceParts(menu).forEach((part) => list.appendChild(mobileEl("span", "", part)));
+  return list;
+}
+
+function renderMobileAsk() {
+  const wrap = mobileEl("section", "mobile-lab-ask");
+  wrap.appendChild(renderMobileSectionHeader("Ask", "First-class chat stays locked until the shared secret is provided."));
+  if (!state.askUnlocked) {
+    wrap.appendChild(renderMobileAskGate());
+    return wrap;
+  }
+
+  const form = mobileEl("form", "mobile-ask-form chat-form");
+  const input = document.createElement("input");
+  input.type = "search";
+  input.value = state.chatDraft;
+  input.placeholder = "Ask about current filters, evidence, prices, places...";
+  input.addEventListener("input", () => {
+    state.chatDraft = input.value;
+  });
+  const button = mobileEl("button", "", state.chatBusy ? "Searching" : "Ask");
+  button.type = "submit";
+  button.disabled = state.chatBusy;
+  form.append(input, button);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    askChat(input.value);
+  });
+  wrap.appendChild(form);
+
+  const suggestions = mobileEl("div", "mobile-suggestion-row");
+  mobileAskSuggestions().forEach((suggestion) => {
+    const chip = mobileEl("button", "", suggestion);
+    chip.type = "button";
+    chip.addEventListener("click", () => askChat(suggestion));
+    suggestions.appendChild(chip);
+  });
+  wrap.appendChild(suggestions);
+
+  const messages = mobileEl("div", "mobile-chat-stack chat-messages");
+  if (!state.chatMessages.length) messages.appendChild(mobileEl("div", "chat-empty", "Ask can reference visible filters, selected evidence, and price rows after unlock."));
+  state.chatMessages.forEach((message) => messages.appendChild(renderChatMessage(message)));
+  if (state.chatBusy) messages.appendChild(mobileEl("div", "chat-message chat-message--assistant", "Searching the static corpus..."));
+  wrap.appendChild(messages);
+  return wrap;
+}
+
+function renderMobileAskGate() {
+  const gate = mobileEl("form", "ask-gate mobile-ask-gate");
+  const copy = mobileEl("div", "");
+  copy.append(mobileEl("strong", "", "Unlock Ask"), mobileEl("span", "", "The mobile lab reuses the existing shared-secret gate and static retrieval fallback."));
+  const row = mobileEl("div", "ask-gate__row");
+  const input = document.createElement("input");
+  input.type = "password";
+  input.autocomplete = "current-password";
+  input.placeholder = "Shared secret";
+  const button = mobileEl("button", "", "Enter");
+  button.type = "submit";
+  row.append(input, button);
+  gate.append(copy, row);
+  if (state.askError) gate.appendChild(mobileEl("small", "chat-warning", state.askError));
+  gate.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    button.disabled = true;
+    button.textContent = "Checking";
+    try {
+      await unlockAsk(input.value);
+      state.mobileLab.mode = "ask";
+    } catch (error) {
+      setActivity({ label: "Ask Locked", title: "Shared secret required", detail: error.message, progress: 1 });
+    } finally {
+      renderMobileLab();
+    }
+  });
+  return gate;
+}
+
+function mobileAskSuggestions() {
+  const menu = state.mobileLab.detailMenu || mobileTrayMenus()[0] || mobileFeaturedMenus(1)[0];
+  const context = menu ? `${displayDateLabel(menu)} ${mobilePlaceLabel(menu)}` : "current filters";
+  return [
+    `compare prices in ${context}`,
+    state.selectedOntologyTerm ? `where does ${state.selectedOntologyTerm.term} appear over time?` : "what dishes cluster by decade?",
+    "show source evidence for oysters and champagne",
+  ];
+}
+
+function renderMobileInspire() {
+  const wrap = mobileEl("section", "mobile-inspire");
+  wrap.appendChild(renderMobileSectionHeader("Cook From The Archive", "Evidence-backed prompts, not claims that menus contain exact recipes."));
+  const caveat = mobileEl("div", "mobile-caveat", "Caveat: these are modern interpretation sketches inspired by menu evidence. Open the source menu before making historical claims.");
+  wrap.appendChild(caveat);
+  const grid = mobileEl("div", "mobile-inspiration-grid");
+  mobileInspirationSeeds().forEach((seed, index) => grid.appendChild(renderMobileInspirationCard(seed, index)));
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+function mobileInspirationSeeds() {
+  const seeded = [
+    state.mobileLab.detailMenu,
+    ...mobileTrayMenus(),
+    ...mobileFeaturedMenus(12),
+  ].filter(Boolean);
+  const seen = new Set();
+  return seeded.filter((menu) => {
+    const key = menuKey(menu);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 8);
+}
+
+function renderMobileInspirationCard(menu, index) {
+  const dishes = (menu.topDishes || []).filter(Boolean);
+  const lead = dishes[index % Math.max(dishes.length, 1)] || menu.restaurant || menu.types?.[0] || "archive menu";
+  const support = dishes.filter((dish) => dish !== lead).slice(0, 3);
+  const card = mobileEl("article", "mobile-inspiration-card");
+  card.append(
+    mobileEl("span", "mobile-kicker", "Inspired by menu evidence"),
+    mobileEl("h3", "", `Modern sketch: ${titleCase(lead)}`),
+    renderMobileProvenance(menu)
+  );
+  const prompt = mobileEl("p", "", support.length
+    ? `Use the source menu as a prompt board: pair "${lead}" with visible menu terms like ${support.map((item) => `"${item}"`).join(", ")}.`
+    : `Use the source menu as a prompt board for service style, naming, and period context before inventing ingredients.`
+  );
+  const caveat = mobileEl("p", "mobile-inspiration-card__caveat", "No exact recipe is asserted; this is a clearly labeled modern interpretation.");
+  const evidence = mobileEl("div", "mobile-evidence-links");
+  const open = mobileEl("button", "", "Open evidence");
+  open.type = "button";
+  open.addEventListener("click", () => openMobileLabDetail(menu));
+  const tray = mobileEl("button", "", mobileTrayHas(menu) ? "Saved" : "Add evidence");
+  tray.type = "button";
+  tray.addEventListener("click", () => toggleMobileTray(menu));
+  evidence.append(open, tray);
+  if (menu.itemUrl) {
+    const link = mobileEl("a", "", "Source link");
+    link.href = menu.itemUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    evidence.appendChild(link);
+  }
+  card.append(prompt, caveat, evidence);
+  return card;
+}
+
+function renderMobileBottomNav() {
+  const nav = mobileEl("nav", "mobile-bottom-nav");
+  nav.setAttribute("aria-label", "Mobile lab modes");
+  [
+    ["discover", "Discover"],
+    ["data", "Data"],
+    ["menus", "Menus"],
+    ["ask", "Ask"],
+    ["inspire", "Inspire"],
+  ].forEach(([mode, label]) => {
+    const button = mobileEl("button", "", label);
+    button.type = "button";
+    button.dataset.mobileMode = mode;
+    button.setAttribute("aria-current", state.mobileLab.mode === mode ? "page" : "false");
+    button.addEventListener("click", () => setMobileLabMode(mode));
+    nav.appendChild(button);
+  });
+  return nav;
+}
+
+function renderMobileEvidenceTray() {
+  const trayMenus = mobileTrayMenus();
+  const tray = mobileEl("aside", "mobile-evidence-tray");
+  tray.hidden = !trayMenus.length;
+  if (!trayMenus.length) return tray;
+  tray.appendChild(mobileEl("strong", "", `${trayMenus.length} evidence item${trayMenus.length === 1 ? "" : "s"}`));
+  const rail = mobileEl("div", "mobile-evidence-tray__rail");
+  trayMenus.forEach((menu) => {
+    const button = mobileEl("button", "", menu.title || "Menu");
+    button.type = "button";
+    button.addEventListener("click", () => openMobileLabDetail(menu));
+    rail.appendChild(button);
+  });
+  tray.appendChild(rail);
+  return tray;
+}
+
+function mobileTrayMenus() {
+  return state.mobileLab.trayIds.map(mobileFindMenuById).filter(Boolean);
+}
+
+function mobileTrayHas(menu) {
+  return state.mobileLab.trayIds.includes(menuKey(menu));
+}
+
+function toggleMobileTray(menu) {
+  const key = menuKey(menu);
+  if (!key) return;
+  if (state.mobileLab.trayIds.includes(key)) {
+    state.mobileLab.trayIds = state.mobileLab.trayIds.filter((item) => item !== key);
+  } else {
+    state.mobileLab.trayIds = [...state.mobileLab.trayIds, key].slice(-6);
+  }
+  renderMobileLab();
+}
+
+async function openMobileLabDetail(menuOrId) {
+  const menu = typeof menuOrId === "object" ? menuOrId : mobileFindMenuById(menuOrId);
+  if (!menu) return;
+  const key = menuKey(menu);
+  state.mobileLab.detailId = key;
+  state.mobileLab.detailMenu = menu;
+  state.mobileLab.detailData = state.detailCache.get(key) || null;
+  state.mobileLab.detailError = "";
+  state.mobileLab.detailOpen = true;
+  state.mobileLab.sheetState = "half";
+  renderMobileLab();
+  try {
+    const detail = state.detailCache.get(key) || (await getJson(`/api/item/${encodeURIComponent(key)}`));
+    state.detailCache.set(key, detail);
+    if (state.mobileLab.detailId === key) {
+      state.mobileLab.detailData = detail;
+      renderMobileLab();
+    }
+  } catch (error) {
+    if (state.mobileLab.detailId === key) {
+      state.mobileLab.detailError = error.message;
+      renderMobileLab();
+    }
+  }
+}
+
+function renderMobileDetailBackdrop() {
+  const backdrop = mobileEl("button", "mobile-detail-backdrop");
+  backdrop.type = "button";
+  backdrop.setAttribute("aria-label", "Close detail sheet");
+  backdrop.addEventListener("click", closeMobileLabDetail);
+  return backdrop;
+}
+
+function closeMobileLabDetail() {
+  state.mobileLab.detailOpen = false;
+  renderMobileLab();
+}
+
+function renderMobileDetailSheet() {
+  const menu = state.mobileLab.detailMenu || mobileFindMenuById(state.mobileLab.detailId);
+  const detail = state.mobileLab.detailData;
+  const sheet = mobileEl("section", `mobile-detail-sheet mobile-detail-sheet--${state.mobileLab.sheetState}`);
+  sheet.setAttribute("role", "dialog");
+  sheet.setAttribute("aria-modal", "true");
+  sheet.setAttribute("aria-label", "Menu detail");
+
+  const handle = mobileEl("div", "mobile-detail-sheet__handle");
+  const bar = mobileEl("div", "mobile-detail-sheet__bar");
+  const title = mobileEl("strong", "", menu?.title || detail?.title || "Menu detail");
+  const controls = mobileEl("div", "");
+  const resize = mobileEl("button", "", state.mobileLab.sheetState === "full" ? "Half" : "Full");
+  resize.type = "button";
+  resize.addEventListener("click", () => {
+    state.mobileLab.sheetState = state.mobileLab.sheetState === "full" ? "half" : "full";
+    renderMobileLab();
+  });
+  const close = mobileEl("button", "", "Close");
+  close.type = "button";
+  close.addEventListener("click", closeMobileLabDetail);
+  controls.append(resize, close);
+  bar.append(title, controls);
+
+  const body = mobileEl("div", "mobile-detail-sheet__body");
+  if (menu) {
+    const img = document.createElement("img");
+    img.alt = "";
+    setImageSource(img, detailImageSource(detail?.imageUrl || menu.imageUrl, detail?.sourceKey || menu.sourceKey || "cia"), detail?.title || menu.title);
+    body.appendChild(img);
+    body.appendChild(renderMobileProvenance(menu));
+  }
+  if (state.mobileLab.detailError) {
+    body.appendChild(mobileEl("p", "mobile-caveat", state.mobileLab.detailError));
+  } else if (!detail) {
+    body.appendChild(mobileEl("p", "mobile-caveat", "Loading source record, transcript sample, and source link..."));
+  } else {
+    const text = mobileEl("p", "mobile-detail-transcript", detail.text || "No transcript text available for this page.");
+    body.appendChild(text);
+  }
+
+  const actions = mobileEl("div", "mobile-detail-actions");
+  if (menu) {
+    const tray = mobileEl("button", "", mobileTrayHas(menu) ? "Remove from tray" : "Save evidence");
+    tray.type = "button";
+    tray.addEventListener("click", () => toggleMobileTray(menu));
+    const ask = mobileEl("button", "", "Ask about this");
+    ask.type = "button";
+    ask.addEventListener("click", () => {
+      state.chatDraft = `What can MenuGraph tell me about ${menu.title}?`;
+      state.mobileLab.mode = "ask";
+      closeMobileLabDetail();
+    });
+    const inspire = mobileEl("button", "", "Inspire");
+    inspire.type = "button";
+    inspire.addEventListener("click", () => {
+      state.mobileLab.mode = "inspire";
+      closeMobileLabDetail();
+    });
+    actions.append(tray, ask, inspire);
+  }
+  if (detail?.sourceUrl || menu?.itemUrl) {
+    const link = mobileEl("a", "", "Open source");
+    link.href = detail?.sourceUrl || menu.itemUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    actions.appendChild(link);
+  }
+  body.appendChild(actions);
+  sheet.append(handle, bar, body);
+  return sheet;
+}
+
+function renderMobileSectionHeader(title, subtitle) {
+  const header = mobileEl("div", "mobile-section-header");
+  header.append(mobileEl("h2", "", title), mobileEl("p", "", subtitle));
+  return header;
 }
 
 function describeOntologyLoaded(ontology) {
@@ -2093,5 +3400,6 @@ function showFatal(error) {
   });
 }
 
+setupMobileLab();
 bindEvents();
 loadMenus().catch(showFatal);
