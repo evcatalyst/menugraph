@@ -1553,12 +1553,16 @@ function askEl(tag, className = "", text = "") {
 
 function setupAskEntry() {
   const params = new URLSearchParams(window.location.search);
-  state.askEntry.enabled = params.get("askMenuGraph") === "1" || params.get("ask") === "1";
+  state.askEntry.enabled = params.get("askMenuGraph") === "1" || params.get("ask") === "1" || isAskEntryPath();
   if (!state.askEntry.enabled) return;
   document.body.classList.add("ask-entry");
   loadAskEntrySessions();
   askEntryRoot();
   renderAskEntry();
+}
+
+function isAskEntryPath() {
+  return window.location.pathname.replace(/\/+$/, "").endsWith("/chat");
 }
 
 function askEntryRoot() {
@@ -1577,6 +1581,10 @@ function askEntryBackHref() {
   params.delete("askMenuGraph");
   params.delete("ask");
   const query = params.toString();
+  if (isAskEntryPath()) {
+    const rootPath = window.location.pathname.replace(/\/+$/, "").replace(/\/chat$/, "/");
+    return `${rootPath}${query ? `?${query}` : ""}`;
+  }
   return `${window.location.pathname}${query ? `?${query}` : ""}`;
 }
 

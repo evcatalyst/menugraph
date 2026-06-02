@@ -50,11 +50,13 @@ The published URL is:
 https://evcatalyst.github.io/menugraph/
 ```
 
-The dedicated Ask MenuGraph experiment is query-routed so it can be tested without replacing the workbench:
+The dedicated Ask MenuGraph experiment has its own static entry point:
 
 ```text
-https://evcatalyst.github.io/menugraph/?askMenuGraph=1
+https://evcatalyst.github.io/menugraph/chat/
 ```
+
+The reversible query route remains available at `?askMenuGraph=1`.
 
 Regenerate the committed Pages snapshot with:
 
