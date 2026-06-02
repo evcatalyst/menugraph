@@ -6,16 +6,18 @@
     <title>MenuGraph</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
+  <body class="cc-minimal-refresh">
     <main class="shell">
       <section class="workspace" aria-label="Historical menu explorer">
         <header class="topbar">
-          <div>
+          <div class="topbar__identity">
             <p class="eyebrow">CIA Historical Menus</p>
             <h1>MenuGraph</h1>
+            <p class="topbar__summary">Explore historical menus across time, place, source, food terms, and prices.</p>
           </div>
-          <div class="topbar__meta">
+          <div class="topbar__meta" aria-label="Collection status">
             <span id="record-count">Loading archive...</span>
+            <span class="topbar__lens-summary">Time, place, source, food, and price lenses</span>
             <a href="https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1" target="_blank" rel="noreferrer">Source</a>
           </div>
         </header>
