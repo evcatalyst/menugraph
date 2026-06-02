@@ -50,6 +50,12 @@ The published URL is:
 https://evcatalyst.github.io/menugraph/
 ```
 
+The dedicated Ask MenuGraph experiment is query-routed so it can be tested without replacing the workbench:
+
+```text
+https://evcatalyst.github.io/menugraph/?askMenuGraph=1
+```
+
 Regenerate the committed Pages snapshot with:
 
 ```bash

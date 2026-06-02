@@ -13,6 +13,11 @@ const state = {
   askUnlocked: false,
   askSecretHash: "",
   askError: "",
+  askEntry: {
+    enabled: false,
+    sessionId: "",
+    sessions: [],
+  },
   dateEstimates: null,
   dateEstimateByMenu: new Map(),
   includeEstimatedDates: true,
@@ -56,6 +61,9 @@ const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 const DEFAULT_REMOTE_CHAT_API_BASE = "https://gitbrain-menugraph.netlify.app";
 const ASK_SECRET_HASH = "8f388ed94f5ff3d417b9b3f897bf9fc4d56a2d0dd6778905d8440a938558d30a";
 const ASK_SECRET_STORAGE_KEY = "menugraph:ask-secret-hash:v1";
+const ASK_ENTRY_SESSION_STORAGE_KEY = "menugraph:ask-entry-sessions:v1";
+const ASK_ENTRY_ACTIVE_SESSION_KEY = "menugraph:ask-entry-active:v1";
+const ASK_ENTRY_MAX_SESSIONS = 8;
 const MOBILE_LAB_VARIANTS = new Set(["cards", "journey", "chat", "recipe", "hybrid"]);
 const MOBILE_LAB_MODE_BY_VARIANT = {
   cards: "menus",
@@ -503,6 +511,7 @@ function update() {
   renderViz();
   renderResults();
   renderMobileLab();
+  renderAskEntry();
 }
 
 function renderSourceControls() {
@@ -741,6 +750,7 @@ async function askChat(question) {
     activateLensButton("chat");
     state.askError = "Enter the shared secret to use Ask MenuGraph.";
     renderViz();
+    renderAskEntry();
     return;
   }
   state.activeLens = "chat";
@@ -749,7 +759,9 @@ async function askChat(question) {
   state.chatMessages.push({ role: "user", content: text });
   state.chatDraft = "";
   state.chatBusy = true;
+  persistAskEntrySession();
   renderViz();
+  renderAskEntry();
   setActivity({
     label: "Chat Query",
     title: "Searching menu, dish, price, and date indexes",
@@ -766,6 +778,7 @@ async function askChat(question) {
       facets: answer.facets || null,
       analysis: answer.analysis || null,
       chartRecommendation: answer.chartRecommendation || null,
+      chartRenderManifest: answer.chartRenderManifest || buildChartRenderManifest(answer),
       parsed: answer.parsed || null,
       engine: answer.engine || "local-retrieval",
       model: answer.model,
@@ -795,8 +808,10 @@ async function askChat(question) {
     });
   } finally {
     state.chatBusy = false;
+    persistAskEntrySession();
     if (state.activeLens === "chat") renderViz();
     renderMobileLab();
+    renderAskEntry();
   }
 }
 
@@ -827,6 +842,51 @@ function buildChatDiagnostics(question, answer, elapsedMs) {
         rows: option.rows?.length || 0,
       })),
       caveats: answer.caveats || [],
+    },
+  };
+}
+
+function chartMetricLabel(key) {
+  if (key === "medianTodayUsd") return "median today-indexed USD";
+  if (key === "medianRaw") return "median raw price";
+  if (key === "medianRelative") return "median relative index";
+  return "result count";
+}
+
+function chartDataQuality(option, rows) {
+  const count = rows.length;
+  if (!option || count < 2) return "thin";
+  if (option.chartType === "table") return count < 6 ? "thin" : "usable";
+  if (count < 4) return "thin";
+  return "usable";
+}
+
+function buildChartRenderManifest(answerOrMessage) {
+  const recommendation = answerOrMessage?.chartRecommendation;
+  const options = recommendation?.options || [];
+  const option = options.find((item) => item.id === recommendation?.defaultOptionId) || options[0] || null;
+  const rows = option?.rows || [];
+  const yKey = option?.spec?.y || "count";
+  const quality = chartDataQuality(option, rows);
+  const searched = answerOrMessage?.searched || {};
+  return {
+    available: Boolean(option),
+    chartType: option?.chartType || "none",
+    title: option?.label || "No chart rendered",
+    metric: yKey,
+    metricLabel: chartMetricLabel(yKey),
+    rowsRendered: rows.length,
+    labels: rows.slice(0, 8).map((row) => row.label).filter(Boolean),
+    dataQuality: quality,
+    omissions: [
+      quality === "thin" ? "The retrieved evidence is too sparse for a strong visual claim." : "",
+      Number(searched.duplicateCandidates || 0) ? `${Number(searched.duplicateCandidates).toLocaleString()} near-duplicate candidates were collapsed before rendering.` : "",
+    ].filter(Boolean),
+    provenance: {
+      source: "Committed MenuGraph snapshots, NYPL structured dish rows, extracted price rows, and date-estimate metadata where available.",
+      candidates: Number(answerOrMessage?.matches?.length || 0),
+      searchedDocuments: Number(searched.documents || 0),
+      returnedMatches: Number(searched.returnedMatches || answerOrMessage?.matches?.length || 0),
     },
   };
 }
@@ -956,6 +1016,7 @@ function renderAskGate() {
       });
     } finally {
       renderViz();
+      renderAskEntry();
     }
   });
   requestAnimationFrame(() => input.focus({ preventScroll: true }));
@@ -1481,6 +1542,348 @@ function renderChatResult(match) {
     if (match.uid) selectMenu(match.uid);
   });
   return button;
+}
+
+function askEl(tag, className = "", text = "") {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function setupAskEntry() {
+  const params = new URLSearchParams(window.location.search);
+  state.askEntry.enabled = params.get("askMenuGraph") === "1" || params.get("ask") === "1";
+  if (!state.askEntry.enabled) return;
+  document.body.classList.add("ask-entry");
+  loadAskEntrySessions();
+  askEntryRoot();
+  renderAskEntry();
+}
+
+function askEntryRoot() {
+  let root = document.querySelector("#ask-entry-root");
+  if (!root) {
+    root = askEl("section", "ask-entry-root");
+    root.id = "ask-entry-root";
+    root.setAttribute("aria-label", "Ask MenuGraph");
+    document.body.appendChild(root);
+  }
+  return root;
+}
+
+function askEntryBackHref() {
+  const params = new URLSearchParams(window.location.search);
+  params.delete("askMenuGraph");
+  params.delete("ask");
+  const query = params.toString();
+  return `${window.location.pathname}${query ? `?${query}` : ""}`;
+}
+
+function serializeAskEntryMessage(message) {
+  return {
+    role: message.role,
+    content: message.content,
+    matches: message.matches || [],
+    facets: message.facets || null,
+    analysis: message.analysis || null,
+    chartRecommendation: message.chartRecommendation || null,
+    chartRenderManifest: message.chartRenderManifest || null,
+    parsed: message.parsed || null,
+    engine: message.engine || "",
+    model: message.model || "",
+    error: message.error || "",
+    searched: message.searched || null,
+    caveats: message.caveats || [],
+    diagnostics: message.diagnostics || null,
+  };
+}
+
+function askEntrySessionTitle(messages) {
+  const firstQuestion = (messages || []).find((message) => message.role === "user")?.content;
+  return firstQuestion ? String(firstQuestion).slice(0, 54) : "New question";
+}
+
+function makeAskEntrySession(messages = []) {
+  return {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    title: askEntrySessionTitle(messages),
+    updatedAt: Date.now(),
+    messages: messages.map(serializeAskEntryMessage),
+  };
+}
+
+function loadAskEntrySessions() {
+  let sessions = [];
+  try {
+    sessions = JSON.parse(localStorage.getItem(ASK_ENTRY_SESSION_STORAGE_KEY) || "[]");
+  } catch (error) {
+    sessions = [];
+  }
+  sessions = Array.isArray(sessions)
+    ? sessions
+        .filter((session) => session?.id)
+        .slice(0, ASK_ENTRY_MAX_SESSIONS)
+        .map((session) => ({
+          ...session,
+          messages: Array.isArray(session.messages) ? session.messages.map(serializeAskEntryMessage) : [],
+        }))
+    : [];
+  const activeId = localStorage.getItem(ASK_ENTRY_ACTIVE_SESSION_KEY);
+  let active = sessions.find((session) => session.id === activeId);
+  if (!active) {
+    active = sessions[0] || makeAskEntrySession();
+    sessions = sessions.length ? sessions : [active];
+  }
+  state.askEntry.sessions = sessions;
+  state.askEntry.sessionId = active.id;
+  state.chatMessages = active.messages.map(serializeAskEntryMessage);
+}
+
+function persistAskEntrySession() {
+  if (!state.askEntry.enabled || !state.askEntry.sessionId) return;
+  const messages = state.chatMessages.map(serializeAskEntryMessage).slice(-16);
+  const nextSession = {
+    id: state.askEntry.sessionId,
+    title: askEntrySessionTitle(messages),
+    updatedAt: Date.now(),
+    messages,
+  };
+  const sessions = [nextSession, ...state.askEntry.sessions.filter((session) => session.id !== nextSession.id)].slice(0, ASK_ENTRY_MAX_SESSIONS);
+  state.askEntry.sessions = sessions;
+  localStorage.setItem(ASK_ENTRY_SESSION_STORAGE_KEY, JSON.stringify(sessions));
+  localStorage.setItem(ASK_ENTRY_ACTIVE_SESSION_KEY, nextSession.id);
+}
+
+function startAskEntrySession() {
+  const session = makeAskEntrySession();
+  state.askEntry.sessionId = session.id;
+  state.askEntry.sessions = [session, ...state.askEntry.sessions].slice(0, ASK_ENTRY_MAX_SESSIONS);
+  state.chatMessages = [];
+  state.chatDraft = "";
+  persistAskEntrySession();
+  renderAskEntry();
+}
+
+function switchAskEntrySession(sessionId) {
+  const session = state.askEntry.sessions.find((item) => item.id === sessionId);
+  if (!session) return;
+  state.askEntry.sessionId = session.id;
+  state.chatMessages = (session.messages || []).map(serializeAskEntryMessage);
+  state.chatDraft = "";
+  localStorage.setItem(ASK_ENTRY_ACTIVE_SESSION_KEY, session.id);
+  renderAskEntry();
+}
+
+function renderAskEntry() {
+  if (!state.askEntry.enabled) return;
+  const root = askEntryRoot();
+  root.replaceChildren(renderAskEntryHeader(), renderAskEntryMain(), renderAskEntryComposer());
+  requestAnimationFrame(() => {
+    const thread = root.querySelector(".ask-entry-thread");
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  });
+}
+
+function renderAskEntryHeader() {
+  const header = askEl("header", "ask-entry-header");
+  const back = askEl("a", "ask-entry-back", "Back");
+  back.href = askEntryBackHref();
+  const titleWrap = askEl("div", "ask-entry-title");
+  titleWrap.append(askEl("strong", "", "Ask MenuGraph"), askEl("span", "", askEntryStatusText()));
+  const actions = askEl("div", "ask-entry-actions");
+  const newChat = askEl("button", "", "New");
+  newChat.type = "button";
+  newChat.addEventListener("click", startAskEntrySession);
+  actions.appendChild(newChat);
+  header.append(back, titleWrap, actions);
+  return header;
+}
+
+function askEntryStatusText() {
+  if (!state.askUnlocked) return "Locked";
+  const lastAssistant = [...state.chatMessages].reverse().find((message) => message.role === "assistant");
+  if (lastAssistant?.engine === "grok") return `Grok ${lastAssistant.model || ""}`.trim();
+  return "Static evidence";
+}
+
+function renderAskEntryMain() {
+  const main = askEl("main", "ask-entry-main");
+  const thread = askEl("div", "ask-entry-thread");
+  if (!state.askUnlocked) {
+    const gateWrap = askEl("div", "ask-entry-gate");
+    gateWrap.append(renderAskGate(), askEl("p", "ask-entry-local-note", "Saved chats stay in this browser only."));
+    thread.appendChild(gateWrap);
+  } else if (!state.chatMessages.length) {
+    thread.appendChild(renderAskEntryEmpty());
+  } else {
+    state.chatMessages.forEach((message) => thread.appendChild(renderAskEntryMessage(message)));
+  }
+  if (state.chatBusy) {
+    const busy = askEl("div", "ask-entry-message ask-entry-message--assistant");
+    busy.appendChild(askEl("div", "ask-entry-bubble", "Searching evidence and preparing chart options..."));
+    thread.appendChild(busy);
+  }
+  main.append(thread, renderAskEntrySessionRail());
+  return main;
+}
+
+function renderAskEntryEmpty() {
+  const empty = askEl("div", "ask-entry-empty");
+  empty.append(
+    askEl("span", "ask-entry-kicker", "Ask MenuGraph"),
+    askEl("h1", "", "Ask a question. Get an answer, a chart, and the evidence behind it."),
+    askEl("p", "", "Charts are rendered deterministically from MenuGraph data; Grok can suggest framing and refine the prose.")
+  );
+  const prompts = askEl("div", "ask-entry-prompts");
+  [
+    "Compare lobster prices in Boston and New York",
+    "Show steak prices over time by region",
+    "Which sources mention oysters most often?",
+    "What evidence is thin for champagne in New York?",
+  ].forEach((prompt) => prompts.appendChild(renderAskEntryPrompt(prompt)));
+  empty.appendChild(prompts);
+  return empty;
+}
+
+function renderAskEntryPrompt(prompt, label = prompt) {
+  const button = askEl("button", "", label);
+  button.type = "button";
+  button.addEventListener("click", () => {
+    state.chatDraft = prompt;
+    renderAskEntry();
+    requestAnimationFrame(() => document.querySelector(".ask-entry-composer input")?.focus({ preventScroll: true }));
+  });
+  return button;
+}
+
+function renderAskEntryMessage(message) {
+  const item = askEl("article", `ask-entry-message ask-entry-message--${message.role} chat-message chat-message--${message.role}`);
+  const bubble = askEl("div", "ask-entry-bubble");
+  bubble.appendChild(askEl("p", "", message.role === "assistant" && message.matches?.length ? String(message.content || "").split("\n\n")[0] : message.content));
+  if (message.role === "assistant") {
+    if (message.error) bubble.appendChild(askEl("small", "chat-warning", message.error));
+    if (message.chartRecommendation) bubble.appendChild(renderAskEntryChart(message));
+    bubble.appendChild(renderAskEntryWeakData(message));
+    if (message.matches?.length) bubble.appendChild(renderAskEntryEvidence(message));
+  }
+  item.appendChild(bubble);
+  return item;
+}
+
+function renderAskEntryChart(message) {
+  const wrap = askEl("section", "ask-entry-chart-card");
+  wrap.appendChild(renderChartRecommendation(message.chartRecommendation));
+  wrap.appendChild(renderAskEntryChartProvenance(message));
+  return wrap;
+}
+
+function renderAskEntryChartProvenance(message) {
+  const manifest = message.chartRenderManifest || buildChartRenderManifest(message);
+  const details = askEl("details", "ask-chart-provenance");
+  const summary = askEl("summary", "", "Data & provenance");
+  details.appendChild(summary);
+  const grid = askEl("div", "ask-chart-provenance__grid");
+  [
+    ["Chart", `${manifest.title} / ${manifest.chartType}`],
+    ["Metric", manifest.metricLabel],
+    ["Rows", `${manifest.rowsRendered.toLocaleString()} rendered from ${manifest.provenance.returnedMatches.toLocaleString()} returned matches`],
+    ["Quality", manifest.dataQuality],
+    ["Searched", manifest.provenance.searchedDocuments ? `${manifest.provenance.searchedDocuments.toLocaleString()} documents` : "Static index"],
+  ].forEach(([label, value]) => {
+    const cell = askEl("div", "");
+    cell.append(askEl("span", "", label), askEl("strong", "", value));
+    grid.appendChild(cell);
+  });
+  details.appendChild(grid);
+  const source = askEl("p", "", manifest.provenance.source);
+  details.appendChild(source);
+  if (manifest.omissions.length) {
+    const list = askEl("ul", "");
+    manifest.omissions.forEach((item) => {
+      const li = askEl("li", "", item);
+      list.appendChild(li);
+    });
+    details.appendChild(list);
+  }
+  return details;
+}
+
+function renderAskEntryWeakData(message) {
+  const manifest = message.chartRenderManifest || buildChartRenderManifest(message);
+  if (message.role !== "assistant" || (manifest.available && manifest.dataQuality !== "thin")) return document.createDocumentFragment();
+  const panel = askEl("div", "ask-entry-weak-data");
+  panel.append(askEl("strong", "", manifest.available ? "Thin chart evidence" : "No reliable chart yet"));
+  panel.appendChild(askEl("p", "", "Try a broader grouping or switch to evidence counts before making a visual claim."));
+  const actions = askEl("div", "ask-entry-refinements");
+  const base = [...state.chatMessages].reverse().find((item) => item.role === "user")?.content || "this question";
+  [
+    [`Broaden ${base} to source counts`, "Broaden to source counts"],
+    [`Show an evidence table for ${base}`, "Show evidence table"],
+    [`Compare ${base} by decade instead`, "Group by decade"],
+  ].forEach(([prompt, label]) => actions.appendChild(renderAskEntryPrompt(prompt, label)));
+  panel.appendChild(actions);
+  return panel;
+}
+
+function renderAskEntryEvidence(message) {
+  const section = askEl("section", "ask-entry-evidence");
+  section.appendChild(askEl("strong", "", "Evidence"));
+  const list = askEl("div", "ask-entry-evidence__list");
+  message.matches.slice(0, 5).forEach((match) => {
+    const card = askEl("button", "ask-entry-evidence-card");
+    card.type = "button";
+    card.append(
+      askEl("span", "", match.item || match.snippet || match.title),
+      askEl("small", "", [match.title, match.year || match.date, match.place, match.source].filter(Boolean).join(" / "))
+    );
+    card.addEventListener("click", () => {
+      if (match.uid) selectMenu(match.uid);
+    });
+    list.appendChild(card);
+  });
+  section.appendChild(list);
+  return section;
+}
+
+function renderAskEntrySessionRail() {
+  const rail = askEl("aside", "ask-entry-session-rail");
+  rail.append(askEl("strong", "", "Local sessions"), askEl("span", "", "This browser only"));
+  const list = askEl("div", "ask-entry-session-list");
+  state.askEntry.sessions.forEach((session) => {
+    const button = askEl("button", "", session.title || "New question");
+    button.type = "button";
+    button.dataset.active = session.id === state.askEntry.sessionId ? "true" : "false";
+    button.addEventListener("click", () => switchAskEntrySession(session.id));
+    list.appendChild(button);
+  });
+  rail.appendChild(list);
+  return rail;
+}
+
+function renderAskEntryComposer() {
+  const form = askEl("form", "ask-entry-composer");
+  const plus = askEl("button", "ask-entry-plus", "+");
+  plus.type = "button";
+  plus.setAttribute("aria-label", "Start a new local chat");
+  plus.addEventListener("click", startAskEntrySession);
+  const input = document.createElement("input");
+  input.type = "search";
+  input.placeholder = state.askUnlocked ? "Ask MenuGraph" : "Unlock Ask to start";
+  input.value = state.chatDraft;
+  input.disabled = !state.askUnlocked || state.chatBusy;
+  input.addEventListener("input", () => {
+    state.chatDraft = input.value;
+  });
+  const submit = askEl("button", "ask-entry-send", state.chatBusy ? "..." : "Ask");
+  submit.type = "submit";
+  submit.disabled = !state.askUnlocked || state.chatBusy;
+  form.append(plus, input, submit);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    askChat(input.value);
+  });
+  return form;
 }
 
 function svgEl(name, attrs = {}) {
@@ -3401,6 +3804,7 @@ function showFatal(error) {
   });
 }
 
+setupAskEntry();
 setupMobileLab();
 bindEvents();
 loadMenus().catch(showFatal);
