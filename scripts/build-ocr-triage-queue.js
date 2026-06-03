@@ -77,6 +77,31 @@ function hasImageReference(record) {
   return Boolean(record.imageUrl || record.imageUri || record.thumbnailUrl || record.iiifInfoUri || record.iiifManifestUrl || asArray(record.imageFeatures).length);
 }
 
+function actionableImageCountFor(record, scalar = {}, options = {}) {
+  if (!hasImageReference(record)) return 0;
+  const pagesPerMenu = Math.max(1, Number(options.pagesPerMenu || DEFAULT_PAGES_PER_MENU) || DEFAULT_PAGES_PER_MENU);
+  const pages = pageCountFor(record, scalar);
+  const sourceKey = cleanValue(record.sourceKey || "");
+
+  // CIA records can resolve multi-page CONTENTdm metadata at OCR runtime even if
+  // the static record only stores a representative image URL.
+  if (sourceKey === "cia") return Math.min(pages, pagesPerMenu);
+
+  const pageIds = asArray(record.pageIds).map(cleanValue).filter(Boolean);
+  if (pageIds.length) return Math.min(pageIds.length, pagesPerMenu);
+
+  if (record.iiifManifestUrl) return Math.min(pages, pagesPerMenu);
+
+  const imageFeatures = asArray(record.imageFeatures);
+  const featureManifest = imageFeatures.find((feature) => cleanValue(feature?.iiifManifestUrl));
+  if (featureManifest) return Math.min(pages, pagesPerMenu);
+  if (imageFeatures.length > 1) return Math.min(imageFeatures.length, pagesPerMenu);
+
+  // A single image URL, thumbnail, imageUri, or IIIF info.json only gives the
+  // local OCR runner one fetchable image unless page IDs or a manifest are present.
+  return 1;
+}
+
 function dateIsUncertain(record) {
   const confidence = cleanValue(record.dateConfidence || record.sourceConfidence).toUpperCase();
   return !record.year || cleanValue(record.decade).toLowerCase() === "unknown" || confidence === "D" || confidence === "X";
@@ -198,7 +223,7 @@ function candidateForRecord(record, options = {}) {
   const pages = pageCountFor(record, scalar);
   const valueScore = valueScoreFor(record);
   const priorityScore = Number(Math.max(0, valueScore - difficultyScore * 0.35).toFixed(2));
-  const estimatedImages = hasImage ? Math.min(pages, options.pagesPerMenu || DEFAULT_PAGES_PER_MENU) : 0;
+  const estimatedImages = actionableImageCountFor(record, scalar, options);
   const menuId = cleanValue(record.menuId || record.uid || recordUid(record));
   const sourceId = sourceIdForMenu(record);
   const sourceKey = cleanValue(record.sourceKey || (menuId.includes(":") ? menuId.split(":")[0] : sourceId));

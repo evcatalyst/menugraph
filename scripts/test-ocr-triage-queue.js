@@ -45,6 +45,36 @@ assert(easyUnknown.missingEvidence.date, "unknown CIA menu should be a date-evid
 assert(easyUnknown.missingEvidence.price, "menus without price evidence should stay in the OCR queue");
 assert.strictEqual(easyUnknown.estimatedImages, 1);
 
+const nyplFirstPageOnly = candidateForRecord(
+  {
+    menuId: "nypl:27102",
+    sourceKey: "nypl",
+    sourceRecordId: "27102",
+    title: "NYPL first page only",
+    imageUrl: "https://images.nypl.org/index.php?id=3884830&t=w",
+    pageCount: 4,
+    firstPage: { image_id: "3884830" },
+  },
+  { localOcrAvailable: true, pagesPerMenu: 2 }
+);
+
+assert.strictEqual(nyplFirstPageOnly.estimatedImages, 1, "NYPL first-page-only records should not stay partial after one OCR page");
+
+const iiifManifestMultiPage = candidateForRecord(
+  {
+    menuId: "northwestern:test",
+    sourceId: "northwestern_transport_menus",
+    sourceKey: "northwestern",
+    sourceRecordId: "test",
+    title: "IIIF manifest menu",
+    iiifManifestUrl: "https://example.test/manifest.json",
+    pageCount: 4,
+  },
+  { localOcrAvailable: true, pagesPerMenu: 2 }
+);
+
+assert.strictEqual(iiifManifestMultiPage.estimatedImages, 2, "IIIF manifest records can still estimate multiple actionable pages");
+
 const hardExternal = candidateForRecord(
   {
     menuId: "lapl:200",
@@ -60,7 +90,7 @@ const hardExternal = candidateForRecord(
 
 assert.strictEqual(hardExternal.localTier, "hard");
 assert.strictEqual(hardExternal.route, "rights_review_before_external_vlm");
-assert.strictEqual(hardExternal.estimatedImages, 3);
+assert.strictEqual(hardExternal.estimatedImages, 1);
 assert(!hardExternal.routingPolicy.externalAllowed, "external routing must be blocked until rights review by default");
 
 assert.strictEqual(tierForDifficulty(0, false), "metadata_only");
