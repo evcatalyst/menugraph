@@ -2386,6 +2386,7 @@ function renderGraphLens(svg, width, height) {
   const overlays = summary.overlays || {};
   const coverage = summary.coverage || {};
   const runPlan = summary.runPlan || {};
+  const assimilation = summary.assimilationPlan || {};
   const pad = { top: 26, right: 24, bottom: 24, left: 24 };
   const compactMode = width < 720;
 
@@ -2408,7 +2409,11 @@ function renderGraphLens(svg, width, height) {
       value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0) + (evidence.recipeClusters || 0)),
       detail: "date / price / recipe",
     },
-    { label: "Run Plan", value: formatNumber(runPlan.pendingImages || coverage.ocrCandidates || 0), detail: runPlan.storageOk ? "pending images" : "blocked by disk" },
+    {
+      label: "Assimilation",
+      value: `${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)}`,
+      detail: assimilation.storageOk || runPlan.storageOk ? "ready streams" : "disk-gated",
+    },
   ];
   metrics.forEach((metric, index) => {
     const col = compactMode ? index % 2 : index;
@@ -2432,13 +2437,15 @@ function renderGraphLens(svg, width, height) {
     },
     {
       title: "Local Enricher",
-      metric: runPlan.nextAction === "free_disk_before_ocr" ? "free disk" : "Mac-first",
-      detail: `${formatNumber(runPlan.localRunnableImages || 0)} local images queued`,
+      metric: assimilation.storageOk || runPlan.storageOk ? "Mac-first" : "free disk",
+      detail: `${formatNumber(runPlan.localRunnableImages || assimilation.ocr?.localRunnableImages || 0)} local images queued`,
     },
     {
       title: "Recipe Bridge",
-      metric: `${formatNumber(summary.recipeBridge?.clusters || evidence.recipeClusters || 0)} clusters`,
-      detail: "Recipe1M, RecipeNLG, Food.com, Sifter as enrichment sources",
+      metric: `${formatNumber(summary.recipeBridge?.clusters || assimilation.recipeBridge?.currentClusters || evidence.recipeClusters || 0)} clusters`,
+      detail: assimilation.recipeBridge?.targetClusterLimit
+        ? `next target ${formatNumber(assimilation.recipeBridge.targetClusterLimit)}`
+        : "Recipe1M, RecipeNLG, Food.com, Sifter as enrichment sources",
     },
     {
       title: "Graph Builder",
@@ -2465,7 +2472,7 @@ function renderGraphLens(svg, width, height) {
     {
       title: "Enrichment",
       metric: `${formatNumber(summary.recipeBridge?.clusters || evidence.recipeClusters || 0)} recipes`,
-      detail: `${formatNumber(runPlan.pendingImages || 0)} OCR images queued`,
+      detail: `${formatNumber(assimilation.readyWorkstreams || 0)} ready streams / ${formatNumber(runPlan.pendingImages || 0)} OCR queued`,
     },
     {
       title: "Overlay",
@@ -2786,10 +2793,14 @@ function describeGraphOverlay() {
   const sources = summary.sourceCapabilities?.sources || 0;
   const nodes = summary.core?.nodes || 0;
   const evidence = summary.evidence || {};
+  const assimilation = summary.assimilationPlan || {};
+  const assimilationDetail = assimilation.workstreams
+    ? ` Assimilation: ${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)} workstreams ready; next ${titleCase(assimilation.recommendedNext || "monitor")}.`
+    : "";
   setActivity({
     label: "Graph Lens",
     title: "Static graph overlay loaded",
-    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.priceObservations || 0)} price items, and ${formatNumber(evidence.matches || 0)} match links.`,
+    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.priceObservations || 0)} price items, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
     progress: 1,
   });
 }

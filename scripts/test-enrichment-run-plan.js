@@ -120,6 +120,8 @@ assert.strictEqual(payload.summary.nextAction, "free_disk_before_ocr");
 assert.strictEqual(payload.localBatches[0].blockedReason, "low_disk_preflight");
 assert.strictEqual(payload.externalReview.allowedCandidates, 1);
 assert.strictEqual(payload.externalReview.estimatedPilotCost.estimatedCostUsd, 0.02);
+assert.strictEqual(payload.recipeBridge.targetClusterLimit, 100);
+assert(payload.recipeBridge.command.includes("--cluster-limit=100"));
 assert.strictEqual(payload.recommendedSequence[0].status, "required");
 assert(!JSON.stringify(payload).includes("data:image/"), "run plan must not contain image blobs");
 

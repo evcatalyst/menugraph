@@ -199,21 +199,33 @@ function sourceRefreshRows(coverageRows = []) {
 
 function recipeBridgePlan(recipeBridge = {}, coverageRows = [], options = {}) {
   const recipeRows = coverageRows.filter((row) => row.sourceType === "recipe_or_food_history");
+  const currentClusters = number(recipeBridge.summary?.clusters || (recipeBridge.clusters || []).length, 0);
+  const currentDishLinks = number(recipeBridge.summary?.dishLinks || (recipeBridge.dishLinks || []).length, 0);
+  const totalCandidateClusters = number(recipeBridge.summary?.totalCandidateClusters, 0);
+  const requestedClusters = Number(options.recipeClusterLimit || 0) || 0;
+  const requestedDishLinks = Number(options.recipeDishLinkLimit || 0) || 0;
+  const nextClusterLimit = totalCandidateClusters && currentClusters < totalCandidateClusters
+    ? Math.min(totalCandidateClusters, Math.max(currentClusters * 2, currentClusters + 10000, 1000))
+    : currentClusters || 1000;
+  const targetClusterLimit = Math.max(currentClusters, requestedClusters || nextClusterLimit);
+  const targetDishLinkLimit = Math.max(currentDishLinks, requestedDishLinks || targetClusterLimit);
   return {
     id: "recipe_bridge_expansion",
     label: "Expand rights-aware recipe bridge candidates",
-    currentClusters: number(recipeBridge.summary?.clusters || (recipeBridge.clusters || []).length, 0),
-    totalCandidateClusters: number(recipeBridge.summary?.totalCandidateClusters, 0),
+    currentClusters,
+    currentDishLinks,
+    totalCandidateClusters,
+    remainingCandidateClusters: Math.max(0, totalCandidateClusters - currentClusters),
     sourceCandidates: recipeBridge.summary?.sourceCandidates || {},
-    targetClusterLimit: Math.max(number(recipeBridge.summary?.clusters, 0), Number(options.recipeClusterLimit || 1000) || 1000),
-    targetDishLinkLimit: Number(options.recipeDishLinkLimit || 2500) || 2500,
+    targetClusterLimit,
+    targetDishLinkLimit,
     sourceRows: recipeRows.map((row) => ({
       sourceId: row.sourceId,
       label: row.label,
       recipeBridgeClusters: number(row.recipeBridgeClusters, 0),
       primaryNextAction: row.primaryNextAction,
     })),
-    command: `npm run enrich:recipe-bridge -- --cluster-limit=${Number(options.recipeClusterLimit || 1000) || 1000} --dish-link-limit=${Number(options.recipeDishLinkLimit || 2500) || 2500}`,
+    command: `npm run enrich:recipe-bridge -- --cluster-limit=${targetClusterLimit} --dish-link-limit=${targetDishLinkLimit}`,
   };
 }
 

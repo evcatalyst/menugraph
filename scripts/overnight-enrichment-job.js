@@ -18,6 +18,8 @@ const { retagEnrichment } = require("./retag-enrichment");
 const { buildEnrichmentCoverageReport } = require("./build-enrichment-coverage-report");
 const { buildRecipeBridge } = require("./build-recipe-bridge");
 const { buildEnrichmentRunPlan } = require("./build-enrichment-run-plan");
+const { buildAssimilationPlan } = require("./build-assimilation-plan");
+const { readRecipeBridgePayload } = require("./enrichment-shards");
 const {
   DEFAULT_MIN_FREE_MB,
   assertStoragePreflight,
@@ -67,6 +69,11 @@ async function writeStatus(payload) {
     )}\n`,
     "utf8"
   );
+}
+
+function currentRecipeBridgeLimit(recipeBridge, key, fallback) {
+  const current = Number(recipeBridge?.summary?.[key] || 0);
+  return Number.isFinite(current) && current > 0 ? current : fallback;
 }
 
 function argValue(args, name, fallback = null) {
@@ -351,10 +358,19 @@ async function main() {
     localOcr: localOcr.summary || localOcr,
   });
 
+  const existingRecipeBridge = await readRecipeBridgePayload(path.join(ROOT_DIR, "docs", "data", "enrichment", "recipe-bridge.json"), { summary: {} });
+  const recipeClusterLimit = Math.max(
+    currentRecipeBridgeLimit(existingRecipeBridge, "clusters", 500),
+    Number(argValue(args, "recipe-cluster-limit", "0")) || 0
+  );
+  const recipeDishLinkLimit = Math.max(
+    currentRecipeBridgeLimit(existingRecipeBridge, "dishLinks", 1600),
+    Number(argValue(args, "recipe-dish-link-limit", "0")) || 0
+  );
   const recipeBridge = await buildRecipeBridge({
     dryRun: hasFlag(args, "dry-run"),
-    clusterLimit: Number(argValue(args, "recipe-cluster-limit", "500")) || 500,
-    dishLinkLimit: Number(argValue(args, "recipe-dish-link-limit", "1600")) || 1600,
+    clusterLimit: recipeClusterLimit,
+    dishLinkLimit: recipeDishLinkLimit,
   });
   console.log(`[${timestamp()}] Recipe bridge complete: ${JSON.stringify(recipeBridge.summary)}`);
 
@@ -396,6 +412,9 @@ async function main() {
   });
   console.log(`[${timestamp()}] Run plan complete: ${JSON.stringify(runPlan.summary)}`);
 
+  const assimilationPlan = await buildAssimilationPlan({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Assimilation plan complete: ${JSON.stringify(assimilationPlan.summary)}`);
+
   await writeStatus({
     status: "running",
     phase: "graph-build",
@@ -410,6 +429,7 @@ async function main() {
     recipeBridge: recipeBridge.summary,
     coverageReport: coverageReport.summary,
     runPlan: runPlan.summary,
+    assimilationPlan: assimilationPlan.summary,
   });
 
   const graph = await buildGraphOverlay();
@@ -430,6 +450,7 @@ async function main() {
     recipeBridge: recipeBridge.summary,
     coverageReport: coverageReport.summary,
     runPlan: runPlan.summary,
+    assimilationPlan: assimilationPlan.summary,
     graphSummary: graph.manifest.summary,
   });
 }
