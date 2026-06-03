@@ -22,6 +22,10 @@ const MAX_IMAGE_EVIDENCE_INDEX = 2000;
 const MAX_OCR_CANDIDATE_INDEX = 1000;
 const MAX_OCR_FAILURE_INDEX = 500;
 const MAX_EXTERNAL_DISH_EDGES_PER_MENU = 3;
+const MAX_RECIPE_CLUSTER_INDEX = 240;
+const MAX_DISH_RECIPE_LINK_INDEX = 1600;
+const MAX_RECIPE_CLUSTER_NODES = 90;
+const MAX_RECIPE_INGREDIENT_EDGES = 4;
 
 function cleanValue(value) {
   if (Array.isArray(value)) return value.map(cleanValue).filter(Boolean).join("; ");
@@ -82,6 +86,10 @@ function dishNodeId(name) {
 
 function termNodeId(term) {
   return `term:${slug(`${term.category}-${term.term || term.id}`)}`;
+}
+
+function recipeClusterNodeId(id) {
+  return cleanValue(id).startsWith("recipecluster:") ? cleanValue(id) : `recipecluster:${slug(id)}`;
 }
 
 function priceNodeId(record, index) {
@@ -375,6 +383,28 @@ function compactDishEvidence(fields) {
   };
 }
 
+function compactRecipeClusterEvidence(cluster) {
+  return {
+    id: cleanValue(cluster.id),
+    canonicalDishId: cleanValue(cluster.canonicalDishId),
+    canonicalName: compactEvidenceText(cluster.canonicalName),
+    dishType: compactEvidenceText(cluster.dishType, 64),
+    ingredientTags: (cluster.ingredientTags || []).slice(0, 10).map(cleanValue).filter(Boolean),
+    techniqueTags: (cluster.techniqueTags || []).slice(0, 8).map(cleanValue).filter(Boolean),
+    firstSeenYear: cluster.firstSeenYear || null,
+    lastSeenYear: cluster.lastSeenYear || null,
+    observedDishMentionCount: Number(cluster.observedDishMentionCount || 0),
+    priceObservationCount: Number(cluster.priceObservationCount || 0),
+    menuCount: Number(cluster.menuCount || 0),
+    sourceCandidates: (cluster.sourceCandidates || []).slice(0, 6).map((candidate) => ({
+      sourceId: cleanValue(candidate.sourceId),
+      role: compactEvidenceText(candidate.role, 80),
+      confidence: Number(candidate.confidence || 0),
+    })),
+    confidence: Number(cluster.confidence || 0),
+  };
+}
+
 function buildDishCounts({ menus, analytics, ontology, prices, enrichment }) {
   const counts = new Map();
   const add = (name, amount, source) => {
@@ -429,6 +459,8 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     sourceCoverage: {},
     sourceProbes: {},
     externalMenus: {},
+    recipeClusters: {},
+    dishRecipeLinks: {},
   };
   const dishNamesByMenu = new Map();
   const ingredientTagsByMenu = new Map();
@@ -805,6 +837,43 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     };
   }
 
+  let recipeClustersIndexed = 0;
+  for (const cluster of enrichment?.recipeBridge?.clusters || []) {
+    const id = recipeClusterNodeId(cluster.id);
+    if (!id || recipeClustersIndexed >= MAX_RECIPE_CLUSTER_INDEX) continue;
+    recipeClustersIndexed += 1;
+    evidenceIndex.recipeClusters[id] = compactRecipeClusterEvidence({ ...cluster, id });
+    for (const menuId of cluster.menuIds || []) {
+      const uid = cleanValue(menuId);
+      if (!overlays[uid]) continue;
+      const overlay = overlays[uid];
+      overlay.counts.recipeClusters = Number(overlay.counts.recipeClusters || 0) + 1;
+      if (!overlay.recipeClusterIds) overlay.recipeClusterIds = [];
+      if (overlay.recipeClusterIds.length < 3 && !overlay.recipeClusterIds.includes(id)) overlay.recipeClusterIds.push(id);
+    }
+  }
+
+  let dishRecipeLinksIndexed = 0;
+  for (const link of enrichment?.recipeBridge?.dishLinks || []) {
+    const id = cleanValue(link.id);
+    if (!id || dishRecipeLinksIndexed >= MAX_DISH_RECIPE_LINK_INDEX) continue;
+    dishRecipeLinksIndexed += 1;
+    evidenceIndex.dishRecipeLinks[id] = {
+      id,
+      canonicalDishId: cleanValue(link.canonicalDishId),
+      recipeClusterId: recipeClusterNodeId(link.recipeClusterId),
+      relationType: cleanValue(link.relationType),
+      confidence: Number(link.confidence || 0),
+      method: cleanValue(link.method),
+      evidence: {
+        observedDishMentionCount: Number(link.evidence?.observedDishMentionCount || 0),
+        priceObservationCount: Number(link.evidence?.priceObservationCount || 0),
+        menuCount: Number(link.evidence?.menuCount || 0),
+        ingredientTags: (link.evidence?.ingredientTags || []).slice(0, 8).map(cleanValue).filter(Boolean),
+      },
+    };
+  }
+
   for (const record of enrichmentRecords(enrichment, "coverageReport")) {
     const sourceId = cleanValue(record.sourceId);
     if (!sourceId) continue;
@@ -982,6 +1051,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
   const dishCounts = buildDishCounts({ menus, analytics, ontology, prices, enrichment });
   const dishIds = new Set(dishCounts.map((dish) => dish.id));
   const enrichmentDishMap = enrichmentDishesByMenu(enrichment);
+  const recipeClusters = (enrichment?.recipeBridge?.clusters || []).slice(0, MAX_RECIPE_CLUSTER_NODES);
 
   addSourceNodes(coreNodes, evaluations);
 
@@ -1302,6 +1372,59 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
     }
   }
 
+  for (const cluster of recipeClusters) {
+    const clusterId = recipeClusterNodeId(cluster.id);
+    addNode(
+      coreNodes,
+      node(clusterId, "RecipeCluster", cluster.canonicalName || clusterId, "recipe-bridge", Number(cluster.confidence || 0.62), {
+        sourceFile: "enrichment/recipe-bridge.json",
+        sourceRecordId: cluster.id,
+      }, {
+        canonicalDishId: cleanValue(cluster.canonicalDishId),
+        dishType: cleanValue(cluster.dishType),
+        ingredientTags: (cluster.ingredientTags || []).slice(0, 8).map(cleanValue).filter(Boolean),
+        firstSeenYear: cluster.firstSeenYear || null,
+        lastSeenYear: cluster.lastSeenYear || null,
+        sourceCandidates: (cluster.sourceCandidates || []).map((candidate) => cleanValue(candidate.sourceId)).filter(Boolean),
+        observedDishMentionCount: Number(cluster.observedDishMentionCount || 0),
+        priceObservationCount: Number(cluster.priceObservationCount || 0),
+      })
+    );
+    const dishId = cleanValue(cluster.canonicalDishId);
+    if (dishIds.has(dishId)) {
+      addEdge(
+        edges,
+        edge("BRIDGES_RECIPE_CLUSTER", dishId, clusterId, 0.66, Number(cluster.confidence || 0.62), {
+          sourceFile: "enrichment/recipe-bridge.json",
+          sourceRecordId: cluster.id,
+          method: "deterministic_ingredient_and_name_bridge",
+        }),
+        seenEdges
+      );
+    }
+    for (const ingredient of (cluster.ingredientTags || []).slice(0, MAX_RECIPE_INGREDIENT_EDGES)) {
+      const term = { category: "ingredients", term: ingredient, id: `recipe-ingredient-${slug(ingredient)}` };
+      const termId = termNodeId(term);
+      addNode(
+        coreNodes,
+        node(termId, "Term", ingredient, "recipe-bridge", 0.7, {
+          sourceFile: "enrichment/recipe-bridge.json",
+          sourceRecordId: `${cluster.id}:${ingredient}`,
+        }, {
+          category: "ingredients",
+        })
+      );
+      addEdge(
+        edges,
+        edge("USES_INGREDIENT", clusterId, termId, 0.5, 0.68, {
+          sourceFile: "enrichment/recipe-bridge.json",
+          sourceRecordId: `${cluster.id}:${ingredient}`,
+        }),
+        seenEdges
+      );
+    }
+  }
+
   return {
     version: VERSION,
     generatedAt,
@@ -1318,6 +1441,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       matches: (matches.relationships || []).length,
       dishNodes: dishCounts.length,
       ingredientTerms: ingredientTermCounts(enrichment).length,
+      recipeClusters: recipeClusters.length,
     },
     nodes: [...coreNodes.values()],
     edges,
@@ -1349,6 +1473,7 @@ function overlaySummary(records) {
     withImageFeatures: values.filter((item) => item.counts.imageFeatures).length,
     withOcrCandidates: values.filter((item) => item.counts.ocrCandidates).length,
     withOcrFailures: values.filter((item) => item.counts.ocrFailures).length,
+    withRecipeClusters: values.filter((item) => item.counts.recipeClusters).length,
   };
 }
 
@@ -1417,6 +1542,7 @@ async function buildGraphOverlay(options = {}) {
     coverageReport,
     sourceProbes,
     externalMenuRecords,
+    recipeBridge,
   ] = await Promise.all([
     readJson(path.join(DATA_DIR, "menus.json"), { menus: [] }),
     readJson(path.join(DATA_DIR, "matches.json"), { relationships: [], matches: {} }),
@@ -1434,6 +1560,7 @@ async function buildGraphOverlay(options = {}) {
     readJson(path.join(DATA_DIR, "enrichment", "coverage-report.json"), { records: [], summary: {} }),
     readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),
     readExternalMenuRecords(),
+    readJson(path.join(DATA_DIR, "enrichment", "recipe-bridge.json"), { clusters: [], dishLinks: [], summary: {} }),
   ]);
 
   const evaluationErrors = graphContract.validateSourceEvaluations(evaluations);
@@ -1450,6 +1577,7 @@ async function buildGraphOverlay(options = {}) {
     coverageReport,
     sourceProbes,
     externalMenuRecords,
+    recipeBridge,
   };
   const sourceCapabilities = buildSourceCapabilities(evaluations, generatedAt);
   const sourceErrors = graphContract.validateGraph(sourceCapabilities, { maxBytes: SIZE_BUDGET_BYTES });
@@ -1487,6 +1615,8 @@ async function buildGraphOverlay(options = {}) {
     sourceCoverage: Object.keys(evidenceIndex.sourceCoverage).length,
     sourceProbes: Object.keys(evidenceIndex.sourceProbes).length,
     externalMenus: Object.keys(evidenceIndex.externalMenus).length,
+    recipeClusters: Object.keys(evidenceIndex.recipeClusters).length,
+    dishRecipeLinks: Object.keys(evidenceIndex.dishRecipeLinks).length,
   };
 
   const artifacts = {
@@ -1531,8 +1661,11 @@ async function buildGraphOverlay(options = {}) {
         sourceCoverage: enrichmentRecords(enrichment, "coverageReport").length,
         sourceProbes: enrichmentRecords(enrichment, "sourceProbes").length,
         externalMenuRecords: enrichmentRecords(enrichment, "externalMenuRecords").length,
+        recipeClusters: recipeBridge.summary?.clusters || (recipeBridge.clusters || []).length,
+        dishRecipeLinks: recipeBridge.summary?.dishLinks || (recipeBridge.dishLinks || []).length,
         statusGeneratedAt: enrichmentStatus.summary?.ocrUpdatedAt || enrichmentStatus.finishedAt || enrichmentStatus.generatedAt || null,
       },
+      recipeBridge: recipeBridge.summary || {},
       coverage: coverageReport.summary || {},
     },
     artifacts: Object.entries(artifacts).map(([name, payload]) => artifactInfo(name, payload)),

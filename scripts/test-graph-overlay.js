@@ -52,6 +52,9 @@ assert(byteLength(menuOverlays) <= manifest.sizeBudgetBytes, "menu overlay index
 assert(byteLength(evidenceIndex) <= manifest.sizeBudgetBytes, "evidence index should stay under the static budget");
 assert(manifest.summary.core.ingredientTerms >= 100, "core graph should expose expanded ingredient taxonomy terms");
 assert(manifest.summary.overlays.withIngredients >= 15500, "ingredient overlays should cover the enriched menu set");
+assert(manifest.summary.recipeBridge?.clusters >= 100, "recipe bridge should summarize deterministic recipe clusters");
+assert(manifest.summary.evidence.recipeClusters >= 100, "recipe clusters should be indexed as compact evidence");
+assert(manifest.summary.overlays.withRecipeClusters >= 100, "recipe bridge clusters should appear in menu overlays");
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");
 assert(manifest.summary.overlays.withOcrCandidates >= 1000, "OCR triage should appear as menu overlay evidence");
 assert(Object.keys(evidenceIndex.ocrCandidates || {}).length >= 1000, "OCR triage evidence should be indexed compactly");
@@ -60,7 +63,10 @@ if (coverageReport.summary?.sources) {
   assert.strictEqual(manifest.summary.coverage.sources, coverageReport.summary.sources, "coverage report summary should be included in the graph manifest");
   assert(Object.keys(evidenceIndex.sourceCoverage || {}).length >= coverageReport.summary.sources, "source coverage should be indexed compactly");
   assert(evidenceIndex.sourceCoverage.cia_menu_collection?.primaryNextAction, "CIA coverage row should include a next action");
-  assert(evidenceIndex.sourceCoverage.the_sifter?.primaryNextAction === "recipe_bridge_sampling", "recipe sources should retain bridge next actions");
+  assert(
+    ["recipe_bridge_sampling", "recipe_bridge_expansion"].includes(evidenceIndex.sourceCoverage.the_sifter?.primaryNextAction),
+    "recipe sources should retain bridge next actions"
+  );
 }
 if (ocrFailures.summary?.total) {
   assert.strictEqual(manifest.summary.enrichment.ocrFailures, ocrFailures.summary.total, "OCR failure count should be summarized in the enrichment graph");
@@ -74,6 +80,9 @@ assert(
   core.nodes.some((node) => node.type === "Term" && node.category === "ingredients" && node.label === "potato"),
   "core graph should include high-signal ingredient term nodes"
 );
+assert(core.nodes.some((node) => node.type === "RecipeCluster"), "core graph should include recipe bridge cluster nodes");
+assert(core.edges.some((edge) => edge.type === "BRIDGES_RECIPE_CLUSTER"), "core graph should link dish nodes to recipe clusters");
+assert(core.edges.some((edge) => edge.type === "USES_INGREDIENT"), "core graph should link recipe clusters to ingredient terms");
 assert(!hasRawBlob(core), "core graph must not contain raw OCR or image blobs");
 assert(!hasRawBlob(menuOverlays), "menu overlays must not contain raw OCR or image blobs");
 assert(!hasRawBlob(evidenceIndex), "evidence index must not contain raw OCR or image blobs");
@@ -207,6 +216,13 @@ if (manifest.summary.externalMenus?.records) {
     "Denver image metadata dimensions should be indexed"
   );
 }
+
+const recipeOverlay = Object.values(overlayRecords).find((record) =>
+  (record.recipeClusterIds || []).some((id) => evidenceIndex.recipeClusters?.[id])
+);
+assert(recipeOverlay, "expected a menu overlay with recipe bridge evidence");
+const recipeCluster = evidenceIndex.recipeClusters[recipeOverlay.recipeClusterIds[0]];
+assert(recipeCluster?.sourceCandidates?.length, "recipe bridge evidence should include target recipe source candidates");
 
 for (const source of evaluations.sources) {
   for (const value of Object.values(source.scores || {})) {

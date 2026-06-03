@@ -14,6 +14,7 @@
     "DateEvidence",
     "PriceObservation",
     "MatchEvidence",
+    "RecipeCluster",
   ]);
   const VALID_EDGE_TYPES = new Set([
     "SUPPORTS_CAPABILITY",
@@ -24,6 +25,8 @@
     "HAS_DATE_EVIDENCE",
     "MATCHES_MENU",
     "HAS_ONTOLOGY_TERM",
+    "BRIDGES_RECIPE_CLUSTER",
+    "USES_INGREDIENT",
   ]);
   const VALID_DATE_CONFIDENCE = new Set(["A", "B", "C", "D", "X"]);
   const STATIC_ARTIFACT_BUDGET_BYTES = 8 * 1024 * 1024;

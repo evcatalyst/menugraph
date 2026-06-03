@@ -2404,8 +2404,8 @@ function renderGraphLens(svg, width, height) {
     { label: "Graph Nodes", value: formatNumber(core.nodes || 0), detail: `${formatNumber(core.edges || 0)} edges` },
     {
       label: "Evidence",
-      value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0)),
-      detail: "date / price / match",
+      value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0) + (evidence.recipeClusters || 0)),
+      detail: "date / price / recipe",
     },
     { label: "Coverage", value: formatNumber(coverage.rowLevelSources || sourceSummary.sources || 0), detail: `${formatNumber(coverage.averageCoverageScore ? Math.round(coverage.averageCoverageScore * 100) : 0)} avg score` },
   ];
@@ -2436,7 +2436,7 @@ function renderGraphLens(svg, width, height) {
     },
     {
       title: "Recipe Bridge",
-      metric: "metadata",
+      metric: `${formatNumber(summary.recipeBridge?.clusters || evidence.recipeClusters || 0)} clusters`,
       detail: "Recipe1M, RecipeNLG, Food.com, Sifter as enrichment sources",
     },
     {
@@ -2463,7 +2463,7 @@ function renderGraphLens(svg, width, height) {
     },
     {
       title: "Enrichment",
-      metric: "local-first",
+      metric: `${formatNumber(summary.recipeBridge?.clusters || evidence.recipeClusters || 0)} recipes`,
       detail: "OCR, dishes, prices, images, recipe links feed silver rows",
     },
     {
@@ -2581,6 +2581,7 @@ function drawCompactEvidenceFooter(svg, x, y, width, summary) {
     { label: "Dates", value: overlays.withDateEvidence || evidence.dateEvidence || 0 },
     { label: "Prices", value: overlays.withPrices || 0 },
     { label: "Matches", value: overlays.withMatches || 0 },
+    { label: "Recipes", value: overlays.withRecipeClusters || evidence.recipeClusters || 0 },
   ];
   const height = 32;
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
@@ -2604,6 +2605,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
     { label: "Date evidence", value: overlays.withDateEvidence || evidence.dateEvidence || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Price overlays", value: overlays.withPrices || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Cross-source matches", value: overlays.withMatches || 0, total: overlays.menus || summary.menus || 1 },
+    { label: "Recipe bridges", value: overlays.withRecipeClusters || evidence.recipeClusters || 0, total: overlays.menus || summary.menus || 1 },
   ];
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
   const title = svgEl("text", { x: x + 12, y: y + 22, class: "flow-box-title" });
@@ -2688,16 +2690,21 @@ function graphSourceRows(graph) {
       const coverageRow = coverage[sourceId] || null;
       const ingestedCount = source.sourceKey ? sourceCounts.get(source.sourceKey) || 0 : 0;
       const externalCount = Number(externalCounts[sourceId] || 0);
+      const recipeBridgeCount = Number(coverageRow?.recipeBridgeClusters || 0);
       const sampleItems = Array.isArray(probe?.sampleItems) ? probe.sampleItems : [];
-      const statusKind = ingestedCount ? "ingested" : externalCount ? "external" : probe ? "probed" : "evaluated";
-      const statusLabel = ingestedCount ? "Ingested" : externalCount ? "Graph Rows" : probe ? "Probed" : "Evaluated";
+      const statusKind = ingestedCount ? "ingested" : externalCount ? "external" : recipeBridgeCount ? "bridged" : probe ? "probed" : "evaluated";
+      const statusLabel = ingestedCount ? "Ingested" : externalCount ? "Graph Rows" : recipeBridgeCount ? "Bridge Targets" : probe ? "Probed" : "Evaluated";
       const coverageDetail = coverageRow
-        ? `${formatNumber(Math.round(Number(coverageRow.coverageScore || 0) * 100))} coverage / ${titleCase(coverageRow.primaryNextAction || "monitor")}`
+        ? recipeBridgeCount
+          ? `${formatNumber(recipeBridgeCount)} bridge clusters / ${titleCase(coverageRow.primaryNextAction || "monitor")}`
+          : `${formatNumber(Math.round(Number(coverageRow.coverageScore || 0) * 100))} coverage / ${titleCase(coverageRow.primaryNextAction || "monitor")}`
         : "";
       const statusDetail = coverageDetail || (ingestedCount
         ? `${formatNumber(ingestedCount)} menu rows in static app`
         : externalCount
           ? `${formatNumber(externalCount)} compact external menu rows in graph`
+          : recipeBridgeCount
+            ? `${formatNumber(recipeBridgeCount)} recipe bridge cluster targets`
           : probe?.publicItemCount
             ? `${formatNumber(probe.publicItemCount)} public items observed`
             : probe?.status
@@ -2714,6 +2721,7 @@ function graphSourceRows(graph) {
         weight: clamp(Number(topEdge?.weight || 0), 0, 1),
         scoreAvg,
         externalCount,
+        recipeBridgeCount,
         ingestedCount,
         statusKind,
         statusLabel,
@@ -2727,11 +2735,13 @@ function graphSourceRows(graph) {
           ? "Row-level menu metadata is in the static app; graph overlays add dish, price, date, and match evidence where available."
           : externalCount
             ? "Derived external metadata is in the static graph overlay; raw images, OCR, and vectors remain out of public artifacts."
+          : recipeBridgeCount
+            ? "Derived menu dish and ingredient clusters target this recipe source; no full recipe text or recipe rows are stored yet."
           : probe?.notes || "",
       };
     })
     .sort((a, b) => {
-      const rank = { ingested: 0, external: 1, probed: 2, evaluated: 3 };
+      const rank = { ingested: 0, external: 1, bridged: 2, probed: 3, evaluated: 4 };
       return rank[a.statusKind] - rank[b.statusKind] || b.weight - a.weight || b.scoreAvg - a.scoreAvg;
     });
 }
@@ -3369,7 +3379,8 @@ function hasGraphEvidence(overlay) {
       Number(counts.ontologyTerms || 0) ||
       Number(counts.imageFeatures || 0) ||
       Number(counts.ocrCandidates || 0) ||
-      Number(counts.ocrFailures || 0)
+      Number(counts.ocrFailures || 0) ||
+      Number(counts.recipeClusters || 0)
   );
 }
 
@@ -3413,6 +3424,7 @@ function renderGraphEvidence(overlay) {
     counts.imageFeatures ? `${counts.imageFeatures} image feature${counts.imageFeatures === 1 ? "" : "s"}` : "",
     counts.ocrCandidates ? `${counts.ocrCandidates} OCR candidate${counts.ocrCandidates === 1 ? "" : "s"}` : "",
     counts.ocrFailures ? `${counts.ocrFailures} OCR gap${counts.ocrFailures === 1 ? "" : "s"}` : "",
+    counts.recipeClusters ? `${counts.recipeClusters} recipe bridge${counts.recipeClusters === 1 ? "" : "s"}` : "",
   ].filter(Boolean);
   const topDishes = (overlay.topDishes || []).slice(0, 4).join("; ");
   const priceRows = (overlay.priceObservationIds || [])
@@ -3439,6 +3451,11 @@ function renderGraphEvidence(overlay) {
     .map((id) => index.ocrFailures?.[id])
     .filter(Boolean)
     .map((record) => `${titleCase(record.errorClass || "error")} / ${record.nextAction || "review"}`);
+  const recipeRows = (overlay.recipeClusterIds || [])
+    .slice(0, 3)
+    .map((id) => index.recipeClusters?.[id])
+    .filter(Boolean)
+    .map((record) => `${record.canonicalName}${record.ingredientTags?.length ? ` (${record.ingredientTags.slice(0, 3).join(", ")})` : ""}`);
 
   summary.innerHTML = `
     <span>
@@ -3452,6 +3469,7 @@ function renderGraphEvidence(overlay) {
       imageRows.length ? `Images: ${imageRows.join("; ")}` : "",
       ocrRows.length ? `OCR: ${ocrRows.join("; ")}` : "",
       ocrFailureRows.length ? `OCR gaps: ${ocrFailureRows.join("; ")}` : "",
+      recipeRows.length ? `Recipes: ${recipeRows.join("; ")}` : "",
     ]
       .filter(Boolean)
       .join(" | ")}</small>

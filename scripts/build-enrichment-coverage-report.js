@@ -92,6 +92,7 @@ function blankSource(id, label = id, sourceKey = "") {
     ocrCandidateIds: new Set(),
     ocrProcessedMenuIds: new Set(),
     ocrFailureMenuIds: new Set(),
+    recipeClusterIds: new Set(),
     counts: {
       dishMentions: 0,
       priceObservations: 0,
@@ -99,6 +100,7 @@ function blankSource(id, label = id, sourceKey = "") {
       ocrPagesProcessed: 0,
       ocrPagesFailed: 0,
       ocrTextLines: 0,
+      recipeClusterCandidates: 0,
     },
     ingredientTags: new Map(),
     dishTypes: new Map(),
@@ -265,6 +267,18 @@ function ingestOcr(sources, candidates, extractions, failures) {
   }
 }
 
+function ingestRecipeBridge(sources, recipeBridge) {
+  for (const cluster of recipeBridge.clusters || []) {
+    for (const candidate of cluster.sourceCandidates || []) {
+      const sourceId = cleanValue(candidate.sourceId);
+      if (!sourceId) continue;
+      const record = sourceRecord(sources, sourceId, sourceId, "");
+      record.recipeClusterIds.add(cleanValue(cluster.id));
+      record.counts.recipeClusterCandidates += 1;
+    }
+  }
+}
+
 function action(id, label, priority, reason) {
   return { id, label, priority: Number(Number(priority).toFixed(2)), reason: cleanValue(reason).slice(0, 180) };
 }
@@ -276,7 +290,11 @@ function actionsForSource(row, probe = null) {
     return actions;
   }
   if (row.sourceType === "recipe_or_food_history") {
-    actions.push(action("recipe_bridge_sampling", "Build recipe bridge samples, not full row ingestion", row.sourceId === "the_sifter" ? 7 : 5, "Recipe sources should enrich dish/ingredient semantics through linked clusters and provenance-safe snippets."));
+    if (row.recipeBridgeClusters > 0) {
+      actions.push(action("recipe_bridge_expansion", "Expand recipe bridge with rights-cleared sample rows", row.sourceId === "the_sifter" ? 7.4 : 6.2, `${row.recipeBridgeClusters} recipe bridge cluster(s) already target this source; next step is rights-cleared sample ingestion.`));
+    } else {
+      actions.push(action("recipe_bridge_sampling", "Build recipe bridge samples, not full row ingestion", row.sourceId === "the_sifter" ? 7 : 5, "Recipe sources should enrich dish/ingredient semantics through linked clusters and provenance-safe snippets."));
+    }
     return actions;
   }
   if (row.ocrFailures > 0) {
@@ -322,12 +340,14 @@ function sourceRows(sources, sourceProbes) {
         ocrCandidates: source.ocrCandidateIds.size,
         ocrProcessedMenus: source.ocrProcessedMenuIds.size,
         ocrFailures: source.ocrFailureMenuIds.size,
+        recipeBridgeClusters: source.recipeClusterIds.size,
         dishMentions: source.counts.dishMentions,
         priceObservations: source.counts.priceObservations,
         imageFeatures: source.counts.imageFeatures,
         ocrPagesProcessed: source.counts.ocrPagesProcessed,
         ocrPagesFailed: source.counts.ocrPagesFailed,
         ocrTextLines: source.counts.ocrTextLines,
+        recipeClusterCandidates: source.counts.recipeClusterCandidates,
         dateCoverage: numberRatio(source.dateMenuIds.size, rowCount),
         dishCoverage: numberRatio(source.dishMenuIds.size, rowCount),
         priceCoverage: numberRatio(source.priceMenuIds.size, rowCount),
@@ -343,6 +363,7 @@ function sourceRows(sources, sourceProbes) {
       row.status =
         row.staticRows ? "static_app_rows" :
         row.externalRows ? "external_graph_rows" :
+        row.recipeBridgeClusters ? "recipe_bridge_targets" :
         probe ? "probed_only" :
         row.sourceType === "menu" ? "modeled_only" : "capability_only";
       row.coverageScore = Number((
@@ -357,7 +378,7 @@ function sourceRows(sources, sourceProbes) {
       return row;
     })
     .sort((a, b) => {
-      const statusRank = { static_app_rows: 0, external_graph_rows: 1, probed_only: 2, modeled_only: 3, capability_only: 4 };
+      const statusRank = { static_app_rows: 0, external_graph_rows: 1, recipe_bridge_targets: 2, probed_only: 3, modeled_only: 4, capability_only: 5 };
       return statusRank[a.status] - statusRank[b.status] || b.rowCount - a.rowCount || a.label.localeCompare(b.label);
     });
 }
@@ -386,6 +407,7 @@ function summarizeRows(rows) {
     ocrCandidates: rows.reduce((sum, row) => sum + row.ocrCandidates, 0),
     ocrProcessedMenus: rows.reduce((sum, row) => sum + row.ocrProcessedMenus, 0),
     ocrFailures: rows.reduce((sum, row) => sum + row.ocrFailures, 0),
+    recipeBridgeClusters: rows.reduce((sum, row) => sum + row.recipeBridgeClusters, 0),
     averageCoverageScore: rowSources.length ? Number((rowSources.reduce((sum, row) => sum + row.coverageScore, 0) / rowSources.length).toFixed(3)) : 0,
     byStatus: countObject(rows.reduce((map, row) => {
       addCount(map, row.status);
@@ -410,6 +432,7 @@ async function buildEnrichmentCoverageReport(options = {}) {
     ocrExtractions,
     ocrFailures,
     sourceProbes,
+    recipeBridge,
   ] = await Promise.all([
     readJson(path.join(DATA_DIR, "reference", "source-evaluations.json"), { sources: [] }),
     readJson(path.join(DATA_DIR, "menus.json"), { menus: [] }),
@@ -420,6 +443,7 @@ async function buildEnrichmentCoverageReport(options = {}) {
     readEnrichmentPayload(path.join(ENRICHMENT_DIR, "ocr-extractions.json"), { records: [] }),
     readJson(path.join(ENRICHMENT_DIR, "ocr-failures.json"), { records: [] }),
     readJson(path.join(ENRICHMENT_DIR, "source-probes.json"), { records: [] }),
+    readJson(path.join(ENRICHMENT_DIR, "recipe-bridge.json"), { clusters: [], summary: {} }),
   ]);
   const extRecords = await externalRecords();
   const sources = new Map();
@@ -430,6 +454,7 @@ async function buildEnrichmentCoverageReport(options = {}) {
   ingestPriceObservations(sources, priceObservations.records || []);
   ingestImageFeatures(sources, imageFeatures.records || []);
   ingestOcr(sources, ocrQueue.records || [], ocrExtractions.records || [], ocrFailures.records || []);
+  ingestRecipeBridge(sources, recipeBridge);
 
   const rows = sourceRows(sources, sourceProbes);
   const payload = {

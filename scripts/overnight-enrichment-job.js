@@ -16,6 +16,7 @@ const { buildOcrTriageQueue } = require("./build-ocr-triage-queue");
 const { buildLocalVisionOcrEnrichment } = require("./local-vision-ocr-enrichment");
 const { retagEnrichment } = require("./retag-enrichment");
 const { buildEnrichmentCoverageReport } = require("./build-enrichment-coverage-report");
+const { buildRecipeBridge } = require("./build-recipe-bridge");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
@@ -314,6 +315,26 @@ async function main() {
 
   await writeStatus({
     status: "running",
+    phase: "recipe-bridge",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+    externalSources,
+    externalImageAssessment,
+    retagged: postOcrRetagged,
+    ocrTriage: ocrTriage.summary,
+    localOcr: localOcr.summary || localOcr,
+  });
+
+  const recipeBridge = await buildRecipeBridge({
+    dryRun: hasFlag(args, "dry-run"),
+    clusterLimit: Number(argValue(args, "recipe-cluster-limit", "500")) || 500,
+    dishLinkLimit: Number(argValue(args, "recipe-dish-link-limit", "1600")) || 1600,
+  });
+  console.log(`[${timestamp()}] Recipe bridge complete: ${JSON.stringify(recipeBridge.summary)}`);
+
+  await writeStatus({
+    status: "running",
     phase: "coverage-report",
     pid: process.pid,
     args,
@@ -323,6 +344,7 @@ async function main() {
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
+    recipeBridge: recipeBridge.summary,
   });
 
   const coverageReport = await buildEnrichmentCoverageReport({ dryRun: hasFlag(args, "dry-run") });
@@ -339,6 +361,7 @@ async function main() {
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
+    recipeBridge: recipeBridge.summary,
     coverageReport: coverageReport.summary,
   });
 
@@ -357,6 +380,7 @@ async function main() {
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
+    recipeBridge: recipeBridge.summary,
     coverageReport: coverageReport.summary,
     graphSummary: graph.manifest.summary,
   });

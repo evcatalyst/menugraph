@@ -27,6 +27,7 @@ The enricher should never overwrite source metadata directly. It should write ne
 | OCR routing candidate | `extraction_run` metrics or queue artifact | Store page counts, difficulty, expected yield, and route; no OCR text or image blobs. |
 | OCR failure triage | `extraction_run` status or failure artifact | Store error class, retryability, next action, and provenance; no image bytes or raw OCR. |
 | Text/image vector | `embedding` | Store vector references, not giant blobs in static JSON. |
+| Recipe bridge cluster | `recipe_cluster` + `entity_link` | Store derived menu-dish-to-recipe targets without copying full recipe rows or recipe text. |
 | Canonical link | `entity_link` | Use candidate links before changing canonical dish/venue entities. |
 | Review decision | `entity_link` or evidence row update | Preserve machine output and reviewer decision. |
 | Coverage assessment | `coverage-report.json` or gold metrics view | Store source-by-source coverage ratios, gaps, and next actions for future overnight runs. |
@@ -114,6 +115,7 @@ Recommended static artifacts:
 - `docs/data/enrichment/ocr-extractions.json` as a manifest with records sharded under `docs/data/enrichment/shards/ocr-extractions/`
 - `docs/data/enrichment/ocr-failures.json` for compact retry/source-review triage
 - `docs/data/enrichment/coverage-report.json` for source-by-source coverage, gaps, and next-run priorities
+- `docs/data/enrichment/recipe-bridge.json` for compact dish-to-recipe cluster targets and rights-safe recipe source candidates
 - `docs/data/graph/core.json`
 - `docs/data/graph/evidence-index.json`
 - `docs/data/graph/menu-overlays.json` plus source shards under `docs/data/graph/menu-overlays/by-source/`
