@@ -18,9 +18,25 @@ function readOverlayRecords(menuOverlays) {
     for (const fileName of fs.readdirSync(shardDir).filter((name) => name.endsWith(".json"))) {
       const shard = readJson(path.join(shardDir, fileName));
       Object.assign(records, shard.records || {});
+      for (const subshard of shard.subshards || []) {
+        const subshardPath = path.join(DATA_DIR, subshard.file.replace(/^graph\//, "graph/"));
+        const subshardPayload = readJson(subshardPath);
+        Object.assign(records, subshardPayload.records || {});
+      }
     }
   }
   return records;
+}
+
+function readHydratedEvidenceIndex(evidenceIndex) {
+  if (!evidenceIndex.shards?.length) return evidenceIndex;
+  const hydrated = { ...evidenceIndex };
+  for (const shard of evidenceIndex.shards) {
+    const shardPath = path.join(DATA_DIR, shard.file.replace(/^graph\//, "graph/"));
+    const payload = readJson(shardPath);
+    hydrated[shard.evidenceType] = payload.records || {};
+  }
+  return hydrated;
 }
 
 function byteLength(payload) {
@@ -39,7 +55,8 @@ const manifest = readJson(path.join(GRAPH_DIR, "manifest.json"));
 const sourceCapabilities = readJson(path.join(GRAPH_DIR, "source-capabilities.json"));
 const core = readJson(path.join(GRAPH_DIR, "core.json"));
 const menuOverlays = readJson(path.join(GRAPH_DIR, "menu-overlays.json"));
-const evidenceIndex = readJson(path.join(GRAPH_DIR, "evidence-index.json"));
+const evidenceIndexArtifact = readJson(path.join(GRAPH_DIR, "evidence-index.json"));
+const evidenceIndex = readHydratedEvidenceIndex(evidenceIndexArtifact);
 const ocrFailuresPath = path.join(DATA_DIR, "enrichment", "ocr-failures.json");
 const ocrFailures = fs.existsSync(ocrFailuresPath) ? readJson(ocrFailuresPath) : { summary: { total: 0 }, records: [] };
 const coverageReportPath = path.join(DATA_DIR, "enrichment", "coverage-report.json");
@@ -49,7 +66,7 @@ assert.deepStrictEqual(graphContract.validateGraph(sourceCapabilities, { maxByte
 assert.deepStrictEqual(graphContract.validateGraph(core, { maxBytes: manifest.sizeBudgetBytes }), [], "core graph should validate");
 assert(byteLength(core) <= manifest.sizeBudgetBytes, "core graph should stay under the static budget");
 assert(byteLength(menuOverlays) <= manifest.sizeBudgetBytes, "menu overlay index should stay under the static budget");
-assert(byteLength(evidenceIndex) <= manifest.sizeBudgetBytes, "evidence index should stay under the static budget");
+assert(byteLength(evidenceIndexArtifact) <= manifest.sizeBudgetBytes, "evidence index should stay under the static budget");
 assert(manifest.summary.core.ingredientTerms >= 100, "core graph should expose expanded ingredient taxonomy terms");
 assert(manifest.summary.overlays.withIngredients >= 15500, "ingredient overlays should cover the enriched menu set");
 assert(manifest.summary.recipeBridge?.clusters >= 100, "recipe bridge should summarize deterministic recipe clusters");
@@ -85,7 +102,7 @@ assert(core.edges.some((edge) => edge.type === "BRIDGES_RECIPE_CLUSTER"), "core 
 assert(core.edges.some((edge) => edge.type === "USES_INGREDIENT"), "core graph should link recipe clusters to ingredient terms");
 assert(!hasRawBlob(core), "core graph must not contain raw OCR or image blobs");
 assert(!hasRawBlob(menuOverlays), "menu overlays must not contain raw OCR or image blobs");
-assert(!hasRawBlob(evidenceIndex), "evidence index must not contain raw OCR or image blobs");
+assert(!hasRawBlob(evidenceIndexArtifact), "evidence index must not contain raw OCR or image blobs");
 const overlayRecords = readOverlayRecords(menuOverlays);
 assert(Object.keys(overlayRecords).length >= manifest.summary.overlays.menus, "overlay shards should cover manifest overlay count");
 for (const shard of menuOverlays.shards || []) {
@@ -93,6 +110,21 @@ for (const shard of menuOverlays.shards || []) {
   const payload = readJson(shardPath);
   assert(byteLength(payload) <= manifest.sizeBudgetBytes, `overlay shard ${shard.sourceKey} should stay under budget`);
   assert(!hasRawBlob(payload), `overlay shard ${shard.sourceKey} must not contain raw OCR or image blobs`);
+  for (const subshard of payload.subshards || []) {
+    const subshardPath = path.join(DATA_DIR, subshard.file.replace(/^graph\//, "graph/"));
+    const subshardPayload = readJson(subshardPath);
+    assert(byteLength(subshardPayload) <= manifest.sizeBudgetBytes, `overlay subshard ${subshard.file} should stay under budget`);
+    assert(!hasRawBlob(subshardPayload), `overlay subshard ${subshard.file} must not contain raw OCR or image blobs`);
+    assert(Object.keys(subshardPayload.records || {}).length > 0, `overlay subshard ${subshard.file} should contain records`);
+  }
+}
+
+for (const shard of evidenceIndexArtifact.shards || []) {
+  const shardPath = path.join(DATA_DIR, shard.file.replace(/^graph\//, "graph/"));
+  const payload = readJson(shardPath);
+  assert(byteLength(payload) <= manifest.sizeBudgetBytes, `evidence shard ${shard.evidenceType} should stay under budget`);
+  assert(!hasRawBlob(payload), `evidence shard ${shard.evidenceType} must not contain raw OCR or image blobs`);
+  assert.strictEqual(Object.keys(payload.records || {}).length, shard.records, `evidence shard ${shard.evidenceType} record count should match manifest`);
 }
 
 const sourceNodeIds = new Set(sourceCapabilities.nodes.filter((node) => node.type === "Source").map((node) => node.id));

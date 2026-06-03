@@ -870,7 +870,34 @@ async function getGraphOverlay(refresh = false) {
     manifest,
     sourceCapabilities,
     menuOverlays,
-    evidenceIndex,
+    evidenceIndex: await hydrateGraphEvidenceIndex(evidenceIndex, refresh),
+  };
+}
+
+async function hydrateGraphEvidenceIndex(payload, refresh = false) {
+  if (!payload?.shards?.length) return payload;
+  const hydrated = { ...payload };
+  for (const shard of payload.shards) {
+    const evidenceType = String(shard.evidenceType || "");
+    if (!evidenceType) continue;
+    const shardPayload = await readStaticJson(String(shard.file || "").replace(/^\/+/, ""), refresh);
+    hydrated[evidenceType] = shardPayload.records || {};
+  }
+  hydrated.hydrated = true;
+  return hydrated;
+}
+
+async function hydrateGraphOverlayShard(payload, refresh = false) {
+  if (!payload?.subshards?.length) return payload;
+  const shardPayloads = await Promise.all(
+    payload.subshards.map((shard) => readStaticJson(String(shard.file || "").replace(/^\/+/, ""), refresh))
+  );
+  const records = {};
+  for (const shard of shardPayloads) Object.assign(records, shard.records || {});
+  return {
+    ...payload,
+    records,
+    hydrated: true,
   };
 }
 
@@ -886,7 +913,8 @@ async function getGraphOverlayShard(sourceKey, refresh = false) {
   const safeKey = safeGraphShardKey(sourceKey);
   if (!safeKey) return { version: 1, sourceKey: "", summary: { menus: 0 }, records: {} };
   try {
-    return await readStaticJson(`graph/menu-overlays/by-source/${safeKey}.json`, refresh);
+    const payload = await readStaticJson(`graph/menu-overlays/by-source/${safeKey}.json`, refresh);
+    return hydrateGraphOverlayShard(payload, refresh);
   } catch (error) {
     const monolith = await readOptionalStaticJson("graph/menu-overlays.json", { records: {} });
     const records = Object.fromEntries(

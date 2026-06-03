@@ -117,8 +117,8 @@ Recommended static artifacts:
 - `docs/data/enrichment/coverage-report.json` for source-by-source coverage, gaps, and next-run priorities
 - `docs/data/enrichment/recipe-bridge.json` for compact dish-to-recipe cluster targets and rights-safe recipe source candidates
 - `docs/data/graph/core.json`
-- `docs/data/graph/evidence-index.json`
-- `docs/data/graph/menu-overlays.json` plus source shards under `docs/data/graph/menu-overlays/by-source/`
+- `docs/data/graph/evidence-index.json` plus evidence-type shards under `docs/data/graph/evidence/by-type/`
+- `docs/data/graph/menu-overlays.json` plus source shards under `docs/data/graph/menu-overlays/by-source/`; oversized source shards may contain a lightweight index with `subshards[]` that points to `part-000*.json` files.
 - `docs/data/graph/source-capabilities.json`
 
 These files should be generated from silver tables, not hand-maintained.

@@ -26,6 +26,8 @@ const MAX_RECIPE_CLUSTER_INDEX = 240;
 const MAX_DISH_RECIPE_LINK_INDEX = 1600;
 const MAX_RECIPE_CLUSTER_NODES = 90;
 const MAX_RECIPE_INGREDIENT_EDGES = 4;
+const OVERLAY_SOURCE_SPLIT_THRESHOLD_BYTES = Math.floor(SIZE_BUDGET_BYTES * 0.65);
+const OVERLAY_SUBSHARD_TARGET_BYTES = Math.floor(SIZE_BUDGET_BYTES * 0.35);
 
 function cleanValue(value) {
   if (Array.isArray(value)) return value.map(cleanValue).filter(Boolean).join("; ");
@@ -1455,6 +1457,10 @@ function artifactInfo(name, payload) {
   };
 }
 
+function payloadBytes(payload) {
+  return Buffer.byteLength(JSON.stringify(payload), "utf8");
+}
+
 async function writeJson(name, payload) {
   const filePath = path.join(GRAPH_DIR, name);
   await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -1481,6 +1487,57 @@ function overlayShardFileName(sourceKey) {
   return `menu-overlays/by-source/${slug(sourceKey || "unknown")}.json`;
 }
 
+function overlaySubshardFileName(sourceKey, index) {
+  return `menu-overlays/by-source/${slug(sourceKey || "unknown")}/part-${String(index + 1).padStart(4, "0")}.json`;
+}
+
+function overlayRecordEntryBytes(menuId, overlay) {
+  return Buffer.byteLength(`${JSON.stringify(menuId)}:${JSON.stringify(overlay)}`, "utf8") + 1;
+}
+
+function buildOverlaySubshards(sourceKey, records, generatedAt) {
+  const sortedEntries = Object.entries(records || {}).sort((a, b) => a[0].localeCompare(b[0]));
+  const chunks = [];
+  let currentEntries = [];
+  let currentBytes = 0;
+
+  for (const [menuId, overlay] of sortedEntries) {
+    const entryBytes = overlayRecordEntryBytes(menuId, overlay);
+    if (currentEntries.length && currentBytes + entryBytes > OVERLAY_SUBSHARD_TARGET_BYTES) {
+      chunks.push(currentEntries);
+      currentEntries = [];
+      currentBytes = 0;
+    }
+    currentEntries.push([menuId, overlay]);
+    currentBytes += entryBytes;
+  }
+  if (currentEntries.length) chunks.push(currentEntries);
+
+  return chunks.map((entries, index) => {
+    const chunkRecords = Object.fromEntries(entries);
+    const file = overlaySubshardFileName(sourceKey, index);
+    const summary = overlaySummary(chunkRecords);
+    return {
+      file,
+      payload: {
+        version: VERSION,
+        generatedAt,
+        sourceKey,
+        partition: `part-${String(index + 1).padStart(4, "0")}`,
+        summary,
+        records: chunkRecords,
+      },
+      metadata: {
+        sourceKey,
+        partition: `part-${String(index + 1).padStart(4, "0")}`,
+        file: `graph/${file}`,
+        summary,
+        records: summary.menus,
+      },
+    };
+  });
+}
+
 function buildMenuOverlayArtifacts(overlays, generatedAt) {
   const bySource = new Map();
   for (const [menuId, overlay] of Object.entries(overlays || {})) {
@@ -1494,20 +1551,43 @@ function buildMenuOverlayArtifacts(overlays, generatedAt) {
   for (const [sourceKey, records] of [...bySource.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
     const file = overlayShardFileName(sourceKey);
     const summary = overlaySummary(records);
-    const payload = {
+    const inlinePayload = {
       version: VERSION,
       generatedAt,
       sourceKey,
       summary,
       records,
     };
-    artifacts[file] = payload;
-    shards.push({
-      sourceKey,
-      file: `graph/${file}`,
-      summary,
-      records: summary.menus,
-    });
+    if (payloadBytes(inlinePayload) > OVERLAY_SOURCE_SPLIT_THRESHOLD_BYTES) {
+      const subshards = buildOverlaySubshards(sourceKey, records, generatedAt);
+      for (const shard of subshards) artifacts[shard.file] = shard.payload;
+      artifacts[file] = {
+        version: VERSION,
+        generatedAt,
+        sourceKey,
+        sharded: true,
+        shardKey: "sourceKey:partition",
+        summary,
+        subshards: subshards.map((shard) => shard.metadata),
+        records: {},
+      };
+      shards.push({
+        sourceKey,
+        file: `graph/${file}`,
+        summary,
+        records: summary.menus,
+        subsharded: true,
+        subshards: subshards.map((shard) => shard.metadata),
+      });
+    } else {
+      artifacts[file] = inlinePayload;
+      shards.push({
+        sourceKey,
+        file: `graph/${file}`,
+        summary,
+        records: summary.menus,
+      });
+    }
   }
 
   const index = {
@@ -1520,6 +1600,61 @@ function buildMenuOverlayArtifacts(overlays, generatedAt) {
     records: {},
   };
   artifacts["menu-overlays.json"] = index;
+  return { index, artifacts, shards };
+}
+
+function evidenceShardFileName(evidenceType) {
+  return `evidence/by-type/${slug(evidenceType || "unknown")}.json`;
+}
+
+function buildEvidenceIndexArtifacts(evidenceIndex, generatedAt) {
+  const evidenceTypes = [
+    "dateEvidence",
+    "priceObservations",
+    "matches",
+    "dishMentions",
+    "imageFeatures",
+    "ocrCandidates",
+    "ocrFailures",
+    "sourceCoverage",
+    "sourceProbes",
+    "externalMenus",
+    "recipeClusters",
+    "dishRecipeLinks",
+  ];
+  const artifacts = {};
+  const shards = [];
+  const index = {
+    version: VERSION,
+    generatedAt,
+    summary: evidenceIndex.summary || {},
+    sharded: true,
+    shardKey: "evidenceType",
+    shards,
+  };
+
+  for (const evidenceType of evidenceTypes) {
+    const records = evidenceIndex[evidenceType] || {};
+    const file = evidenceShardFileName(evidenceType);
+    const summary = { records: Object.keys(records).length };
+    const payload = {
+      version: VERSION,
+      generatedAt,
+      evidenceType,
+      summary,
+      records,
+    };
+    artifacts[file] = payload;
+    index[evidenceType] = {};
+    shards.push({
+      evidenceType,
+      file: `graph/${file}`,
+      summary,
+      records: summary.records,
+    });
+  }
+
+  artifacts["evidence-index.json"] = index;
   return { index, artifacts, shards };
 }
 
@@ -1618,12 +1753,14 @@ async function buildGraphOverlay(options = {}) {
     recipeClusters: Object.keys(evidenceIndex.recipeClusters).length,
     dishRecipeLinks: Object.keys(evidenceIndex.dishRecipeLinks).length,
   };
+  const evidenceIndexArtifacts = buildEvidenceIndexArtifacts(evidenceIndex, generatedAt);
+  const publicEvidenceIndex = evidenceIndexArtifacts.index;
 
   const artifacts = {
     "source-capabilities.json": sourceCapabilities,
     "core.json": core,
     ...menuOverlayArtifacts.artifacts,
-    "evidence-index.json": evidenceIndex,
+    ...evidenceIndexArtifacts.artifacts,
   };
 
   const manifest = {
@@ -1636,7 +1773,7 @@ async function buildGraphOverlay(options = {}) {
       menus: menus.length,
       sourceCapabilities: sourceCapabilities.summary,
       core: core.summary,
-      evidence: evidenceIndex.summary,
+      evidence: publicEvidenceIndex.summary,
       overlays: menuOverlays.summary,
       externalMenus: {
         records: enrichmentRecords(enrichment, "externalMenuRecords").length,
@@ -1671,8 +1808,8 @@ async function buildGraphOverlay(options = {}) {
     artifacts: Object.entries(artifacts).map(([name, payload]) => artifactInfo(name, payload)),
     shardPlan: {
       thresholdBytes: SIZE_BUDGET_BYTES,
-      activeShards: ["menuOverlaysBySource"],
-      nextShards: ["decade", "entityType", "evidenceType"],
+      activeShards: ["menuOverlaysBySource", "menuOverlaysBySourcePartition", "evidenceByType"],
+      nextShards: ["decade", "entityType"],
     },
   };
   artifacts["manifest.json"] = manifest;

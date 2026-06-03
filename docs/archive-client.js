@@ -674,9 +674,27 @@
       manifest,
       sourceCapabilities,
       menuOverlays,
-      evidenceIndex,
+      evidenceIndex: await hydrateGraphEvidenceIndex(evidenceIndex, refresh),
     };
     return graphOverlayCache;
+  }
+
+  async function hydrateGraphEvidenceIndex(payload, refresh = false) {
+    if (!payload?.shards?.length) return payload;
+    const hydrated = { ...payload };
+    const shardPayloads = await Promise.all(
+      payload.shards.map((shard) =>
+        requestStaticJson(String(shard.file || "").replace(/^\/+/, ""), refresh).then((shardPayload) => ({
+          evidenceType: shard.evidenceType,
+          records: shardPayload.records || {},
+        }))
+      )
+    );
+    for (const shard of shardPayloads) {
+      if (shard.evidenceType) hydrated[shard.evidenceType] = shard.records;
+    }
+    hydrated.hydrated = true;
+    return hydrated;
   }
 
   function graphShardKeyForSource(sourceKey) {
@@ -687,12 +705,27 @@
       .slice(0, 80);
   }
 
+  async function hydrateGraphOverlayShard(payload, refresh = false) {
+    if (!payload?.subshards?.length) return payload;
+    const shardPayloads = await Promise.all(
+      payload.subshards.map((shard) => requestStaticJson(String(shard.file || "").replace(/^\/+/, ""), refresh))
+    );
+    const records = {};
+    for (const shard of shardPayloads) Object.assign(records, shard.records || {});
+    return {
+      ...payload,
+      records,
+      hydrated: true,
+    };
+  }
+
   async function getGraphOverlayShard(sourceKey, { refresh = false } = {}) {
     const shardKey = graphShardKeyForSource(sourceKey);
     if (!refresh && graphOverlayShardCache.has(shardKey)) return graphOverlayShardCache.get(shardKey);
     const payload = await requestStaticJson(`graph/menu-overlays/by-source/${shardKey}.json`, refresh);
-    graphOverlayShardCache.set(shardKey, payload);
-    return payload;
+    const hydrated = await hydrateGraphOverlayShard(payload, refresh);
+    graphOverlayShardCache.set(shardKey, hydrated);
+    return hydrated;
   }
 
   function requestBody(options) {
