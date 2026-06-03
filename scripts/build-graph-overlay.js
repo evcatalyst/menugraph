@@ -12,6 +12,9 @@ const MAX_TOPOLOGY_DISH_EDGES_PER_MENU = 3;
 const MAX_ONTOLOGY_EDGES_PER_TERM = 30;
 const SIZE_BUDGET_BYTES = graphContract.STATIC_ARTIFACT_BUDGET_BYTES;
 const MAX_CORE_MENU_NODES = 2000;
+const MAX_INGREDIENT_TERMS = 120;
+const MAX_DISH_EVIDENCE_INDEX = 10000;
+const MAX_IMAGE_EVIDENCE_INDEX = 2000;
 
 function cleanValue(value) {
   if (Array.isArray(value)) return value.map(cleanValue).filter(Boolean).join("; ");
@@ -230,7 +233,11 @@ function addSourceNodes(coreNodes, evaluations) {
   }
 }
 
-function buildDishCounts({ menus, analytics, ontology, prices }) {
+function enrichmentRecords(enrichment, key) {
+  return enrichment?.[key]?.records || [];
+}
+
+function buildDishCounts({ menus, analytics, ontology, prices, enrichment }) {
   const counts = new Map();
   const add = (name, amount, source) => {
     const label = cleanValue(name);
@@ -244,6 +251,8 @@ function buildDishCounts({ menus, analytics, ontology, prices }) {
 
   for (const dish of analytics.topDishes || []) add(dish.name || dish.normalized, dish.count || 1, "analytics");
   for (const record of prices.records || []) add(record.item, 1, "prices");
+  for (const record of enrichmentRecords(enrichment, "dishMentions")) add(record.rawName || record.normalizedName, 1, `enrichment:${record.extractionMethod || "dish"}`);
+  for (const record of enrichmentRecords(enrichment, "priceObservations")) add(record.rawName || record.normalizedName, 1, `enrichment:${record.extractionMethod || "price"}`);
   for (const menu of menus) for (const dish of (menu.topDishes || []).slice(0, 8)) add(dish, 1, "menu-top-dishes");
   for (const category of ["dishes", "ingredients", "beverages"]) {
     for (const term of ontology.categories?.[category] || []) add(term.term, term.count || 1, `ontology:${category}`);
@@ -254,7 +263,15 @@ function buildDishCounts({ menus, analytics, ontology, prices }) {
     .slice(0, MAX_DISH_NODES);
 }
 
-function buildEvidenceIndexes({ menus, matches, prices, dateEstimates }) {
+function priceEnhancementKey(record) {
+  return [
+    cleanValue(record.menuId || record.menuUid),
+    normalizeText(record.normalizedName || record.rawName || record.item),
+    cleanValue(record.rawPriceText || record.rawPrice || record.amount),
+  ].join("|");
+}
+
+function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichment }) {
   const menuIds = new Set(menus.map(recordUid));
   const overlays = {};
   const evidenceIndex = {
@@ -262,10 +279,24 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates }) {
     dateEvidence: {},
     priceObservations: {},
     matches: {},
+    dishMentions: {},
+    imageFeatures: {},
+    sourceProbes: {},
   };
+  const dishNamesByMenu = new Map();
+  const ingredientTagsByMenu = new Map();
+  const priceEnhancements = new Map();
+  let dishEvidenceIndexed = 0;
+  let imageEvidenceIndexed = 0;
+  for (const record of enrichmentRecords(enrichment, "priceObservations")) {
+    priceEnhancements.set(priceEnhancementKey(record), record);
+  }
 
   for (const menu of menus) {
     const uid = recordUid(menu);
+    const initialDishes = new Set((menu.topDishes || []).slice(0, 3).map(normalizeText).filter(Boolean));
+    dishNamesByMenu.set(uid, initialDishes);
+    ingredientTagsByMenu.set(uid, new Set());
     overlays[uid] = {
       menuId: uid,
       sourceKey: cleanValue(menu.sourceKey || "cia"),
@@ -275,13 +306,59 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates }) {
         dateEvidence: 0,
         matches: 0,
         ontologyTerms: 0,
+        ingredientTags: 0,
+        imageFeatures: 0,
       },
       topDishes: (menu.topDishes || []).slice(0, 3).map(cleanValue).filter(Boolean),
+      ingredientTags: [],
+      dishMentionIds: [],
       priceObservationIds: [],
       dateEvidenceIds: [],
       matchIds: [],
+      imageFeatureIds: [],
     };
-    overlays[uid].counts.dishMentions = overlays[uid].topDishes.length;
+    overlays[uid].counts.dishMentions = initialDishes.size;
+  }
+
+  for (const record of enrichmentRecords(enrichment, "dishMentions")) {
+    const uid = cleanValue(record.menuId);
+    if (!menuIds.has(uid)) continue;
+    const overlay = overlays[uid];
+    const normalized = normalizeText(record.normalizedName || record.rawName);
+    if (!normalized) continue;
+    const dishSet = dishNamesByMenu.get(uid) || new Set();
+    if (!dishSet.has(normalized)) {
+      dishSet.add(normalized);
+      overlay.counts.dishMentions = dishSet.size;
+      if (overlay.topDishes.length < 3) overlay.topDishes.push(cleanValue(record.rawName || record.normalizedName));
+    }
+    dishNamesByMenu.set(uid, dishSet);
+    for (const tag of record.ingredientTags || []) {
+      const tagSet = ingredientTagsByMenu.get(uid) || new Set();
+      tagSet.add(cleanValue(tag));
+      ingredientTagsByMenu.set(uid, tagSet);
+    }
+    if (overlay.dishMentionIds.length < 2 && dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX) {
+      overlay.dishMentionIds.push(record.id);
+      dishEvidenceIndexed += 1;
+      evidenceIndex.dishMentions[record.id] = {
+        id: record.id,
+        menuId: uid,
+        rawName: cleanValue(record.rawName),
+        normalizedName: cleanValue(record.normalizedName),
+        dishType: cleanValue(record.dishType),
+        ingredientTags: (record.ingredientTags || []).slice(0, 8).map(cleanValue),
+        sectionName: cleanValue(record.sectionName),
+        confidence: Number(record.confidence || 0),
+        method: cleanValue(record.extractionMethod),
+      };
+    }
+  }
+
+  for (const [uid, tags] of ingredientTagsByMenu) {
+    if (!overlays[uid]) continue;
+    overlays[uid].ingredientTags = [...tags].filter(Boolean).sort().slice(0, 8);
+    overlays[uid].counts.ingredientTags = tags.size;
   }
 
   for (const record of dateEstimates.records || []) {
@@ -313,6 +390,15 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates }) {
     const uid = cleanValue(record.menuUid || record.menuId);
     if (!menuIds.has(uid)) continue;
     const id = priceNodeId(record, index);
+    const enhancement =
+      priceEnhancements.get(priceEnhancementKey(record)) ||
+      priceEnhancements.get(
+        [
+          uid,
+          normalizeText(record.item),
+          cleanValue(record.rawAmount || record.amount),
+        ].join("|")
+      );
     overlays[uid].counts.priceObservations += 1;
     if (overlays[uid].priceObservationIds.length < 6) {
       overlays[uid].priceObservationIds.push(id);
@@ -325,6 +411,8 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates }) {
         currency: cleanValue(record.currency),
         year: record.year || null,
         confidence: cleanValue(record.confidence || "unknown"),
+        dishType: cleanValue(enhancement?.dishType),
+        ingredientTags: (enhancement?.ingredientTags || []).slice(0, 8).map(cleanValue),
         normalized: record.normalized
           ? {
               todayUsd: record.normalized.todayUsd ?? null,
@@ -334,6 +422,44 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates }) {
           : null,
       };
     }
+  }
+
+  for (const record of enrichmentRecords(enrichment, "imageFeatures")) {
+    const uid = cleanValue(record.menuId);
+    if (!menuIds.has(uid)) continue;
+    const overlay = overlays[uid];
+    overlay.counts.imageFeatures += 1;
+    if (overlay.imageFeatureIds.length < 2 && imageEvidenceIndexed < MAX_IMAGE_EVIDENCE_INDEX) {
+      overlay.imageFeatureIds.push(record.id);
+      imageEvidenceIndexed += 1;
+      evidenceIndex.imageFeatures[record.id] = {
+        id: record.id,
+        menuId: uid,
+        featureType: cleanValue(record.featureType),
+        scalar: {
+          width: record.scalar?.width ?? null,
+          height: record.scalar?.height ?? null,
+          aspectRatio: record.scalar?.aspectRatio ?? null,
+          orientation: cleanValue(record.scalar?.orientation || "unknown"),
+          byteSize: record.scalar?.byteSize ?? null,
+          mediaType: cleanValue(record.scalar?.mediaType || "unknown"),
+        },
+        confidence: Number(record.confidence || 0),
+        method: cleanValue(record.modelName),
+      };
+    }
+  }
+
+  for (const record of enrichmentRecords(enrichment, "sourceProbes")) {
+    evidenceIndex.sourceProbes[record.sourceId] = {
+      sourceId: record.sourceId,
+      status: cleanValue(record.status),
+      sourceUrl: cleanValue(record.sourceUrl),
+      publicItemCount: record.publicItemCount ?? null,
+      sampleItems: (record.sampleItems || []).slice(0, 8),
+      notes: cleanValue(record.notes),
+      error: cleanValue(record.error),
+    };
   }
 
   for (const [index, relationship] of (matches.relationships || []).entries()) {
@@ -398,14 +524,41 @@ function selectCoreMenus(menus, overlays) {
   return new Set([...selected].slice(0, MAX_CORE_MENU_NODES));
 }
 
-function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, ontology, analytics, evidenceIndex, overlays, generatedAt }) {
+function ingredientTermCounts(enrichment) {
+  const counts = new Map();
+  for (const record of enrichmentRecords(enrichment, "dishMentions")) {
+    for (const tag of record.ingredientTags || []) {
+      const key = cleanValue(tag);
+      if (!key) continue;
+      const previous = counts.get(key) || { term: key, count: 0, menuIds: new Set() };
+      previous.count += 1;
+      if (record.menuId) previous.menuIds.add(cleanValue(record.menuId));
+      counts.set(key, previous);
+    }
+  }
+  return [...counts.values()].sort((a, b) => b.count - a.count || a.term.localeCompare(b.term)).slice(0, MAX_INGREDIENT_TERMS);
+}
+
+function enrichmentDishesByMenu(enrichment) {
+  const byMenu = new Map();
+  for (const record of enrichmentRecords(enrichment, "dishMentions")) {
+    const uid = cleanValue(record.menuId);
+    if (!uid) continue;
+    if (!byMenu.has(uid)) byMenu.set(uid, []);
+    byMenu.get(uid).push(record);
+  }
+  return byMenu;
+}
+
+function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, ontology, analytics, evidenceIndex, overlays, enrichment, generatedAt }) {
   const coreNodes = new Map();
   const edges = [];
   const seenEdges = new Set();
   const menuIdSet = new Set();
   const coreMenuIds = selectCoreMenus(menus, overlays);
-  const dishCounts = buildDishCounts({ menus, analytics, ontology, prices });
+  const dishCounts = buildDishCounts({ menus, analytics, ontology, prices, enrichment });
   const dishIds = new Set(dishCounts.map((dish) => dish.id));
+  const enrichmentDishMap = enrichmentDishesByMenu(enrichment);
 
   addSourceNodes(coreNodes, evaluations);
 
@@ -456,15 +609,27 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       );
     }
 
-    for (const dish of (menu.topDishes || []).slice(0, MAX_TOPOLOGY_DISH_EDGES_PER_MENU)) {
-      const dishId = dishNodeId(dish);
+    const dishCandidates = [
+      ...(menu.topDishes || []).map((rawName) => ({ rawName, method: "source_top_dishes", confidence: menu.sourceKey === "nypl" ? 0.82 : 0.52 })),
+      ...(enrichmentDishMap.get(uid) || []).map((record) => ({
+        rawName: record.rawName || record.normalizedName,
+        method: record.extractionMethod || "enrichment_dish_mention",
+        confidence: Number(record.confidence || 0.58),
+      })),
+    ];
+    const seenDishIds = new Set();
+    for (const dish of dishCandidates) {
+      if (seenDishIds.size >= MAX_TOPOLOGY_DISH_EDGES_PER_MENU) break;
+      const dishId = dishNodeId(dish.rawName);
       if (!dishIds.has(dishId)) continue;
+      if (seenDishIds.has(dishId)) continue;
+      seenDishIds.add(dishId);
       addEdge(
         edges,
-        edge("MENTIONS_DISH", menuNodeId(uid), dishId, 0.62, menu.sourceKey === "nypl" ? 0.82 : 0.52, {
+        edge("MENTIONS_DISH", menuNodeId(uid), dishId, 0.62, dish.confidence, {
           sourceFile: "menus.json",
           sourceRecordId: cleanValue(menu.sourceRecordId || menu.pointer || menu.id),
-          extraction: "source_top_dishes",
+          extraction: dish.method,
         }),
         seenEdges
       );
@@ -575,6 +740,33 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
     }
   }
 
+  for (const ingredient of ingredientTermCounts(enrichment)) {
+    const term = { category: "ingredients", term: ingredient.term, id: `enrichment-ingredient-${slug(ingredient.term)}` };
+    const termId = termNodeId(term);
+    addNode(
+      coreNodes,
+      node(termId, "Term", ingredient.term, "enrichment", 0.7, {
+        sourceFile: "enrichment/dish-mentions.json",
+        sourceRecordId: ingredient.term,
+      }, {
+        category: "ingredients",
+        count: ingredient.count,
+      })
+    );
+    for (const menuId of [...ingredient.menuIds].slice(0, MAX_ONTOLOGY_EDGES_PER_TERM)) {
+      if (!menuIdSet.has(cleanValue(menuId))) continue;
+      if (overlays[menuId]) overlays[menuId].counts.ontologyTerms += 1;
+      addEdge(
+        edges,
+        edge("HAS_ONTOLOGY_TERM", menuNodeId(menuId), termId, 0.54, 0.7, {
+          sourceFile: "enrichment/dish-mentions.json",
+          sourceRecordId: ingredient.term,
+        }),
+        seenEdges
+      );
+    }
+  }
+
   return {
     version: VERSION,
     generatedAt,
@@ -589,6 +781,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       priceObservationNodes: Math.min(MAX_CORE_PRICE_NODES, Object.keys(evidenceIndex.priceObservations).length),
       matches: (matches.relationships || []).length,
       dishNodes: dishCounts.length,
+      ingredientTerms: ingredientTermCounts(enrichment).length,
     },
     nodes: [...coreNodes.values()],
     edges,
@@ -608,7 +801,7 @@ async function writeJson(name, payload) {
 
 async function buildGraphOverlay(options = {}) {
   const generatedAt = new Date().toISOString();
-  const [menusPayload, matches, analytics, prices, dateEstimates, ontology, evaluations] = await Promise.all([
+  const [menusPayload, matches, analytics, prices, dateEstimates, ontology, evaluations, enrichmentStatus, dishMentions, enrichmentPrices, imageFeatures, sourceProbes] = await Promise.all([
     readJson(path.join(DATA_DIR, "menus.json"), { menus: [] }),
     readJson(path.join(DATA_DIR, "matches.json"), { relationships: [], matches: {} }),
     readJson(path.join(DATA_DIR, "analytics.json"), { topDishes: [] }),
@@ -616,17 +809,29 @@ async function buildGraphOverlay(options = {}) {
     readJson(path.join(DATA_DIR, "date-estimates.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "ontology.json"), { categories: {} }),
     readJson(path.join(REFERENCE_DIR, "source-evaluations.json"), { sources: [], capabilities: [] }),
+    readJson(path.join(DATA_DIR, "enrichment-status.json"), { summary: {} }),
+    readJson(path.join(DATA_DIR, "enrichment", "dish-mentions.json"), { records: [] }),
+    readJson(path.join(DATA_DIR, "enrichment", "price-observations.json"), { records: [] }),
+    readJson(path.join(DATA_DIR, "enrichment", "image-features.json"), { records: [] }),
+    readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),
   ]);
 
   const evaluationErrors = graphContract.validateSourceEvaluations(evaluations);
   if (evaluationErrors.length) throw new Error(`Invalid source evaluations:\n${evaluationErrors.join("\n")}`);
 
   const menus = menusPayload.menus || menusPayload.records || [];
+  const enrichment = {
+    status: enrichmentStatus,
+    dishMentions,
+    priceObservations: enrichmentPrices,
+    imageFeatures,
+    sourceProbes,
+  };
   const sourceCapabilities = buildSourceCapabilities(evaluations, generatedAt);
   const sourceErrors = graphContract.validateGraph(sourceCapabilities, { maxBytes: SIZE_BUDGET_BYTES });
   if (sourceErrors.length) throw new Error(`Invalid source-capabilities graph:\n${sourceErrors.join("\n")}`);
 
-  const { overlays, evidenceIndex } = buildEvidenceIndexes({ menus, matches, prices, dateEstimates });
+  const { overlays, evidenceIndex } = buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichment });
   const core = buildCoreGraph({
     menus,
     evaluations,
@@ -637,6 +842,7 @@ async function buildGraphOverlay(options = {}) {
     analytics,
     evidenceIndex,
     overlays,
+    enrichment,
     generatedAt,
   });
   const coreErrors = graphContract.validateGraph(core, { maxBytes: SIZE_BUDGET_BYTES });
@@ -651,6 +857,8 @@ async function buildGraphOverlay(options = {}) {
       withDateEvidence: Object.values(overlays).filter((item) => item.counts.dateEvidence).length,
       withMatches: Object.values(overlays).filter((item) => item.counts.matches).length,
       withDishes: Object.values(overlays).filter((item) => item.counts.dishMentions).length,
+      withIngredients: Object.values(overlays).filter((item) => item.counts.ingredientTags).length,
+      withImageFeatures: Object.values(overlays).filter((item) => item.counts.imageFeatures).length,
     },
     records: overlays,
   };
@@ -660,6 +868,9 @@ async function buildGraphOverlay(options = {}) {
     dateEvidence: Object.keys(evidenceIndex.dateEvidence).length,
     priceObservations: Object.keys(evidenceIndex.priceObservations).length,
     matches: Object.keys(evidenceIndex.matches).length,
+    dishMentions: Object.keys(evidenceIndex.dishMentions).length,
+    imageFeatures: Object.keys(evidenceIndex.imageFeatures).length,
+    sourceProbes: Object.keys(evidenceIndex.sourceProbes).length,
   };
 
   const artifacts = {
@@ -681,6 +892,13 @@ async function buildGraphOverlay(options = {}) {
       core: core.summary,
       evidence: evidenceIndex.summary,
       overlays: menuOverlays.summary,
+      enrichment: {
+        dishMentions: enrichmentRecords(enrichment, "dishMentions").length,
+        priceObservations: enrichmentRecords(enrichment, "priceObservations").length,
+        imageFeatures: enrichmentRecords(enrichment, "imageFeatures").length,
+        sourceProbes: enrichmentRecords(enrichment, "sourceProbes").length,
+        statusGeneratedAt: enrichmentStatus.finishedAt || enrichmentStatus.generatedAt || null,
+      },
     },
     artifacts: Object.entries(artifacts).map(([name, payload]) => artifactInfo(name, payload)),
     shardPlan: {
