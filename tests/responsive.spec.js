@@ -15,7 +15,7 @@ async function openMobileLab(page, variant = "hybrid") {
 }
 
 async function openAskEntry(page) {
-  await page.goto("/?askMenuGraph=1");
+  await page.goto("/chat/");
   await expect(page.locator("#ask-entry-root")).toBeVisible();
   await expect(page.locator(".ask-entry-root .ask-gate")).toBeVisible();
 }

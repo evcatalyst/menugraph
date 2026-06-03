@@ -187,6 +187,38 @@
     return null;
   }
 
+  function graphOverlayRecords(graphOverlay) {
+    return graphOverlay?.menuOverlays?.records || graphOverlay?.records || {};
+  }
+
+  function graphSummaryForMenu(uid, records, evidenceIndex) {
+    const overlay = records?.[uid] || {};
+    const counts = overlay.counts || {};
+    const priceRows = (overlay.priceObservationIds || [])
+      .slice(0, 3)
+      .map((id) => evidenceIndex?.priceObservations?.[id])
+      .filter(Boolean)
+      .map((record) => [record.item, record.rawPrice, record.currency].filter(Boolean).join(" "));
+    const dateRows = (overlay.dateEvidenceIds || [])
+      .slice(0, 2)
+      .map((id) => evidenceIndex?.dateEvidence?.[id])
+      .filter(Boolean)
+      .map((record) => [record.confidence, record.decade || record.centerYear, (record.methods || []).join(" ")].filter(Boolean).join(" "));
+    const topDishes = (overlay.topDishes || []).slice(0, 6);
+    const summary = [...topDishes, ...priceRows, ...dateRows].map(cleanValue).filter(Boolean);
+    return {
+      counts: {
+        dishMentions: Number(counts.dishMentions || 0),
+        priceObservations: Number(counts.priceObservations || 0),
+        dateEvidence: Number(counts.dateEvidence || 0),
+        matches: Number(counts.matches || 0),
+        ontologyTerms: Number(counts.ontologyTerms || 0),
+      },
+      snippet: summary.slice(0, 4).join("; "),
+      searchable: summary.join(" | "),
+    };
+  }
+
   function padded(value) {
     return ` ${normalizeText(value)} `;
   }
@@ -447,10 +479,13 @@
     return selected;
   }
 
-  function buildSearchDocuments({ menus, prices, dateEstimates } = {}) {
+  function buildSearchDocuments(inputs = {}) {
+    const { menus, prices, dateEstimates, graphOverlay } = inputs;
     const menuList = Array.isArray(menus) ? menus : menus?.menus || [];
     const priceRecords = Array.isArray(prices) ? prices : prices?.records || [];
     const estimateMap = makeDateEstimateMap(dateEstimates);
+    const graphRecords = graphOverlayRecords(graphOverlay);
+    const graphEvidence = graphOverlay?.evidenceIndex || {};
     const menuMap = new Map();
     const docs = [];
 
@@ -458,6 +493,7 @@
       const uid = String(recordUid(menu));
       const estimate = dateEstimateFor(menu, estimateMap);
       const base = makeMenuResult(menu, estimate);
+      const graphSummary = graphSummaryForMenu(uid, graphRecords, graphEvidence);
       menuMap.set(uid, { menu, estimate, base });
       if (menu?.id || menu?.pointer) menuMap.set(String(menu.id || menu.pointer), { menu, estimate, base });
       if (menu?.sourceRecordId) menuMap.set(String(menu.sourceRecordId), { menu, estimate, base });
@@ -465,9 +501,9 @@
       docs.push({
         kind: "menu",
         item: "",
-        snippet: asArray(menu.topDishes).slice(0, 5).join("; "),
-        searchable: padded(menuSearchFields(menu)),
-        base,
+        snippet: [asArray(menu.topDishes).slice(0, 5).join("; "), graphSummary.snippet].filter(Boolean).join(" | "),
+        searchable: padded([menuSearchFields(menu), graphSummary.searchable].join(" | ")),
+        base: { ...base, graphEvidenceCounts: graphSummary.counts },
       });
 
       for (const dish of asArray(menu.topDishes).slice(0, 18)) {
@@ -526,7 +562,8 @@
     const menuCount = Array.isArray(inputs.menus) ? inputs.menus.length : inputs.menus?.menus?.length || 0;
     const priceCount = Array.isArray(inputs.prices) ? inputs.prices.length : inputs.prices?.records?.length || 0;
     const dateCount = Array.isArray(inputs.dateEstimates) ? inputs.dateEstimates.length : inputs.dateEstimates?.records?.length || 0;
-    return `${menuCount}:${priceCount}:${dateCount}`;
+    const graphStamp = inputs.graphOverlay?.manifest?.generatedAt || inputs.graphOverlay?.menuOverlays?.generatedAt || "no-graph";
+    return `${menuCount}:${priceCount}:${dateCount}:${graphStamp}`;
   }
 
   function getSearchDocuments(inputs) {

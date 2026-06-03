@@ -675,7 +675,12 @@ function contentTypeFor(filePath) {
 }
 
 function serveStatic(req, res, pathname) {
-  const requested = pathname === "/" ? "/index.html" : pathname;
+  let requested = pathname;
+  if (requested === "/" || requested.endsWith("/")) {
+    requested = `${requested}index.html`;
+  } else if (!path.extname(requested)) {
+    requested = `${requested}/index.html`;
+  }
   const filePath = path.normalize(path.join(PUBLIC_DIR, requested));
   if (!filePath.startsWith(PUBLIC_DIR)) {
     notFound(res);

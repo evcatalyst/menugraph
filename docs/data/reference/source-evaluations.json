@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "updatedAt": "2026-06-02",
+  "scoreScale": "1-10; risk means lower operational/legal risk",
+  "capabilities": [
+    { "id": "date_estimation", "label": "Date estimation" },
+    { "id": "price_trends", "label": "Price trends" },
+    { "id": "dish_entity_resolution", "label": "Dish entity resolution" },
+    { "id": "visual_style_cv", "label": "Visual style CV" },
+    { "id": "recipe_enrichment", "label": "Recipe enrichment" },
+    { "id": "regional_evidence", "label": "Regional evidence" },
+    { "id": "transport_evidence", "label": "Transport evidence" },
+    { "id": "nutrition_proxy", "label": "Nutrition proxy" }
+  ],
+  "sources": [
+    {
+      "id": "cia_menu_collection",
+      "label": "CIA Menu Collection",
+      "sourceKey": "cia",
+      "scores": { "dq": 6, "access": 7, "coverage": 9, "uniqueValue": 10, "integrationFit": 10, "mlReady": 8, "risk": 6 },
+      "capabilityWeights": { "date_estimation": 10, "price_trends": 6, "dish_entity_resolution": 6, "visual_style_cv": 9, "regional_evidence": 7, "transport_evidence": 8 }
+    },
+    {
+      "id": "nypl_wotm",
+      "label": "NYPL What's on the Menu",
+      "sourceKey": "nypl",
+      "scores": { "dq": 9, "access": 9, "coverage": 9, "uniqueValue": 10, "integrationFit": 10, "mlReady": 10, "risk": 9 },
+      "capabilityWeights": { "date_estimation": 9, "price_trends": 10, "dish_entity_resolution": 10, "visual_style_cv": 7, "regional_evidence": 6, "nutrition_proxy": 3 }
+    },
+    {
+      "id": "lapl_menu_collection",
+      "label": "Los Angeles Public Library Menu Collection",
+      "scores": { "dq": 7, "access": 5, "coverage": 8, "uniqueValue": 8, "integrationFit": 8, "mlReady": 6, "risk": 5 },
+      "capabilityWeights": { "date_estimation": 8, "regional_evidence": 10, "visual_style_cv": 7, "transport_evidence": 6, "dish_entity_resolution": 5 }
+    },
+    {
+      "id": "cornell_nestle_menu_collection",
+      "label": "Cornell Nestle/SHA Menu Collection",
+      "scores": { "dq": 7, "access": 4, "coverage": 8, "uniqueValue": 8, "integrationFit": 8, "mlReady": 6, "risk": 5 },
+      "capabilityWeights": { "date_estimation": 7, "visual_style_cv": 8, "dish_entity_resolution": 6, "regional_evidence": 5 }
+    },
+    {
+      "id": "uh_1850s_1860s_menus",
+      "label": "University of Houston 1850s-1860s Menus",
+      "scores": { "dq": 8, "access": 7, "coverage": 3, "uniqueValue": 9, "integrationFit": 7, "mlReady": 7, "risk": 8 },
+      "capabilityWeights": { "date_estimation": 8, "dish_entity_resolution": 5, "visual_style_cv": 5, "regional_evidence": 6, "transport_evidence": 4 }
+    },
+    {
+      "id": "northwestern_transport_menus",
+      "label": "Northwestern Transportation Library Menu Collection",
+      "scores": { "dq": 7, "access": 8, "coverage": 5, "uniqueValue": 8, "integrationFit": 8, "mlReady": 7, "risk": 7 },
+      "capabilityWeights": { "transport_evidence": 10, "date_estimation": 7, "visual_style_cv": 8, "regional_evidence": 4 }
+    },
+    {
+      "id": "regional_menu_collections",
+      "label": "Regional menu collections",
+      "scores": { "dq": 6, "access": 4, "coverage": 6, "uniqueValue": 8, "integrationFit": 6, "mlReady": 5, "risk": 5 },
+      "capabilityWeights": { "regional_evidence": 10, "date_estimation": 6, "dish_entity_resolution": 5, "visual_style_cv": 5 }
+    },
+    {
+      "id": "dotlas_structured_menus",
+      "label": "Dotlas Structured Menu Dataset",
+      "scores": { "dq": 9, "access": 4, "coverage": 8, "uniqueValue": 9, "integrationFit": 9, "mlReady": 8, "risk": 4 },
+      "capabilityWeights": { "price_trends": 8, "dish_entity_resolution": 9, "recipe_enrichment": 5, "nutrition_proxy": 4 }
+    },
+    {
+      "id": "recipe1m_plus",
+      "label": "Recipe1M+",
+      "scores": { "dq": 8, "access": 5, "coverage": 8, "uniqueValue": 8, "integrationFit": 8, "mlReady": 9, "risk": 5 },
+      "capabilityWeights": { "recipe_enrichment": 10, "dish_entity_resolution": 7, "visual_style_cv": 8, "nutrition_proxy": 5 }
+    },
+    {
+      "id": "recipenlg",
+      "label": "RecipeNLG",
+      "scores": { "dq": 8, "access": 6, "coverage": 9, "uniqueValue": 8, "integrationFit": 8, "mlReady": 8, "risk": 5 },
+      "capabilityWeights": { "recipe_enrichment": 9, "dish_entity_resolution": 8, "nutrition_proxy": 4 }
+    },
+    {
+      "id": "foodcom_recipes_interactions",
+      "label": "Food.com Recipes and Interactions",
+      "scores": { "dq": 8, "access": 8, "coverage": 7, "uniqueValue": 8, "integrationFit": 8, "mlReady": 8, "risk": 6 },
+      "capabilityWeights": { "recipe_enrichment": 8, "dish_entity_resolution": 7, "nutrition_proxy": 5 }
+    },
+    {
+      "id": "epicurious_kaggle",
+      "label": "Epicurious Kaggle",
+      "scores": { "dq": 7, "access": 6, "coverage": 4, "uniqueValue": 6, "integrationFit": 6, "mlReady": 6, "risk": 4 },
+      "capabilityWeights": { "recipe_enrichment": 5, "nutrition_proxy": 8, "dish_entity_resolution": 4 }
+    },
+    {
+      "id": "yummly_whats_cooking",
+      "label": "Yummly What's Cooking",
+      "scores": { "dq": 9, "access": 7, "coverage": 4, "uniqueValue": 7, "integrationFit": 7, "mlReady": 8, "risk": 5 },
+      "capabilityWeights": { "dish_entity_resolution": 7, "recipe_enrichment": 6, "nutrition_proxy": 4 }
+    },
+    {
+      "id": "the_sifter",
+      "label": "The Sifter",
+      "scores": { "dq": 8, "access": 7, "coverage": 10, "uniqueValue": 9, "integrationFit": 9, "mlReady": 7, "risk": 8 },
+      "capabilityWeights": { "recipe_enrichment": 9, "date_estimation": 6, "dish_entity_resolution": 8, "regional_evidence": 5 }
+    }
+  ]
+}
