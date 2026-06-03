@@ -87,6 +87,7 @@ function blankSource(id, label = id, sourceKey = "") {
     dateMenuIds: new Set(),
     dishMenuIds: new Set(),
     priceMenuIds: new Set(),
+    sourcePriceMenuIds: new Set(),
     ingredientMenuIds: new Set(),
     imageMenuIds: new Set(),
     ocrCandidateIds: new Set(),
@@ -96,6 +97,8 @@ function blankSource(id, label = id, sourceKey = "") {
     counts: {
       dishMentions: 0,
       priceObservations: 0,
+      sourcePriceItems: 0,
+      sourceItemRows: 0,
       imageFeatures: 0,
       ocrPagesProcessed: 0,
       ocrPagesFailed: 0,
@@ -173,6 +176,12 @@ function ingestMenus(sources, menus) {
     record.staticMenuIds.add(menuId);
     if (menu.year || (menu.decade && menu.decade !== "unknown")) record.dateMenuIds.add(menuId);
     if ((menu.topDishes || []).length) record.dishMenuIds.add(menuId);
+    const sourcePriceCount = Number(menu.priceCount || 0);
+    if (sourcePriceCount > 0) {
+      record.sourcePriceMenuIds.add(menuId);
+      record.counts.sourcePriceItems += sourcePriceCount;
+    }
+    if (Number(menu.itemCount || menu.dishCount || 0) > 0) record.counts.sourceItemRows = (record.counts.sourceItemRows || 0) + Number(menu.itemCount || menu.dishCount || 0);
   }
 }
 
@@ -324,6 +333,7 @@ function sourceRows(sources, sourceProbes) {
     .map((source) => {
       const rowMenuIds = new Set([...source.staticMenuIds, ...source.externalMenuIds]);
       const rowCount = rowMenuIds.size;
+      const priceEvidenceMenus = new Set([...(source.priceMenuIds || []), ...(source.sourcePriceMenuIds || [])]);
       const row = {
         sourceId: source.sourceId,
         sourceKey: source.sourceKey || null,
@@ -334,7 +344,9 @@ function sourceRows(sources, sourceProbes) {
         externalRows: source.externalMenuIds.size,
         dateMenus: source.dateMenuIds.size,
         dishMenus: source.dishMenuIds.size,
-        priceMenus: source.priceMenuIds.size,
+        priceMenus: priceEvidenceMenus.size,
+        sampledPriceMenus: source.priceMenuIds.size,
+        sourceStructuredPriceMenus: (source.sourcePriceMenuIds || new Set()).size,
         ingredientMenus: source.ingredientMenuIds.size,
         imageMenus: source.imageMenuIds.size,
         ocrCandidates: source.ocrCandidateIds.size,
@@ -343,6 +355,8 @@ function sourceRows(sources, sourceProbes) {
         recipeBridgeClusters: source.recipeClusterIds.size,
         dishMentions: source.counts.dishMentions,
         priceObservations: source.counts.priceObservations,
+        sourceStructuredPriceItems: source.counts.sourcePriceItems || 0,
+        sourceStructuredItemRows: source.counts.sourceItemRows || 0,
         imageFeatures: source.counts.imageFeatures,
         ocrPagesProcessed: source.counts.ocrPagesProcessed,
         ocrPagesFailed: source.counts.ocrPagesFailed,
@@ -350,7 +364,7 @@ function sourceRows(sources, sourceProbes) {
         recipeClusterCandidates: source.counts.recipeClusterCandidates,
         dateCoverage: numberRatio(source.dateMenuIds.size, rowCount),
         dishCoverage: numberRatio(source.dishMenuIds.size, rowCount),
-        priceCoverage: numberRatio(source.priceMenuIds.size, rowCount),
+        priceCoverage: numberRatio(priceEvidenceMenus.size, rowCount),
         ingredientCoverage: numberRatio(source.ingredientMenuIds.size, rowCount),
         imageCoverage: numberRatio(source.imageMenuIds.size, rowCount),
         topIngredientTags: topObject(source.ingredientTags, 10),

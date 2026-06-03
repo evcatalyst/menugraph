@@ -71,6 +71,7 @@ const rows = sourceRows(
         dateMenuIds: new Set(["lapl:1"]),
         dishMenuIds: new Set(["lapl:1"]),
         priceMenuIds: new Set(),
+        sourcePriceMenuIds: new Set(["lapl:2"]),
         ingredientMenuIds: new Set(["lapl:1"]),
         imageMenuIds: new Set(["lapl:1", "lapl:2"]),
         ocrCandidateIds: new Set(["ocr:1"]),
@@ -80,6 +81,8 @@ const rows = sourceRows(
         counts: {
           dishMentions: 3,
           priceObservations: 0,
+          sourcePriceItems: 12,
+          sourceItemRows: 20,
           imageFeatures: 2,
           ocrPagesProcessed: 1,
           ocrPagesFailed: 1,
@@ -125,7 +128,10 @@ const lapl = rows.find((row) => row.sourceId === "lapl_menu_collection");
 assert.strictEqual(lapl.status, "external_graph_rows");
 assert.strictEqual(lapl.rowCount, 2);
 assert.strictEqual(lapl.imageCoverage, 1);
-assert.strictEqual(lapl.priceCoverage, 0);
+assert.strictEqual(lapl.priceCoverage, 0.5);
+assert.strictEqual(lapl.sampledPriceMenus, 0);
+assert.strictEqual(lapl.sourceStructuredPriceMenus, 1);
+assert.strictEqual(lapl.sourceStructuredPriceItems, 12);
 assert.strictEqual(lapl.failureClasses.access_denied, 1);
 assert(lapl.nextActions.some((item) => item.id === "source_image_route_review"));
 

@@ -56,6 +56,9 @@ function coverageGap(row) {
   const rowCount = number(row.rowCount, 0);
   const dishMenus = number(row.dishMenus, 0);
   const priceMenus = number(row.priceMenus, 0);
+  const sampledPriceMenus = number(row.sampledPriceMenus, priceMenus);
+  const sourceStructuredPriceMenus = number(row.sourceStructuredPriceMenus, 0);
+  const sourceStructuredPriceItems = number(row.sourceStructuredPriceItems, 0);
   const ingredientMenus = number(row.ingredientMenus, 0);
   const imageMenus = number(row.imageMenus, 0);
   const missingDishMenus = Math.max(0, rowCount - dishMenus);
@@ -86,6 +89,9 @@ function coverageGap(row) {
     imageCoverage: pct(row.imageCoverage),
     missingDishMenus,
     missingPriceMenus,
+    sampledPriceMenus,
+    sourceStructuredPriceMenus,
+    sourceStructuredPriceItems,
     missingIngredientMenus,
     missingImageMenus,
     ocrCandidates,
@@ -118,6 +124,8 @@ function summarizeGaps(gaps = []) {
         impactScore: gap.impactScore,
         missingDishMenus: gap.missingDishMenus,
         missingPriceMenus: gap.missingPriceMenus,
+        sampledPriceMenus: gap.sampledPriceMenus,
+        sourceStructuredPriceMenus: gap.sourceStructuredPriceMenus,
         missingIngredientMenus: gap.missingIngredientMenus,
         primaryNextAction: gap.primaryNextAction,
       })),
