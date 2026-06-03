@@ -12,6 +12,7 @@ const { buildUhSource } = require("./uh-source");
 const { buildUwSource } = require("./uw-source");
 const { buildDenverSource } = require("./denver-source");
 const { buildCornellSource } = require("./cornell-source");
+const { buildOcrTriageQueue } = require("./build-ocr-triage-queue");
 const { retagEnrichment } = require("./retag-enrichment");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -236,6 +237,26 @@ async function main() {
 
   await writeStatus({
     status: "running",
+    phase: "ocr-triage",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+    externalSources,
+    externalImageAssessment,
+    retagged,
+  });
+
+  const ocrTriage = await buildOcrTriageQueue({
+    dryRun: hasFlag(args, "dry-run"),
+    recordLimit: Number(argValue(args, "ocr-triage-limit", "5000")) || 5000,
+    earlyLimit: Number(argValue(args, "ocr-triage-early-limit", "100")) || 100,
+    pagesPerMenu: Number(argValue(args, "ocr-triage-pages-per-menu", "2")) || 2,
+    externalCostPerImageUsd: Number(argValue(args, "external-cost-per-image", "0")) || null,
+  });
+  console.log(`[${timestamp()}] OCR triage complete: ${JSON.stringify(ocrTriage.summary)}`);
+
+  await writeStatus({
+    status: "running",
     phase: "graph-build",
     pid: process.pid,
     args,
@@ -243,6 +264,7 @@ async function main() {
     externalSources,
     externalImageAssessment,
     retagged,
+    ocrTriage: ocrTriage.summary,
   });
 
   const graph = await buildGraphOverlay();
@@ -258,6 +280,7 @@ async function main() {
     externalSources,
     externalImageAssessment,
     retagged,
+    ocrTriage: ocrTriage.summary,
     graphSummary: graph.manifest.summary,
   });
 }

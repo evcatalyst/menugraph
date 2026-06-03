@@ -3359,7 +3359,8 @@ function hasGraphEvidence(overlay) {
       Number(counts.dateEvidence || 0) ||
       Number(counts.matches || 0) ||
       Number(counts.ontologyTerms || 0) ||
-      Number(counts.imageFeatures || 0)
+      Number(counts.imageFeatures || 0) ||
+      Number(counts.ocrCandidates || 0)
   );
 }
 
@@ -3401,6 +3402,7 @@ function renderGraphEvidence(overlay) {
     counts.dateEvidence ? `${counts.dateEvidence} date evidence` : "",
     counts.matches ? `${counts.matches} match edge${counts.matches === 1 ? "" : "s"}` : "",
     counts.imageFeatures ? `${counts.imageFeatures} image feature${counts.imageFeatures === 1 ? "" : "s"}` : "",
+    counts.ocrCandidates ? `${counts.ocrCandidates} OCR candidate${counts.ocrCandidates === 1 ? "" : "s"}` : "",
   ].filter(Boolean);
   const topDishes = (overlay.topDishes || []).slice(0, 4).join("; ");
   const priceRows = (overlay.priceObservationIds || [])
@@ -3417,6 +3419,11 @@ function renderGraphEvidence(overlay) {
     .slice(0, 2)
     .map((id) => imageFeatureLabel(index.imageFeatures?.[id]))
     .filter(Boolean);
+  const ocrRows = (overlay.ocrCandidateIds || [])
+    .slice(0, 2)
+    .map((id) => index.ocrCandidates?.[id])
+    .filter(Boolean)
+    .map((record) => `${titleCase(record.localTier || "OCR")} / ${record.route || "queued"} / rank ${record.priorityRank || "backlog"}`);
 
   summary.innerHTML = `
     <span>
@@ -3428,6 +3435,7 @@ function renderGraphEvidence(overlay) {
       priceRows.length ? `Prices: ${priceRows.join("; ")}` : "",
       dateRows.length ? `Dates: ${dateRows.join("; ")}` : "",
       imageRows.length ? `Images: ${imageRows.join("; ")}` : "",
+      ocrRows.length ? `OCR: ${ocrRows.join("; ")}` : "",
     ]
       .filter(Boolean)
       .join(" | ")}</small>

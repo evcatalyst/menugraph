@@ -16,6 +16,7 @@ const MAX_EXTERNAL_MENU_NODES = 500;
 const MAX_INGREDIENT_TERMS = 120;
 const MAX_DISH_EVIDENCE_INDEX = 10000;
 const MAX_IMAGE_EVIDENCE_INDEX = 2000;
+const MAX_OCR_CANDIDATE_INDEX = 2000;
 const MAX_EXTERNAL_DISH_EDGES_PER_MENU = 4;
 
 function cleanValue(value) {
@@ -387,6 +388,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     matches: {},
     dishMentions: {},
     imageFeatures: {},
+    ocrCandidates: {},
     sourceProbes: {},
     externalMenus: {},
   };
@@ -708,6 +710,43 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         method: cleanValue(record.modelName),
       };
     }
+  }
+
+  let ocrCandidateEvidenceIndexed = 0;
+  for (const record of enrichmentRecords(enrichment, "ocrTriage")) {
+    const uid = cleanValue(record.menuId);
+    if (!menuIds.has(uid) || !overlays[uid]) continue;
+    const overlay = overlays[uid];
+    overlay.counts.ocrCandidates = Number(overlay.counts.ocrCandidates || 0) + 1;
+    if (!overlay.ocrCandidateIds) overlay.ocrCandidateIds = [];
+    if (overlay.ocrCandidateIds.length >= 2 || ocrCandidateEvidenceIndexed >= MAX_OCR_CANDIDATE_INDEX) continue;
+    overlay.ocrCandidateIds.push(record.id);
+    ocrCandidateEvidenceIndexed += 1;
+    evidenceIndex.ocrCandidates[record.id] = {
+      id: cleanValue(record.id),
+      menuId: uid,
+      sourceId: cleanValue(record.sourceId),
+      sourceKey: cleanValue(record.sourceKey),
+      route: cleanValue(record.route),
+      localTier: cleanValue(record.localTier),
+      priorityRank: record.priorityRank ?? null,
+      priorityBatch: cleanValue(record.priorityBatch),
+      priorityScore: Number(record.priorityScore || 0),
+      valueScore: Number(record.valueScore || 0),
+      difficultyScore: Number(record.difficultyScore || 0),
+      pageCount: Number(record.pageCount || 0) || null,
+      estimatedImages: Number(record.estimatedImages || 0),
+      missingEvidence: record.missingEvidence || {},
+      expectedYield: record.expectedYield || {},
+      imageAssessment: {
+        hasImage: Boolean(record.imageAssessment?.hasImage),
+        hasDimensions: Boolean(record.imageAssessment?.hasDimensions),
+        width: record.imageAssessment?.width ?? null,
+        height: record.imageAssessment?.height ?? null,
+        orientation: cleanValue(record.imageAssessment?.orientation || "unknown"),
+      },
+      sourceFile: cleanValue(record.provenance?.sourceFile || "enrichment/ocr-triage-queue.json"),
+    };
   }
 
   for (const record of enrichmentRecords(enrichment, "sourceProbes")) {
@@ -1228,6 +1267,7 @@ function overlaySummary(records) {
     withDishes: values.filter((item) => item.counts.dishMentions).length,
     withIngredients: values.filter((item) => item.counts.ingredientTags).length,
     withImageFeatures: values.filter((item) => item.counts.imageFeatures).length,
+    withOcrCandidates: values.filter((item) => item.counts.ocrCandidates).length,
   };
 }
 
@@ -1279,7 +1319,22 @@ function buildMenuOverlayArtifacts(overlays, generatedAt) {
 
 async function buildGraphOverlay(options = {}) {
   const generatedAt = new Date().toISOString();
-  const [menusPayload, matches, analytics, prices, dateEstimates, ontology, evaluations, enrichmentStatus, dishMentions, enrichmentPrices, imageFeatures, sourceProbes, externalMenuRecords] = await Promise.all([
+  const [
+    menusPayload,
+    matches,
+    analytics,
+    prices,
+    dateEstimates,
+    ontology,
+    evaluations,
+    enrichmentStatus,
+    dishMentions,
+    enrichmentPrices,
+    imageFeatures,
+    ocrTriage,
+    sourceProbes,
+    externalMenuRecords,
+  ] = await Promise.all([
     readJson(path.join(DATA_DIR, "menus.json"), { menus: [] }),
     readJson(path.join(DATA_DIR, "matches.json"), { relationships: [], matches: {} }),
     readJson(path.join(DATA_DIR, "analytics.json"), { topDishes: [] }),
@@ -1291,6 +1346,7 @@ async function buildGraphOverlay(options = {}) {
     readJson(path.join(DATA_DIR, "enrichment", "dish-mentions.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "price-observations.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "image-features.json"), { records: [] }),
+    readJson(path.join(DATA_DIR, "enrichment", "ocr-triage-queue.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),
     readExternalMenuRecords(),
   ]);
@@ -1304,6 +1360,7 @@ async function buildGraphOverlay(options = {}) {
     dishMentions,
     priceObservations: enrichmentPrices,
     imageFeatures,
+    ocrTriage,
     sourceProbes,
     externalMenuRecords,
   };
@@ -1338,6 +1395,7 @@ async function buildGraphOverlay(options = {}) {
     matches: Object.keys(evidenceIndex.matches).length,
     dishMentions: Object.keys(evidenceIndex.dishMentions).length,
     imageFeatures: Object.keys(evidenceIndex.imageFeatures).length,
+    ocrCandidates: Object.keys(evidenceIndex.ocrCandidates).length,
     sourceProbes: Object.keys(evidenceIndex.sourceProbes).length,
     externalMenus: Object.keys(evidenceIndex.externalMenus).length,
   };
@@ -1379,6 +1437,7 @@ async function buildGraphOverlay(options = {}) {
         dishMentions: enrichmentRecords(enrichment, "dishMentions").length,
         priceObservations: enrichmentRecords(enrichment, "priceObservations").length,
         imageFeatures: enrichmentRecords(enrichment, "imageFeatures").length,
+        ocrCandidates: enrichmentRecords(enrichment, "ocrTriage").length,
         sourceProbes: enrichmentRecords(enrichment, "sourceProbes").length,
         externalMenuRecords: enrichmentRecords(enrichment, "externalMenuRecords").length,
         statusGeneratedAt: enrichmentStatus.finishedAt || enrichmentStatus.generatedAt || null,

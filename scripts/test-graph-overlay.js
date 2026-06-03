@@ -47,6 +47,9 @@ assert(byteLength(core) <= manifest.sizeBudgetBytes, "core graph should stay und
 assert(byteLength(menuOverlays) <= manifest.sizeBudgetBytes, "menu overlay index should stay under the static budget");
 assert(manifest.summary.core.ingredientTerms >= 100, "core graph should expose expanded ingredient taxonomy terms");
 assert(manifest.summary.overlays.withIngredients >= 15500, "ingredient overlays should cover the enriched menu set");
+assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");
+assert(manifest.summary.overlays.withOcrCandidates >= 1000, "OCR triage should appear as menu overlay evidence");
+assert(Object.keys(evidenceIndex.ocrCandidates || {}).length >= 1000, "OCR triage evidence should be indexed compactly");
 assert(
   core.nodes.some((node) => node.type === "Term" && node.category === "ingredients" && node.label === "potato"),
   "core graph should include high-signal ingredient term nodes"

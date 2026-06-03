@@ -24,6 +24,7 @@ The enricher should never overwrite source metadata directly. It should write ne
 | Price candidate | `price_observation` | Include raw price text, parsed amount, scale, currency, confidence. |
 | Date clue | `date_evidence` | Include interval/point year, method, confidence, hard-bound flag. |
 | Layout/style feature | `image_feature` | Store scalar features locally and large vectors by reference. |
+| OCR routing candidate | `extraction_run` metrics or queue artifact | Store page counts, difficulty, expected yield, and route; no OCR text or image blobs. |
 | Text/image vector | `embedding` | Store vector references, not giant blobs in static JSON. |
 | Canonical link | `entity_link` | Use candidate links before changing canonical dish/venue entities. |
 | Review decision | `entity_link` or evidence row update | Preserve machine output and reviewer decision. |
@@ -103,6 +104,7 @@ The static app should publish compact derived overlays, not raw processing artif
 Recommended static artifacts:
 
 - `docs/data/enrichment-status.json`
+- `docs/data/enrichment/ocr-triage-queue.json`
 - `docs/data/dish-mentions.json`
 - `docs/data/price-observations.json`
 - `docs/data/date-evidence-overlay.json`
@@ -113,4 +115,3 @@ These files should be generated from silver tables, not hand-maintained.
 ## Versioning
 
 Each model or OCR processor run gets a new `extraction_run` row. If a later run improves a claim, keep the older row and mark the newer row as the preferred current claim in the gold layer or static overlay. This preserves auditability and makes model comparison possible.
-
