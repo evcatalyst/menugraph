@@ -380,7 +380,18 @@ async function fetchBuffer(url, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const parsed = new URL(url);
     const client = parsed.protocol === "http:" ? http : https;
-    const req = client.request(
+    let settled = false;
+    let req = null;
+    const settle = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(totalTimeout);
+      callback(value);
+    };
+    const totalTimeout = setTimeout(() => {
+      if (req) req.destroy(new Error(`request timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+    req = client.request(
       parsed,
       {
         method: "GET",
@@ -391,7 +402,9 @@ async function fetchBuffer(url, timeoutMs = 20000) {
       (response) => {
         if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
           response.resume();
-          fetchBuffer(new URL(response.headers.location, parsed).toString(), timeoutMs).then(resolve).catch(reject);
+          fetchBuffer(new URL(response.headers.location, parsed).toString(), timeoutMs)
+            .then((buffer) => settle(resolve, buffer))
+            .catch((error) => settle(reject, error));
           return;
         }
         const chunks = [];
@@ -399,15 +412,16 @@ async function fetchBuffer(url, timeoutMs = 20000) {
         response.on("end", () => {
           const buffer = Buffer.concat(chunks);
           if (response.statusCode >= 400) {
-            reject(new Error(`HTTP ${response.statusCode}`));
+            settle(reject, new Error(`HTTP ${response.statusCode}`));
             return;
           }
-          resolve(buffer);
+          settle(resolve, buffer);
         });
+        response.on("error", (error) => settle(reject, error));
       }
     );
-    req.on("timeout", () => req.destroy(new Error("image request timed out")));
-    req.on("error", reject);
+    req.on("timeout", () => req.destroy(new Error(`request timed out after ${timeoutMs}ms`)));
+    req.on("error", (error) => settle(reject, error));
     req.end();
   });
 }
@@ -685,6 +699,8 @@ async function buildLocalEnrichment(options = {}) {
   const textPriceRecords = [];
   const runEvents = [];
   const deadline = options.timeBudgetMs ? Date.now() + options.timeBudgetMs : Infinity;
+  let textMenus = 0;
+  let warningCount = 0;
 
   for (const [index, menu] of selected.entries()) {
     if (Date.now() > deadline) {
@@ -695,6 +711,7 @@ async function buildLocalEnrichment(options = {}) {
     try {
       const text = await cachedTranscript(menu, options);
       if (!text) continue;
+      textMenus += 1;
       textDishRecords.push(...textDishMentions(menu, text, options.maxDishMentionsPerMenu));
       for (const price of extractPricesFromText(text, menu)) {
         const enriched = enrichmentPriceObservation(
@@ -708,11 +725,21 @@ async function buildLocalEnrichment(options = {}) {
         );
         textPriceRecords.push(enriched);
       }
-      if (options.onProgress && ((index + 1) % 25 === 0 || index + 1 === selected.length)) {
-        options.onProgress(`text enrichment ${index + 1}/${selected.length}`);
-      }
     } catch (error) {
+      warningCount += 1;
       runEvents.push({ level: "warn", menuId: recordUid(menu), message: error.message });
+    } finally {
+      if (options.onProgress && ((index + 1) % 25 === 0 || index + 1 === selected.length)) {
+        options.onProgress(
+          [
+            `text enrichment ${index + 1}/${selected.length} processed`,
+            `${textMenus} with text`,
+            `${textDishRecords.length} text dishes`,
+            `${textPriceRecords.length} text prices`,
+            `${warningCount} warnings`,
+          ].join(", ")
+        );
+      }
     }
   }
 
