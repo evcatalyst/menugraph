@@ -3,7 +3,6 @@ const fs = require("fs/promises");
 const http = require("http");
 const https = require("https");
 const path = require("path");
-const { fetchMenuText } = require("../server");
 const { cleanValue, normalizeText, recordUid } = require("../docs/multisource");
 const { extractPricesFromText, normalizePrice, contextForEntry } = require("../docs/price-utils");
 
@@ -379,12 +378,46 @@ async function cachedTranscript(menu, options) {
   } catch (error) {
     if (!options.fetchCiaText || (menu.sourceKey || "cia") !== "cia") return "";
   }
-  const text = await withTimeout(fetchMenuText(menu.id), options.menuTimeoutMs, `transcript ${recordUid(menu)}`);
+  const text = await withTimeout(fetchCiaTranscriptBounded(menu, options), options.menuTimeoutMs, `transcript ${recordUid(menu)}`);
   if (text) {
     await fs.mkdir(TRANSCRIPT_CACHE_DIR, { recursive: true });
     await fs.writeFile(filePath, text, "utf8");
   }
   return text || "";
+}
+
+async function fetchCiaTranscriptBounded(menu, options) {
+  const id = cleanValue(menu.sourceRecordId || menu.pointer || menu.id);
+  if (!id) return "";
+  const item = await fetchCiaMetadata(id, options);
+  const texts = [];
+  if (item.text) texts.push(cleanValue(item.text));
+
+  const rawParentId = Number(item.parentId);
+  const parentId = Number.isFinite(rawParentId) && rawParentId > 0 ? String(rawParentId) : id;
+  let pages = [];
+  try {
+    const compound = await fetchJsonLoose(
+      `https://${CONTENTDM_HOST}/digital/bl/dmwebservices/index.php?q=dmGetCompoundObjectInfo/${CIA_COLLECTION}/${encodeURIComponent(parentId)}/json`,
+      options.requestTimeoutMs
+    );
+    pages = Array.isArray(compound.page) ? compound.page : [];
+  } catch (error) {
+    pages = [];
+  }
+
+  for (const page of pages.slice(0, options.maxTranscriptPages)) {
+    const pageId = cleanValue(page.pageptr || page.id);
+    if (!pageId || pageId === id) continue;
+    try {
+      const pageItem = await fetchCiaMetadata(pageId, options);
+      if (pageItem.text) texts.push(cleanValue(pageItem.text));
+    } catch (error) {
+      // Individual page OCR misses are common; keep the rest of the menu usable.
+    }
+  }
+
+  return texts.filter(Boolean).join("\n");
 }
 
 function parseImageDimensions(buffer) {
@@ -853,6 +886,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     dryRun: hasFlag(args, "dry-run"),
     requestTimeoutMs: Math.max(2000, Number(argValue(args, "timeout-ms", "20000")) || 20000),
     menuTimeoutMs: Math.max(5000, Number(argValue(args, "menu-timeout-ms", "45000")) || 45000),
+    maxTranscriptPages: Math.max(1, Number(argValue(args, "max-transcript-pages", "8")) || 8),
     timeBudgetMs: timeBudgetMin > 0 ? timeBudgetMin * 60 * 1000 : 0,
     maxDishMentionsPerMenu: Math.max(10, Number(argValue(args, "max-dish-mentions-per-menu", "120")) || 120),
     publicDishLimit: Math.max(1000, Number(argValue(args, "public-dish-limit", "60000")) || 60000),
