@@ -426,6 +426,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     imageFeatures: {},
     ocrCandidates: {},
     ocrFailures: {},
+    sourceCoverage: {},
     sourceProbes: {},
     externalMenus: {},
   };
@@ -801,6 +802,34 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       sampleItems: (record.sampleItems || []).slice(0, 8),
       notes: cleanValue(record.notes),
       error: cleanValue(record.error),
+    };
+  }
+
+  for (const record of enrichmentRecords(enrichment, "coverageReport")) {
+    const sourceId = cleanValue(record.sourceId);
+    if (!sourceId) continue;
+    evidenceIndex.sourceCoverage[sourceId] = {
+      sourceId,
+      label: cleanValue(record.label),
+      status: cleanValue(record.status),
+      sourceType: cleanValue(record.sourceType),
+      rowCount: Number(record.rowCount || 0),
+      staticRows: Number(record.staticRows || 0),
+      externalRows: Number(record.externalRows || 0),
+      dishCoverage: Number(record.dishCoverage || 0),
+      priceCoverage: Number(record.priceCoverage || 0),
+      ingredientCoverage: Number(record.ingredientCoverage || 0),
+      imageCoverage: Number(record.imageCoverage || 0),
+      coverageScore: Number(record.coverageScore || 0),
+      ocrCandidates: Number(record.ocrCandidates || 0),
+      ocrProcessedMenus: Number(record.ocrProcessedMenus || 0),
+      ocrFailures: Number(record.ocrFailures || 0),
+      primaryNextAction: cleanValue(record.primaryNextAction),
+      nextActions: (record.nextActions || []).slice(0, 3).map((item) => ({
+        id: cleanValue(item.id),
+        label: cleanValue(item.label),
+        priority: Number(item.priority || 0),
+      })),
     };
   }
 
@@ -1385,6 +1414,7 @@ async function buildGraphOverlay(options = {}) {
     imageFeatures,
     ocrTriage,
     ocrFailures,
+    coverageReport,
     sourceProbes,
     externalMenuRecords,
   ] = await Promise.all([
@@ -1401,6 +1431,7 @@ async function buildGraphOverlay(options = {}) {
     readJson(path.join(DATA_DIR, "enrichment", "image-features.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "ocr-triage-queue.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "ocr-failures.json"), { records: [] }),
+    readJson(path.join(DATA_DIR, "enrichment", "coverage-report.json"), { records: [], summary: {} }),
     readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),
     readExternalMenuRecords(),
   ]);
@@ -1416,6 +1447,7 @@ async function buildGraphOverlay(options = {}) {
     imageFeatures,
     ocrTriage,
     ocrFailures,
+    coverageReport,
     sourceProbes,
     externalMenuRecords,
   };
@@ -1452,6 +1484,7 @@ async function buildGraphOverlay(options = {}) {
     imageFeatures: Object.keys(evidenceIndex.imageFeatures).length,
     ocrCandidates: Object.keys(evidenceIndex.ocrCandidates).length,
     ocrFailures: Object.keys(evidenceIndex.ocrFailures).length,
+    sourceCoverage: Object.keys(evidenceIndex.sourceCoverage).length,
     sourceProbes: Object.keys(evidenceIndex.sourceProbes).length,
     externalMenus: Object.keys(evidenceIndex.externalMenus).length,
   };
@@ -1495,10 +1528,12 @@ async function buildGraphOverlay(options = {}) {
         imageFeatures: enrichmentRecords(enrichment, "imageFeatures").length,
         ocrCandidates: enrichmentRecords(enrichment, "ocrTriage").length,
         ocrFailures: enrichmentRecords(enrichment, "ocrFailures").length,
+        sourceCoverage: enrichmentRecords(enrichment, "coverageReport").length,
         sourceProbes: enrichmentRecords(enrichment, "sourceProbes").length,
         externalMenuRecords: enrichmentRecords(enrichment, "externalMenuRecords").length,
         statusGeneratedAt: enrichmentStatus.summary?.ocrUpdatedAt || enrichmentStatus.finishedAt || enrichmentStatus.generatedAt || null,
       },
+      coverage: coverageReport.summary || {},
     },
     artifacts: Object.entries(artifacts).map(([name, payload]) => artifactInfo(name, payload)),
     shardPlan: {

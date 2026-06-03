@@ -2384,6 +2384,7 @@ function renderGraphLens(svg, width, height) {
   const core = summary.core || {};
   const evidence = summary.evidence || {};
   const overlays = summary.overlays || {};
+  const coverage = summary.coverage || {};
   const pad = { top: 26, right: 24, bottom: 24, left: 24 };
   const compactMode = width < 720;
 
@@ -2406,7 +2407,7 @@ function renderGraphLens(svg, width, height) {
       value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0)),
       detail: "date / price / match",
     },
-    { label: "Sources", value: formatNumber(sourceSummary.sources || 0), detail: `${formatNumber(sourceSummary.capabilities || 0)} capabilities` },
+    { label: "Coverage", value: formatNumber(coverage.rowLevelSources || sourceSummary.sources || 0), detail: `${formatNumber(coverage.averageCoverageScore ? Math.round(coverage.averageCoverageScore * 100) : 0)} avg score` },
   ];
   metrics.forEach((metric, index) => {
     const col = compactMode ? index % 2 : index;
@@ -2666,6 +2667,7 @@ function graphSourceRows(graph) {
   const sources = nodes.filter((node) => node.type === "Source");
   const capabilityById = new Map(nodes.filter((node) => node.type === "Capability").map((node) => [node.id, node]));
   const probes = graph?.evidenceIndex?.sourceProbes || {};
+  const coverage = graph?.evidenceIndex?.sourceCoverage || {};
   const sourceCounts = sourceRecordCounts();
   const externalCounts = graph?.manifest?.summary?.externalMenus?.bySource || {};
   const edgesBySource = new Map();
@@ -2683,20 +2685,24 @@ function graphSourceRows(graph) {
         (Number(scores.dq || 0) + Number(scores.access || 0) + Number(scores.coverage || 0) + Number(scores.integrationFit || 0) + Number(scores.mlReady || 0)) / 5;
       const sourceId = source.provenance?.sourceId || String(source.id || "").replace(/^source:/, "");
       const probe = probes[sourceId] || null;
+      const coverageRow = coverage[sourceId] || null;
       const ingestedCount = source.sourceKey ? sourceCounts.get(source.sourceKey) || 0 : 0;
       const externalCount = Number(externalCounts[sourceId] || 0);
       const sampleItems = Array.isArray(probe?.sampleItems) ? probe.sampleItems : [];
       const statusKind = ingestedCount ? "ingested" : externalCount ? "external" : probe ? "probed" : "evaluated";
       const statusLabel = ingestedCount ? "Ingested" : externalCount ? "Graph Rows" : probe ? "Probed" : "Evaluated";
-      const statusDetail = ingestedCount
+      const coverageDetail = coverageRow
+        ? `${formatNumber(Math.round(Number(coverageRow.coverageScore || 0) * 100))} coverage / ${titleCase(coverageRow.primaryNextAction || "monitor")}`
+        : "";
+      const statusDetail = coverageDetail || (ingestedCount
         ? `${formatNumber(ingestedCount)} menu rows in static app`
         : externalCount
           ? `${formatNumber(externalCount)} compact external menu rows in graph`
-        : probe?.publicItemCount
-          ? `${formatNumber(probe.publicItemCount)} public items observed`
-          : probe?.status
-            ? `${titleCase(probe.status)} metadata probe`
-            : "capability and rights model only";
+          : probe?.publicItemCount
+            ? `${formatNumber(probe.publicItemCount)} public items observed`
+            : probe?.status
+              ? `${titleCase(probe.status)} metadata probe`
+              : "capability and rights model only");
       const sampleText = sampleItems
         .slice(0, 2)
         .map((item) => [item.title, item.date].filter(Boolean).join(" / "))
@@ -2714,6 +2720,8 @@ function graphSourceRows(graph) {
         statusDetail,
         sourceUrl: probe?.sourceUrl || "",
         publicItemCount: probe?.publicItemCount || null,
+        coverageScore: Number(coverageRow?.coverageScore || 0),
+        primaryNextAction: coverageRow?.primaryNextAction || "",
         sampleText,
         notes: ingestedCount
           ? "Row-level menu metadata is in the static app; graph overlays add dish, price, date, and match evidence where available."

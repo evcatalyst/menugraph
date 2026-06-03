@@ -29,6 +29,7 @@ The enricher should never overwrite source metadata directly. It should write ne
 | Text/image vector | `embedding` | Store vector references, not giant blobs in static JSON. |
 | Canonical link | `entity_link` | Use candidate links before changing canonical dish/venue entities. |
 | Review decision | `entity_link` or evidence row update | Preserve machine output and reviewer decision. |
+| Coverage assessment | `coverage-report.json` or gold metrics view | Store source-by-source coverage ratios, gaps, and next actions for future overnight runs. |
 
 ## Minimal OCR Enricher Output
 
@@ -112,6 +113,7 @@ Recommended static artifacts:
 - `docs/data/enrichment/price-observations.json` as a manifest with records sharded under `docs/data/enrichment/shards/price-observations/`
 - `docs/data/enrichment/ocr-extractions.json` as a manifest with records sharded under `docs/data/enrichment/shards/ocr-extractions/`
 - `docs/data/enrichment/ocr-failures.json` for compact retry/source-review triage
+- `docs/data/enrichment/coverage-report.json` for source-by-source coverage, gaps, and next-run priorities
 - `docs/data/graph/core.json`
 - `docs/data/graph/evidence-index.json`
 - `docs/data/graph/menu-overlays.json` plus source shards under `docs/data/graph/menu-overlays/by-source/`

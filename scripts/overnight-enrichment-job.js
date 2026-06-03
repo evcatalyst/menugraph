@@ -15,6 +15,7 @@ const { buildCornellSource } = require("./cornell-source");
 const { buildOcrTriageQueue } = require("./build-ocr-triage-queue");
 const { buildLocalVisionOcrEnrichment } = require("./local-vision-ocr-enrichment");
 const { retagEnrichment } = require("./retag-enrichment");
+const { buildEnrichmentCoverageReport } = require("./build-enrichment-coverage-report");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
@@ -313,6 +314,22 @@ async function main() {
 
   await writeStatus({
     status: "running",
+    phase: "coverage-report",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+    externalSources,
+    externalImageAssessment,
+    retagged: postOcrRetagged,
+    ocrTriage: ocrTriage.summary,
+    localOcr: localOcr.summary || localOcr,
+  });
+
+  const coverageReport = await buildEnrichmentCoverageReport({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Coverage report complete: ${JSON.stringify(coverageReport.summary)}`);
+
+  await writeStatus({
+    status: "running",
     phase: "graph-build",
     pid: process.pid,
     args,
@@ -322,6 +339,7 @@ async function main() {
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
+    coverageReport: coverageReport.summary,
   });
 
   const graph = await buildGraphOverlay();
@@ -339,6 +357,7 @@ async function main() {
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
+    coverageReport: coverageReport.summary,
     graphSummary: graph.manifest.summary,
   });
 }

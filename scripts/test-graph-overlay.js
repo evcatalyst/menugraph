@@ -42,6 +42,8 @@ const menuOverlays = readJson(path.join(GRAPH_DIR, "menu-overlays.json"));
 const evidenceIndex = readJson(path.join(GRAPH_DIR, "evidence-index.json"));
 const ocrFailuresPath = path.join(DATA_DIR, "enrichment", "ocr-failures.json");
 const ocrFailures = fs.existsSync(ocrFailuresPath) ? readJson(ocrFailuresPath) : { summary: { total: 0 }, records: [] };
+const coverageReportPath = path.join(DATA_DIR, "enrichment", "coverage-report.json");
+const coverageReport = fs.existsSync(coverageReportPath) ? readJson(coverageReportPath) : { summary: { sources: 0 }, records: [] };
 
 assert.deepStrictEqual(graphContract.validateGraph(sourceCapabilities, { maxBytes: manifest.sizeBudgetBytes }), [], "source graph should validate");
 assert.deepStrictEqual(graphContract.validateGraph(core, { maxBytes: manifest.sizeBudgetBytes }), [], "core graph should validate");
@@ -53,6 +55,13 @@ assert(manifest.summary.overlays.withIngredients >= 15500, "ingredient overlays 
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");
 assert(manifest.summary.overlays.withOcrCandidates >= 1000, "OCR triage should appear as menu overlay evidence");
 assert(Object.keys(evidenceIndex.ocrCandidates || {}).length >= 1000, "OCR triage evidence should be indexed compactly");
+if (coverageReport.summary?.sources) {
+  assert.strictEqual(manifest.summary.enrichment.sourceCoverage, coverageReport.summary.sources, "source coverage count should be summarized in the enrichment graph");
+  assert.strictEqual(manifest.summary.coverage.sources, coverageReport.summary.sources, "coverage report summary should be included in the graph manifest");
+  assert(Object.keys(evidenceIndex.sourceCoverage || {}).length >= coverageReport.summary.sources, "source coverage should be indexed compactly");
+  assert(evidenceIndex.sourceCoverage.cia_menu_collection?.primaryNextAction, "CIA coverage row should include a next action");
+  assert(evidenceIndex.sourceCoverage.the_sifter?.primaryNextAction === "recipe_bridge_sampling", "recipe sources should retain bridge next actions");
+}
 if (ocrFailures.summary?.total) {
   assert.strictEqual(manifest.summary.enrichment.ocrFailures, ocrFailures.summary.total, "OCR failure count should be summarized in the enrichment graph");
   assert(Object.keys(evidenceIndex.ocrFailures || {}).length > 0, "OCR failure evidence should be indexed compactly");
