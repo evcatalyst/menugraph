@@ -164,6 +164,52 @@ async function fetchJsonLoose(url, timeoutMs = 20000) {
   return JSON.parse(buffer.toString("utf8"));
 }
 
+function iiifServiceImageUrl(service, fallbackImageUrl = "", width = 1400) {
+  const serviceId = cleanValue(service?.id || service?.["@id"]);
+  if (serviceId) return `${serviceId.replace(/\/$/, "")}/full/${width},/0/default.jpg`;
+  const raw = cleanValue(fallbackImageUrl);
+  if (!raw) return "";
+  return raw
+    .replace(/\/full\/(?:full|\d+,?)\/0\/default\.jpg(?:[?#].*)?$/i, `/full/${width},/0/default.jpg`)
+    .replace(/\/full\/(?:full|\d+,?)\/0\/default\.png(?:[?#].*)?$/i, `/full/${width},/0/default.jpg`);
+}
+
+function canvasImageBody(canvas) {
+  return (
+    canvas?.items?.[0]?.items?.[0]?.body ||
+    canvas?.images?.[0]?.resource ||
+    canvas?.thumbnail?.[0] ||
+    canvas?.thumbnail ||
+    null
+  );
+}
+
+function imageUrlsForIiifManifestPayload(payload, options = {}) {
+  const width = options.imageWidth || 1400;
+  const limit = Math.max(1, Number(options.pagesPerMenu || 1) || 1);
+  const canvases =
+    payload?.items ||
+    payload?.sequences?.flatMap((sequence) => sequence.canvases || []) ||
+    payload?.canvases ||
+    [];
+  const urls = [];
+  for (const canvas of canvases) {
+    const body = canvasImageBody(canvas);
+    if (!body) continue;
+    const imageUrl = iiifServiceImageUrl(body.service || body.service?.[0], body.id || body["@id"], width);
+    if (imageUrl) urls.push(imageUrl);
+    if (urls.length >= limit) break;
+  }
+  return [...new Set(urls)];
+}
+
+async function iiifManifestImageUrls(manifestUrl, options) {
+  const url = cleanValue(manifestUrl);
+  if (!url) return [];
+  const payload = await fetchJsonLoose(url, options.requestTimeoutMs);
+  return imageUrlsForIiifManifestPayload(payload, options);
+}
+
 async function ciaImageUrlsForRecord(record, options) {
   const id = cleanValue(record.sourceRecordId || record.pointer || record.id);
   if (!id) return [];
@@ -189,6 +235,15 @@ async function resolveImageUrlsForRecord(record, options) {
       if (urls.length) return urls;
     } catch (error) {
       options.onProgress?.(`CIA image metadata fallback for ${record.menuId || record.sourceRecordId}: ${error.message}`);
+    }
+  }
+  const manifestUrl = cleanValue(record.iiifManifestUrl || record.imageFeatures?.find?.((feature) => feature?.iiifManifestUrl)?.iiifManifestUrl);
+  if (manifestUrl) {
+    try {
+      const urls = await iiifManifestImageUrls(manifestUrl, options);
+      if (urls.length) return urls;
+    } catch (error) {
+      options.onProgress?.(`IIIF manifest image fallback for ${record.menuId || record.sourceRecordId}: ${error.message}`);
     }
   }
   return imageUrlsForRecord(record, options);
@@ -601,10 +656,12 @@ module.exports = {
   VERSION,
   buildLocalVisionOcrEnrichment,
   imageUrlsForRecord,
+  imageUrlsForIiifManifestPayload,
   resolveImageUrlsForRecord,
   ciaImageUrlsForRecord,
   ciaIiifImageUrl,
   dedupeExtractionRecords,
+  iiifServiceImageUrl,
   menuLike,
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,

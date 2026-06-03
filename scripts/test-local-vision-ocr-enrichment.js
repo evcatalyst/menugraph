@@ -2,6 +2,8 @@ const assert = require("assert");
 const {
   dedupeExtractionRecords,
   imageUrlsForRecord,
+  imageUrlsForIiifManifestPayload,
+  iiifServiceImageUrl,
   menuLike,
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
@@ -46,6 +48,47 @@ const uhFallbackUrls = imageUrlsForRecord(
   { imageWidth: 1000, pagesPerMenu: 1 }
 );
 assert.deepStrictEqual(uhFallbackUrls, ["https://digitalcollections.lib.uh.edu/downloads/f7623d15f?file=thumbnail"]);
+
+assert.strictEqual(
+  iiifServiceImageUrl(
+    { "@id": "https://media.lib.uh.edu/images/q237hs53h%2Ffiles%2F647aa5e8-589e-489f-b203-4efdd8905103" },
+    "",
+    1200
+  ),
+  "https://media.lib.uh.edu/images/q237hs53h%2Ffiles%2F647aa5e8-589e-489f-b203-4efdd8905103/full/1200,/0/default.jpg"
+);
+
+const uhManifestUrls = imageUrlsForIiifManifestPayload(
+  {
+    "@type": "sc:Manifest",
+    sequences: [
+      {
+        canvases: [
+          {
+            "@type": "sc:Canvas",
+            width: 640,
+            height: 480,
+            images: [
+              {
+                resource: {
+                  "@type": "dctypes:Image",
+                  "@id": "https://media.lib.uh.edu/images/q237hs53h%2Ffiles%2F647aa5e8-589e-489f-b203-4efdd8905103/full/600,/0/default.jpg",
+                  service: {
+                    "@id": "https://media.lib.uh.edu/images/q237hs53h%2Ffiles%2F647aa5e8-589e-489f-b203-4efdd8905103",
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  { imageWidth: 1000, pagesPerMenu: 1 }
+);
+assert.deepStrictEqual(uhManifestUrls, [
+  "https://media.lib.uh.edu/images/q237hs53h%2Ffiles%2F647aa5e8-589e-489f-b203-4efdd8905103/full/1000,/0/default.jpg",
+]);
 
 const menu = menuLike(
   { menuId: "lapl:1247", sourceKey: "lapl", sourceRecordId: "1247", title: "A. Sabella's Capri Room" },
