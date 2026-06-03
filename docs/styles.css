@@ -1934,16 +1934,22 @@ body[data-active-lens="graph"] .result-list {
   height: 122px;
 }
 
+body[data-active-lens="graph"] .canvas-toolbar h2 {
+  white-space: normal;
+  text-overflow: clip;
+  line-height: 1.15;
+}
+
 .source-result-card {
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
   min-height: 110px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfdfc;
-  padding: 10px;
+  padding: 9px;
 }
 
 .source-result-card__top {
@@ -1996,17 +2002,18 @@ body[data-active-lens="graph"] .result-list {
 }
 
 .source-result-card h3 {
+  min-height: 15px;
   overflow: hidden;
   color: var(--ink);
-  font-size: 13px;
-  line-height: 1.2;
+  font-size: 12.5px;
+  line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .source-result-card p {
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 11px;
   line-height: 1.28;
 }
 
@@ -2014,7 +2021,7 @@ body[data-active-lens="graph"] .result-list {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 .source-result-card a {
@@ -2034,7 +2041,7 @@ body[data-active-lens="graph"] .result-list {
   font: inherit;
   font-size: 11.5px;
   font-weight: 850;
-  padding: 5px 9px;
+  padding: 4px 8px;
 }
 
 .source-result-card__open:hover,

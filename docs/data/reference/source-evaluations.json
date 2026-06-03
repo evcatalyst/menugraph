@@ -79,6 +79,13 @@
       "capabilityWeights": { "regional_evidence": 10, "date_estimation": 6, "visual_style_cv": 6, "dish_entity_resolution": 5, "transport_evidence": 4 }
     },
     {
+      "id": "seattle_room_menu_collection",
+      "label": "Seattle Room Menu Collection",
+      "sourceKey": "seattle",
+      "scores": { "dq": 8, "access": 8, "coverage": 6, "uniqueValue": 8, "integrationFit": 8, "mlReady": 7, "risk": 7 },
+      "capabilityWeights": { "regional_evidence": 10, "date_estimation": 8, "dish_entity_resolution": 7, "visual_style_cv": 7, "price_trends": 5 }
+    },
+    {
       "id": "dotlas_structured_menus",
       "label": "Dotlas Structured Menu Dataset",
       "scores": { "dq": 9, "access": 4, "coverage": 8, "uniqueValue": 9, "integrationFit": 9, "mlReady": 8, "risk": 4 },

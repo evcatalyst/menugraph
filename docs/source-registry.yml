@@ -223,6 +223,35 @@ sources:
       local_first: true
       external_routing_default: "sanitized_metadata_only"
 
+  seattle_room_menu_collection:
+    name: "Seattle Room Menu Collection"
+    source_type: "regional_menu_images_metadata"
+    priority: 2
+    access:
+      method: "contentdm_api"
+      bulk_available: true
+      source_url: "https://spl.contentdm.oclc.org/digital/collection/p16118coll5"
+      api_url: "https://spl.contentdm.oclc.org/digital/api"
+    rights:
+      category: "mixed"
+      license: "Source item rights; Seattle Public Library educational, academic, and personal use terms apply per item"
+      grok_safe_default: false
+      public_static_fields:
+        - source metadata
+        - source links
+        - derived date evidence
+        - derived dish and ingredient hints
+        - derived price observations from metadata descriptions
+        - derived image metadata features
+      restricted_fields:
+        - raw full-page images unless rights-cleared
+        - raw OCR if added later unless rights-cleared
+        - embedding vectors and external LLM payloads
+    enrichment:
+      role: "pacific_northwest_restaurant_cuisine_price_evidence"
+      local_first: true
+      external_routing_default: "sanitized_metadata_only"
+
   dotlas_structured_menus:
     name: "Dotlas Structured Menu Dataset"
     source_type: "modern_structured_menu_commercial"

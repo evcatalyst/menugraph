@@ -7,6 +7,7 @@ const { buildLocalEnrichment, optionsFromArgs } = require("./local-enrichment");
 const { buildMilwaukeeSource } = require("./milwaukee-source");
 const { buildNolaSource } = require("./nola-source");
 const { buildNorthwesternSource } = require("./northwestern-source");
+const { buildSeattleSource } = require("./seattle-source");
 const { buildUhSource } = require("./uh-source");
 const { buildUwSource } = require("./uw-source");
 
@@ -28,6 +29,7 @@ const DEFAULT_ARGS = [
   "--milwaukee-limit=100",
   "--uw-limit=300",
   "--nola-limit=100",
+  "--seattle-limit=300",
 ];
 
 function timestamp() {
@@ -101,6 +103,11 @@ async function runExternalSources(args) {
       sourceId: "nola_menu_collection",
       limit: sourceLimit(args, "nola-limit", 100),
       run: (limit) => buildNolaSource({ limit, timeoutMs, dryRun }),
+    },
+    {
+      sourceId: "seattle_room_menu_collection",
+      limit: sourceLimit(args, "seattle-limit", 300),
+      run: (limit) => buildSeattleSource({ limit, timeoutMs, dryRun }),
     },
   ];
 

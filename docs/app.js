@@ -218,6 +218,7 @@ function sourceCollectionLabel(sourceKey) {
   if (sourceKey === "milwaukee") return "Milwaukee Public Library";
   if (sourceKey === "uw") return "University of Washington Digital Collections";
   if (sourceKey === "nola") return "New Orleans Public Library";
+  if (sourceKey === "seattle") return "Seattle Public Library";
   return "Source Collection";
 }
 
@@ -2407,9 +2408,9 @@ function renderGraphLens(svg, width, height) {
   });
 
   const flowY = metricY + (compactMode ? 132 : 78);
-  const flowH = compactMode ? 54 : 88;
+  const flowH = compactMode ? 52 : 76;
   const availableW = width - pad.left - pad.right;
-  const flowBoxes = [
+  const desktopFlowBoxes = [
     {
       title: "Source Knowledge",
       metric: `${formatNumber(sourceSummary.sources || 0)} sources`,
@@ -2421,9 +2422,19 @@ function renderGraphLens(svg, width, height) {
       detail: "menus, matches, analytics, prices, date estimates, ontology",
     },
     {
+      title: "Local Enricher",
+      metric: "Mac-first",
+      detail: "OCR spans, dish mentions, prices, dates, image features",
+    },
+    {
+      title: "Recipe Bridge",
+      metric: "metadata",
+      detail: "Recipe1M, RecipeNLG, Food.com, Sifter as enrichment sources",
+    },
+    {
       title: "Graph Builder",
-      metric: "contracted",
-      detail: "Valid IDs, provenance, compact edges, no raw OCR or vectors",
+      metric: "validated",
+      detail: "IDs, provenance, compact edges, no raw OCR or vectors",
     },
     {
       title: "Browser Overlay",
@@ -2431,8 +2442,31 @@ function renderGraphLens(svg, width, height) {
       detail: "Detail evidence, Ask context, food lens links, flow view",
     },
   ];
+  const compactFlowBoxes = [
+    {
+      title: "Sources",
+      metric: `${formatNumber(sourceSummary.sources || 0)} modeled`,
+      detail: "Rights, access, coverage, recipes, regional collections",
+    },
+    {
+      title: "Snapshots",
+      metric: `${formatNumber(summary.menus || state.allMenus.length)} menus`,
+      detail: "Static menu, price, match, ontology, date files",
+    },
+    {
+      title: "Enrichment",
+      metric: "local-first",
+      detail: "OCR, dishes, prices, images, recipe links feed silver rows",
+    },
+    {
+      title: "Overlay",
+      metric: `${formatNumber(overlays.menus || 0)} menus`,
+      detail: "Compact graph evidence in browser, Ask, and detail panels",
+    },
+  ];
 
   if (compactMode) {
+    const flowBoxes = compactFlowBoxes;
     const boxW = availableW;
     flowBoxes.forEach((box, index) => {
       const y = flowY + index * (flowH + 14);
@@ -2443,21 +2477,51 @@ function renderGraphLens(svg, width, height) {
       }
     });
   } else {
-    const gap = 16;
-    const boxW = (availableW - gap * (flowBoxes.length - 1)) / flowBoxes.length;
-    flowBoxes.forEach((box, index) => {
-      const x = pad.left + index * (boxW + gap);
-      drawFlowBox(svg, x, flowY, boxW, flowH, box, index === 2);
-      if (index < flowBoxes.length - 1) {
-        svg.appendChild(svgEl("line", { x1: x + boxW, y1: flowY + flowH / 2, x2: x + boxW + gap, y2: flowY + flowH / 2, class: "flow-connector" }));
-      }
+    const gap = 14;
+    const rowGap = 16;
+    const boxW = (availableW - gap * 2) / 3;
+    const positions = desktopFlowBoxes.map((box, index) => ({
+      box,
+      x: pad.left + (index % 3) * (boxW + gap),
+      y: flowY + Math.floor(index / 3) * (flowH + rowGap),
+    }));
+    positions.forEach((item, index) => {
+      drawFlowBox(svg, item.x, item.y, boxW, flowH, item.box, index === 4);
     });
+    const graphBuilder = positions[4];
+    const browserOverlay = positions[5];
+    for (const source of [positions[0], positions[1], positions[2]]) {
+      const fromX = source.x + boxW / 2;
+      const fromY = source.y + flowH;
+      const toX = graphBuilder.x + boxW / 2;
+      const toY = graphBuilder.y;
+      svg.appendChild(svgEl("line", { x1: fromX, y1: fromY, x2: toX, y2: toY, class: "flow-connector" }));
+    }
+    svg.appendChild(
+      svgEl("line", {
+        x1: positions[3].x + boxW,
+        y1: positions[3].y + flowH / 2,
+        x2: graphBuilder.x,
+        y2: graphBuilder.y + flowH / 2,
+        class: "flow-connector",
+      })
+    );
+    svg.appendChild(
+      svgEl("line", {
+        x1: graphBuilder.x + boxW,
+        y1: graphBuilder.y + flowH / 2,
+        x2: browserOverlay.x,
+        y2: browserOverlay.y + flowH / 2,
+        class: "flow-connector",
+      })
+    );
   }
 
-  const lowerY = compactMode ? flowY + flowBoxes.length * (flowH + 14) + 8 : flowY + flowH + 28;
+  const lowerY = compactMode ? flowY + compactFlowBoxes.length * (flowH + 14) + 8 : flowY + flowH * 2 + 44;
   const lowerH = height - lowerY - pad.bottom;
   if (lowerH < 82) {
-    drawCompactEvidenceFooter(svg, pad.left, Math.max(flowY + flowH + 18, height - pad.bottom - 40), availableW, summary);
+    const footerY = compactMode ? flowY + compactFlowBoxes.length * (flowH + 14) + 2 : flowY + flowH * 2 + 26;
+    drawCompactEvidenceFooter(svg, pad.left, Math.max(footerY, height - pad.bottom - 40), availableW, summary);
     return;
   }
 
@@ -2489,13 +2553,13 @@ function drawFlowMetric(svg, x, y, width, metric) {
 function drawFlowBox(svg, x, y, width, height, box, strong = false) {
   const group = svgEl("g");
   group.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: strong ? "flow-box flow-box--strong" : "flow-box" }));
-  const title = svgEl("text", { x: x + 12, y: y + 22, class: "flow-box-title" });
+  const title = svgEl("text", { x: x + 12, y: y + 20, class: "flow-box-title" });
   title.textContent = box.title;
   group.appendChild(title);
-  const metric = svgEl("text", { x: x + 12, y: y + 46, class: "flow-box-metric" });
+  const metric = svgEl("text", { x: x + 12, y: y + 43, class: "flow-box-metric" });
   metric.textContent = box.metric;
   group.appendChild(metric);
-  const detail = svgEl("text", { x: x + 12, y: y + height - 14, class: "flow-muted" });
+  const detail = svgEl("text", { x: x + 12, y: y + height - 11, class: "flow-muted" });
   detail.textContent = box.detail.slice(0, Math.max(24, Math.floor((width - 18) / 5.5)));
   group.appendChild(detail);
   svg.appendChild(group);

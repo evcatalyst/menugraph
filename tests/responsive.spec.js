@@ -474,6 +474,7 @@ test("graph lens exposes source status and application data flow", async ({ page
   expect(sourceStripText).toContain("Milwaukee");
   expect(sourceStripText).toContain("University of Washington");
   expect(sourceStripText).toContain("New Orleans Public Library");
+  expect(sourceStripText).toContain("Seattle Room Menu Collection");
   expect(sourceStripText).toContain("The Sifter");
 
   await page.locator(".source-result-card").filter({ hasText: "Northwestern" }).locator(".source-result-card__open").click();

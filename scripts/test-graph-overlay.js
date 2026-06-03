@@ -71,18 +71,21 @@ if (manifest.summary.externalMenus?.records) {
   assert(manifest.summary.externalMenus.bySource.milwaukee_historic_menus > 0, "external Milwaukee rows should be summarized by source");
   assert(manifest.summary.externalMenus.bySource.uw_menus_collection > 0, "external UW rows should be summarized by source");
   assert(manifest.summary.externalMenus.bySource.nola_menu_collection > 0, "external NOLA rows should be summarized by source");
+  assert(manifest.summary.externalMenus.bySource.seattle_room_menu_collection > 0, "external Seattle rows should be summarized by source");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("northwestern:")), "external Northwestern menu evidence should be indexed");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("uh:")), "external UH menu evidence should be indexed");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("lapl:")), "external LAPL menu evidence should be indexed");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("milwaukee:")), "external Milwaukee menu evidence should be indexed");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("uw:")), "external UW menu evidence should be indexed");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("nola:")), "external NOLA menu evidence should be indexed");
+  assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("seattle:")), "external Seattle menu evidence should be indexed");
   assert(core.nodes.some((node) => node.id.startsWith("menu:northwestern:")), "core graph should include external Northwestern menu nodes");
   assert(core.nodes.some((node) => node.id.startsWith("menu:uh:")), "core graph should include external UH menu nodes");
   assert(core.nodes.some((node) => node.id.startsWith("menu:lapl:")), "core graph should include external LAPL menu nodes");
   assert(core.nodes.some((node) => node.id.startsWith("menu:milwaukee:")), "core graph should include external Milwaukee menu nodes");
   assert(core.nodes.some((node) => node.id.startsWith("menu:uw:")), "core graph should include external UW menu nodes");
   assert(core.nodes.some((node) => node.id.startsWith("menu:nola:")), "core graph should include external NOLA menu nodes");
+  assert(core.nodes.some((node) => node.id.startsWith("menu:seattle:")), "core graph should include external Seattle menu nodes");
   assert(
     core.edges.some((edge) => edge.type === "HAS_MENU" && edge.from === "source:northwestern_transport_menus" && edge.to.startsWith("menu:northwestern:")),
     "core graph should link Northwestern source to external menu nodes"
@@ -114,6 +117,16 @@ if (manifest.summary.externalMenus?.records) {
     "core graph should link NOLA source to external menu nodes"
   );
   assert(
+    core.edges.some((edge) => edge.type === "HAS_MENU" && edge.from === "source:seattle_room_menu_collection" && edge.to.startsWith("menu:seattle:")),
+    "core graph should link Seattle source to external menu nodes"
+  );
+  assert(
+    Object.values(evidenceIndex.dishMentions || {}).some(
+      (record) => record.sourceId === "seattle_room_menu_collection" && record.method === "seattle_metadata_keyword"
+    ),
+    "Seattle metadata dish mentions should be indexed"
+  );
+  assert(
     Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "lapl_menu_collection" && record.scalar?.width && record.scalar?.height),
     "LAPL image metadata dimensions should be indexed"
   );
@@ -142,6 +155,10 @@ if (manifest.summary.externalMenus?.records) {
   assert(
     Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "nola_menu_collection" && record.scalar?.width && record.scalar?.height),
     "NOLA image metadata dimensions should be indexed"
+  );
+  assert(
+    Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "seattle_room_menu_collection" && record.scalar?.width && record.scalar?.height),
+    "Seattle image metadata dimensions should be indexed"
   );
 }
 
