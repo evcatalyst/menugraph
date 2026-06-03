@@ -33,6 +33,20 @@ const ciaUrls = imageUrlsForRecord(
 );
 assert.deepStrictEqual(ciaUrls, ["https://ciadigitalcollections.culinary.edu/digital/api/singleitem/image/p16940coll1/14159/default.jpg"]);
 
+const uhFallbackUrls = imageUrlsForRecord(
+  {
+    sourceKey: "uh",
+    thumbnailUrl: "https://digitalcollections.lib.uh.edu/downloads/f7623d15f?file=thumbnail",
+    imageFeatures: [
+      {
+        sourceImageUrl: "https://digitalcollections.lib.uh.edu/downloads/f7623d15f?file=thumbnail",
+      },
+    ],
+  },
+  { imageWidth: 1000, pagesPerMenu: 1 }
+);
+assert.deepStrictEqual(uhFallbackUrls, ["https://digitalcollections.lib.uh.edu/downloads/f7623d15f?file=thumbnail"]);
+
 const menu = menuLike(
   { menuId: "lapl:1247", sourceKey: "lapl", sourceRecordId: "1247", title: "A. Sabella's Capri Room" },
   { placeText: "San Francisco, California", pointYear: 1954, country: "United States" }

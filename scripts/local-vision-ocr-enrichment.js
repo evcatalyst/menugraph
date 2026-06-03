@@ -204,6 +204,11 @@ function imageUrlsForRecord(record, options) {
   if (record.iiifInfoUri) return [resizedIiifImageUrlFromInfo(record.iiifInfoUri, "", width)];
   if (record.imageUri) return [resizedIiifImageUrl(record.imageUri, width)];
   if (record.imageUrl) return [resizedIiifImageUrl(record.imageUrl, width)];
+  const featureImageUrls = (Array.isArray(record.imageFeatures) ? record.imageFeatures : [])
+    .map((feature) => cleanValue(feature.sourceImageUrl || feature.provenance?.sourceImageUrl))
+    .filter(Boolean);
+  if (featureImageUrls.length) return featureImageUrls.slice(0, options.pagesPerMenu);
+  if (record.thumbnailUrl) return [record.thumbnailUrl];
   return [];
 }
 
@@ -330,12 +335,24 @@ async function appendEnrichmentPayload(relativePath, newRecords, summaryExtras =
 async function updateStatus(summary) {
   const filePath = path.join(DATA_DIR, "enrichment-status.json");
   const payload = await readJson(filePath, { summary: {} });
+  const cumulative = summary.cumulative || {};
   payload.summary = {
     ...(payload.summary || {}),
-    ocrProcessedPages: summary.pagesProcessed,
-    ocrTextLines: summary.textLines,
-    ocrDishMentions: summary.dishMentions,
-    ocrPriceObservations: summary.priceObservations,
+    ocrProcessedPages: cumulative.pagesProcessed ?? summary.pagesProcessed,
+    ocrTextLines: cumulative.textLines ?? summary.textLines,
+    ocrTextSpans: cumulative.textSpans ?? summary.textSpans,
+    ocrDishMentions: cumulative.dishMentions ?? summary.dishMentions,
+    ocrPriceObservations: cumulative.priceObservations ?? summary.priceObservations,
+    ocrPagesFailed: cumulative.pagesFailed ?? summary.pagesFailed ?? 0,
+    ocrLastBatch: {
+      candidatesSelected: summary.candidatesSelected,
+      pagesAttempted: summary.pagesAttempted,
+      pagesProcessed: summary.pagesProcessed,
+      pagesFailed: summary.pagesFailed,
+      dishMentions: summary.dishMentions,
+      priceObservations: summary.priceObservations,
+      bySource: summary.bySource || {},
+    },
     ocrUpdatedAt: summary.finishedAt,
   };
   await writeJson(filePath, payload);
@@ -495,6 +512,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
   const finishedAt = new Date().toISOString();
   const records = dedupeExtractionRecords(dedupeRecords([...(previous.records || []), ...extractionRecords]));
   const successfulExtractions = extractionRecords.filter((record) => record.status !== "error");
+  const cumulativeSuccessfulExtractions = records.filter((record) => record.status !== "error");
   const summary = {
     startedAt,
     finishedAt,
@@ -512,6 +530,21 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
         return counts;
       }, new Map())
     ),
+    cumulative: {
+      pagesAttempted: records.length,
+      pagesProcessed: cumulativeSuccessfulExtractions.length,
+      pagesFailed: records.length - cumulativeSuccessfulExtractions.length,
+      textLines: cumulativeSuccessfulExtractions.reduce((sum, record) => sum + Number(record.lineCount || 0), 0),
+      textSpans: cumulativeSuccessfulExtractions.reduce((sum, record) => sum + Number(record.textSpanCount || 0), 0),
+      dishMentions: cumulativeSuccessfulExtractions.reduce((sum, record) => sum + (record.dishMentionIds || []).length, 0),
+      priceObservations: cumulativeSuccessfulExtractions.reduce((sum, record) => sum + (record.priceObservationIds || []).length, 0),
+      bySource: Object.fromEntries(
+        cumulativeSuccessfulExtractions.reduce((counts, record) => {
+          counts.set(record.sourceId, (counts.get(record.sourceId) || 0) + 1);
+          return counts;
+        }, new Map())
+      ),
+    },
     events,
   };
   const payload = {
