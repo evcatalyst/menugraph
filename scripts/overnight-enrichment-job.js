@@ -17,10 +17,16 @@ const { buildLocalVisionOcrEnrichment } = require("./local-vision-ocr-enrichment
 const { retagEnrichment } = require("./retag-enrichment");
 const { buildEnrichmentCoverageReport } = require("./build-enrichment-coverage-report");
 const { buildRecipeBridge } = require("./build-recipe-bridge");
+const {
+  DEFAULT_MIN_FREE_MB,
+  assertStoragePreflight,
+  optionsFromArgs: storagePreflightOptionsFromArgs,
+} = require("./storage-preflight");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
 const STATUS_PATH = path.join(CACHE_DIR, "overnight-status.json");
+const STORAGE_LABEL = "overnight enrichment";
 const DEFAULT_ARGS = [
   "--fetch-cia-text",
   "--skip-transcript-cache",
@@ -203,6 +209,11 @@ async function runLocalOcrEnrichment(args) {
     retryRetryable: hasFlag(args, "local-ocr-retry-retryable"),
     keepImages: hasFlag(args, "local-ocr-keep-images"),
     dryRun: hasFlag(args, "dry-run"),
+    storagePreflight: storagePreflightOptionsFromArgs(args, {
+      targetDir: ROOT_DIR,
+      minFreeMb: DEFAULT_MIN_FREE_MB,
+      label: "local Vision OCR enrichment",
+    }),
     onProgress: (message) => console.log(`[${timestamp()}] ${message}`),
   };
   console.log(`[${timestamp()}] Running local Vision OCR enrichment with limit=${limit}`);
@@ -211,6 +222,13 @@ async function runLocalOcrEnrichment(args) {
 
 async function main() {
   const args = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ARGS;
+  const storageCheck = assertStoragePreflight(
+    storagePreflightOptionsFromArgs(args, {
+      targetDir: ROOT_DIR,
+      minFreeMb: DEFAULT_MIN_FREE_MB,
+      label: STORAGE_LABEL,
+    })
+  );
   const options = optionsFromArgs(args);
   options.onProgress = (message) => {
     console.log(`[${timestamp()}] ${message}`);
@@ -229,8 +247,12 @@ async function main() {
     phase: "local-enrichment",
     pid: process.pid,
     args,
+    storagePreflight: storageCheck,
   });
 
+  console.log(
+    `[${timestamp()}] Storage preflight ok: ${storageCheck.availableFormatted} available; ${storageCheck.minFreeFormatted} required`
+  );
   console.log(`[${timestamp()}] Starting local enrichment job with args: ${args.join(" ")}`);
   const enrichment = await buildLocalEnrichment(options);
   console.log(`[${timestamp()}] Local enrichment complete: ${JSON.stringify(enrichment.status.summary)}`);
@@ -395,6 +417,7 @@ main().catch(async (error) => {
     phase: "failed",
     pid: process.pid,
     error: error.message,
+    storagePreflight: error.storagePreflight || null,
     stack: error.stack,
   }).catch(() => {});
   process.exitCode = 1;

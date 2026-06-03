@@ -161,6 +161,11 @@ assert.strictEqual(options.tier, "easy");
 assert.strictEqual(options.pagesPerMenu, 1);
 assert.strictEqual(options.imageWidth, 1200);
 assert.strictEqual(options.dryRun, true);
+assert.strictEqual(options.storagePreflight.minFreeMb, 1024);
+
+const storageOptions = optionsFromArgs(["--limit=1", "--min-free-mb=256", "--skip-storage-preflight"]);
+assert.strictEqual(storageOptions.storagePreflight.minFreeMb, 256);
+assert.strictEqual(storageOptions.storagePreflight.enabled, false);
 
 const retryOptions = optionsFromArgs(["--limit=10", "--retry-errors", "--batch=all"]);
 assert.strictEqual(retryOptions.retryErrors, true);

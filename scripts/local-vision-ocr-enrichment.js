@@ -12,6 +12,12 @@ const {
   textDishMentions,
 } = require("./local-enrichment");
 const { readEnrichmentPayload, writeEnrichmentPayload } = require("./enrichment-shards");
+const {
+  DEFAULT_MIN_FREE_MB,
+  assertStoragePreflight,
+  optionsFromArgs: storagePreflightOptionsFromArgs,
+  storagePreflight,
+} = require("./storage-preflight");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -23,6 +29,7 @@ const FAILURE_OUTPUT_PATH = path.join(ENRICHMENT_DIR, "ocr-failures.json");
 const CONTENTDM_HOST = "ciadigitalcollections.culinary.edu";
 const CIA_COLLECTION = "p16940coll1";
 const VERSION = 1;
+const STORAGE_LABEL = "local Vision OCR enrichment";
 
 function argValue(args, name, fallback = null) {
   const prefix = `--${name}=`;
@@ -623,8 +630,27 @@ async function updateStatus(summary) {
   await writeJson(filePath, payload);
 }
 
+function runStoragePreflight(options = {}) {
+  const config =
+    options.storagePreflight === false || options.skipStoragePreflight
+      ? { enabled: false, targetDir: ROOT_DIR, label: STORAGE_LABEL, minFreeMb: DEFAULT_MIN_FREE_MB }
+      : {
+          targetDir: ROOT_DIR,
+          label: STORAGE_LABEL,
+          minFreeMb: DEFAULT_MIN_FREE_MB,
+          ...(typeof options.storagePreflight === "object" ? options.storagePreflight : {}),
+        };
+  return config.enabled === false ? storagePreflight(config) : assertStoragePreflight(config);
+}
+
 async function buildLocalVisionOcrEnrichment(options = {}) {
   const startedAt = new Date().toISOString();
+  const storageCheck = runStoragePreflight(options);
+  if (!storageCheck.skipped) {
+    options.onProgress?.(
+      `storage preflight ok: ${storageCheck.availableFormatted} available; ${storageCheck.minFreeFormatted} required`
+    );
+  }
   const queue = await readJson(path.join(ENRICHMENT_DIR, "ocr-triage-queue.json"), { records: [] });
   const previous = await readEnrichmentPayload(OUTPUT_PATH, { records: [] });
   const previousFailures = await readJson(FAILURE_OUTPUT_PATH, { records: [] });
@@ -822,6 +848,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
       ),
     },
     failureSummary: failureReport.summary,
+    storagePreflight: storageCheck,
     events,
   };
   const payload = {
@@ -865,6 +892,11 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     refreshImages: hasFlag(args, "refresh-images"),
     keepImages: hasFlag(args, "keep-images"),
     dryRun: hasFlag(args, "dry-run"),
+    storagePreflight: storagePreflightOptionsFromArgs(args, {
+      targetDir: ROOT_DIR,
+      minFreeMb: DEFAULT_MIN_FREE_MB,
+      label: STORAGE_LABEL,
+    }),
     onProgress: (message) => console.log(message),
   };
 }
@@ -893,6 +925,7 @@ module.exports = {
   menuLike,
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
+  runStoragePreflight,
   nonRetryableFailedPageKeys,
   retryableFailedPageKeys,
   selectOcrCandidates,
