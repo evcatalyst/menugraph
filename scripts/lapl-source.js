@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const fs = require("fs/promises");
 const path = require("path");
 const { cleanValue, normalizeText } = require("../docs/multisource");
-const { ingredientTagsFor } = require("./local-enrichment");
+const { dishTypeFor, ingredientTagsFor, normalizedDishName } = require("./local-enrichment");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -35,6 +35,21 @@ const CUISINE_PATTERNS = [
   ["japanese", /\bjapanese\b|sushi|teriyaki|teppan/i],
   ["mexican", /\bmexican\b/i],
   ["seafood", /\bseafood\b|\bfish\b|\blobster\b|\boyster\b/i],
+];
+
+const DISH_HINT_PATTERNS = [
+  ["alcoholic drinks", /\balcoholic drinks?\b|\bcocktails?\b|\bbar\b|\blounge\b/i],
+  ["breakfast options", /\bbreakfast\b/i],
+  ["dessert options", /\bdesserts?\b|\bpastr(?:y|ies)\b|\bbakery\b/i],
+  ["dinner options", /\bdinners?\b/i],
+  ["fish and seafood options", /\bseafood\b|\bfish\b|\blobster\b|\boysters?\b|\bclams?\b|\bsole\b|\bsalmon\b|\bshrimp\b/i],
+  ["lunch options", /\blunch(?:eon|es)?\b/i],
+  ["pasta", /\bpastas?\b|\bspaghetti\b|\bravioli\b/i],
+  ["pizza", /\bpizzas?\b|\bpizzeria\b/i],
+  ["sandwiches", /\bsandwich(?:es)?\b|\bdelicatessen\b|\bdeli\b/i],
+  ["steak", /\bsteaks?\b|\bsteakhouse\b/i],
+  ["sushi", /\bsushi\b/i],
+  ["wine list", /\bwine list\b|\bwines?\b/i],
 ];
 
 function argValue(args, name, fallback = null) {
@@ -223,6 +238,39 @@ function imageFeaturesFor(record, item) {
   ];
 }
 
+function dishSegmentsFor(text) {
+  const segments = [];
+  for (const [label, pattern] of DISH_HINT_PATTERNS) {
+    if (pattern.test(text)) segments.push(label);
+  }
+  return [...new Set(segments)].slice(0, 8);
+}
+
+function dishMentionFor(record, rawName, contextText) {
+  const normalizedName = normalizedDishName(rawName);
+  if (!normalizedName) return null;
+  const tags = [...new Set([...ingredientTagsFor(rawName), ...ingredientTagsFor(contextText)])].sort();
+  return {
+    id: stableId("lapldish", [record.menuId, normalizedName]),
+    menuId: record.menuId,
+    sourceId: SOURCE_ID,
+    sourceKey: SOURCE_KEY,
+    rawName: cleanValue(rawName),
+    normalizedName,
+    canonicalDishId: `dish:${normalizedName.replace(/\s+/g, "-").slice(0, 96)}`,
+    sectionName: "metadata description",
+    dishType: dishTypeFor(rawName),
+    ingredientTags: tags,
+    extractionMethod: "lapl_metadata_keyword",
+    confidence: 0.46,
+    provenance: {
+      sourceFile: "enrichment/external-sources/lapl_menu_collection.json",
+      sourceRecordId: record.sourceRecordId,
+      sourceApiUrl: record.sourceApiUrl,
+    },
+  };
+}
+
 function normalizeItem(item, searchItem = {}) {
   const sourceRecordId = cleanValue(item?.itemId || searchItem.itemId || item?.item_id);
   if (!sourceRecordId) return null;
@@ -292,11 +340,20 @@ function normalizeItem(item, searchItem = {}) {
       rightsNote: rightsStatement || "Derived metadata only; no raw image, OCR, transcript, or IIIF payload copied into static graph artifacts.",
     },
     priceObservations: [],
-    dishMentions: [],
-    dishHints: [],
   };
+  const dishMentions = dishSegmentsFor(contextText).map((segment) => dishMentionFor(baseRecord, segment, contextText)).filter(Boolean);
+  const ingredientTags = [...new Set([...(baseRecord.ingredientTags || []), ...dishMentions.flatMap((dish) => dish.ingredientTags || [])])].sort();
   return {
     ...baseRecord,
+    dishMentions,
+    dishHints: dishMentions.map((dish) => ({
+      rawName: dish.rawName,
+      normalizedName: dish.normalizedName,
+      dishType: dish.dishType,
+      ingredientTags: dish.ingredientTags,
+      confidence: dish.confidence,
+    })),
+    ingredientTags,
     imageFeatures: imageFeaturesFor(baseRecord, item),
   };
 }
@@ -349,6 +406,7 @@ async function buildLaplSource(options = {}) {
     if (record) records.push(record);
   }
   const generatedAt = new Date().toISOString();
+  const dishMentions = records.flatMap((record) => record.dishMentions || []);
   const output = {
     version: VERSION,
     generatedAt,
@@ -359,13 +417,14 @@ async function buildLaplSource(options = {}) {
     summary: {
       total: records.length,
       totalHits: searchPayload.totalResults ?? null,
-      dishMentions: 0,
+      dishMentions: dishMentions.length,
       priceObservations: 0,
       withDates: records.filter((record) => record.lowerYear || record.upperYear || record.year).length,
       withIiif: records.filter((record) => record.imageUri || record.iiifInfoUri).length,
       withVenues: records.filter((record) => record.venueText).length,
       withAddress: records.filter((record) => record.address).length,
       withPhone: records.filter((record) => record.phoneText).length,
+      withDishHints: records.filter((record) => record.dishHints.length).length,
       imageFeatures: records.reduce((sum, record) => sum + (record.imageFeatures || []).length, 0),
       transportModes: countBy(records, (record) => record.transportMode),
       dateConfidence: countBy(records, (record) => record.dateConfidence),
@@ -395,6 +454,7 @@ async function main() {
     [
       `Wrote ${output.summary.total.toLocaleString()} LAPL external menu records`,
       `${output.summary.withDates.toLocaleString()} dated records`,
+      `${output.summary.dishMentions.toLocaleString()} metadata dish hints`,
       `${output.summary.imageFeatures.toLocaleString()} image metadata features`,
     ].join(", ")
   );
@@ -410,6 +470,7 @@ if (require.main === module) {
 module.exports = {
   buildLaplSource,
   cuisineTagsFor,
+  dishSegmentsFor,
   normalizeItem,
   normalizePlace,
   optionsFromArgs,

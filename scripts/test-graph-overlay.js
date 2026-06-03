@@ -93,6 +93,12 @@ if (manifest.summary.externalMenus?.records) {
     "core graph should link LAPL source to external menu nodes"
   );
   assert(
+    Object.values(evidenceIndex.dishMentions || {}).some(
+      (record) => record.sourceId === "lapl_menu_collection" && record.method === "lapl_metadata_keyword"
+    ),
+    "LAPL metadata dish mentions should be indexed"
+  );
+  assert(
     core.edges.some((edge) => edge.type === "HAS_MENU" && edge.from === "source:milwaukee_historic_menus" && edge.to.startsWith("menu:milwaukee:")),
     "core graph should link Milwaukee source to external menu nodes"
   );

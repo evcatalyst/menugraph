@@ -1,6 +1,7 @@
 const assert = require("assert");
 const {
   cuisineTagsFor,
+  dishSegmentsFor,
   normalizeItem,
   normalizePlace,
   optionsFromArgs,
@@ -81,6 +82,12 @@ function run() {
   assert.strictEqual(transportModeFor("Princess Cruises menu"), "ship");
   assert.strictEqual(transportModeFor("Union Pacific dining car menu"), "railroad");
   assert.deepStrictEqual(cuisineTagsFor("Seafood. Cooking, American."), ["american", "seafood"]);
+  assert.deepStrictEqual(dishSegmentsFor("Seafood restaurant wine list with lunch and desserts."), [
+    "dessert options",
+    "fish and seafood options",
+    "lunch options",
+    "wine list",
+  ]);
   assert(styleTagsFor({ title: "souvenir miniature menu", format: "Menus", physicalDescription: "", notes: "" }).includes("miniature menu"));
 
   const record = normalizeItem(item, searchItem);
@@ -94,6 +101,8 @@ function run() {
   assert(record.cuisineTags.includes("american"));
   assert(record.cuisineTags.includes("seafood"));
   assert(record.styleTags.includes("miniature menu"));
+  assert(record.dishHints.some((dish) => dish.rawName === "fish and seafood options"));
+  assert(record.ingredientTags.includes("fish"));
   assert(record.imageFeatures.length === 1);
   assert.strictEqual(record.imageFeatures[0].scalar.pageCount, 2);
   assert.deepStrictEqual(record.priceObservations, []);
