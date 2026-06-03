@@ -45,6 +45,7 @@ assert.deepStrictEqual(graphContract.validateGraph(sourceCapabilities, { maxByte
 assert.deepStrictEqual(graphContract.validateGraph(core, { maxBytes: manifest.sizeBudgetBytes }), [], "core graph should validate");
 assert(byteLength(core) <= manifest.sizeBudgetBytes, "core graph should stay under the static budget");
 assert(byteLength(menuOverlays) <= manifest.sizeBudgetBytes, "menu overlay index should stay under the static budget");
+assert(byteLength(evidenceIndex) <= manifest.sizeBudgetBytes, "evidence index should stay under the static budget");
 assert(manifest.summary.core.ingredientTerms >= 100, "core graph should expose expanded ingredient taxonomy terms");
 assert(manifest.summary.overlays.withIngredients >= 15500, "ingredient overlays should cover the enriched menu set");
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");

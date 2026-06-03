@@ -6,18 +6,20 @@ const DATA_DIR = path.join(__dirname, "..", "docs", "data");
 const GRAPH_DIR = path.join(DATA_DIR, "graph");
 const REFERENCE_DIR = path.join(DATA_DIR, "reference");
 const VERSION = 1;
-const MAX_CORE_PRICE_NODES = 1200;
-const MAX_DISH_NODES = 1000;
-const MAX_TOPOLOGY_DISH_EDGES_PER_MENU = 3;
-const MAX_ONTOLOGY_EDGES_PER_TERM = 30;
+// Core is a browser-facing topology preview. Full per-menu evidence lives in
+// evidence-index.json and menu-overlays/by-source shards.
+const MAX_CORE_PRICE_NODES = 900;
+const MAX_DISH_NODES = 800;
+const MAX_TOPOLOGY_DISH_EDGES_PER_MENU = 2;
+const MAX_ONTOLOGY_EDGES_PER_TERM = 20;
 const SIZE_BUDGET_BYTES = graphContract.STATIC_ARTIFACT_BUDGET_BYTES;
-const MAX_CORE_MENU_NODES = 2000;
+const MAX_CORE_MENU_NODES = 1500;
 const MAX_EXTERNAL_MENU_NODES = 500;
 const MAX_INGREDIENT_TERMS = 120;
-const MAX_DISH_EVIDENCE_INDEX = 10000;
+const MAX_DISH_EVIDENCE_INDEX = 7000;
 const MAX_IMAGE_EVIDENCE_INDEX = 2000;
-const MAX_OCR_CANDIDATE_INDEX = 2000;
-const MAX_EXTERNAL_DISH_EDGES_PER_MENU = 4;
+const MAX_OCR_CANDIDATE_INDEX = 1000;
+const MAX_EXTERNAL_DISH_EDGES_PER_MENU = 3;
 
 function cleanValue(value) {
   if (Array.isArray(value)) return value.map(cleanValue).filter(Boolean).join("; ");
@@ -339,6 +341,38 @@ function externalSourceFile(record) {
   return cleanValue(record?.provenance?.sourceFile || record?.sourceFile || "enrichment/external-menu-records.json");
 }
 
+function compactEvidenceText(value, maxLength = 120) {
+  return cleanValue(value).slice(0, maxLength);
+}
+
+function compactPriceEvidence(fields) {
+  return {
+    id: cleanValue(fields.id),
+    menuId: cleanValue(fields.menuId),
+    sourceId: compactEvidenceText(fields.sourceId, 80),
+    item: compactEvidenceText(fields.item),
+    rawPrice: compactEvidenceText(fields.rawPrice, 48),
+    amount: Number.isFinite(Number(fields.amount)) ? Number(fields.amount) : null,
+    currency: compactEvidenceText(fields.currency, 24),
+    year: fields.year || null,
+    confidence: compactEvidenceText(fields.confidence || "unknown", 24),
+    method: compactEvidenceText(fields.method, 64),
+    external: Boolean(fields.external) || undefined,
+  };
+}
+
+function compactDishEvidence(fields) {
+  return {
+    id: cleanValue(fields.id),
+    menuId: cleanValue(fields.menuId),
+    sourceId: compactEvidenceText(fields.sourceId, 80),
+    rawName: compactEvidenceText(fields.rawName),
+    normalizedName: compactEvidenceText(fields.normalizedName),
+    dishType: compactEvidenceText(fields.dishType, 64),
+    method: compactEvidenceText(fields.method, 64),
+  };
+}
+
 function buildDishCounts({ menus, analytics, ontology, prices, enrichment }) {
   const counts = new Map();
   const add = (name, amount, source) => {
@@ -495,16 +529,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         decade: cleanValue(record.decade || "unknown"),
         confidence: record.dateConfidence || "C",
         methods: ["external_source_date_created"],
-        reviewStatus: "source_metadata",
         sourceFile,
-        evidence: [
-          {
-            method: "date_created",
-            source: cleanValue(record.sourceId || record.sourceKey),
-            effect: cleanValue(record.dateText),
-            confidence: record.dateConfidence || "C",
-          },
-        ],
       };
       overlays[uid].dateEvidenceIds.push(id);
     }
@@ -512,46 +537,33 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       if (overlays[uid].dishMentionIds.length < 3 && dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX) {
         overlays[uid].dishMentionIds.push(dish.id);
         dishEvidenceIndexed += 1;
-        evidenceIndex.dishMentions[dish.id] = {
+        evidenceIndex.dishMentions[dish.id] = compactDishEvidence({
           id: dish.id,
           menuId: uid,
-          sourceId: cleanValue(dish.sourceId || record.sourceId),
-          rawName: cleanValue(dish.rawName),
-          normalizedName: cleanValue(dish.normalizedName),
-          dishType: cleanValue(dish.dishType),
-          ingredientTags: (dish.ingredientTags || []).slice(0, 8).map(cleanValue),
-          sectionName: cleanValue(dish.sectionName),
-          confidence: Number(dish.confidence || 0),
-          method: cleanValue(dish.extractionMethod || "external"),
-          sourceFile,
-        };
+          sourceId: dish.sourceId || record.sourceId,
+          rawName: dish.rawName,
+          normalizedName: dish.normalizedName,
+          dishType: dish.dishType,
+          method: dish.extractionMethod || "external",
+        });
       }
     }
     for (const [priceIndex, price] of priceObservations.entries()) {
       const id = priceNodeId(price, `external:${priceIndex}`);
       if (overlays[uid].priceObservationIds.length < 6) overlays[uid].priceObservationIds.push(id);
-      evidenceIndex.priceObservations[id] = {
+      evidenceIndex.priceObservations[id] = compactPriceEvidence({
         id,
         menuId: uid,
-        sourceId: cleanValue(price.sourceId || record.sourceId),
-        item: cleanValue(price.item || price.rawName),
-        rawPrice: cleanValue(price.rawPrice || price.rawPriceText),
-        amount: Number.isFinite(Number(price.amount)) ? Number(price.amount) : null,
-        currency: cleanValue(price.currency || price.currencyCode),
+        sourceId: price.sourceId || record.sourceId,
+        item: price.item || price.rawName,
+        rawPrice: price.rawPrice || price.rawPriceText,
+        amount: price.amount,
+        currency: price.currency || price.currencyCode,
         year: price.year || record.year || record.pointYear || null,
-        confidence: cleanValue(price.confidence || "medium"),
-        dishType: cleanValue(price.dishType),
-        ingredientTags: (price.ingredientTags || []).slice(0, 8).map(cleanValue),
-        normalized: price.normalized
-          ? {
-              todayUsd: price.normalized.todayUsd ?? null,
-              relativeIndex: price.normalized.relativeIndex ?? null,
-              caveat: cleanValue(price.normalized.caveat),
-            }
-          : null,
-        sourceFile,
+        confidence: price.confidence || "medium",
+        method: price.extractionMethod || "external_price",
         external: true,
-      };
+      });
     }
     for (const imageFeature of imageFeatures) {
       const id = cleanValue(imageFeature.id);
@@ -582,7 +594,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     }
   }
 
-  for (const record of enrichmentRecords(enrichment, "dishMentions")) {
+  for (const record of prioritizedDishEvidenceRows(enrichmentRecords(enrichment, "dishMentions"))) {
     const uid = cleanValue(record.menuId);
     if (!menuIds.has(uid)) continue;
     const overlay = overlays[uid];
@@ -600,21 +612,18 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       tagSet.add(cleanValue(tag));
       ingredientTagsByMenu.set(uid, tagSet);
     }
-    const isOcrDish = record.extractionMethod === "local_vision_ocr_dish";
-    if (overlay.dishMentionIds.length < 2 && (isOcrDish || dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX)) {
+    if (overlay.dishMentionIds.length < 2 && dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX) {
       overlay.dishMentionIds.push(record.id);
-      if (!isOcrDish) dishEvidenceIndexed += 1;
-      evidenceIndex.dishMentions[record.id] = {
+      dishEvidenceIndexed += 1;
+      evidenceIndex.dishMentions[record.id] = compactDishEvidence({
         id: record.id,
         menuId: uid,
-        rawName: cleanValue(record.rawName),
-        normalizedName: cleanValue(record.normalizedName),
-        dishType: cleanValue(record.dishType),
-        ingredientTags: (record.ingredientTags || []).slice(0, 8).map(cleanValue),
-        sectionName: cleanValue(record.sectionName),
-        confidence: Number(record.confidence || 0),
-        method: cleanValue(record.extractionMethod),
-      };
+        sourceId: record.sourceId,
+        rawName: record.rawName,
+        normalizedName: record.normalizedName,
+        dishType: record.dishType,
+        method: record.extractionMethod,
+      });
     }
   }
 
@@ -627,26 +636,18 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     if (overlays[uid].priceObservationIds.length < 6) {
       const id = cleanValue(record.id);
       overlays[uid].priceObservationIds.push(id);
-      evidenceIndex.priceObservations[id] = {
+      evidenceIndex.priceObservations[id] = compactPriceEvidence({
         id,
         menuId: uid,
-        item: cleanValue(record.rawName || record.normalizedName),
-        rawPrice: cleanValue(record.rawPriceText || record.amount),
-        amount: Number.isFinite(Number(record.amount)) ? Number(record.amount) : null,
-        currency: cleanValue(record.currencyCode),
+        sourceId: record.sourceId,
+        item: record.rawName || record.normalizedName,
+        rawPrice: record.rawPriceText || record.amount,
+        amount: record.amount,
+        currency: record.currencyCode,
         year: record.year || null,
-        confidence: cleanValue(record.confidence || "unknown"),
-        dishType: cleanValue(record.dishType),
-        ingredientTags: (record.ingredientTags || []).slice(0, 8).map(cleanValue),
-        normalized: record.normalized
-          ? {
-              todayUsd: record.normalized.todayUsd ?? null,
-              relativeIndex: record.normalized.relativeIndex ?? null,
-              caveat: cleanValue(record.normalized.caveat),
-            }
-          : null,
-        method: cleanValue(record.extractionMethod),
-      };
+        confidence: record.confidence || "unknown",
+        method: record.extractionMethod,
+      });
     }
   }
 
@@ -669,13 +670,6 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       decade: record.estimatedDecade || null,
       confidence: record.confidence || "X",
       methods: record.methods || [],
-      reviewStatus: record.reviewStatus || "machine_inferred",
-      evidence: (record.evidence || []).slice(0, 3).map((item) => ({
-        method: item.method,
-        source: cleanValue(item.source),
-        effect: cleanValue(item.effect),
-        confidence: item.confidence || record.confidence || "X",
-      })),
     };
     overlays[uid].dateEvidenceIds.push(id);
     overlays[uid].counts.dateEvidence += 1;
@@ -697,25 +691,18 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     overlays[uid].counts.priceObservations += 1;
     if (overlays[uid].priceObservationIds.length < 6) {
       overlays[uid].priceObservationIds.push(id);
-      evidenceIndex.priceObservations[id] = {
+      evidenceIndex.priceObservations[id] = compactPriceEvidence({
         id,
         menuId: uid,
-        item: cleanValue(record.item),
-        rawPrice: cleanValue(record.rawPrice || record.rawAmount || record.amount),
-        amount: Number.isFinite(Number(record.amount)) ? Number(record.amount) : null,
-        currency: cleanValue(record.currency),
+        sourceId: record.sourceId,
+        item: record.item,
+        rawPrice: record.rawPrice || record.rawAmount || record.amount,
+        amount: record.amount,
+        currency: record.currency,
         year: record.year || null,
-        confidence: cleanValue(record.confidence || "unknown"),
-        dishType: cleanValue(enhancement?.dishType),
-        ingredientTags: (enhancement?.ingredientTags || []).slice(0, 8).map(cleanValue),
-        normalized: record.normalized
-          ? {
-              todayUsd: record.normalized.todayUsd ?? null,
-              relativeIndex: record.normalized.relativeIndex ?? null,
-              caveat: cleanValue(record.normalized.caveat),
-            }
-          : null,
-      };
+        confidence: record.confidence || "unknown",
+        method: enhancement?.extractionMethod || record.extractionMethod || "structured_price",
+      });
     }
   }
 
@@ -755,31 +742,20 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     if (overlay.ocrCandidateIds.length >= 2 || ocrCandidateEvidenceIndexed >= MAX_OCR_CANDIDATE_INDEX) continue;
     overlay.ocrCandidateIds.push(record.id);
     ocrCandidateEvidenceIndexed += 1;
-    evidenceIndex.ocrCandidates[record.id] = {
-      id: cleanValue(record.id),
-      menuId: uid,
-      sourceId: cleanValue(record.sourceId),
-      sourceKey: cleanValue(record.sourceKey),
-      route: cleanValue(record.route),
-      localTier: cleanValue(record.localTier),
-      priorityRank: record.priorityRank ?? null,
-      priorityBatch: cleanValue(record.priorityBatch),
-      priorityScore: Number(record.priorityScore || 0),
-      valueScore: Number(record.valueScore || 0),
-      difficultyScore: Number(record.difficultyScore || 0),
-      pageCount: Number(record.pageCount || 0) || null,
-      estimatedImages: Number(record.estimatedImages || 0),
-      missingEvidence: record.missingEvidence || {},
-      expectedYield: record.expectedYield || {},
-      imageAssessment: {
-        hasImage: Boolean(record.imageAssessment?.hasImage),
-        hasDimensions: Boolean(record.imageAssessment?.hasDimensions),
-        width: record.imageAssessment?.width ?? null,
-        height: record.imageAssessment?.height ?? null,
-        orientation: cleanValue(record.imageAssessment?.orientation || "unknown"),
-      },
-      sourceFile: cleanValue(record.provenance?.sourceFile || "enrichment/ocr-triage-queue.json"),
-    };
+      evidenceIndex.ocrCandidates[record.id] = {
+        id: cleanValue(record.id),
+        menuId: uid,
+        sourceId: cleanValue(record.sourceId),
+        sourceKey: cleanValue(record.sourceKey),
+        route: cleanValue(record.route),
+        localTier: cleanValue(record.localTier),
+        priorityRank: record.priorityRank ?? null,
+        priorityBatch: cleanValue(record.priorityBatch),
+        priorityScore: Number(record.priorityScore || 0),
+        valueScore: Number(record.valueScore || 0),
+        difficultyScore: Number(record.difficultyScore || 0),
+        estimatedImages: Number(record.estimatedImages || 0),
+      };
   }
 
   for (const record of enrichmentRecords(enrichment, "sourceProbes")) {
@@ -820,7 +796,6 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         source,
         target,
         score: Number(relationship.score || 0),
-        evidence: (relationship.evidence || []).slice(0, 3).map(cleanValue),
       };
     }
   }
@@ -880,6 +855,15 @@ function enrichmentDishesByMenu(enrichment) {
     byMenu.get(uid).push(record);
   }
   return byMenu;
+}
+
+function prioritizedDishEvidenceRows(records) {
+  const priority = (record) => {
+    if (record.extractionMethod === "local_vision_ocr_dish") return 0;
+    if (record.extractionMethod === "local_transcript_regex") return 1;
+    return 2;
+  };
+  return [...(records || [])].sort((a, b) => priority(a) - priority(b));
 }
 
 function externalMenuScore(record) {
