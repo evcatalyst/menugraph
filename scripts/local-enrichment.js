@@ -6,6 +6,7 @@ const path = require("path");
 const { cleanValue, normalizeText, recordUid } = require("../docs/multisource");
 const { extractPricesFromText, normalizePrice, contextForEntry } = require("../docs/price-utils");
 const { dishTypeFor, ingredientTagsFor } = require("../docs/food-taxonomy");
+const { writeEnrichmentPayload } = require("./enrichment-shards");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -271,6 +272,10 @@ async function writeJson(relativePath, payload) {
   const filePath = path.join(DATA_DIR, relativePath);
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, `${JSON.stringify(payload)}\n`, "utf8");
+}
+
+async function writeMaybeShardedJson(relativePath, payload, options = {}) {
+  return writeEnrichmentPayload(path.join(DATA_DIR, relativePath), payload, options);
 }
 
 function cacheFileForMenu(menu) {
@@ -814,8 +819,8 @@ async function buildLocalEnrichment(options = {}) {
   const probePayload = { version: VERSION, generatedAt: finishedAt, summary: { total: sourceProbes.length, byStatus: summarize(sourceProbes, (record) => record.status) }, records: sourceProbes };
 
   if (!options.dryRun) {
-    await writeJson("enrichment/dish-mentions.json", dishPayload);
-    await writeJson("enrichment/price-observations.json", pricePayload);
+    await writeMaybeShardedJson("enrichment/dish-mentions.json", dishPayload, { shard: true });
+    await writeMaybeShardedJson("enrichment/price-observations.json", pricePayload, { shard: true });
     await writeJson("enrichment/image-features.json", imagePayload);
     await writeJson("enrichment/source-probes.json", probePayload);
     await writeJson("enrichment-status.json", status);

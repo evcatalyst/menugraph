@@ -11,6 +11,7 @@ const {
   ingredientTagsFor,
   textDishMentions,
 } = require("./local-enrichment");
+const { readEnrichmentPayload, writeEnrichmentPayload } = require("./enrichment-shards");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -51,6 +52,10 @@ async function readJson(filePath, fallback = {}) {
 async function writeJson(filePath, payload) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, `${JSON.stringify(payload)}\n`, "utf8");
+}
+
+async function writeMaybeShardedJson(filePath, payload, options = {}) {
+  return writeEnrichmentPayload(filePath, payload, options);
 }
 
 function isLikelyNonImagePayload(buffer) {
@@ -377,9 +382,9 @@ async function sourceRecordMap() {
 
 async function appendEnrichmentPayload(relativePath, newRecords, summaryExtras = {}) {
   const filePath = path.join(DATA_DIR, relativePath);
-  const payload = await readJson(filePath, { version: VERSION, records: [] });
+  const payload = await readEnrichmentPayload(filePath, { version: VERSION, records: [] });
   const records = dedupeRecords([...(payload.records || []), ...newRecords]);
-  await writeJson(filePath, {
+  await writeMaybeShardedJson(filePath, {
     ...payload,
     version: payload.version || VERSION,
     generatedAt: new Date().toISOString(),
@@ -389,7 +394,7 @@ async function appendEnrichmentPayload(relativePath, newRecords, summaryExtras =
       ...summaryExtras,
     },
     records,
-  });
+  }, { shard: true });
   return records.length;
 }
 
@@ -422,7 +427,7 @@ async function updateStatus(summary) {
 async function buildLocalVisionOcrEnrichment(options = {}) {
   const startedAt = new Date().toISOString();
   const queue = await readJson(path.join(ENRICHMENT_DIR, "ocr-triage-queue.json"), { records: [] });
-  const previous = await readJson(OUTPUT_PATH, { records: [] });
+  const previous = await readEnrichmentPayload(OUTPUT_PATH, { records: [] });
   const sources = await sourceRecordMap();
   const [cpiUs, cpiCountry, contextEvents] = await Promise.all([
     readJson(path.join(DATA_DIR, "reference", "cpi-us.json"), {}),
@@ -622,7 +627,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
     records,
   };
   if (!options.dryRun) {
-    await writeJson(OUTPUT_PATH, payload);
+    await writeMaybeShardedJson(OUTPUT_PATH, payload, { shard: true });
     await appendEnrichmentPayload("enrichment/dish-mentions.json", dishMentions, { ocrVisionAdded: dishMentions.length });
     await appendEnrichmentPayload("enrichment/price-observations.json", priceObservations, { ocrVisionAdded: priceObservations.length });
     await updateStatus(summary);

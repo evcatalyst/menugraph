@@ -1,6 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 const graphContract = require("../docs/graph-contract");
+const { readEnrichmentPayload } = require("./enrichment-shards");
 
 const DATA_DIR = path.join(__dirname, "..", "docs", "data");
 const GRAPH_DIR = path.join(DATA_DIR, "graph");
@@ -1360,8 +1361,8 @@ async function buildGraphOverlay(options = {}) {
     readJson(path.join(DATA_DIR, "ontology.json"), { categories: {} }),
     readJson(path.join(REFERENCE_DIR, "source-evaluations.json"), { sources: [], capabilities: [] }),
     readJson(path.join(DATA_DIR, "enrichment-status.json"), { summary: {} }),
-    readJson(path.join(DATA_DIR, "enrichment", "dish-mentions.json"), { records: [] }),
-    readJson(path.join(DATA_DIR, "enrichment", "price-observations.json"), { records: [] }),
+    readEnrichmentPayload(path.join(DATA_DIR, "enrichment", "dish-mentions.json"), { records: [] }),
+    readEnrichmentPayload(path.join(DATA_DIR, "enrichment", "price-observations.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "image-features.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "ocr-triage-queue.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),

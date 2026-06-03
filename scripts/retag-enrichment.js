@@ -2,6 +2,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const { cleanValue } = require("../docs/multisource");
 const { VERSION: TAXONOMY_VERSION, dishTypeFor, ingredientTagsFor } = require("../docs/food-taxonomy");
+const { readEnrichmentPayload, writeEnrichmentPayload } = require("./enrichment-shards");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -181,8 +182,8 @@ async function retagEnrichment(options = {}) {
   const dishPath = path.join(ENRICHMENT_DIR, "dish-mentions.json");
   const pricePath = path.join(ENRICHMENT_DIR, "price-observations.json");
   const statusPath = path.join(DATA_DIR, "enrichment-status.json");
-  const dishPayload = retagDishPayload(await readJson(dishPath, { records: [] }));
-  const pricePayload = retagPricePayload(await readJson(pricePath, { records: [] }));
+  const dishPayload = retagDishPayload(await readEnrichmentPayload(dishPath, { records: [] }));
+  const pricePayload = retagPricePayload(await readEnrichmentPayload(pricePath, { records: [] }));
   const statusPayload = retagStatusPayload(await readJson(statusPath, { summary: {} }), dishPayload, pricePayload);
 
   const externalSources = [];
@@ -208,8 +209,8 @@ async function retagEnrichment(options = {}) {
   }
 
   if (!options.dryRun) {
-    await writeJson(dishPath, dishPayload);
-    await writeJson(pricePath, pricePayload);
+    await writeEnrichmentPayload(dishPath, dishPayload, { shard: true });
+    await writeEnrichmentPayload(pricePath, pricePayload, { shard: true });
     await writeJson(statusPath, statusPayload);
     for (const source of externalSources) {
       await writeJson(source.filePath, source.payload);

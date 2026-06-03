@@ -105,10 +105,13 @@ Recommended static artifacts:
 
 - `docs/data/enrichment-status.json`
 - `docs/data/enrichment/ocr-triage-queue.json`
-- `docs/data/dish-mentions.json`
-- `docs/data/price-observations.json`
-- `docs/data/date-evidence-overlay.json`
-- `docs/data/graph-overlay.json`
+- `docs/data/enrichment/dish-mentions.json` as a manifest with records sharded under `docs/data/enrichment/shards/dish-mentions/`
+- `docs/data/enrichment/price-observations.json` as a manifest with records sharded under `docs/data/enrichment/shards/price-observations/`
+- `docs/data/enrichment/ocr-extractions.json` as a manifest with records sharded under `docs/data/enrichment/shards/ocr-extractions/`
+- `docs/data/graph/core.json`
+- `docs/data/graph/evidence-index.json`
+- `docs/data/graph/menu-overlays.json` plus source shards under `docs/data/graph/menu-overlays/by-source/`
+- `docs/data/graph/source-capabilities.json`
 
 These files should be generated from silver tables, not hand-maintained.
 
