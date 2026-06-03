@@ -874,6 +874,37 @@ async function getGraphOverlay(refresh = false) {
   };
 }
 
+function safeGraphShardKey(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+async function getGraphOverlayShard(sourceKey, refresh = false) {
+  const safeKey = safeGraphShardKey(sourceKey);
+  if (!safeKey) return { version: 1, sourceKey: "", summary: { menus: 0 }, records: {} };
+  try {
+    return await readStaticJson(`graph/menu-overlays/by-source/${safeKey}.json`, refresh);
+  } catch (error) {
+    const monolith = await readOptionalStaticJson("graph/menu-overlays.json", { records: {} });
+    const records = Object.fromEntries(
+      Object.entries(monolith.records || {}).filter(([, overlay]) => safeGraphShardKey(overlay?.sourceKey || "unknown") === safeKey)
+    );
+    return {
+      version: monolith.version || 1,
+      generatedAt: monolith.generatedAt || null,
+      sourceKey: safeKey,
+      summary: {
+        menus: Object.keys(records).length,
+      },
+      records,
+      fallback: true,
+    };
+  }
+}
+
 function compactChatMatches(matches) {
   return (matches || []).slice(0, 12).map((match) => ({
     title: match.title,
@@ -1082,6 +1113,12 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    const graphOverlayShardMatch = url.pathname.match(/^\/api\/graph\/overlays\/source\/([^/]+)$/);
+    if (graphOverlayShardMatch) {
+      sendJson(res, await getGraphOverlayShard(decodeURIComponent(graphOverlayShardMatch[1]), url.searchParams.get("refresh") === "1"));
+      return;
+    }
+
     if (url.pathname === "/api/chat") {
       const answer = await answerChat(req, url);
       sendJson(res, answer.error ? answer : answer, answer.statusCode || (answer.error ? 400 : 200));
@@ -1151,6 +1188,7 @@ module.exports = {
   getOntology,
   getDateEstimates,
   getGraphOverlay,
+  getGraphOverlayShard,
   ontologyStatus,
   searchMenus,
   selectOntologySample,

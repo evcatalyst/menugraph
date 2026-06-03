@@ -19,6 +19,7 @@
   let matchesCache = null;
   let analyticsCache = null;
   let graphOverlayCache = null;
+  const graphOverlayShardCache = new Map();
 
   function multiSource() {
     return window.MenuGraphMultiSource || null;
@@ -678,6 +679,22 @@
     return graphOverlayCache;
   }
 
+  function graphShardKeyForSource(sourceKey) {
+    return cleanValue(sourceKey || "unknown")
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+  }
+
+  async function getGraphOverlayShard(sourceKey, { refresh = false } = {}) {
+    const shardKey = graphShardKeyForSource(sourceKey);
+    if (!refresh && graphOverlayShardCache.has(shardKey)) return graphOverlayShardCache.get(shardKey);
+    const payload = await requestStaticJson(`graph/menu-overlays/by-source/${shardKey}.json`, refresh);
+    graphOverlayShardCache.set(shardKey, payload);
+    return payload;
+  }
+
   function requestBody(options) {
     if (!options?.body) return {};
     if (typeof options.body === "string") {
@@ -856,6 +873,10 @@
     }
     if (url.pathname === "/api/graph") {
       return getGraphOverlay({ refresh: url.searchParams.get("refresh") === "1" });
+    }
+    const graphOverlayShardMatch = url.pathname.match(/^\/api\/graph\/overlays\/source\/([^/]+)$/);
+    if (graphOverlayShardMatch) {
+      return getGraphOverlayShard(decodeURIComponent(graphOverlayShardMatch[1]), { refresh: url.searchParams.get("refresh") === "1" });
     }
     if (url.pathname === "/api/chat") {
       return getChatAnswer({

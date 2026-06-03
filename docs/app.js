@@ -24,6 +24,8 @@ const state = {
   matches: null,
   graphOverlay: null,
   graphOverlayByMenu: new Map(),
+  graphOverlayShardPromises: new Map(),
+  graphOverlayLoadedShards: new Set(),
   ontologyCategory: "ingredients",
   priceMode: "todayUsd",
   priceCurrency: null,
@@ -479,17 +481,63 @@ async function loadGraphOverlay(refresh = false) {
   const graphOverlay = await getJson(`/api/graph${refresh ? "?refresh=1" : ""}`);
   state.graphOverlay = graphOverlay;
   state.graphOverlayByMenu = new Map();
+  state.graphOverlayShardPromises = new Map();
+  state.graphOverlayLoadedShards = new Set();
   const records = graphOverlay?.menuOverlays?.records || {};
-  for (const [menuId, overlay] of Object.entries(records)) {
-    state.graphOverlayByMenu.set(menuId, overlay);
-    const ciaMatch = menuId.match(/^cia:(\d+)$/);
-    if (ciaMatch) state.graphOverlayByMenu.set(ciaMatch[1], overlay);
+  registerGraphOverlayRecords(records);
+  if (Object.keys(records).length) {
+    state.graphOverlayLoadedShards.add("legacy");
   }
   if (state.activeLens === "graph") {
     describeGraphOverlay();
     renderViz();
     renderResults();
   }
+}
+
+function registerGraphOverlayRecords(records = {}) {
+  for (const [menuId, overlay] of Object.entries(records)) {
+    state.graphOverlayByMenu.set(menuId, overlay);
+    const ciaMatch = menuId.match(/^cia:(\d+)$/);
+    if (ciaMatch) state.graphOverlayByMenu.set(ciaMatch[1], overlay);
+  }
+}
+
+function graphShardKeyForSource(sourceKey) {
+  return compact(sourceKey || "unknown", "unknown")
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function graphSourceKeyForMenu(menu) {
+  const explicit = compact(menu?.sourceKey, "");
+  if (explicit) return explicit;
+  const id = compact(menuKey(menu) || menu?.uid || menu?.id || menu?.sourceRecordId || "", "");
+  const prefixed = id.match(/^([^:]+):/);
+  if (prefixed) return prefixed[1];
+  return /^\d+$/.test(id) ? "cia" : "unknown";
+}
+
+async function loadGraphOverlayShard(sourceKey) {
+  const shardKey = graphShardKeyForSource(sourceKey);
+  if (!shardKey || state.graphOverlayLoadedShards.has(shardKey)) return;
+  if (state.graphOverlayShardPromises.has(shardKey)) return state.graphOverlayShardPromises.get(shardKey);
+  const promise = getJson(`/api/graph/overlays/source/${encodeURIComponent(shardKey)}`)
+    .then((payload) => {
+      registerGraphOverlayRecords(payload.records || {});
+      state.graphOverlayLoadedShards.add(shardKey);
+      return payload;
+    })
+    .finally(() => state.graphOverlayShardPromises.delete(shardKey));
+  state.graphOverlayShardPromises.set(shardKey, promise);
+  return promise;
+}
+
+async function ensureGraphOverlayForMenu(menu) {
+  if (!menu || graphOverlayForMenu(menu)) return;
+  await loadGraphOverlayShard(graphSourceKeyForMenu(menu)).catch(() => null);
 }
 
 function filteredMenus(options = {}) {
@@ -2808,16 +2856,21 @@ function renderGraphSourceResults() {
 
 async function selectMenu(id) {
   state.selectedId = String(id);
+  const selectedAtStart = state.selectedId;
   renderViz();
   const summary = state.allMenus.find((menu) => menuKey(menu) === state.selectedId || String(menu.id) === state.selectedId) || state.visibleMenus.find((menu) => menuKey(menu) === state.selectedId);
   renderDetailSkeleton(summary);
   scrollDetailIntoViewOnMobile();
   try {
     const detail = state.detailCache.get(state.selectedId) || (await getJson(`/api/item/${encodeURIComponent(state.selectedId)}`));
+    if (state.selectedId !== selectedAtStart) return;
     state.detailCache.set(state.selectedId, detail);
     renderDetail(detail, summary);
     const matches = await getJson(`/api/matches/${encodeURIComponent(state.selectedId)}`).catch(() => ({ matches: [] }));
-    renderEvidence(matches.matches || [], summary, detail);
+    if (state.selectedId !== selectedAtStart) return;
+    await ensureGraphOverlayForMenu(summary || detail);
+    if (state.selectedId !== selectedAtStart) return;
+    renderEvidence(matches.matches || [], summary || detail);
   } catch (error) {
     els.detailText.textContent = error.message;
   }

@@ -18,7 +18,7 @@ const DEFAULT_ARGS = [
   "--time-budget-min=480",
   "--public-dish-limit=60000",
   "--external-sources",
-  "--lapl-limit=100",
+  "--lapl-limit=500",
   "--northwestern-limit=160",
   "--uh-limit=100",
 ];

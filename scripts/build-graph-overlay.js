@@ -810,6 +810,44 @@ function enrichmentDishesByMenu(enrichment) {
   return byMenu;
 }
 
+function externalMenuScore(record) {
+  const year = Number(record.year || record.pointYear || record.lowerYear || record.upperYear || 0);
+  return (
+    (record.priceObservations || []).length * 14 +
+    ((record.dishMentions || []).length || (record.dishHints || []).length) * 9 +
+    (record.lowerYear || record.year || record.pointYear ? 8 : 0) +
+    (record.imageFeatures || []).length * 3 +
+    (record.iiifManifestUrl || record.iiifInfoUri || record.thumbnailUrl ? 2 : 0) +
+    (record.address ? 3 : 0) +
+    (record.phoneText ? 2 : 0) +
+    (record.cuisineTags || []).length * 2 +
+    (year && year < 1900 ? 8 : 0)
+  );
+}
+
+function selectExternalMenusForCore(records) {
+  const bySource = new Map();
+  for (const record of records || []) {
+    const sourceKey = cleanValue(record.sourceKey || record.sourceId || "external");
+    if (!bySource.has(sourceKey)) bySource.set(sourceKey, []);
+    bySource.get(sourceKey).push(record);
+  }
+  const selected = new Map();
+  const perSourceFloor = Math.max(20, Math.floor(MAX_EXTERNAL_MENU_NODES / Math.max(1, bySource.size * 3)));
+  const rankedBySource = [...bySource.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  for (const [, sourceRecords] of rankedBySource) {
+    for (const record of [...sourceRecords].sort((a, b) => externalMenuScore(b) - externalMenuScore(a) || cleanValue(a.title).localeCompare(cleanValue(b.title))).slice(0, perSourceFloor)) {
+      selected.set(cleanValue(record.menuId || record.id), record);
+    }
+  }
+  const ranked = [...(records || [])].sort((a, b) => externalMenuScore(b) - externalMenuScore(a) || cleanValue(a.title).localeCompare(cleanValue(b.title)));
+  for (const record of ranked) {
+    if (selected.size >= MAX_EXTERNAL_MENU_NODES) break;
+    selected.set(cleanValue(record.menuId || record.id), record);
+  }
+  return [...selected.values()].slice(0, MAX_EXTERNAL_MENU_NODES);
+}
+
 function externalMenuSourceNodeId(record) {
   const sourceId = cleanValue(record.sourceId) || sourceIdForKey(record.sourceKey || "external");
   return sourceNodeId(sourceId);
@@ -821,7 +859,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
   const seenEdges = new Set();
   const menuIdSet = new Set();
   const coreMenuIds = selectCoreMenus(menus, overlays);
-  const externalMenus = enrichmentRecords(enrichment, "externalMenuRecords").slice(0, MAX_EXTERNAL_MENU_NODES);
+  const externalMenus = selectExternalMenusForCore(enrichmentRecords(enrichment, "externalMenuRecords"));
   const dishCounts = buildDishCounts({ menus, analytics, ontology, prices, enrichment });
   const dishIds = new Set(dishCounts.map((dish) => dish.id));
   const enrichmentDishMap = enrichmentDishesByMenu(enrichment);
@@ -1175,7 +1213,68 @@ function artifactInfo(name, payload) {
 }
 
 async function writeJson(name, payload) {
-  await fs.writeFile(path.join(GRAPH_DIR, name), `${JSON.stringify(payload)}\n`, "utf8");
+  const filePath = path.join(GRAPH_DIR, name);
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, `${JSON.stringify(payload)}\n`, "utf8");
+}
+
+function overlaySummary(records) {
+  const values = Object.values(records || {});
+  return {
+    menus: values.length,
+    withPrices: values.filter((item) => item.counts.priceObservations).length,
+    withDateEvidence: values.filter((item) => item.counts.dateEvidence).length,
+    withMatches: values.filter((item) => item.counts.matches).length,
+    withDishes: values.filter((item) => item.counts.dishMentions).length,
+    withIngredients: values.filter((item) => item.counts.ingredientTags).length,
+    withImageFeatures: values.filter((item) => item.counts.imageFeatures).length,
+  };
+}
+
+function overlayShardFileName(sourceKey) {
+  return `menu-overlays/by-source/${slug(sourceKey || "unknown")}.json`;
+}
+
+function buildMenuOverlayArtifacts(overlays, generatedAt) {
+  const bySource = new Map();
+  for (const [menuId, overlay] of Object.entries(overlays || {})) {
+    const sourceKey = cleanValue(overlay.sourceKey || "unknown");
+    if (!bySource.has(sourceKey)) bySource.set(sourceKey, {});
+    bySource.get(sourceKey)[menuId] = overlay;
+  }
+
+  const artifacts = {};
+  const shards = [];
+  for (const [sourceKey, records] of [...bySource.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const file = overlayShardFileName(sourceKey);
+    const summary = overlaySummary(records);
+    const payload = {
+      version: VERSION,
+      generatedAt,
+      sourceKey,
+      summary,
+      records,
+    };
+    artifacts[file] = payload;
+    shards.push({
+      sourceKey,
+      file: `graph/${file}`,
+      summary,
+      records: summary.menus,
+    });
+  }
+
+  const index = {
+    version: VERSION,
+    generatedAt,
+    sharded: true,
+    shardKey: "sourceKey",
+    summary: overlaySummary(overlays),
+    shards,
+    records: {},
+  };
+  artifacts["menu-overlays.json"] = index;
+  return { index, artifacts, shards };
 }
 
 async function buildGraphOverlay(options = {}) {
@@ -1229,20 +1328,8 @@ async function buildGraphOverlay(options = {}) {
   const coreErrors = graphContract.validateGraph(core, { maxBytes: SIZE_BUDGET_BYTES });
   if (coreErrors.length) throw new Error(`Invalid core graph:\n${coreErrors.join("\n")}`);
 
-  const menuOverlays = {
-    version: VERSION,
-    generatedAt,
-    summary: {
-      menus: Object.keys(overlays).length,
-      withPrices: Object.values(overlays).filter((item) => item.counts.priceObservations).length,
-      withDateEvidence: Object.values(overlays).filter((item) => item.counts.dateEvidence).length,
-      withMatches: Object.values(overlays).filter((item) => item.counts.matches).length,
-      withDishes: Object.values(overlays).filter((item) => item.counts.dishMentions).length,
-      withIngredients: Object.values(overlays).filter((item) => item.counts.ingredientTags).length,
-      withImageFeatures: Object.values(overlays).filter((item) => item.counts.imageFeatures).length,
-    },
-    records: overlays,
-  };
+  const menuOverlayArtifacts = buildMenuOverlayArtifacts(overlays, generatedAt);
+  const menuOverlays = menuOverlayArtifacts.index;
 
   evidenceIndex.generatedAt = generatedAt;
   evidenceIndex.summary = {
@@ -1258,7 +1345,7 @@ async function buildGraphOverlay(options = {}) {
   const artifacts = {
     "source-capabilities.json": sourceCapabilities,
     "core.json": core,
-    "menu-overlays.json": menuOverlays,
+    ...menuOverlayArtifacts.artifacts,
     "evidence-index.json": evidenceIndex,
   };
 
@@ -1300,13 +1387,15 @@ async function buildGraphOverlay(options = {}) {
     artifacts: Object.entries(artifacts).map(([name, payload]) => artifactInfo(name, payload)),
     shardPlan: {
       thresholdBytes: SIZE_BUDGET_BYTES,
-      nextShards: ["sourceKey", "decade", "entityType"],
+      activeShards: ["menuOverlaysBySource"],
+      nextShards: ["decade", "entityType", "evidenceType"],
     },
   };
   artifacts["manifest.json"] = manifest;
 
   if (!options.dryRun) {
     await fs.mkdir(GRAPH_DIR, { recursive: true });
+    await fs.rm(path.join(GRAPH_DIR, "menu-overlays"), { recursive: true, force: true });
     for (const [name, payload] of Object.entries(artifacts)) await writeJson(name, payload);
   }
 

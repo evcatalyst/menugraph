@@ -11,6 +11,18 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function readOverlayRecords(menuOverlays) {
+  const records = { ...(menuOverlays.records || {}) };
+  const shardDir = path.join(GRAPH_DIR, "menu-overlays", "by-source");
+  if (fs.existsSync(shardDir)) {
+    for (const fileName of fs.readdirSync(shardDir).filter((name) => name.endsWith(".json"))) {
+      const shard = readJson(path.join(shardDir, fileName));
+      Object.assign(records, shard.records || {});
+    }
+  }
+  return records;
+}
+
 function byteLength(payload) {
   return Buffer.byteLength(JSON.stringify(payload), "utf8");
 }
@@ -32,9 +44,18 @@ const evidenceIndex = readJson(path.join(GRAPH_DIR, "evidence-index.json"));
 assert.deepStrictEqual(graphContract.validateGraph(sourceCapabilities, { maxBytes: manifest.sizeBudgetBytes }), [], "source graph should validate");
 assert.deepStrictEqual(graphContract.validateGraph(core, { maxBytes: manifest.sizeBudgetBytes }), [], "core graph should validate");
 assert(byteLength(core) <= manifest.sizeBudgetBytes, "core graph should stay under the static budget");
+assert(byteLength(menuOverlays) <= manifest.sizeBudgetBytes, "menu overlay index should stay under the static budget");
 assert(!hasRawBlob(core), "core graph must not contain raw OCR or image blobs");
 assert(!hasRawBlob(menuOverlays), "menu overlays must not contain raw OCR or image blobs");
 assert(!hasRawBlob(evidenceIndex), "evidence index must not contain raw OCR or image blobs");
+const overlayRecords = readOverlayRecords(menuOverlays);
+assert(Object.keys(overlayRecords).length >= manifest.summary.overlays.menus, "overlay shards should cover manifest overlay count");
+for (const shard of menuOverlays.shards || []) {
+  const shardPath = path.join(DATA_DIR, shard.file.replace(/^graph\//, "graph/"));
+  const payload = readJson(shardPath);
+  assert(byteLength(payload) <= manifest.sizeBudgetBytes, `overlay shard ${shard.sourceKey} should stay under budget`);
+  assert(!hasRawBlob(payload), `overlay shard ${shard.sourceKey} must not contain raw OCR or image blobs`);
+}
 
 const sourceNodeIds = new Set(sourceCapabilities.nodes.filter((node) => node.type === "Source").map((node) => node.id));
 assert(sourceNodeIds.has("source:the_sifter"), "recipe/history sources should be represented in source graph");
@@ -77,13 +98,13 @@ for (const source of evaluations.sources) {
   }
 }
 
-const dateOverlay = Object.values(menuOverlays.records).find((record) => record.sourceKey === "cia" && record.counts.dateEvidence > 0);
+const dateOverlay = Object.values(overlayRecords).find((record) => record.sourceKey === "cia" && record.counts.dateEvidence > 0);
 assert(dateOverlay, "expected a CIA menu with date evidence overlay");
 const dateEvidence = evidenceIndex.dateEvidence[dateOverlay.dateEvidenceIds[0]];
 assert(dateEvidence, "CIA date overlay should resolve to date evidence");
 assert(graphContract.VALID_DATE_CONFIDENCE.has(dateEvidence.confidence), "date evidence confidence should be valid");
 
-const pricedNyplOverlay = Object.values(menuOverlays.records).find(
+const pricedNyplOverlay = Object.values(overlayRecords).find(
   (record) => record.sourceKey === "nypl" && record.counts.priceObservations > 0 && record.counts.dishMentions > 0
 );
 assert(pricedNyplOverlay, "expected an NYPL menu with dish and price overlay");
