@@ -119,9 +119,18 @@ assert.strictEqual(failedHard.status, "failed_review");
 assert.strictEqual(failedHard.failureClasses.access_denied, 1);
 const pendingPlan = progressiveRunPlan([
   { ...easyUnknown, priorityBatch: "phase1", priorityRank: 1, processing: processedEasy },
+  {
+    ...easyUnknown,
+    id: "ocrtriage:partial",
+    priorityBatch: "phase1",
+    priorityRank: 2,
+    processing: { status: "partial", pendingImages: 1 },
+  },
   { ...hardExternal, priorityBatch: "backlog", priorityRank: 2, processing: failedHard },
 ]);
 assert.strictEqual(pendingPlan.runs.find((run) => run.label === "phase1_easy_local").candidates, 0);
+assert.strictEqual(pendingPlan.runs.find((run) => run.label === "continue_partial_second_pages").candidates, 1);
+assert(pendingPlan.runs.find((run) => run.label === "continue_partial_second_pages").command.includes("--continue-partial"));
 
 const options = optionsFromArgs([
   "--source=milwaukee_historic_menus,uw_menus_collection",

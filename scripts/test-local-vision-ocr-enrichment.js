@@ -10,6 +10,8 @@ const {
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
   selectOcrCandidates,
+  successfulPageKey,
+  successfulPageKeys,
   textSpansFromOcr,
 } = require("./local-vision-ocr-enrichment");
 
@@ -197,6 +199,47 @@ assert.deepStrictEqual(
   ["ocrtriage:b"],
   "retry-retryable should select only candidates classified as retryable"
 );
+
+const continueOptions = optionsFromArgs(["--limit=10", "--continue-partial", "--batch=all", "--pages-per-menu=2"]);
+assert.strictEqual(continueOptions.continuePartial, true);
+assert.deepStrictEqual(
+  selectOcrCandidates(
+    [
+      {
+        id: "ocrtriage:partial",
+        priorityRank: 1,
+        priorityBatch: "phase1",
+        sourceKey: "cia",
+        sourceId: "cia_menu_collection",
+        localTier: "easy",
+        processing: { status: "partial", pendingImages: 1 },
+      },
+      {
+        id: "ocrtriage:processed",
+        priorityRank: 2,
+        priorityBatch: "phase1",
+        sourceKey: "cia",
+        sourceId: "cia_menu_collection",
+        localTier: "easy",
+        processing: { status: "processed", pendingImages: 0 },
+      },
+      {
+        id: "ocrtriage:pending",
+        priorityRank: 3,
+        priorityBatch: "phase1",
+        sourceKey: "cia",
+        sourceId: "cia_menu_collection",
+        localTier: "easy",
+        processing: { status: "pending", pendingImages: 1 },
+      },
+    ],
+    [{ status: "ok", candidateId: "ocrtriage:partial", pageNumber: 1 }],
+    continueOptions
+  ).map((candidate) => candidate.id),
+  ["ocrtriage:partial"],
+  "continue-partial should select only partial candidates with pending page work"
+);
+assert.deepStrictEqual([...successfulPageKeys([{ status: "ok", candidateId: "ocrtriage:partial", pageNumber: 1 }])], [successfulPageKey("ocrtriage:partial", 1)]);
 
 assert.deepStrictEqual(classifyOcrError("HTTP 403"), {
   errorClass: "access_denied",

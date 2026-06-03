@@ -338,9 +338,11 @@ function progressiveRunPlan(candidates, options = {}) {
   const pending = candidates
     .filter((record) => !record.processing || ["pending", "partial", "retryable_failed"].includes(record.processing.status))
     .sort((a, b) => Number(a.priorityRank || 999999) - Number(b.priorityRank || 999999));
-  const phase1Easy = pending.filter((record) => record.route === "local_ocr" && record.priorityBatch === "phase1" && record.localTier === "easy");
-  const phase1Medium = pending.filter((record) => record.route === "local_ocr" && record.priorityBatch === "phase1" && record.localTier === "medium");
-  const backlogLocal = pending.filter((record) => record.route === "local_ocr" && record.priorityBatch !== "phase1");
+  const firstPass = pending.filter((record) => !record.processing || record.processing.status === "pending");
+  const partialLocal = pending.filter((record) => record.route === "local_ocr" && record.processing?.status === "partial");
+  const phase1Easy = firstPass.filter((record) => record.route === "local_ocr" && record.priorityBatch === "phase1" && record.localTier === "easy");
+  const phase1Medium = firstPass.filter((record) => record.route === "local_ocr" && record.priorityBatch === "phase1" && record.localTier === "medium");
+  const backlogLocal = firstPass.filter((record) => record.route === "local_ocr" && record.priorityBatch !== "phase1");
   const retryable = pending.filter((record) => record.processing?.status === "retryable_failed");
   const metadataOnly = pending.filter((record) => record.route === "metadata_only_no_image");
   const externalReview = pending.filter((record) => /external|rights_review/.test(record.route));
@@ -358,6 +360,7 @@ function progressiveRunPlan(candidates, options = {}) {
     runs: [
       runSlice(phase1Easy, "phase1_easy_local", ["--limit=25", "--batch=phase1", "--tier=easy", "--pages-per-menu=1"], 25),
       runSlice(phase1Medium, "phase1_medium_local", ["--limit=25", "--batch=phase1", "--tier=medium", "--pages-per-menu=1"], 25),
+      runSlice(partialLocal, "continue_partial_second_pages", ["--limit=25", "--batch=all", "--continue-partial", "--pages-per-menu=2"], 25),
       runSlice(backlogLocal, "backlog_local", ["--limit=50", "--batch=all", "--tier=all", "--pages-per-menu=1"], 50),
       runSlice(retryable, "retryable_local_failures", ["--limit=25", "--batch=all", "--retry-retryable", "--pages-per-menu=1"], 25),
     ],

@@ -421,8 +421,21 @@ function countBy(records, keyFn) {
   return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
 }
 
+function successfulPageKey(candidateId, pageNumber) {
+  return [cleanValue(candidateId), Number(pageNumber || 0) || 0].join("|");
+}
+
+function successfulPageKeys(records = []) {
+  return new Set(
+    (records || [])
+      .filter((record) => record?.status !== "error")
+      .map((record) => successfulPageKey(record.candidateId, record.pageNumber))
+      .filter((key) => key !== "|0")
+  );
+}
+
 function selectOcrCandidates(queueRecords, previousRecords, options = {}) {
-  const processed = new Set((previousRecords || []).map((record) => cleanValue(record.candidateId)).filter(Boolean));
+  const attempted = new Set((previousRecords || []).map((record) => cleanValue(record.candidateId)).filter(Boolean));
   const failedCandidateIds = new Set(
     (previousRecords || [])
       .filter((record) => record?.status === "error")
@@ -440,7 +453,9 @@ function selectOcrCandidates(queueRecords, previousRecords, options = {}) {
         ? retryCandidateIds.has(candidate.id)
         : options.retryErrors
           ? failedCandidateIds.has(candidate.id)
-          : !processed.has(candidate.id) || options.refresh
+          : options.continuePartial
+            ? candidate.processing?.status === "partial" && Number(candidate.processing?.pendingImages || 0) > 0
+            : !attempted.has(candidate.id) || options.refresh
     )
     .filter((candidate) => sourceFilter === "all" || candidate.sourceKey === sourceFilter || candidate.sourceId === sourceFilter)
     .filter((candidate) => tierFilter === "all" || candidate.localTier === tierFilter)
@@ -597,6 +612,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
       .map((record) => cleanValue(record.candidateId))
       .filter(Boolean)
   );
+  const previousSuccessfulPages = successfulPageKeys(previous.records || []);
   const candidates = selectOcrCandidates(queue.records || [], previous.records || [], { ...options, retryCandidateIds });
 
   const extractionRecords = [];
@@ -612,6 +628,10 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
       continue;
     }
     for (const [pageIndex, imageUrl] of urls.entries()) {
+      const pageNumber = pageIndex + 1;
+      if (options.continuePartial && !options.refresh && previousSuccessfulPages.has(successfulPageKey(candidate.id, pageNumber))) {
+        continue;
+      }
       let cached = null;
       try {
         cached = await fetchImageToCache(imageUrl, options);
@@ -619,7 +639,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
         const text = (ocr.lines || []).map((line) => line.text).join("\n");
         const pageDishMentions = textDishMentions(menu, text, options.maxDishMentionsPerMenu).map((record) => ({
           ...record,
-          id: stableId("dishmention", [candidate.menuId, candidate.id, pageIndex + 1, record.normalizedName, record.lineNumber || ""]),
+          id: stableId("dishmention", [candidate.menuId, candidate.id, pageNumber, record.normalizedName, record.lineNumber || ""]),
           extractionMethod: "local_vision_ocr_dish",
           confidence: Number(Math.min(0.96, Number(record.confidence || 0.5) + 0.04).toFixed(3)),
           provenance: {
@@ -627,13 +647,13 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
             sourceFile: "enrichment/ocr-extractions.json",
             sourceRecordId: candidate.sourceRecordId,
             candidateId: candidate.id,
-            pageNumber: pageIndex + 1,
+            pageNumber,
             ocrEngine: "macos_vision",
           },
         }));
         const rawPriceRows = extractPricesFromText(text, menu).map((record, index) => ({
           ...record,
-          id: stableId("ocrpricebase", [candidate.menuId, candidate.id, pageIndex + 1, record.item, record.rawPrice, index]),
+          id: stableId("ocrpricebase", [candidate.menuId, candidate.id, pageNumber, record.item, record.rawPrice, index]),
           sourceKey: candidate.sourceKey,
           menuUid: candidate.menuId,
           rawLineNumber: Number(record.id?.split("-").slice(-2, -1)[0]) + 1 || null,
@@ -643,14 +663,14 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
           const enriched = enrichmentPriceObservation(record, references, contextEvents);
           return {
             ...enriched,
-            id: stableId("priceobs", [candidate.menuId, candidate.id, pageIndex + 1, enriched.normalizedName, enriched.rawPriceText]),
+            id: stableId("priceobs", [candidate.menuId, candidate.id, pageNumber, enriched.normalizedName, enriched.rawPriceText]),
             extractionMethod: "local_vision_ocr_price",
             provenance: {
               ...(enriched.provenance || {}),
               sourceFile: "enrichment/ocr-extractions.json",
               sourceRecordId: candidate.sourceRecordId,
               candidateId: candidate.id,
-              pageNumber: pageIndex + 1,
+              pageNumber,
               ocrEngine: "macos_vision",
             },
           };
@@ -660,11 +680,11 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
           lines: ocr.lines || [],
           menuId: candidate.menuId,
           candidateId: candidate.id,
-          pageIndex: pageIndex + 1,
+          pageIndex: pageNumber,
           evidenceLines,
         });
         extractionRecords.push({
-          id: stableId("ocrextraction", [candidate.menuId, candidate.id, pageIndex + 1, imageUrl]),
+          id: stableId("ocrextraction", [candidate.menuId, candidate.id, pageNumber, imageUrl]),
           status: "ok",
           candidateId: candidate.id,
           menuId: candidate.menuId,
@@ -672,7 +692,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
           sourceKey: candidate.sourceKey,
           sourceRecordId: candidate.sourceRecordId,
           title: candidate.title,
-          pageNumber: pageIndex + 1,
+          pageNumber,
           imageHash: hash(imageUrl),
           imageBytes: cached.bytes,
           ocrEngine: "macos_vision",
@@ -693,9 +713,9 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
         priceObservations.push(...pagePriceObservations);
         if (!options.keepImages) await fs.rm(cached.filePath, { force: true });
       } catch (error) {
-        events.push({ level: "warn", candidateId: candidate.id, menuId: candidate.menuId, pageNumber: pageIndex + 1, message: error.message });
+        events.push({ level: "warn", candidateId: candidate.id, menuId: candidate.menuId, pageNumber, message: error.message });
         extractionRecords.push({
-          id: stableId("ocrextraction", [candidate.menuId, candidate.id, pageIndex + 1, "error", imageUrl]),
+          id: stableId("ocrextraction", [candidate.menuId, candidate.id, pageNumber, "error", imageUrl]),
           status: "error",
           candidateId: candidate.id,
           menuId: candidate.menuId,
@@ -703,7 +723,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
           sourceKey: candidate.sourceKey,
           sourceRecordId: candidate.sourceRecordId,
           title: candidate.title,
-          pageNumber: pageIndex + 1,
+          pageNumber,
           imageHash: hash(imageUrl),
           imageBytes: cached?.bytes || null,
           ocrEngine: "macos_vision",
@@ -804,6 +824,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     refresh: hasFlag(args, "refresh"),
     retryErrors: hasFlag(args, "retry-errors"),
     retryRetryable: hasFlag(args, "retry-retryable"),
+    continuePartial: hasFlag(args, "continue-partial"),
     refreshImages: hasFlag(args, "refresh-images"),
     keepImages: hasFlag(args, "keep-images"),
     dryRun: hasFlag(args, "dry-run"),
@@ -836,5 +857,7 @@ module.exports = {
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
   selectOcrCandidates,
+  successfulPageKeys,
+  successfulPageKey,
   textSpansFromOcr,
 };
