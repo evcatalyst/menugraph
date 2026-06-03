@@ -1,5 +1,6 @@
 const assert = require("assert");
 const {
+  descriptionServiceSegments,
   deriveVenueText,
   normalizeItem,
   optionsFromArgs,
@@ -61,6 +62,14 @@ function run() {
   assert.strictEqual(deriveVenueText("Scrapbook of hotel and restaurant menus"), "");
   assert.strictEqual(transportModeFor("U.S.M. steamship Columbia bill of fare"), "ship");
   assert.strictEqual(transportModeFor("Delmonico restaurant dinner"), "restaurant");
+  assert.deepStrictEqual(
+    descriptionServiceSegments({
+      title: "Louisville Hotel, March 15, 1857",
+      description: ["Table d' Hote and wine list for Louisville Hotel."],
+      subjects: ["Hotels", "Food"],
+    }),
+    ["wine list", "table d'hote"]
+  );
 
   const record = normalizeItem(itemJson, rows[0]);
   assert.strictEqual(record.id, "uh:v692t686f");
@@ -73,6 +82,10 @@ function run() {
   assert.strictEqual(record.iiifManifestUrl, "https://digitalcollections.lib.uh.edu/concern/texts/v692t686f/manifest");
   assert.strictEqual(record.rightsStatement, "https://creativecommons.org/publicdomain/mark/1.0/");
   assert.deepStrictEqual(record.priceObservations, []);
+  assert.strictEqual(record.dishMentions.length, 1);
+  assert.strictEqual(record.dishMentions[0].rawName, "dinner options");
+  assert.strictEqual(record.dishMentions[0].extractionMethod, "uh_metadata_service_keyword");
+  assert.strictEqual(record.dishMentions[0].confidence, 0.44);
 
   const options = optionsFromArgs(["--limit=9999", "--timeout-ms=12000", "--dry-run"]);
   assert.strictEqual(options.limit, 100);

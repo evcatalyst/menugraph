@@ -30,6 +30,18 @@ const EARLY_DISH_PATTERNS = [
   /\bchampagne\b/i,
 ];
 
+const SERVICE_DISH_PATTERNS = [
+  { label: "breakfast options", pattern: /\bbreakfast\b/i },
+  { label: "luncheon options", pattern: /\bluncheon\b/i },
+  { label: "lunch options", pattern: /\blunch\b/i },
+  { label: "dinner options", pattern: /\bdinner\b/i },
+  { label: "supper options", pattern: /\bsupper\b/i },
+  { label: "wine list", pattern: /\bwine\s+list\b/i },
+  { label: "carte du jour", pattern: /\bcarte\s+du\s+jour\b/i },
+  { label: "table d'hote", pattern: /\btable\s+d['’]?\s*hote\b/i },
+  { label: "ordinary service", pattern: /\bordinary\b/i },
+];
+
 function argValue(args, name, fallback = null) {
   const prefix = `--${name}=`;
   const match = args.find((arg) => arg.startsWith(prefix));
@@ -183,22 +195,33 @@ function descriptionDishSegments({ title, description, subjects }) {
   return [...new Set(segments)].slice(0, 6);
 }
 
-function dishMentionFor(record, rawName) {
+function descriptionServiceSegments({ title, description, subjects }) {
+  const text = [title, ...values(description), ...values(subjects)].join(" ");
+  const segments = [];
+  for (const entry of SERVICE_DISH_PATTERNS) {
+    if (entry.pattern.test(text)) segments.push(entry.label);
+  }
+  return [...new Set(segments)].slice(0, 6);
+}
+
+function dishMentionFor(record, rawName, options = {}) {
   const normalizedName = normalizedDishName(rawName);
   if (!normalizedName) return null;
+  const extractionMethod = cleanValue(options.extractionMethod || "uh_metadata_keyword");
+  const confidence = Number(options.confidence || 0.52);
   return {
-    id: stableId("uhdish", [record.menuId, normalizedName]),
+    id: stableId("uhdish", [record.menuId, normalizedName, extractionMethod]),
     menuId: record.menuId,
     sourceId: SOURCE_ID,
     sourceKey: SOURCE_KEY,
     rawName: cleanValue(rawName),
     normalizedName,
     canonicalDishId: `dish:${normalizedName.replace(/\s+/g, "-").slice(0, 96)}`,
-    sectionName: "metadata description",
+    sectionName: cleanValue(options.sectionName || "metadata description"),
     dishType: dishTypeFor(rawName),
     ingredientTags: ingredientTagsFor(rawName),
-    extractionMethod: "uh_metadata_keyword",
-    confidence: 0.52,
+    extractionMethod,
+    confidence,
     provenance: {
       sourceFile: "enrichment/external-sources/uh_1850s_1860s_menus.json",
       sourceRecordId: record.sourceRecordId,
@@ -266,7 +289,16 @@ function normalizeItem(item, row = {}) {
       rightsNote: rightsStatement || "Derived metadata only; no raw image, OCR, transcript, or IIIF payload copied into static graph artifacts.",
     },
   };
-  const dishMentions = descriptionDishSegments({ title, description, subjects }).map((rawName) => dishMentionFor(baseRecord, rawName)).filter(Boolean);
+  const dishMentions = [
+    ...descriptionDishSegments({ title, description, subjects }).map((rawName) => dishMentionFor(baseRecord, rawName)),
+    ...descriptionServiceSegments({ title, description, subjects }).map((rawName) =>
+      dishMentionFor(baseRecord, rawName, {
+        extractionMethod: "uh_metadata_service_keyword",
+        sectionName: "metadata service",
+        confidence: 0.44,
+      })
+    ),
+  ].filter(Boolean);
   return {
     ...baseRecord,
     dishHints: dishMentions.map((dish) => ({
@@ -388,5 +420,6 @@ module.exports = {
   optionsFromArgs,
   parseCollectionRows,
   parseDateRange,
+  descriptionServiceSegments,
   transportModeFor,
 };
