@@ -46,10 +46,13 @@ assert(Object.keys(evidenceIndex.sourceProbes || {}).length >= 4, "expected prob
 if (manifest.summary.externalMenus?.records) {
   assert(manifest.summary.externalMenus.bySource.northwestern_transport_menus > 0, "external Northwestern rows should be summarized by source");
   assert(manifest.summary.externalMenus.bySource.uh_1850s_1860s_menus > 0, "external UH rows should be summarized by source");
+  assert(manifest.summary.externalMenus.bySource.lapl_menu_collection > 0, "external LAPL rows should be summarized by source");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("northwestern:")), "external Northwestern menu evidence should be indexed");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("uh:")), "external UH menu evidence should be indexed");
+  assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("lapl:")), "external LAPL menu evidence should be indexed");
   assert(core.nodes.some((node) => node.id.startsWith("menu:northwestern:")), "core graph should include external Northwestern menu nodes");
   assert(core.nodes.some((node) => node.id.startsWith("menu:uh:")), "core graph should include external UH menu nodes");
+  assert(core.nodes.some((node) => node.id.startsWith("menu:lapl:")), "core graph should include external LAPL menu nodes");
   assert(
     core.edges.some((edge) => edge.type === "HAS_MENU" && edge.from === "source:northwestern_transport_menus" && edge.to.startsWith("menu:northwestern:")),
     "core graph should link Northwestern source to external menu nodes"
@@ -57,6 +60,14 @@ if (manifest.summary.externalMenus?.records) {
   assert(
     core.edges.some((edge) => edge.type === "HAS_MENU" && edge.from === "source:uh_1850s_1860s_menus" && edge.to.startsWith("menu:uh:")),
     "core graph should link UH source to external menu nodes"
+  );
+  assert(
+    core.edges.some((edge) => edge.type === "HAS_MENU" && edge.from === "source:lapl_menu_collection" && edge.to.startsWith("menu:lapl:")),
+    "core graph should link LAPL source to external menu nodes"
+  );
+  assert(
+    Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "lapl_menu_collection" && record.scalar?.pageCount),
+    "LAPL image metadata features should be indexed"
   );
 }
 

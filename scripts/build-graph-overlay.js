@@ -12,7 +12,7 @@ const MAX_TOPOLOGY_DISH_EDGES_PER_MENU = 3;
 const MAX_ONTOLOGY_EDGES_PER_TERM = 30;
 const SIZE_BUDGET_BYTES = graphContract.STATIC_ARTIFACT_BUDGET_BYTES;
 const MAX_CORE_MENU_NODES = 2000;
-const MAX_EXTERNAL_MENU_NODES = 300;
+const MAX_EXTERNAL_MENU_NODES = 500;
 const MAX_INGREDIENT_TERMS = 120;
 const MAX_DISH_EVIDENCE_INDEX = 10000;
 const MAX_IMAGE_EVIDENCE_INDEX = 2000;
@@ -433,6 +433,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     const sourceFile = externalSourceFile(record);
     const dishMentions = record.dishMentions || [];
     const priceObservations = record.priceObservations || [];
+    const imageFeatures = record.imageFeatures || [];
     const ingredientTags = new Set([
       ...(record.ingredientTags || []),
       ...dishMentions.flatMap((dish) => dish.ingredientTags || []),
@@ -450,7 +451,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         matches: 0,
         ontologyTerms: 0,
         ingredientTags: ingredientTags.size,
-        imageFeatures: record.iiifManifestUrl || record.thumbnailUrl ? 1 : 0,
+        imageFeatures: imageFeatures.length || (record.iiifManifestUrl || record.iiifInfoUri || record.imageUri || record.thumbnailUrl ? 1 : 0),
       },
       topDishes: (record.dishHints || dishMentions || []).slice(0, 3).map((dish) => cleanValue(dish.rawName || dish.normalizedName)).filter(Boolean),
       ingredientTags: [...ingredientTags].sort().slice(0, 8),
@@ -546,6 +547,33 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
               caveat: cleanValue(price.normalized.caveat),
             }
           : null,
+        sourceFile,
+        external: true,
+      };
+    }
+    for (const imageFeature of imageFeatures) {
+      const id = cleanValue(imageFeature.id);
+      if (!id || imageEvidenceIndexed >= MAX_IMAGE_EVIDENCE_INDEX) continue;
+      if (overlays[uid].imageFeatureIds.length < 2) overlays[uid].imageFeatureIds.push(id);
+      imageEvidenceIndexed += 1;
+      evidenceIndex.imageFeatures[id] = {
+        id,
+        menuId: uid,
+        sourceId: cleanValue(imageFeature.sourceId || record.sourceId),
+        featureType: cleanValue(imageFeature.featureType || "external_image_metadata"),
+        scalar: {
+          width: imageFeature.scalar?.width ?? null,
+          height: imageFeature.scalar?.height ?? null,
+          aspectRatio: imageFeature.scalar?.aspectRatio ?? null,
+          orientation: cleanValue(imageFeature.scalar?.orientation || "unknown"),
+          byteSize: imageFeature.scalar?.byteSize ?? null,
+          mediaType: cleanValue(imageFeature.scalar?.mediaType || "unknown"),
+          pageCount: imageFeature.scalar?.pageCount ?? record.pageCount ?? null,
+          hasImageUri: Boolean(imageFeature.scalar?.hasImageUri || record.imageUri),
+          hasIiifInfo: Boolean(imageFeature.scalar?.hasIiifInfo || record.iiifInfoUri),
+        },
+        confidence: Number(imageFeature.confidence || 0.62),
+        method: cleanValue(imageFeature.modelName || "external_metadata"),
         sourceFile,
         external: true,
       };
@@ -956,6 +984,10 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
 
     const termValues = [
       ...(record.ingredientTags || []).map((term) => ({ category: "ingredients", term })),
+      ...(record.cuisineTags || []).map((term) => ({ category: "cuisines", term })),
+      ...(record.styleTags || []).map((term) => ({ category: "styles", term })),
+      ...(record.formatTags || []).map((term) => ({ category: "formats", term })),
+      ...(record.subjectTerms || record.subjects || []).slice(0, 4).map((term) => ({ category: "subjects", term })),
       record.transportMode ? { category: "styles", term: record.transportMode } : null,
     ].filter(Boolean);
     for (const term of termValues.slice(0, 10)) {

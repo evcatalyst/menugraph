@@ -1,7 +1,10 @@
 const fs = require("fs/promises");
 const path = require("path");
 const { buildGraphOverlay } = require("./build-graph-overlay");
+const { buildLaplSource } = require("./lapl-source");
 const { buildLocalEnrichment, optionsFromArgs } = require("./local-enrichment");
+const { buildNorthwesternSource } = require("./northwestern-source");
+const { buildUhSource } = require("./uh-source");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
@@ -14,6 +17,10 @@ const DEFAULT_ARGS = [
   "--image-limit=200",
   "--time-budget-min=480",
   "--public-dish-limit=60000",
+  "--external-sources",
+  "--lapl-limit=100",
+  "--northwestern-limit=160",
+  "--uh-limit=100",
 ];
 
 function timestamp() {
@@ -34,6 +41,81 @@ async function writeStatus(payload) {
     )}\n`,
     "utf8"
   );
+}
+
+function argValue(args, name, fallback = null) {
+  const prefix = `--${name}=`;
+  const match = args.find((arg) => arg.startsWith(prefix));
+  return match ? match.slice(prefix.length) : fallback;
+}
+
+function hasFlag(args, name) {
+  return args.includes(`--${name}`);
+}
+
+function sourceLimit(args, name, fallback) {
+  return Math.max(0, Number(argValue(args, name, String(fallback))) || 0);
+}
+
+async function runExternalSources(args) {
+  if (hasFlag(args, "skip-external-sources")) {
+    return { skipped: true, sources: [] };
+  }
+
+  const timeoutMs = Math.max(5000, Number(argValue(args, "external-timeout-ms", "30000")) || 30000);
+  const dryRun = hasFlag(args, "dry-run");
+  const sources = [
+    {
+      sourceId: "lapl_menu_collection",
+      limit: sourceLimit(args, "lapl-limit", 100),
+      run: (limit) => buildLaplSource({ limit, timeoutMs, dryRun }),
+    },
+    {
+      sourceId: "northwestern_transport_menus",
+      limit: sourceLimit(args, "northwestern-limit", 160),
+      run: (limit) => buildNorthwesternSource({ limit, query: "menu transportation dining", timeoutMs, dryRun }),
+    },
+    {
+      sourceId: "uh_1850s_1860s_menus",
+      limit: sourceLimit(args, "uh-limit", 100),
+      run: (limit) => buildUhSource({ limit, timeoutMs, dryRun }),
+    },
+  ];
+
+  const results = [];
+  for (const source of sources) {
+    if (!source.limit) {
+      results.push({ sourceId: source.sourceId, skipped: true, reason: "limit=0" });
+      continue;
+    }
+    await writeStatus({
+      status: "running",
+      phase: "external-sources",
+      pid: process.pid,
+      args,
+      currentSource: source.sourceId,
+      externalSources: results,
+    });
+    console.log(`[${timestamp()}] Refreshing external source ${source.sourceId} with limit=${source.limit}`);
+    try {
+      const output = await source.run(source.limit);
+      results.push({
+        sourceId: source.sourceId,
+        status: "ok",
+        summary: output.summary,
+        generatedAt: output.generatedAt,
+      });
+      console.log(`[${timestamp()}] External source complete ${source.sourceId}: ${JSON.stringify(output.summary)}`);
+    } catch (error) {
+      results.push({
+        sourceId: source.sourceId,
+        status: "error",
+        error: error.message,
+      });
+      console.error(`[${timestamp()}] External source failed ${source.sourceId}: ${error.stack || error.message}`);
+    }
+  }
+  return { skipped: false, sources: results };
 }
 
 async function main() {
@@ -64,10 +146,21 @@ async function main() {
 
   await writeStatus({
     status: "running",
+    phase: "external-sources",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+  });
+
+  const externalSources = await runExternalSources(args);
+
+  await writeStatus({
+    status: "running",
     phase: "graph-build",
     pid: process.pid,
     args,
     enrichmentSummary: enrichment.status.summary,
+    externalSources,
   });
 
   const graph = await buildGraphOverlay();
@@ -80,6 +173,7 @@ async function main() {
     args,
     finishedAt: timestamp(),
     enrichmentSummary: enrichment.status.summary,
+    externalSources,
     graphSummary: graph.manifest.summary,
   });
 }
