@@ -190,7 +190,7 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
         prioritizedActions: nextActions.length,
       },
       reason: "Metadata refresh is the cheapest path while disk blocks OCR; it can improve dates, venues, image routes, dish hints, and source coverage.",
-      commands: [...commandList(sourceRefresh), "npm run enrich:retag", "npm run enrich:coverage", "npm run enrich:run-plan", "npm run build:graph"],
+      commands: [...commandList(sourceRefresh), "npm run enrich:external-metadata", "npm run enrich:retag", "npm run enrich:coverage", "npm run enrich:run-plan", "npm run build:graph"],
       sourceIds: sourceRefresh.map((row) => row.sourceId).slice(0, 12),
     },
     {
@@ -203,7 +203,7 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
         missingIngredientMenus: metadataSources.reduce((sum, gap) => sum + gap.missingIngredientMenus, 0),
       },
       reason: "Prioritize sources where dish/ingredient coverage is weak before spending on external LLM review.",
-      commands: ["npm run enrich:retag", "npm run enrich:recipe-bridge", "npm run enrich:coverage", "npm run build:graph"],
+      commands: ["npm run enrich:external-metadata", "npm run enrich:retag", "npm run enrich:recipe-bridge", "npm run enrich:coverage", "npm run build:graph"],
       sourceIds: metadataSources.map((gap) => gap.sourceId),
     },
     {
@@ -263,6 +263,7 @@ function phases(streams, runPlan) {
         .map((stream) => stream.id),
       commands: [
         "npm run enrich:coverage",
+        "npm run enrich:external-metadata",
         runPlan.recipeBridge?.command,
         "npm run enrich:retag",
         "npm run enrich:run-plan",

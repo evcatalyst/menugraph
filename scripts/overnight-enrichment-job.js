@@ -12,6 +12,7 @@ const { buildUhSource } = require("./uh-source");
 const { buildUwSource } = require("./uw-source");
 const { buildDenverSource } = require("./denver-source");
 const { buildCornellSource } = require("./cornell-source");
+const { enrichExternalMetadata } = require("./enrich-external-metadata");
 const { buildOcrTriageQueue } = require("./build-ocr-triage-queue");
 const { buildLocalVisionOcrEnrichment } = require("./local-vision-ocr-enrichment");
 const { retagEnrichment } = require("./retag-enrichment");
@@ -288,12 +289,26 @@ async function main() {
 
   await writeStatus({
     status: "running",
+    phase: "external-metadata-enrichment",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+    externalSources,
+    externalImageAssessment,
+  });
+
+  const externalMetadata = await enrichExternalMetadata({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] External metadata enrichment complete: ${JSON.stringify(externalMetadata.summary)}`);
+
+  await writeStatus({
+    status: "running",
     phase: "retag-enrichment",
     pid: process.pid,
     args,
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
   });
 
   const retagged = await retagEnrichment({ dryRun: hasFlag(args, "dry-run") });
@@ -307,6 +322,7 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
     retagged,
   });
 
@@ -327,6 +343,7 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
     retagged,
     ocrTriage: ocrTriage.summary,
   });
@@ -353,6 +370,7 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
@@ -382,6 +400,7 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
@@ -399,6 +418,7 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
@@ -423,6 +443,7 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
@@ -444,6 +465,7 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
     retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
