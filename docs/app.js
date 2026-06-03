@@ -215,6 +215,7 @@ function sourceCollectionLabel(sourceKey) {
   if (sourceKey === "lapl") return "Los Angeles Public Library";
   if (sourceKey === "northwestern") return "Northwestern Digital Collections";
   if (sourceKey === "uh") return "University of Houston Digital Library";
+  if (sourceKey === "milwaukee") return "Milwaukee Public Library";
   return "Source Collection";
 }
 

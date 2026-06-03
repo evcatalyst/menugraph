@@ -460,7 +460,7 @@ test("graph lens exposes source status and application data flow", async ({ page
   await expect(page.locator("body")).toHaveAttribute("data-active-lens", "graph");
   await expect(page.locator("#result-title")).toContainText("Application Structure");
   await expect(page.locator("#results-label")).toHaveText("Source Status");
-  await expect(page.locator(".source-result-card")).toHaveCount(14);
+  await expect(page.locator(".source-result-card")).toHaveCount(15);
   await expect(page.locator("svg")).toContainText("Static-first graph overlay");
   await expect(page.locator("svg")).toContainText(/Dish/);
 
@@ -470,6 +470,7 @@ test("graph lens exposes source status and application data flow", async ({ page
   expect(sourceStripText).toContain("Probed");
   expect(sourceStripText).toContain("NYPL What's on the Menu");
   expect(sourceStripText).toContain("Northwestern");
+  expect(sourceStripText).toContain("Milwaukee");
   expect(sourceStripText).toContain("The Sifter");
 
   await page.locator(".source-result-card").filter({ hasText: "Northwestern" }).locator(".source-result-card__open").click();

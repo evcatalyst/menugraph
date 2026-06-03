@@ -3,6 +3,7 @@ const path = require("path");
 const { buildGraphOverlay } = require("./build-graph-overlay");
 const { buildLaplSource } = require("./lapl-source");
 const { buildLocalEnrichment, optionsFromArgs } = require("./local-enrichment");
+const { buildMilwaukeeSource } = require("./milwaukee-source");
 const { buildNorthwesternSource } = require("./northwestern-source");
 const { buildUhSource } = require("./uh-source");
 
@@ -21,6 +22,7 @@ const DEFAULT_ARGS = [
   "--lapl-limit=500",
   "--northwestern-limit=160",
   "--uh-limit=100",
+  "--milwaukee-limit=100",
 ];
 
 function timestamp() {
@@ -79,6 +81,11 @@ async function runExternalSources(args) {
       sourceId: "uh_1850s_1860s_menus",
       limit: sourceLimit(args, "uh-limit", 100),
       run: (limit) => buildUhSource({ limit, timeoutMs, dryRun }),
+    },
+    {
+      sourceId: "milwaukee_historic_menus",
+      limit: sourceLimit(args, "milwaukee-limit", 100),
+      run: (limit) => buildMilwaukeeSource({ limit, timeoutMs, dryRun }),
     },
   ];
 

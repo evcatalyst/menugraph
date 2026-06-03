@@ -142,6 +142,33 @@ sources:
       role: "transport_style_and_venue_evidence"
       local_first: true
 
+  milwaukee_historic_menus:
+    name: "Milwaukee Public Library Historic Menu Collection"
+    source_type: "regional_menu_images_metadata"
+    priority: 2
+    access:
+      method: "contentdm_api"
+      bulk_available: true
+      source_url: "https://content.mpl.org/digital/collection/histmenu"
+      api_url: "https://content.mpl.org/digital/api"
+    rights:
+      category: "mixed"
+      license: "Source item rights; many records use RightsStatements.org InC or InC-RUU"
+      grok_safe_default: false
+      public_static_fields:
+        - source metadata
+        - source links
+        - derived date evidence
+        - derived dish and ingredient hints
+        - derived image metadata features
+      restricted_fields:
+        - raw full-page images unless rights-cleared
+        - raw OCR if added later unless rights-cleared
+    enrichment:
+      role: "regional_venue_address_style_evidence"
+      local_first: true
+      external_routing_default: "sanitized_metadata_only"
+
   dotlas_structured_menus:
     name: "Dotlas Structured Menu Dataset"
     source_type: "modern_structured_menu_commercial"
@@ -174,4 +201,3 @@ sources:
       role: "dish_ingredient_embedding_and_nutrition_proxy"
       local_first: true
       external_routing_default: "derived_summaries_only"
-
