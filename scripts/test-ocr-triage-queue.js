@@ -117,6 +117,16 @@ assert.strictEqual(processedEasy.priceObservations, 1);
 const failedHard = processingForCandidate(hardExternal, processingIndex, 3);
 assert.strictEqual(failedHard.status, "failed_review");
 assert.strictEqual(failedHard.failureClasses.access_denied, 1);
+const mixedProcessingIndex = buildProcessingIndex(
+  [
+    { candidateId: "ocrtriage:mixed", status: "ok", dishMentionIds: ["dish:1"], priceObservationIds: [] },
+    { candidateId: "ocrtriage:mixed", status: "error" },
+  ],
+  [{ candidateId: "ocrtriage:mixed", retryable: false, errorClass: "access_denied", nextAction: "source_access_review" }]
+);
+const mixedProcessed = processingForCandidate({ ...easyUnknown, id: "ocrtriage:mixed", estimatedImages: 2 }, mixedProcessingIndex, 2);
+assert.strictEqual(mixedProcessed.status, "processed");
+assert.strictEqual(mixedProcessed.pendingImages, 0);
 const pendingPlan = progressiveRunPlan([
   { ...easyUnknown, priorityBatch: "phase1", priorityRank: 1, processing: processedEasy },
   {

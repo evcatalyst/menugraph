@@ -434,6 +434,26 @@ function successfulPageKeys(records = []) {
   );
 }
 
+function nonRetryableFailedPageKeys(records = []) {
+  return new Set(
+    (records || [])
+      .filter((record) => record?.status === "error" && !classifyOcrError(record.errorMessage).retryable)
+      .map((record) => successfulPageKey(record.candidateId, record.pageNumber))
+      .filter((key) => key !== "|0")
+  );
+}
+
+function hasActionablePendingPage(candidate, options = {}) {
+  const successfulPages = options.successfulPageKeys instanceof Set ? options.successfulPageKeys : new Set();
+  const nonRetryablePages = options.nonRetryableFailedPageKeys instanceof Set ? options.nonRetryableFailedPageKeys : new Set();
+  const pagesPerMenu = Math.max(1, Number(options.pagesPerMenu || 1) || 1);
+  for (let pageNumber = 1; pageNumber <= pagesPerMenu; pageNumber += 1) {
+    const key = successfulPageKey(candidate.id, pageNumber);
+    if (!successfulPages.has(key) && !nonRetryablePages.has(key)) return true;
+  }
+  return false;
+}
+
 function selectOcrCandidates(queueRecords, previousRecords, options = {}) {
   const attempted = new Set((previousRecords || []).map((record) => cleanValue(record.candidateId)).filter(Boolean));
   const failedCandidateIds = new Set(
@@ -454,7 +474,7 @@ function selectOcrCandidates(queueRecords, previousRecords, options = {}) {
         : options.retryErrors
           ? failedCandidateIds.has(candidate.id)
           : options.continuePartial
-            ? candidate.processing?.status === "partial" && Number(candidate.processing?.pendingImages || 0) > 0
+            ? candidate.processing?.status === "partial" && Number(candidate.processing?.pendingImages || 0) > 0 && hasActionablePendingPage(candidate, options)
             : !attempted.has(candidate.id) || options.refresh
     )
     .filter((candidate) => sourceFilter === "all" || candidate.sourceKey === sourceFilter || candidate.sourceId === sourceFilter)
@@ -613,6 +633,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
       .filter(Boolean)
   );
   const previousSuccessfulPages = successfulPageKeys(previous.records || []);
+  const previousNonRetryableFailedPages = nonRetryableFailedPageKeys(previous.records || []);
   const candidates = selectOcrCandidates(queue.records || [], previous.records || [], { ...options, retryCandidateIds });
 
   const extractionRecords = [];
@@ -630,6 +651,9 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
     for (const [pageIndex, imageUrl] of urls.entries()) {
       const pageNumber = pageIndex + 1;
       if (options.continuePartial && !options.refresh && previousSuccessfulPages.has(successfulPageKey(candidate.id, pageNumber))) {
+        continue;
+      }
+      if (options.continuePartial && !options.refresh && previousNonRetryableFailedPages.has(successfulPageKey(candidate.id, pageNumber))) {
         continue;
       }
       let cached = null;
@@ -856,6 +880,7 @@ module.exports = {
   menuLike,
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
+  nonRetryableFailedPageKeys,
   selectOcrCandidates,
   successfulPageKeys,
   successfulPageKey,

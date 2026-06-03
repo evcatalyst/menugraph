@@ -339,7 +339,7 @@ function progressiveRunPlan(candidates, options = {}) {
     .filter((record) => !record.processing || ["pending", "partial", "retryable_failed"].includes(record.processing.status))
     .sort((a, b) => Number(a.priorityRank || 999999) - Number(b.priorityRank || 999999));
   const firstPass = pending.filter((record) => !record.processing || record.processing.status === "pending");
-  const partialLocal = pending.filter((record) => record.route === "local_ocr" && record.processing?.status === "partial");
+  const partialLocal = pending.filter((record) => record.route === "local_ocr" && record.processing?.status === "partial" && Number(record.processing?.pendingImages || 0) > 0);
   const phase1Easy = firstPass.filter((record) => record.route === "local_ocr" && record.priorityBatch === "phase1" && record.localTier === "easy");
   const phase1Medium = firstPass.filter((record) => record.route === "local_ocr" && record.priorityBatch === "phase1" && record.localTier === "medium");
   const backlogLocal = firstPass.filter((record) => record.route === "local_ocr" && record.priorityBatch !== "phase1");
@@ -441,9 +441,12 @@ function processingForCandidate(candidate, processingIndex, pagesPerMenu = DEFAU
       retryableFailure: false,
     };
   }
-  const pendingImages = Math.max(0, targetImages - state.processedPages - state.failedPages);
+  const coveredImages = state.processedPages + state.failedPages;
+  const pendingImages = Math.max(0, targetImages - coveredImages);
   let status = "pending";
-  if (state.processedPages >= targetImages && targetImages > 0) status = "processed";
+  if (targetImages > 0 && coveredImages >= targetImages && state.retryableFailure) status = "retryable_failed";
+  else if (targetImages > 0 && coveredImages >= targetImages && state.processedPages > 0) status = "processed";
+  else if (targetImages > 0 && coveredImages >= targetImages) status = "failed_review";
   else if (state.processedPages > 0) status = "partial";
   else if (state.failedPages > 0 && state.retryableFailure) status = "retryable_failed";
   else if (state.failedPages > 0) status = "failed_review";

@@ -7,6 +7,7 @@ const {
   imageUrlsForIiifManifestPayload,
   iiifServiceImageUrl,
   menuLike,
+  nonRetryableFailedPageKeys,
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
   selectOcrCandidates,
@@ -240,6 +241,47 @@ assert.deepStrictEqual(
   "continue-partial should select only partial candidates with pending page work"
 );
 assert.deepStrictEqual([...successfulPageKeys([{ status: "ok", candidateId: "ocrtriage:partial", pageNumber: 1 }])], [successfulPageKey("ocrtriage:partial", 1)]);
+assert.deepStrictEqual(
+  [
+    ...nonRetryableFailedPageKeys([
+      { status: "error", candidateId: "ocrtriage:partial", pageNumber: 2, errorMessage: "HTTP 403" },
+      { status: "error", candidateId: "ocrtriage:retry", pageNumber: 1, errorMessage: "socket hang up" },
+    ]),
+  ],
+  [successfulPageKey("ocrtriage:partial", 2)]
+);
+assert.deepStrictEqual(
+  selectOcrCandidates(
+    [
+      {
+        id: "ocrtriage:partial",
+        priorityRank: 1,
+        priorityBatch: "phase1",
+        sourceKey: "cia",
+        sourceId: "cia_menu_collection",
+        localTier: "easy",
+        processing: { status: "partial", pendingImages: 1 },
+      },
+      {
+        id: "ocrtriage:actionable",
+        priorityRank: 2,
+        priorityBatch: "phase1",
+        sourceKey: "cia",
+        sourceId: "cia_menu_collection",
+        localTier: "easy",
+        processing: { status: "partial", pendingImages: 1 },
+      },
+    ],
+    [{ status: "ok", candidateId: "ocrtriage:partial", pageNumber: 1 }],
+    {
+      ...continueOptions,
+      successfulPageKeys: new Set([successfulPageKey("ocrtriage:partial", 1), successfulPageKey("ocrtriage:actionable", 1)]),
+      nonRetryableFailedPageKeys: new Set([successfulPageKey("ocrtriage:partial", 2)]),
+    }
+  ).map((candidate) => candidate.id),
+  ["ocrtriage:actionable"],
+  "continue-partial should skip candidates whose remaining pages are known non-retryable failures"
+);
 
 assert.deepStrictEqual(classifyOcrError("HTTP 403"), {
   errorClass: "access_denied",

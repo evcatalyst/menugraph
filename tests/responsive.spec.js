@@ -22,11 +22,12 @@ async function openAskEntry(page) {
 
 async function unlockAsk(page) {
   const secret = Buffer.from("bWFjZGFkZHk=", "base64").toString("utf8");
-  const gate = page.locator(".ask-gate:visible");
+  const entryGate = page.locator(".ask-entry-root .ask-gate:visible");
+  const gate = (await entryGate.count()) ? entryGate : page.locator(".ask-gate:visible").first();
   await gate.locator("input").fill(secret);
-  await gate.locator("button").click();
-  await expect(page.locator(".ask-gate:visible")).toHaveCount(0);
+  await gate.evaluate((form) => form.requestSubmit());
   await expect(page.locator(".chat-form:visible, .ask-entry-composer:visible")).toBeVisible();
+  await expect(page.locator(".ask-gate:visible")).toHaveCount(0);
 }
 
 async function layoutMetrics(page) {
