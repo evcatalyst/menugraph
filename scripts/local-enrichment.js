@@ -5,6 +5,7 @@ const https = require("https");
 const path = require("path");
 const { cleanValue, normalizeText, recordUid } = require("../docs/multisource");
 const { extractPricesFromText, normalizePrice, contextForEntry } = require("../docs/price-utils");
+const { dishTypeFor, ingredientTagsFor } = require("../docs/food-taxonomy");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -14,81 +15,6 @@ const TRANSCRIPT_CACHE_DIR = path.join(CACHE_DIR, "transcripts");
 const CONTENTDM_HOST = "ciadigitalcollections.culinary.edu";
 const CIA_COLLECTION = "p16940coll1";
 const VERSION = 1;
-
-const INGREDIENTS = [
-  "almond",
-  "anchovy",
-  "apple",
-  "artichoke",
-  "asparagus",
-  "bacon",
-  "banana",
-  "bass",
-  "beans",
-  "beef",
-  "beet",
-  "berries",
-  "butter",
-  "cabbage",
-  "carrot",
-  "caviar",
-  "celery",
-  "cheese",
-  "cherry",
-  "chicken",
-  "chocolate",
-  "clam",
-  "cod",
-  "corn",
-  "crab",
-  "cream",
-  "duck",
-  "egg",
-  "fish",
-  "garlic",
-  "ham",
-  "lamb",
-  "lemon",
-  "lettuce",
-  "lobster",
-  "mushroom",
-  "mutton",
-  "olive",
-  "onion",
-  "orange",
-  "oyster",
-  "pea",
-  "peach",
-  "pineapple",
-  "pork",
-  "potato",
-  "rice",
-  "salmon",
-  "sardine",
-  "sausage",
-  "shrimp",
-  "sole",
-  "spinach",
-  "strawberry",
-  "sweetbread",
-  "tomato",
-  "trout",
-  "turkey",
-  "veal",
-  "venison",
-];
-
-const DISH_TYPES = [
-  ["beverage", /\b(coffee|tea|wine|beer|ale|cocktail|champagne|whiskey|whisky|brandy|cider|soda|water|milk)\b/],
-  ["dessert", /\b(ice cream|cake|pie|pudding|sherbet|dessert|pastry|tart|fruit)\b/],
-  ["seafood", /\b(oyster|lobster|clam|crab|fish|salmon|shrimp|sole|cod|bass|trout|halibut)\b/],
-  ["meat", /\b(beef|steak|mutton|lamb|veal|pork|bacon|ham|venison|chop|roast)\b/],
-  ["poultry", /\b(chicken|turkey|duck|squab|pigeon)\b/],
-  ["soup", /\b(soup|consomme|bisque|chowder|broth)\b/],
-  ["salad", /\b(salad|lettuce|celery|tomato)\b/],
-  ["vegetable", /\b(asparagus|potato|spinach|pea|beans|corn|carrot|beet|cabbage|mushroom|onion)\b/],
-  ["bread", /\b(bread|roll|toast|muffin|biscuit|waffle|pancake)\b/],
-];
 
 const SECTION_PATTERNS = [
   ["soups", /\b(soups?|consommes?|broths?)\b/],
@@ -132,17 +58,6 @@ function titleish(value) {
     .split(/\s+/)
     .map((word) => (word ? word[0].toUpperCase() + word.slice(1) : ""))
     .join(" ");
-}
-
-function ingredientTagsFor(value) {
-  const normalized = ` ${normalizeText(value)} `;
-  return INGREDIENTS.filter((ingredient) => normalized.includes(` ${ingredient} `));
-}
-
-function dishTypeFor(value) {
-  const normalized = normalizeText(value);
-  const match = DISH_TYPES.find(([, pattern]) => pattern.test(normalized));
-  return match ? match[0] : "dish";
 }
 
 function sectionForLine(line) {

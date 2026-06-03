@@ -45,6 +45,12 @@ assert.deepStrictEqual(graphContract.validateGraph(sourceCapabilities, { maxByte
 assert.deepStrictEqual(graphContract.validateGraph(core, { maxBytes: manifest.sizeBudgetBytes }), [], "core graph should validate");
 assert(byteLength(core) <= manifest.sizeBudgetBytes, "core graph should stay under the static budget");
 assert(byteLength(menuOverlays) <= manifest.sizeBudgetBytes, "menu overlay index should stay under the static budget");
+assert(manifest.summary.core.ingredientTerms >= 100, "core graph should expose expanded ingredient taxonomy terms");
+assert(manifest.summary.overlays.withIngredients >= 15500, "ingredient overlays should cover the enriched menu set");
+assert(
+  core.nodes.some((node) => node.type === "Term" && node.category === "ingredients" && node.label === "potato"),
+  "core graph should include high-signal ingredient term nodes"
+);
 assert(!hasRawBlob(core), "core graph must not contain raw OCR or image blobs");
 assert(!hasRawBlob(menuOverlays), "menu overlays must not contain raw OCR or image blobs");
 assert(!hasRawBlob(evidenceIndex), "evidence index must not contain raw OCR or image blobs");

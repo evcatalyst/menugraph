@@ -11,6 +11,7 @@ const { buildSeattleSource } = require("./seattle-source");
 const { buildUhSource } = require("./uh-source");
 const { buildUwSource } = require("./uw-source");
 const { buildDenverSource } = require("./denver-source");
+const { retagEnrichment } = require("./retag-enrichment");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
@@ -214,12 +215,26 @@ async function main() {
 
   await writeStatus({
     status: "running",
+    phase: "retag-enrichment",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+    externalSources,
+    externalImageAssessment,
+  });
+
+  const retagged = await retagEnrichment({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Retag enrichment complete: ${JSON.stringify({ taxonomyVersion: retagged.taxonomyVersion, externalSources: retagged.externalSources.length })}`);
+
+  await writeStatus({
+    status: "running",
     phase: "graph-build",
     pid: process.pid,
     args,
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    retagged,
   });
 
   const graph = await buildGraphOverlay();
@@ -234,6 +249,7 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
+    retagged,
     graphSummary: graph.manifest.summary,
   });
 }
