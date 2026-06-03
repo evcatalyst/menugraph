@@ -199,6 +199,8 @@ async function runLocalOcrEnrichment(args) {
     maxDishMentionsPerMenu: Math.max(10, Number(argValue(args, "local-ocr-max-dish-mentions", "120")) || 120),
     refresh: hasFlag(args, "local-ocr-refresh"),
     refreshImages: hasFlag(args, "local-ocr-refresh-images"),
+    continuePartial: hasFlag(args, "local-ocr-continue-partial"),
+    retryRetryable: hasFlag(args, "local-ocr-retry-retryable"),
     keepImages: hasFlag(args, "local-ocr-keep-images"),
     dryRun: hasFlag(args, "dry-run"),
     onProgress: (message) => console.log(`[${timestamp()}] ${message}`),
