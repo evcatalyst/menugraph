@@ -472,6 +472,14 @@ test("graph lens exposes source status and application data flow", async ({ page
   expect(sourceStripText).toContain("Northwestern");
   expect(sourceStripText).toContain("The Sifter");
 
+  await page.locator(".source-result-card").filter({ hasText: "Northwestern" }).locator(".source-result-card__open").click();
+  await expect(page.locator("#results-label")).toContainText("Northwestern");
+  await expect(page.locator(".external-record-card").filter({ hasText: "All sources" })).toBeVisible();
+  await page.locator("button.external-record-card").first().click();
+  await expect(page.locator("#detail-title")).not.toHaveText("");
+  await expect(page.locator("#detail-text")).toContainText("External graph row");
+  await expect(page.locator("#detail-link")).toContainText("Northwestern");
+
   const metrics = await layoutMetrics(page);
   expectNoHorizontalOverflow(metrics);
   expectNoResultClipping(metrics);

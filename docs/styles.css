@@ -2023,6 +2023,105 @@ body[data-active-lens="graph"] .result-list {
   font-weight: 800;
 }
 
+.source-result-card__open {
+  justify-self: start;
+  align-self: end;
+  border: 1px solid rgba(49, 111, 115, 0.24);
+  border-radius: 999px;
+  background: rgba(49, 111, 115, 0.08);
+  color: var(--teal);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 850;
+  padding: 5px 9px;
+}
+
+.source-result-card__open:hover,
+.source-result-card__open:focus-visible {
+  background: rgba(49, 111, 115, 0.14);
+  outline: 2px solid rgba(49, 111, 115, 0.22);
+  outline-offset: 2px;
+}
+
+body[data-active-lens="graph"] .result-list[data-graph-mode="external-records"] {
+  grid-auto-columns: minmax(260px, 320px);
+  height: 142px;
+}
+
+.external-record-card {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 6px;
+  min-width: 0;
+  min-height: 128px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdfc;
+  color: var(--ink);
+  padding: 10px;
+  text-align: left;
+}
+
+button.external-record-card {
+  cursor: pointer;
+  font: inherit;
+}
+
+button.external-record-card:hover,
+button.external-record-card:focus-visible {
+  border-color: rgba(49, 111, 115, 0.42);
+  outline: 2px solid rgba(49, 111, 115, 0.18);
+  outline-offset: 2px;
+}
+
+.external-record-card--summary {
+  background: #f7faf8;
+}
+
+.external-record-card--summary button {
+  justify-self: start;
+  border: 1px solid rgba(47, 58, 63, 0.18);
+  border-radius: 999px;
+  background: white;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 850;
+  padding: 5px 9px;
+}
+
+.external-record-card h3,
+.external-record-card p {
+  margin: 0;
+}
+
+.external-record-card h3 {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.22;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.external-record-card p {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.external-record-card small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
 .loading {
   padding: 18px;
   color: var(--muted);

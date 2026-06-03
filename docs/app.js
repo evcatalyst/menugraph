@@ -26,6 +26,7 @@ const state = {
   graphOverlayByMenu: new Map(),
   graphOverlayShardPromises: new Map(),
   graphOverlayLoadedShards: new Set(),
+  selectedGraphSourceId: null,
   ontologyCategory: "ingredients",
   priceMode: "todayUsd",
   priceCurrency: null,
@@ -211,6 +212,9 @@ function sourceLabel(menu) {
 function sourceCollectionLabel(sourceKey) {
   if (sourceKey === "nypl") return "NYPL Digital Collections";
   if (sourceKey === "cia") return "CIA Digital Collections";
+  if (sourceKey === "lapl") return "Los Angeles Public Library";
+  if (sourceKey === "northwestern") return "Northwestern Digital Collections";
+  if (sourceKey === "uh") return "University of Houston Digital Library";
   return "Source Collection";
 }
 
@@ -2629,6 +2633,8 @@ function graphSourceRows(graph) {
         capability: capability?.label || "Capability",
         weight: clamp(Number(topEdge?.weight || 0), 0, 1),
         scoreAvg,
+        externalCount,
+        ingestedCount,
         statusKind,
         statusLabel,
         statusDetail,
@@ -2645,6 +2651,22 @@ function graphSourceRows(graph) {
     .sort((a, b) => {
       const rank = { ingested: 0, external: 1, probed: 2, evaluated: 3 };
       return rank[a.statusKind] - rank[b.statusKind] || b.weight - a.weight || b.scoreAvg - a.scoreAvg;
+    });
+}
+
+function graphSourceRowById(sourceId) {
+  return graphSourceRows(state.graphOverlay).find((row) => row.id === sourceId) || null;
+}
+
+function graphExternalMenuRecords(sourceId) {
+  const records = Object.values(state.graphOverlay?.evidenceIndex?.externalMenus || {});
+  return records
+    .filter((record) => record.sourceId === sourceId)
+    .sort((a, b) => {
+      const leftYear = Number(a.pointYear || a.year || a.lowerYear || 9999);
+      const rightYear = Number(b.pointYear || b.year || b.lowerYear || 9999);
+      if (leftYear !== rightYear) return leftYear - rightYear;
+      return String(a.title || "").localeCompare(String(b.title || ""));
     });
 }
 
@@ -2805,9 +2827,15 @@ function renderResults() {
 }
 
 function renderGraphSourceResults() {
+  if (state.selectedGraphSourceId) {
+    renderGraphExternalSourceResults();
+    return;
+  }
+
   const rows = graphSourceRows(state.graphOverlay);
   els.resultsCount.textContent = rows.length.toLocaleString();
   els.resultsLabel.textContent = "Source Status";
+  els.resultList.dataset.graphMode = "sources";
   if (!rows.length) {
     const empty = document.createElement("div");
     empty.className = "loading";
@@ -2841,6 +2869,23 @@ function renderGraphSourceResults() {
       note.textContent = row.sampleText || row.notes || "Evaluation-only source; row-level ingestion is planned after rights and export review.";
 
       card.append(top, title, meta, note);
+      if (row.externalCount) {
+        const openRows = document.createElement("button");
+        openRows.className = "source-result-card__open";
+        openRows.type = "button";
+        openRows.textContent = `View ${formatNumber(row.externalCount)} rows`;
+        openRows.addEventListener("click", () => {
+          state.selectedGraphSourceId = row.id;
+          renderResults();
+          setActivity({
+            label: "Graph Source",
+            title: `${row.label} rows`,
+            detail: "Showing compact external graph records with provenance and source links; raw OCR and image payloads stay outside the public graph.",
+            progress: 1,
+          });
+        });
+        card.appendChild(openRows);
+      }
       if (row.sourceUrl) {
         const link = document.createElement("a");
         link.href = row.sourceUrl;
@@ -2852,6 +2897,129 @@ function renderGraphSourceResults() {
       return card;
     })
   );
+}
+
+function renderGraphExternalSourceResults() {
+  const source = graphSourceRowById(state.selectedGraphSourceId);
+  const records = graphExternalMenuRecords(state.selectedGraphSourceId);
+  els.resultsCount.textContent = records.length.toLocaleString();
+  els.resultsLabel.textContent = source ? `${source.label} Rows` : "External Rows";
+  els.resultList.dataset.graphMode = "external-records";
+
+  const back = document.createElement("article");
+  back.className = "external-record-card external-record-card--summary";
+  const backButton = document.createElement("button");
+  backButton.type = "button";
+  backButton.textContent = "All sources";
+  backButton.addEventListener("click", () => {
+    state.selectedGraphSourceId = null;
+    renderResults();
+  });
+  const sourceTitle = document.createElement("h3");
+  sourceTitle.textContent = source?.label || "External source";
+  const sourceMeta = document.createElement("p");
+  sourceMeta.textContent = source
+    ? `${formatNumber(records.length)} compact graph rows / ${source.capability} ${Math.round(source.weight * 10)}/10 / ${source.statusLabel}`
+    : `${formatNumber(records.length)} compact graph rows`;
+  const sourceNote = document.createElement("small");
+  sourceNote.textContent = "Derived metadata only. No raw OCR dumps, image blobs, or embedding vectors are stored in this static overlay.";
+  back.append(backButton, sourceTitle, sourceMeta, sourceNote);
+
+  const cards = records.slice(0, 80).map((record) => {
+    const button = document.createElement("button");
+    button.className = "external-record-card";
+    button.type = "button";
+    const sourcePill = document.createElement("span");
+    sourcePill.className = "source-status-pill";
+    sourcePill.textContent = compact(record.sourceKey, "source");
+    const title = document.createElement("h3");
+    title.textContent = compact(record.title, "Untitled menu");
+    const meta = document.createElement("p");
+    meta.textContent = [compact(record.dateText || record.decade, ""), compact(record.placeText, ""), compact(record.venueText, "")].filter(Boolean).join(" / ");
+    const evidence = document.createElement("small");
+    evidence.textContent = externalRecordEvidenceLabel(record);
+    button.append(sourcePill, title, meta, evidence);
+    button.addEventListener("click", async () => {
+      await loadGraphOverlayShard(record.sourceKey).catch(() => null);
+      renderExternalMenuDetail(record);
+    });
+    return button;
+  });
+  els.resultList.replaceChildren(back, ...cards);
+}
+
+function externalRecordEvidenceLabel(record) {
+  const parts = [
+    record.priceObservationCount ? `${record.priceObservationCount} price${record.priceObservationCount === 1 ? "" : "s"}` : "",
+    record.dishHints?.length ? `${record.dishHints.length} dish hint${record.dishHints.length === 1 ? "" : "s"}` : "",
+    record.ingredientTags?.length ? `${record.ingredientTags.length} ingredient tag${record.ingredientTags.length === 1 ? "" : "s"}` : "",
+  ].filter(Boolean);
+  return parts.join(" / ") || "metadata graph row";
+}
+
+function renderExternalMenuDetail(record) {
+  state.selectedId = record.id;
+  els.detailEmpty.classList.add("hidden");
+  els.detailCard.classList.remove("hidden");
+  els.detailImage.alt = record.title || "External menu record";
+  setImageSource(els.detailImage, placeholderImage(record.title || "External menu"), record.title);
+  configureDetailImageZoom("", record.title, record.sourceKey);
+  els.detailKicker.textContent = [record.dateText || record.decade, record.placeText].filter(Boolean).join(" / ");
+  els.detailTitle.textContent = record.title || "External menu record";
+  els.detailLink.href = record.sourceUrl || "#";
+  els.detailLink.textContent = `Open in ${sourceCollectionLabel(record.sourceKey)}`;
+  els.pageStrip.replaceChildren();
+
+  const rows = [
+    ["Corpus", sourceCollectionLabel(record.sourceKey)],
+    ["Source ID", record.sourceId],
+    ["Source Date", record.dateText || record.decade],
+    ["Date Interval", externalDateInterval(record)],
+    ["Venue", record.venueText],
+    ["Place", record.placeText],
+    ["Mode", record.transportMode],
+    ["Prices", record.priceObservationCount ? `${record.priceObservationCount} compact observation${record.priceObservationCount === 1 ? "" : "s"}` : ""],
+    ["Ingredients", (record.ingredientTags || []).join(", ")],
+  ].filter(([, value]) => compact(value, ""));
+
+  els.detailMeta.replaceChildren(
+    ...rows.flatMap(([label, value]) => {
+      const dt = document.createElement("dt");
+      dt.textContent = label;
+      const dd = document.createElement("dd");
+      dd.textContent = value;
+      return [dt, dd];
+    })
+  );
+
+  const dishRows = (record.dishHints || []).slice(0, 8).map((item) => `- ${item}`);
+  els.detailText.textContent = [
+    "External graph row",
+    "This is a compact, provenance-preserving record derived from an external source. It is intentionally not a raw OCR dump.",
+    dishRows.length ? `Representative dish hints:\n${dishRows.join("\n")}` : "",
+    record.iiifManifestUrl ? `IIIF manifest: ${record.iiifManifestUrl}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const overlay = state.graphOverlayByMenu.get(record.id);
+  els.detailEvidence.replaceChildren();
+  if (overlay && hasGraphEvidence(overlay)) {
+    els.detailEvidence.classList.remove("hidden");
+    const title = document.createElement("strong");
+    title.textContent = "Evidence";
+    els.detailEvidence.appendChild(title);
+    for (const item of renderGraphEvidence(overlay)) {
+      els.detailEvidence.appendChild(item);
+    }
+  } else {
+    els.detailEvidence.classList.add("hidden");
+  }
+}
+
+function externalDateInterval(record) {
+  if (record.lowerYear && record.upperYear && record.lowerYear !== record.upperYear) return `${record.lowerYear}-${record.upperYear}`;
+  return record.year || record.pointYear || record.lowerYear || "";
 }
 
 async function selectMenu(id) {
@@ -4238,6 +4406,7 @@ function bindEvents() {
   els.lensButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.activeLens = button.dataset.lens;
+      if (state.activeLens !== "graph") state.selectedGraphSourceId = null;
       activateLensButton(state.activeLens);
       renderViz();
       renderResults();
