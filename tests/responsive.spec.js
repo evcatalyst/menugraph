@@ -466,8 +466,10 @@ test("graph lens exposes source status and application data flow", async ({ page
 
   const sourceStripText = await page.locator("#result-list").textContent();
   expect(sourceStripText).toContain("Ingested");
+  expect(sourceStripText).toContain("Graph Rows");
   expect(sourceStripText).toContain("Probed");
   expect(sourceStripText).toContain("NYPL What's on the Menu");
+  expect(sourceStripText).toContain("Northwestern");
   expect(sourceStripText).toContain("The Sifter");
 
   const metrics = await layoutMetrics(page);

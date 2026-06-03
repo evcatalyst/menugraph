@@ -1973,6 +1973,11 @@ body[data-active-lens="graph"] .result-list {
   color: #7c5c1e;
 }
 
+.source-result-card--external .source-status-pill {
+  background: rgba(95, 113, 77, 0.14);
+  color: var(--moss);
+}
+
 .source-result-card--evaluated .source-status-pill {
   background: rgba(47, 58, 63, 0.08);
   color: var(--muted);

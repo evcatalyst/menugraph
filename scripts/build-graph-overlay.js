@@ -12,9 +12,11 @@ const MAX_TOPOLOGY_DISH_EDGES_PER_MENU = 3;
 const MAX_ONTOLOGY_EDGES_PER_TERM = 30;
 const SIZE_BUDGET_BYTES = graphContract.STATIC_ARTIFACT_BUDGET_BYTES;
 const MAX_CORE_MENU_NODES = 2000;
+const MAX_EXTERNAL_MENU_NODES = 300;
 const MAX_INGREDIENT_TERMS = 120;
 const MAX_DISH_EVIDENCE_INDEX = 10000;
 const MAX_IMAGE_EVIDENCE_INDEX = 2000;
+const MAX_EXTERNAL_DISH_EDGES_PER_MENU = 4;
 
 function cleanValue(value) {
   if (Array.isArray(value)) return value.map(cleanValue).filter(Boolean).join("; ");
@@ -164,6 +166,26 @@ function compactMenu(menu) {
   };
 }
 
+function compactExternalMenu(record) {
+  return {
+    uid: cleanValue(record.menuId || record.id),
+    sourceKey: cleanValue(record.sourceKey || "external"),
+    sourceId: cleanValue(record.sourceId),
+    sourceRecordId: cleanValue(record.sourceRecordId),
+    year: record.year || null,
+    lowerYear: record.lowerYear || null,
+    upperYear: record.upperYear || null,
+    pointYear: record.pointYear || null,
+    decade: cleanValue(record.decade || "unknown"),
+    title: cleanValue(record.title),
+    restaurant: cleanValue(record.venueText),
+    place: cleanValue(record.placeText),
+    transportMode: cleanValue(record.transportMode),
+    itemUrl: cleanValue(record.itemUrl || record.sourceUrl),
+    iiifManifestUrl: cleanValue(record.iiifManifestUrl),
+  };
+}
+
 function buildSourceCapabilities(evaluations, generatedAt) {
   const nodes = [];
   const edges = [];
@@ -253,6 +275,10 @@ function buildDishCounts({ menus, analytics, ontology, prices, enrichment }) {
   for (const record of prices.records || []) add(record.item, 1, "prices");
   for (const record of enrichmentRecords(enrichment, "dishMentions")) add(record.rawName || record.normalizedName, 1, `enrichment:${record.extractionMethod || "dish"}`);
   for (const record of enrichmentRecords(enrichment, "priceObservations")) add(record.rawName || record.normalizedName, 1, `enrichment:${record.extractionMethod || "price"}`);
+  for (const record of enrichmentRecords(enrichment, "externalMenuRecords")) {
+    for (const dish of record.dishHints || []) add(dish.rawName || dish.normalizedName, 1, `external:${record.sourceId || record.sourceKey || "menu"}`);
+    for (const price of record.priceObservations || []) add(price.rawName || price.item || price.normalizedName, 1, `external:${record.sourceId || record.sourceKey || "price"}`);
+  }
   for (const menu of menus) for (const dish of (menu.topDishes || []).slice(0, 8)) add(dish, 1, "menu-top-dishes");
   for (const category of ["dishes", "ingredients", "beverages"]) {
     for (const term of ontology.categories?.[category] || []) add(term.term, term.count || 1, `ontology:${category}`);
@@ -272,7 +298,8 @@ function priceEnhancementKey(record) {
 }
 
 function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichment }) {
-  const menuIds = new Set(menus.map(recordUid));
+  const externalMenus = enrichmentRecords(enrichment, "externalMenuRecords");
+  const menuIds = new Set([...menus.map(recordUid), ...externalMenus.map((record) => cleanValue(record.menuId || record.id)).filter(Boolean)]);
   const overlays = {};
   const evidenceIndex = {
     version: VERSION,
@@ -282,6 +309,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     dishMentions: {},
     imageFeatures: {},
     sourceProbes: {},
+    externalMenus: {},
   };
   const dishNamesByMenu = new Map();
   const ingredientTagsByMenu = new Map();
@@ -318,6 +346,130 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       imageFeatureIds: [],
     };
     overlays[uid].counts.dishMentions = initialDishes.size;
+  }
+
+  for (const record of externalMenus) {
+    const uid = cleanValue(record.menuId || record.id);
+    if (!uid) continue;
+    const dishMentions = record.dishMentions || [];
+    const priceObservations = record.priceObservations || [];
+    const ingredientTags = new Set([
+      ...(record.ingredientTags || []),
+      ...dishMentions.flatMap((dish) => dish.ingredientTags || []),
+      ...priceObservations.flatMap((price) => price.ingredientTags || []),
+    ].map(cleanValue).filter(Boolean));
+    overlays[uid] = {
+      menuId: uid,
+      sourceId: cleanValue(record.sourceId),
+      sourceKey: cleanValue(record.sourceKey || "external"),
+      external: true,
+      counts: {
+        dishMentions: dishMentions.length || (record.dishHints || []).length,
+        priceObservations: priceObservations.length,
+        dateEvidence: record.lowerYear || record.year || record.pointYear ? 1 : 0,
+        matches: 0,
+        ontologyTerms: 0,
+        ingredientTags: ingredientTags.size,
+        imageFeatures: record.iiifManifestUrl || record.thumbnailUrl ? 1 : 0,
+      },
+      topDishes: (record.dishHints || dishMentions || []).slice(0, 3).map((dish) => cleanValue(dish.rawName || dish.normalizedName)).filter(Boolean),
+      ingredientTags: [...ingredientTags].sort().slice(0, 8),
+      dishMentionIds: [],
+      priceObservationIds: [],
+      dateEvidenceIds: [],
+      matchIds: [],
+      imageFeatureIds: [],
+    };
+    evidenceIndex.externalMenus[uid] = {
+      id: uid,
+      sourceId: cleanValue(record.sourceId),
+      sourceKey: cleanValue(record.sourceKey || "external"),
+      sourceRecordId: cleanValue(record.sourceRecordId),
+      title: cleanValue(record.title),
+      dateText: cleanValue(record.dateText),
+      year: record.year || null,
+      lowerYear: record.lowerYear || null,
+      upperYear: record.upperYear || null,
+      pointYear: record.pointYear || null,
+      decade: cleanValue(record.decade || "unknown"),
+      transportMode: cleanValue(record.transportMode),
+      placeText: cleanValue(record.placeText),
+      venueText: cleanValue(record.venueText),
+      dishHints: overlays[uid].topDishes,
+      ingredientTags: overlays[uid].ingredientTags,
+      priceObservationCount: priceObservations.length,
+      sourceUrl: cleanValue(record.sourceUrl || record.itemUrl),
+      iiifManifestUrl: cleanValue(record.iiifManifestUrl),
+    };
+    if (overlays[uid].counts.dateEvidence) {
+      const id = dateEvidenceNodeId({ menuId: uid });
+      evidenceIndex.dateEvidence[id] = {
+        id,
+        menuId: uid,
+        lower: record.lowerYear ? `${record.lowerYear}-01-01` : null,
+        upper: record.upperYear ? `${record.upperYear}-12-31` : null,
+        centerYear: record.year || record.pointYear || null,
+        decade: cleanValue(record.decade || "unknown"),
+        confidence: record.dateConfidence || "C",
+        methods: ["external_source_date_created"],
+        reviewStatus: "source_metadata",
+        sourceFile: "enrichment/external-menu-records.json",
+        evidence: [
+          {
+            method: "date_created",
+            source: cleanValue(record.sourceId || record.sourceKey),
+            effect: cleanValue(record.dateText),
+            confidence: record.dateConfidence || "C",
+          },
+        ],
+      };
+      overlays[uid].dateEvidenceIds.push(id);
+    }
+    for (const dish of dishMentions) {
+      if (overlays[uid].dishMentionIds.length < 3 && dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX) {
+        overlays[uid].dishMentionIds.push(dish.id);
+        dishEvidenceIndexed += 1;
+        evidenceIndex.dishMentions[dish.id] = {
+          id: dish.id,
+          menuId: uid,
+          sourceId: cleanValue(dish.sourceId || record.sourceId),
+          rawName: cleanValue(dish.rawName),
+          normalizedName: cleanValue(dish.normalizedName),
+          dishType: cleanValue(dish.dishType),
+          ingredientTags: (dish.ingredientTags || []).slice(0, 8).map(cleanValue),
+          sectionName: cleanValue(dish.sectionName),
+          confidence: Number(dish.confidence || 0),
+          method: cleanValue(dish.extractionMethod || "external"),
+          sourceFile: "enrichment/external-menu-records.json",
+        };
+      }
+    }
+    for (const [priceIndex, price] of priceObservations.entries()) {
+      const id = priceNodeId(price, `external:${priceIndex}`);
+      if (overlays[uid].priceObservationIds.length < 6) overlays[uid].priceObservationIds.push(id);
+      evidenceIndex.priceObservations[id] = {
+        id,
+        menuId: uid,
+        sourceId: cleanValue(price.sourceId || record.sourceId),
+        item: cleanValue(price.item || price.rawName),
+        rawPrice: cleanValue(price.rawPrice || price.rawPriceText),
+        amount: Number.isFinite(Number(price.amount)) ? Number(price.amount) : null,
+        currency: cleanValue(price.currency || price.currencyCode),
+        year: price.year || record.year || record.pointYear || null,
+        confidence: cleanValue(price.confidence || "medium"),
+        dishType: cleanValue(price.dishType),
+        ingredientTags: (price.ingredientTags || []).slice(0, 8).map(cleanValue),
+        normalized: price.normalized
+          ? {
+              todayUsd: price.normalized.todayUsd ?? null,
+              relativeIndex: price.normalized.relativeIndex ?? null,
+              caveat: cleanValue(price.normalized.caveat),
+            }
+          : null,
+        sourceFile: "enrichment/external-menu-records.json",
+        external: true,
+      };
+    }
   }
 
   for (const record of enrichmentRecords(enrichment, "dishMentions")) {
@@ -550,12 +702,18 @@ function enrichmentDishesByMenu(enrichment) {
   return byMenu;
 }
 
+function externalMenuSourceNodeId(record) {
+  const sourceId = cleanValue(record.sourceId) || sourceIdForKey(record.sourceKey || "external");
+  return sourceNodeId(sourceId);
+}
+
 function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, ontology, analytics, evidenceIndex, overlays, enrichment, generatedAt }) {
   const coreNodes = new Map();
   const edges = [];
   const seenEdges = new Set();
   const menuIdSet = new Set();
   const coreMenuIds = selectCoreMenus(menus, overlays);
+  const externalMenus = enrichmentRecords(enrichment, "externalMenuRecords").slice(0, MAX_EXTERNAL_MENU_NODES);
   const dishCounts = buildDishCounts({ menus, analytics, ontology, prices, enrichment });
   const dishIds = new Set(dishCounts.map((dish) => dish.id));
   const enrichmentDishMap = enrichmentDishesByMenu(enrichment);
@@ -636,6 +794,112 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
     }
   }
 
+  for (const record of externalMenus) {
+    const uid = cleanValue(record.menuId || record.id);
+    if (!uid) continue;
+    menuIdSet.add(uid);
+    const sourceId = cleanValue(record.sourceId) || sourceIdForKey(record.sourceKey || "external");
+    addNode(
+      coreNodes,
+      node(menuNodeId(uid), "Menu", record.title || uid, record.sourceKey || sourceId, Number(record.confidence || 0.68), {
+        sourceFile: "enrichment/external-menu-records.json",
+        sourceRecordId: cleanValue(record.sourceRecordId),
+        sourceKey: cleanValue(record.sourceKey || "external"),
+        sourceId,
+      }, compactExternalMenu(record))
+    );
+    addEdge(
+      edges,
+      edge("HAS_MENU", externalMenuSourceNodeId(record), menuNodeId(uid), 0.82, Number(record.confidence || 0.68), {
+        sourceFile: "enrichment/external-menu-records.json",
+        sourceRecordId: cleanValue(record.sourceRecordId),
+        sourceId,
+      }),
+      seenEdges
+    );
+
+    const label = cleanValue(record.venueText || record.collectionTitle);
+    if (label) {
+      const venueId = venueNodeId(label, { city: record.placeText, state: "", country: record.country || "" });
+      addNode(
+        coreNodes,
+        node(venueId, "Venue", label, record.sourceKey || "external-menu-metadata", 0.52, {
+          sourceFile: "enrichment/external-menu-records.json",
+          sourceRecordId: cleanValue(record.sourceRecordId),
+          provisional: true,
+        }, {
+          place: cleanValue(record.placeText),
+          provisional: true,
+          transportMode: cleanValue(record.transportMode),
+        })
+      );
+      addEdge(
+        edges,
+        edge("SERVED_AT", menuNodeId(uid), venueId, 0.62, 0.52, {
+          sourceFile: "enrichment/external-menu-records.json",
+          sourceRecordId: cleanValue(record.sourceRecordId),
+          provisional: true,
+        }),
+        seenEdges
+      );
+    }
+
+    const externalDishCandidates = [
+      ...(record.dishMentions || []).map((dish) => ({
+        rawName: dish.rawName || dish.normalizedName,
+        method: dish.extractionMethod || "external_dish_mention",
+        confidence: Number(dish.confidence || 0.68),
+      })),
+      ...(record.dishHints || []).map((dish) => ({
+        rawName: dish.rawName || dish.normalizedName,
+        method: "external_dish_hint",
+        confidence: Number(dish.confidence || 0.58),
+      })),
+    ];
+    const seenDishIds = new Set();
+    for (const dish of externalDishCandidates) {
+      if (seenDishIds.size >= MAX_EXTERNAL_DISH_EDGES_PER_MENU) break;
+      const dishId = dishNodeId(dish.rawName);
+      if (!dishIds.has(dishId) || seenDishIds.has(dishId)) continue;
+      seenDishIds.add(dishId);
+      addEdge(
+        edges,
+        edge("MENTIONS_DISH", menuNodeId(uid), dishId, 0.66, dish.confidence, {
+          sourceFile: "enrichment/external-menu-records.json",
+          sourceRecordId: cleanValue(record.sourceRecordId),
+          extraction: dish.method,
+        }),
+        seenEdges
+      );
+    }
+
+    const termValues = [
+      ...(record.ingredientTags || []).map((term) => ({ category: "ingredients", term })),
+      record.transportMode ? { category: "styles", term: record.transportMode } : null,
+    ].filter(Boolean);
+    for (const term of termValues.slice(0, 10)) {
+      const termId = termNodeId(term);
+      addNode(
+        coreNodes,
+        node(termId, "Term", term.term, "external-menu-records", 0.66, {
+          sourceFile: "enrichment/external-menu-records.json",
+          sourceRecordId: cleanValue(record.sourceRecordId),
+        }, {
+          category: term.category,
+        })
+      );
+      addEdge(
+        edges,
+        edge("HAS_ONTOLOGY_TERM", menuNodeId(uid), termId, 0.48, 0.66, {
+          sourceFile: "enrichment/external-menu-records.json",
+          sourceRecordId: cleanValue(record.sourceRecordId),
+        }),
+        seenEdges
+      );
+      if (overlays[uid]) overlays[uid].counts.ontologyTerms += 1;
+    }
+  }
+
   for (const dish of dishCounts) {
     addNode(
       coreNodes,
@@ -654,7 +918,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
     addNode(
       coreNodes,
       node(id, "DateEvidence", `${record.confidence} ${record.decade || record.centerYear || "date evidence"}`, "date-estimates", dateConfidence(record), {
-        sourceFile: "date-estimates.json",
+        sourceFile: record.sourceFile || "date-estimates.json",
         sourceRecordId: record.menuId,
       }, {
         dateConfidence: record.confidence,
@@ -665,20 +929,21 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
     addEdge(
       edges,
       edge("HAS_DATE_EVIDENCE", menuNodeId(record.menuId), id, dateConfidence(record), dateConfidence(record), {
-        sourceFile: "date-estimates.json",
+        sourceFile: record.sourceFile || "date-estimates.json",
         sourceRecordId: record.menuId,
       }),
       seenEdges
     );
   }
 
-  for (const [index, [id, record]] of Object.entries(evidenceIndex.priceObservations).entries()) {
+  const priceEntries = Object.entries(evidenceIndex.priceObservations).sort(([, a], [, b]) => Number(Boolean(b.external)) - Number(Boolean(a.external)));
+  for (const [index, [id, record]] of priceEntries.entries()) {
     if (index >= MAX_CORE_PRICE_NODES) break;
     if (!menuIdSet.has(record.menuId)) continue;
     addNode(
       coreNodes,
       node(id, "PriceObservation", `${record.item || "Price"} ${record.rawPrice || ""}`.trim(), "prices", priceConfidence(record), {
-        sourceFile: "prices.json",
+        sourceFile: record.sourceFile || "prices.json",
         sourceRecordId: record.menuId,
       }, {
         item: record.item,
@@ -690,7 +955,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
     addEdge(
       edges,
       edge("HAS_PRICE", menuNodeId(record.menuId), id, 0.7, priceConfidence(record), {
-        sourceFile: "prices.json",
+        sourceFile: record.sourceFile || "prices.json",
         sourceRecordId: record.menuId,
       }),
       seenEdges
@@ -775,6 +1040,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       edges: edges.length,
       menus: menus.length,
       coreMenus: menuIdSet.size,
+      externalMenuNodes: externalMenus.length,
       sources: (evaluations.sources || []).length,
       dateEvidence: Object.keys(evidenceIndex.dateEvidence).length,
       priceObservationsIndexed: Object.keys(evidenceIndex.priceObservations).length,
@@ -801,7 +1067,7 @@ async function writeJson(name, payload) {
 
 async function buildGraphOverlay(options = {}) {
   const generatedAt = new Date().toISOString();
-  const [menusPayload, matches, analytics, prices, dateEstimates, ontology, evaluations, enrichmentStatus, dishMentions, enrichmentPrices, imageFeatures, sourceProbes] = await Promise.all([
+  const [menusPayload, matches, analytics, prices, dateEstimates, ontology, evaluations, enrichmentStatus, dishMentions, enrichmentPrices, imageFeatures, sourceProbes, externalMenuRecords] = await Promise.all([
     readJson(path.join(DATA_DIR, "menus.json"), { menus: [] }),
     readJson(path.join(DATA_DIR, "matches.json"), { relationships: [], matches: {} }),
     readJson(path.join(DATA_DIR, "analytics.json"), { topDishes: [] }),
@@ -814,6 +1080,7 @@ async function buildGraphOverlay(options = {}) {
     readJson(path.join(DATA_DIR, "enrichment", "price-observations.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "image-features.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),
+    readJson(path.join(DATA_DIR, "enrichment", "external-menu-records.json"), { records: [] }),
   ]);
 
   const evaluationErrors = graphContract.validateSourceEvaluations(evaluations);
@@ -826,6 +1093,7 @@ async function buildGraphOverlay(options = {}) {
     priceObservations: enrichmentPrices,
     imageFeatures,
     sourceProbes,
+    externalMenuRecords,
   };
   const sourceCapabilities = buildSourceCapabilities(evaluations, generatedAt);
   const sourceErrors = graphContract.validateGraph(sourceCapabilities, { maxBytes: SIZE_BUDGET_BYTES });
@@ -871,6 +1139,7 @@ async function buildGraphOverlay(options = {}) {
     dishMentions: Object.keys(evidenceIndex.dishMentions).length,
     imageFeatures: Object.keys(evidenceIndex.imageFeatures).length,
     sourceProbes: Object.keys(evidenceIndex.sourceProbes).length,
+    externalMenus: Object.keys(evidenceIndex.externalMenus).length,
   };
 
   const artifacts = {
@@ -892,11 +1161,26 @@ async function buildGraphOverlay(options = {}) {
       core: core.summary,
       evidence: evidenceIndex.summary,
       overlays: menuOverlays.summary,
+      externalMenus: {
+        records: enrichmentRecords(enrichment, "externalMenuRecords").length,
+        bySource: Object.fromEntries(
+          Object.entries(
+            enrichmentRecords(enrichment, "externalMenuRecords").reduce((acc, record) => {
+              const key = cleanValue(record.sourceId || record.sourceKey || "external");
+              acc[key] = (acc[key] || 0) + 1;
+              return acc;
+            }, {})
+          ).sort((a, b) => a[0].localeCompare(b[0]))
+        ),
+        dishMentions: enrichmentRecords(enrichment, "externalMenuRecords").reduce((sum, record) => sum + (record.dishMentions || []).length, 0),
+        priceObservations: enrichmentRecords(enrichment, "externalMenuRecords").reduce((sum, record) => sum + (record.priceObservations || []).length, 0),
+      },
       enrichment: {
         dishMentions: enrichmentRecords(enrichment, "dishMentions").length,
         priceObservations: enrichmentRecords(enrichment, "priceObservations").length,
         imageFeatures: enrichmentRecords(enrichment, "imageFeatures").length,
         sourceProbes: enrichmentRecords(enrichment, "sourceProbes").length,
+        externalMenuRecords: enrichmentRecords(enrichment, "externalMenuRecords").length,
         statusGeneratedAt: enrichmentStatus.finishedAt || enrichmentStatus.generatedAt || null,
       },
     },

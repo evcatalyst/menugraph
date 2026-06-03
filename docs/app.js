@@ -2541,6 +2541,7 @@ function graphSourceRows(graph) {
   const capabilityById = new Map(nodes.filter((node) => node.type === "Capability").map((node) => [node.id, node]));
   const probes = graph?.evidenceIndex?.sourceProbes || {};
   const sourceCounts = sourceRecordCounts();
+  const externalCounts = graph?.manifest?.summary?.externalMenus?.bySource || {};
   const edgesBySource = new Map();
   for (const edge of edges.filter((edge) => edge.type === "SUPPORTS_CAPABILITY")) {
     if (!edgesBySource.has(edge.from)) edgesBySource.set(edge.from, []);
@@ -2557,11 +2558,14 @@ function graphSourceRows(graph) {
       const sourceId = source.provenance?.sourceId || String(source.id || "").replace(/^source:/, "");
       const probe = probes[sourceId] || null;
       const ingestedCount = source.sourceKey ? sourceCounts.get(source.sourceKey) || 0 : 0;
+      const externalCount = Number(externalCounts[sourceId] || 0);
       const sampleItems = Array.isArray(probe?.sampleItems) ? probe.sampleItems : [];
-      const statusKind = ingestedCount ? "ingested" : probe ? "probed" : "evaluated";
-      const statusLabel = ingestedCount ? "Ingested" : probe ? "Probed" : "Evaluated";
+      const statusKind = ingestedCount ? "ingested" : externalCount ? "external" : probe ? "probed" : "evaluated";
+      const statusLabel = ingestedCount ? "Ingested" : externalCount ? "Graph Rows" : probe ? "Probed" : "Evaluated";
       const statusDetail = ingestedCount
         ? `${formatNumber(ingestedCount)} menu rows in static app`
+        : externalCount
+          ? `${formatNumber(externalCount)} compact external menu rows in graph`
         : probe?.publicItemCount
           ? `${formatNumber(probe.publicItemCount)} public items observed`
           : probe?.status
@@ -2585,11 +2589,13 @@ function graphSourceRows(graph) {
         sampleText,
         notes: ingestedCount
           ? "Row-level menu metadata is in the static app; graph overlays add dish, price, date, and match evidence where available."
+          : externalCount
+            ? "Derived external metadata is in the static graph overlay; raw images, OCR, and vectors remain out of public artifacts."
           : probe?.notes || "",
       };
     })
     .sort((a, b) => {
-      const rank = { ingested: 0, probed: 1, evaluated: 2 };
+      const rank = { ingested: 0, external: 1, probed: 2, evaluated: 3 };
       return rank[a.statusKind] - rank[b.statusKind] || b.weight - a.weight || b.scoreAvg - a.scoreAvg;
     });
 }

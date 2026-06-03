@@ -1,0 +1,389 @@
+const crypto = require("crypto");
+const fs = require("fs/promises");
+const path = require("path");
+const { cleanValue, normalizeText } = require("../docs/multisource");
+const { normalizePrice } = require("../docs/price-utils");
+const { dishTypeFor, ingredientTagsFor, normalizedDishName } = require("./local-enrichment");
+
+const ROOT_DIR = path.join(__dirname, "..");
+const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
+const OUTPUT_PATH = path.join(DATA_DIR, "enrichment", "external-menu-records.json");
+const SOURCE_ID = "northwestern_transport_menus";
+const SOURCE_KEY = "northwestern";
+const API_URL = "https://api.dc.library.northwestern.edu/api/v2/search";
+const VERSION = 1;
+
+const SOURCE_FIELDS = [
+  "id",
+  "title",
+  "date_created",
+  "work_type",
+  "thumbnail",
+  "iiif_manifest",
+  "description",
+  "subject",
+  "collection",
+  "creator",
+  "location",
+];
+
+function argValue(args, name, fallback = null) {
+  const prefix = `--${name}=`;
+  const match = args.find((arg) => arg.startsWith(prefix));
+  return match ? match.slice(prefix.length) : fallback;
+}
+
+function hasFlag(args, name) {
+  return args.includes(`--${name}`);
+}
+
+function stableId(prefix, parts) {
+  return `${prefix}:${crypto.createHash("sha1").update(parts.map((part) => cleanValue(part)).join("|")).digest("hex").slice(0, 16)}`;
+}
+
+function firstValue(value) {
+  if (Array.isArray(value)) return cleanValue(value[0]);
+  return cleanValue(value);
+}
+
+function values(value) {
+  if (Array.isArray(value)) return value.map(cleanValue).filter(Boolean);
+  const single = cleanValue(value);
+  return single ? [single] : [];
+}
+
+function subjectLabels(subjects = []) {
+  return (subjects || [])
+    .flatMap((subject) => [subject?.label, subject?.label_with_role, ...(subject?.variants || [])])
+    .map(cleanValue)
+    .filter(Boolean);
+}
+
+function locationLabels(locations = []) {
+  return (locations || []).map((location) => cleanValue(location?.label || location)).filter(Boolean);
+}
+
+function parseDateRange(...parts) {
+  const text = parts.map(cleanValue).filter(Boolean).join(" ");
+  const years = [...text.matchAll(/\b(18|19|20)\d{2}\b/g)].map((match) => Number(match[0]));
+  if (!years.length) {
+    return {
+      dateText: cleanValue(parts[0]),
+      year: null,
+      lowerYear: null,
+      upperYear: null,
+      decade: "unknown",
+      confidence: "X",
+    };
+  }
+  const lowerYear = Math.min(...years);
+  const upperYear = Math.max(...years);
+  const point = lowerYear === upperYear ? lowerYear : Math.round((lowerYear + upperYear) / 2);
+  return {
+    dateText: cleanValue(parts[0]) || String(point),
+    year: lowerYear === upperYear ? lowerYear : null,
+    lowerYear,
+    upperYear,
+    pointYear: point,
+    decade: `${Math.floor(point / 10) * 10}s`,
+    confidence: lowerYear === upperYear ? "A" : upperYear - lowerYear <= 10 ? "B" : "C",
+  };
+}
+
+function transportModeFor(text) {
+  const normalized = normalizeText(text);
+  if (/\b(airline|airlines|airways|aircraft|flight|business class|tokyo)\b/.test(normalized)) return "airline";
+  if (/\b(cruise|ship|steamship|ocean liner|steam ship)\b/.test(normalized)) return "ship";
+  if (/\b(railroad|railroads|railway|railways|dining car|penn central|new york central)\b/.test(normalized)) return "railroad";
+  return "transport";
+}
+
+function organizationFor({ title, subjects, collectionTitle }) {
+  const labels = subjectLabels(subjects);
+  const organization = labels.find((label) => /\b(company|railroad|railway|airlines?|airways?|transportation|steamship|line)\b/i.test(label));
+  if (organization) return organization;
+  const titlePrefix = cleanValue(title).split(/\bMenu\b/i)[0].replace(/,\s*$/, "");
+  return cleanValue(titlePrefix || collectionTitle);
+}
+
+function amountFromPrice(rawPrice) {
+  const match = cleanValue(rawPrice).match(/\$?\s*(\d+(?:\.\d{1,2})?)/);
+  const value = match ? Number(match[1]) : null;
+  return Number.isFinite(value) ? value : null;
+}
+
+function representativeDishText(description) {
+  const text = values(description).join(" ");
+  const match = text.match(/\bRepresentative dishes?:\s*(.+)$/i);
+  return cleanValue(match ? match[1] : "");
+}
+
+function representativeDishSegments(description) {
+  const text = representativeDishText(description);
+  if (!text) return [];
+  const segments = [];
+  const priced = /([^.;]+?)\s*\((\$[0-9]+(?:\.[0-9]{1,2})?)\)/g;
+  let match = priced.exec(text);
+  while (match) {
+    const rawName = cleanValue(match[1].replace(/^[.;,\s]+/, ""));
+    if (rawName) segments.push({ rawName, rawPriceText: match[2] });
+    match = priced.exec(text);
+  }
+  if (segments.length) return segments;
+  return text
+    .split(/[.;]/)
+    .map(cleanValue)
+    .filter(Boolean)
+    .slice(0, 8)
+    .map((rawName) => ({ rawName, rawPriceText: "" }));
+}
+
+function dishMentionFor(record, segment) {
+  const normalizedName = normalizedDishName(segment.rawName);
+  if (!normalizedName) return null;
+  return {
+    id: stableId("externaldish", [record.menuId, normalizedName, segment.rawPriceText]),
+    menuId: record.menuId,
+    sourceId: SOURCE_ID,
+    sourceKey: SOURCE_KEY,
+    rawName: cleanValue(segment.rawName),
+    normalizedName,
+    canonicalDishId: `dish:${normalizedName.replace(/\s+/g, "-").slice(0, 96)}`,
+    sectionName: "representative dishes",
+    dishType: dishTypeFor(segment.rawName),
+    ingredientTags: ingredientTagsFor(segment.rawName),
+    extractionMethod: "northwestern_description",
+    confidence: segment.rawPriceText ? 0.82 : 0.68,
+    provenance: {
+      sourceFile: "enrichment/external-menu-records.json",
+      sourceRecordId: record.sourceRecordId,
+      sourceApiUrl: API_URL,
+    },
+  };
+}
+
+function priceObservationFor(record, segment, references = {}) {
+  if (!segment.rawPriceText) return null;
+  const amount = amountFromPrice(segment.rawPriceText);
+  if (!Number.isFinite(amount)) return null;
+  const normalizedName = normalizedDishName(segment.rawName);
+  const priceRecord = {
+    id: stableId("externalprice", [record.menuId, normalizedName, segment.rawPriceText]),
+    menuId: record.menuId,
+    menuUid: record.menuId,
+    sourceId: SOURCE_ID,
+    sourceKey: SOURCE_KEY,
+    item: cleanValue(segment.rawName),
+    rawName: cleanValue(segment.rawName),
+    normalizedName,
+    rawPrice: segment.rawPriceText,
+    rawPriceText: segment.rawPriceText,
+    amount,
+    currency: "USD",
+    currencyCode: "USD",
+    year: record.year || record.pointYear || null,
+    confidence: "medium",
+    scale: "external-description-usd",
+    dishType: dishTypeFor(segment.rawName),
+    ingredientTags: ingredientTagsFor(segment.rawName),
+    extractionMethod: "northwestern_description_price",
+    provenance: {
+      sourceFile: "enrichment/external-menu-records.json",
+      sourceRecordId: record.sourceRecordId,
+      sourceApiUrl: API_URL,
+    },
+  };
+  priceRecord.normalized = normalizePrice(priceRecord, references);
+  return priceRecord;
+}
+
+function normalizeHit(hit, references = {}) {
+  const source = hit?._source || hit || {};
+  const sourceRecordId = cleanValue(source.id || hit?._id);
+  if (!sourceRecordId) return null;
+  const title = cleanValue(source.title) || "Untitled Northwestern menu";
+  const collectionTitle = cleanValue(source.collection?.title);
+  const dateText = firstValue(source.date_created);
+  const parsedDate = parseDateRange(dateText, title);
+  const subjects = subjectLabels(source.subject);
+  const places = locationLabels(source.location);
+  const descriptionText = values(source.description).join(" ");
+  const mode = transportModeFor([title, collectionTitle, subjects.join(" "), descriptionText].join(" "));
+  const menuId = `${SOURCE_KEY}:${sourceRecordId}`;
+  const baseRecord = {
+    id: menuId,
+    menuId,
+    sourceId: SOURCE_ID,
+    sourceKey: SOURCE_KEY,
+    sourceRecordId,
+    title,
+    dateText: parsedDate.dateText,
+    year: parsedDate.year,
+    lowerYear: parsedDate.lowerYear,
+    upperYear: parsedDate.upperYear,
+    pointYear: parsedDate.pointYear,
+    decade: parsedDate.decade,
+    dateConfidence: parsedDate.confidence,
+    workType: cleanValue(source.work_type),
+    collectionTitle,
+    itemUrl: `https://dc.library.northwestern.edu/items/${sourceRecordId}`,
+    iiifManifestUrl: cleanValue(source.iiif_manifest),
+    thumbnailUrl: cleanValue(source.thumbnail),
+    sourceUrl: `https://dc.library.northwestern.edu/items/${sourceRecordId}`,
+    sourceApiUrl: API_URL,
+    venueText: organizationFor({ title, subjects: source.subject, collectionTitle }),
+    placeText: places.join(", "),
+    country: subjects.find((label) => /^United States$/i.test(label)) ? "United States" : "",
+    transportMode: mode,
+    subjects: subjects.slice(0, 12),
+    descriptionSummary: cleanValue(descriptionText).slice(0, 420),
+    confidence: parsedDate.confidence === "A" ? 0.86 : parsedDate.confidence === "B" ? 0.74 : 0.58,
+    provenance: {
+      sourceFile: "enrichment/external-menu-records.json",
+      sourceRecordId,
+      sourceApiUrl: API_URL,
+      rightsNote: "Derived metadata only; no raw image, OCR, or IIIF payload copied into static graph artifacts.",
+    },
+  };
+  const segments = representativeDishSegments(source.description);
+  const dishMentions = segments.map((segment) => dishMentionFor(baseRecord, segment)).filter(Boolean);
+  const priceObservations = segments.map((segment) => priceObservationFor(baseRecord, segment, references)).filter(Boolean);
+  return {
+    ...baseRecord,
+    dishHints: dishMentions.map((dish) => ({
+      rawName: dish.rawName,
+      normalizedName: dish.normalizedName,
+      dishType: dish.dishType,
+      ingredientTags: dish.ingredientTags,
+      confidence: dish.confidence,
+    })),
+    ingredientTags: [...new Set(dishMentions.flatMap((dish) => dish.ingredientTags))].sort(),
+    priceObservations,
+    dishMentions,
+  };
+}
+
+async function readJson(relativePath, fallback) {
+  try {
+    return JSON.parse(await fs.readFile(path.join(DATA_DIR, relativePath), "utf8"));
+  } catch (error) {
+    return fallback;
+  }
+}
+
+async function writeJson(filePath, payload) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, `${JSON.stringify(payload)}\n`, "utf8");
+}
+
+async function fetchNorthwesternRecords(options) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "MenuGraph bounded metadata connector; derived metadata only",
+      },
+      body: JSON.stringify({
+        _source: SOURCE_FIELDS,
+        size: options.limit,
+        query: { match: { all_text: options.query } },
+      }),
+    });
+    if (!response.ok) throw new Error(`Northwestern API returned HTTP ${response.status}`);
+    return response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function totalHits(payload) {
+  return payload?.pagination?.total_hits ?? payload?.hits?.total?.value ?? payload?.total ?? null;
+}
+
+async function buildNorthwesternSource(options = {}) {
+  const startedAt = new Date().toISOString();
+  const [cpiUs, cpiCountry] = await Promise.all([
+    readJson("reference/cpi-us.json", {}),
+    readJson("reference/cpi-country.json", {}),
+  ]);
+  const references = { cpiUs, cpiCountry };
+  const payload = options.payload || (await fetchNorthwesternRecords(options));
+  const hits = payload.data || payload.hits?.hits || [];
+  const records = hits.map((hit) => normalizeHit(hit, references)).filter(Boolean);
+  const generatedAt = new Date().toISOString();
+  const dishMentions = records.flatMap((record) => record.dishMentions || []);
+  const priceObservations = records.flatMap((record) => record.priceObservations || []);
+  const output = {
+    version: VERSION,
+    generatedAt,
+    sourceId: SOURCE_ID,
+    sourceKey: SOURCE_KEY,
+    query: options.query,
+    sourceApiUrl: API_URL,
+    summary: {
+      total: records.length,
+      totalHits: totalHits(payload),
+      dishMentions: dishMentions.length,
+      priceObservations: priceObservations.length,
+      withDates: records.filter((record) => record.lowerYear).length,
+      withIiif: records.filter((record) => record.iiifManifestUrl).length,
+      withDishHints: records.filter((record) => record.dishHints.length).length,
+      transportModes: countBy(records, (record) => record.transportMode),
+      ingredientTags: countBy(dishMentions.flatMap((record) => record.ingredientTags.map((tag) => ({ tag }))), (record) => record.tag),
+      startedAt,
+      finishedAt: generatedAt,
+    },
+    records,
+  };
+  if (!options.dryRun) await writeJson(OUTPUT_PATH, output);
+  return output;
+}
+
+function countBy(records, getter) {
+  const counts = new Map();
+  for (const record of records || []) {
+    const key = getter(record) || "unknown";
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return Object.fromEntries([...counts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
+}
+
+function optionsFromArgs(args = process.argv.slice(2)) {
+  return {
+    limit: Math.min(500, Math.max(1, Number(argValue(args, "limit", "120")) || 120)),
+    query: cleanValue(argValue(args, "query", "menu transportation dining")),
+    timeoutMs: Math.max(5000, Number(argValue(args, "timeout-ms", "30000")) || 30000),
+    dryRun: hasFlag(args, "dry-run"),
+  };
+}
+
+async function main() {
+  const output = await buildNorthwesternSource(optionsFromArgs());
+  console.log(
+    [
+      `Wrote ${output.summary.total.toLocaleString()} Northwestern external menu records`,
+      `${output.summary.dishMentions.toLocaleString()} dish mentions`,
+      `${output.summary.priceObservations.toLocaleString()} price observations`,
+    ].join(", ")
+  );
+}
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  buildNorthwesternSource,
+  normalizeHit,
+  optionsFromArgs,
+  parseDateRange,
+  representativeDishSegments,
+  transportModeFor,
+};
