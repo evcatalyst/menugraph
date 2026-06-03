@@ -83,6 +83,7 @@ function candidateFromFile(cacheDir, filePath, kind) {
 function collectPruneCandidates(options = {}) {
   const cacheDir = path.resolve(options.cacheDir || DEFAULT_CACHE_DIR);
   const pruneTranscripts = options.pruneTranscripts !== false;
+  const pruneOcrImages = options.pruneOcrImages !== false;
   const pruneLogs = options.pruneLogs !== false;
   const keepLogs = Math.max(0, Number.isFinite(options.keepLogs) ? options.keepLogs : 5);
   const candidates = [];
@@ -91,6 +92,14 @@ function collectPruneCandidates(options = {}) {
     const transcriptsDir = path.join(cacheDir, "transcripts");
     for (const filePath of walkFiles(transcriptsDir)) {
       const candidate = candidateFromFile(cacheDir, filePath, "transcript");
+      if (candidate) candidates.push(candidate);
+    }
+  }
+
+  if (pruneOcrImages) {
+    const ocrImagesDir = path.join(cacheDir, "ocr-images");
+    for (const filePath of walkFiles(ocrImagesDir)) {
+      const candidate = candidateFromFile(cacheDir, filePath, "ocr_image");
       if (candidate) candidates.push(candidate);
     }
   }
@@ -128,8 +137,10 @@ function summarizeCandidates(cacheDir, candidates, dryRun, bytesBefore, bytesAft
     formattedBytesDeleted: formatBytes(dryRun ? 0 : bytesDeleted),
     formattedBytesMatched: formatBytes(bytesDeleted),
     transcriptsMatched: byKind.transcript || 0,
+    ocrImagesMatched: byKind.ocr_image || 0,
     logsMatched: byKind.overnight_log || 0,
     transcriptsDeleted: dryRun ? 0 : byKind.transcript || 0,
+    ocrImagesDeleted: dryRun ? 0 : byKind.ocr_image || 0,
     logsDeleted: dryRun ? 0 : byKind.overnight_log || 0,
     bytesBefore,
     bytesAfter,
@@ -162,6 +173,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     cacheDir: path.resolve(argValue(args, "cache-dir", DEFAULT_CACHE_DIR)),
     dryRun: hasFlag(args, "dry-run"),
     pruneTranscripts: !hasFlag(args, "no-transcripts"),
+    pruneOcrImages: !hasFlag(args, "no-ocr-images"),
     pruneLogs: !hasFlag(args, "no-logs"),
     keepLogs: Math.max(0, Number(argValue(args, "keep-logs", "5")) || 0),
   };

@@ -207,6 +207,15 @@ assert(pricedNyplOverlay, "expected an NYPL menu with dish and price overlay");
 assert(pricedNyplOverlay.topDishes.length > 0, "NYPL overlay should expose top dish summaries");
 assert(evidenceIndex.priceObservations[pricedNyplOverlay.priceObservationIds[0]], "NYPL price overlay should resolve to evidence index");
 
+const ocrPriceOverlay = Object.values(overlayRecords).find((record) =>
+  (record.priceObservationIds || []).some((id) => evidenceIndex.priceObservations[id]?.method === "local_vision_ocr_price")
+);
+assert(ocrPriceOverlay, "expected local Vision OCR prices to resolve through graph overlays");
+assert(
+  (ocrPriceOverlay.dishMentionIds || []).some((id) => evidenceIndex.dishMentions[id]?.method === "local_vision_ocr_dish"),
+  "expected local Vision OCR dish evidence to resolve through graph overlays"
+);
+
 assert(
   core.edges.some((edge) => edge.type === "MATCHES_MENU"),
   "core graph should expose cross-source MATCHES_MENU edges"

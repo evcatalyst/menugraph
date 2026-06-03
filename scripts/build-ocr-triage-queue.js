@@ -28,8 +28,16 @@ function stableId(prefix, parts) {
   return `${prefix}:${crypto.createHash("sha1").update(parts.map((part) => cleanValue(part)).join("|")).digest("hex").slice(0, 16)}`;
 }
 
+function localOcrEngine() {
+  if (spawnSync("sh", ["-lc", "command -v tesseract >/dev/null 2>&1"], { stdio: "ignore" }).status === 0) return "tesseract";
+  const swiftVision =
+    process.platform === "darwin" &&
+    spawnSync("sh", ["-lc", "test -x /usr/bin/swift && test -d /System/Library/Frameworks/Vision.framework"], { stdio: "ignore" }).status === 0;
+  return swiftVision ? "macos_vision" : null;
+}
+
 function localOcrAvailable() {
-  return spawnSync("sh", ["-lc", "command -v tesseract >/dev/null 2>&1"], { stdio: "ignore" }).status === 0;
+  return Boolean(localOcrEngine());
 }
 
 function asArray(value) {
@@ -359,7 +367,7 @@ async function buildOcrTriageQueue(options = {}) {
       name: "ocr_triage_queue_builder",
       version: "0.1.0",
       localOcrAvailable: Boolean(localOcr),
-      localOcrEngine: localOcr ? "tesseract" : null,
+      localOcrEngine: localOcr ? localOcrEngine() || "local_ocr" : null,
     },
     policy: {
       localFirst: true,
@@ -407,6 +415,8 @@ module.exports = {
   candidateForRecord,
   difficultyScoreFor,
   expectedYield,
+  localOcrAvailable,
+  localOcrEngine,
   routeForCandidate,
   summarize,
   tierForDifficulty,

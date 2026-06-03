@@ -29,6 +29,7 @@ function run() {
   try {
     writeFile(path.join(cacheDir, "transcripts", "cia_1.txt"), "soups\nconsomme royal\n");
     writeFile(path.join(cacheDir, "transcripts", "nested", "cia_2.txt"), "lobster 1.25\n");
+    writeFile(path.join(cacheDir, "ocr-images", "page-1.jpg"), "temporary image bytes\n");
     writeFile(path.join(cacheDir, "overnight-status.json"), "{}\n");
     writeFile(path.join(cacheDir, "overnight-current.json"), "{}\n");
     writeFile(path.join(cacheDir, "manual-note.txt"), "preserve\n");
@@ -39,23 +40,28 @@ function run() {
 
     const candidates = collectPruneCandidates({ cacheDir, keepLogs: 2 });
     assert.strictEqual(candidates.filter((candidate) => candidate.kind === "transcript").length, 2);
+    assert.strictEqual(candidates.filter((candidate) => candidate.kind === "ocr_image").length, 1);
     assert.strictEqual(candidates.filter((candidate) => candidate.kind === "overnight_log").length, 3);
     assert(!candidates.some((candidate) => candidate.relativePath === "overnight-status.json"));
     assert(!candidates.some((candidate) => candidate.relativePath === "overnight-current.json"));
 
     const dryRun = pruneCache({ cacheDir, keepLogs: 2, dryRun: true });
     assert.strictEqual(dryRun.filesDeleted, 0);
-    assert.strictEqual(dryRun.filesMatched, 5);
+    assert.strictEqual(dryRun.filesMatched, 6);
     assert.strictEqual(dryRun.transcriptsMatched, 2);
+    assert.strictEqual(dryRun.ocrImagesMatched, 1);
     assert.strictEqual(dryRun.logsMatched, 3);
     assert.strictEqual(exists(path.join(cacheDir, "transcripts", "cia_1.txt")), true);
+    assert.strictEqual(exists(path.join(cacheDir, "ocr-images", "page-1.jpg")), true);
 
     const summary = pruneCache({ cacheDir, keepLogs: 2 });
-    assert.strictEqual(summary.filesDeleted, 5);
+    assert.strictEqual(summary.filesDeleted, 6);
     assert.strictEqual(summary.transcriptsDeleted, 2);
+    assert.strictEqual(summary.ocrImagesDeleted, 1);
     assert.strictEqual(summary.logsDeleted, 3);
     assert.strictEqual(exists(path.join(cacheDir, "transcripts", "cia_1.txt")), false);
     assert.strictEqual(exists(path.join(cacheDir, "transcripts", "nested", "cia_2.txt")), false);
+    assert.strictEqual(exists(path.join(cacheDir, "ocr-images", "page-1.jpg")), false);
     assert.strictEqual(exists(path.join(cacheDir, "overnight-status.json")), true);
     assert.strictEqual(exists(path.join(cacheDir, "overnight-current.json")), true);
     assert.strictEqual(exists(path.join(cacheDir, "manual-note.txt")), true);
@@ -63,10 +69,11 @@ function run() {
     assert.strictEqual(exists(path.join(cacheDir, "overnight-2026-06-05.log")), true);
     assert.strictEqual(exists(path.join(cacheDir, "overnight-2026-06-01.log")), false);
 
-    const options = optionsFromArgs(["--cache-dir=/tmp/example", "--dry-run", "--no-logs", "--keep-logs=12"]);
+    const options = optionsFromArgs(["--cache-dir=/tmp/example", "--dry-run", "--no-logs", "--no-ocr-images", "--keep-logs=12"]);
     assert.strictEqual(options.cacheDir, "/tmp/example");
     assert.strictEqual(options.dryRun, true);
     assert.strictEqual(options.pruneLogs, false);
+    assert.strictEqual(options.pruneOcrImages, false);
     assert.strictEqual(options.keepLogs, 12);
 
     console.log("prune enrichment cache tests passed");

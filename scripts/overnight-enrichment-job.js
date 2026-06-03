@@ -13,6 +13,7 @@ const { buildUwSource } = require("./uw-source");
 const { buildDenverSource } = require("./denver-source");
 const { buildCornellSource } = require("./cornell-source");
 const { buildOcrTriageQueue } = require("./build-ocr-triage-queue");
+const { buildLocalVisionOcrEnrichment } = require("./local-vision-ocr-enrichment");
 const { retagEnrichment } = require("./retag-enrichment");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -175,6 +176,35 @@ async function runExternalImageAssessment(args) {
   return assessExternalImages({ timeoutMs, dryRun, limit, sources: [], refresh: hasFlag(args, "refresh-external-images") });
 }
 
+async function runLocalOcrEnrichment(args) {
+  if (!hasFlag(args, "run-local-ocr")) {
+    return {
+      skipped: true,
+      reason: "Pass --run-local-ocr with --local-ocr-limit to fetch bounded images and run macOS Vision OCR.",
+    };
+  }
+
+  const limit = Math.max(1, Number(argValue(args, "local-ocr-limit", "25")) || 25);
+  const options = {
+    limit,
+    batch: argValue(args, "local-ocr-batch", "phase1"),
+    source: argValue(args, "local-ocr-source", "all"),
+    tier: argValue(args, "local-ocr-tier", "all"),
+    pagesPerMenu: Math.max(1, Number(argValue(args, "local-ocr-pages-per-menu", "1")) || 1),
+    imageWidth: Math.max(800, Number(argValue(args, "local-ocr-image-width", "1400")) || 1400),
+    requestTimeoutMs: Math.max(5000, Number(argValue(args, "local-ocr-timeout-ms", argValue(args, "external-timeout-ms", "30000"))) || 30000),
+    ocrTimeoutMs: Math.max(10000, Number(argValue(args, "local-ocr-engine-timeout-ms", "90000")) || 90000),
+    maxDishMentionsPerMenu: Math.max(10, Number(argValue(args, "local-ocr-max-dish-mentions", "120")) || 120),
+    refresh: hasFlag(args, "local-ocr-refresh"),
+    refreshImages: hasFlag(args, "local-ocr-refresh-images"),
+    keepImages: hasFlag(args, "local-ocr-keep-images"),
+    dryRun: hasFlag(args, "dry-run"),
+    onProgress: (message) => console.log(`[${timestamp()}] ${message}`),
+  };
+  console.log(`[${timestamp()}] Running local Vision OCR enrichment with limit=${limit}`);
+  return buildLocalVisionOcrEnrichment(options);
+}
+
 async function main() {
   const args = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ARGS;
   const options = optionsFromArgs(args);
@@ -257,7 +287,7 @@ async function main() {
 
   await writeStatus({
     status: "running",
-    phase: "graph-build",
+    phase: "local-vision-ocr",
     pid: process.pid,
     args,
     enrichmentSummary: enrichment.status.summary,
@@ -265,6 +295,33 @@ async function main() {
     externalImageAssessment,
     retagged,
     ocrTriage: ocrTriage.summary,
+  });
+
+  const localOcr = await runLocalOcrEnrichment(args);
+  if (localOcr.skipped) {
+    console.log(`[${timestamp()}] Local Vision OCR skipped: ${localOcr.reason}`);
+  } else {
+    console.log(`[${timestamp()}] Local Vision OCR complete: ${JSON.stringify(localOcr.summary)}`);
+  }
+
+  const postOcrRetagged = localOcr.skipped ? retagged : await retagEnrichment({ dryRun: hasFlag(args, "dry-run") });
+  if (!localOcr.skipped) {
+    console.log(
+      `[${timestamp()}] Post-OCR retag complete: ${JSON.stringify({ taxonomyVersion: postOcrRetagged.taxonomyVersion, externalSources: postOcrRetagged.externalSources.length })}`
+    );
+  }
+
+  await writeStatus({
+    status: "running",
+    phase: "graph-build",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+    externalSources,
+    externalImageAssessment,
+    retagged: postOcrRetagged,
+    ocrTriage: ocrTriage.summary,
+    localOcr: localOcr.summary || localOcr,
   });
 
   const graph = await buildGraphOverlay();
@@ -279,8 +336,9 @@ async function main() {
     enrichmentSummary: enrichment.status.summary,
     externalSources,
     externalImageAssessment,
-    retagged,
+    retagged: postOcrRetagged,
     ocrTriage: ocrTriage.summary,
+    localOcr: localOcr.summary || localOcr,
     graphSummary: graph.manifest.summary,
   });
 }

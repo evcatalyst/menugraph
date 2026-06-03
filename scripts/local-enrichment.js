@@ -872,6 +872,7 @@ module.exports = {
   dishTypeFor,
   ingredientTagsFor,
   metadataDishMentions,
+  enrichmentPriceObservation,
   normalizedDishName,
   optionsFromArgs,
   parseImageDimensions,

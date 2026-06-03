@@ -600,9 +600,10 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       tagSet.add(cleanValue(tag));
       ingredientTagsByMenu.set(uid, tagSet);
     }
-    if (overlay.dishMentionIds.length < 2 && dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX) {
+    const isOcrDish = record.extractionMethod === "local_vision_ocr_dish";
+    if (overlay.dishMentionIds.length < 2 && (isOcrDish || dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX)) {
       overlay.dishMentionIds.push(record.id);
-      dishEvidenceIndexed += 1;
+      if (!isOcrDish) dishEvidenceIndexed += 1;
       evidenceIndex.dishMentions[record.id] = {
         id: record.id,
         menuId: uid,
@@ -612,6 +613,38 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         ingredientTags: (record.ingredientTags || []).slice(0, 8).map(cleanValue),
         sectionName: cleanValue(record.sectionName),
         confidence: Number(record.confidence || 0),
+        method: cleanValue(record.extractionMethod),
+      };
+    }
+  }
+
+  for (const record of enrichmentRecords(enrichment, "priceObservations")) {
+    if (record.extractionMethod !== "local_vision_ocr_price") continue;
+    const uid = cleanValue(record.menuId);
+    if (!menuIds.has(uid)) continue;
+    const overlay = overlays[uid];
+    overlay.counts.priceObservations += 1;
+    if (overlays[uid].priceObservationIds.length < 6) {
+      const id = cleanValue(record.id);
+      overlays[uid].priceObservationIds.push(id);
+      evidenceIndex.priceObservations[id] = {
+        id,
+        menuId: uid,
+        item: cleanValue(record.rawName || record.normalizedName),
+        rawPrice: cleanValue(record.rawPriceText || record.amount),
+        amount: Number.isFinite(Number(record.amount)) ? Number(record.amount) : null,
+        currency: cleanValue(record.currencyCode),
+        year: record.year || null,
+        confidence: cleanValue(record.confidence || "unknown"),
+        dishType: cleanValue(record.dishType),
+        ingredientTags: (record.ingredientTags || []).slice(0, 8).map(cleanValue),
+        normalized: record.normalized
+          ? {
+              todayUsd: record.normalized.todayUsd ?? null,
+              relativeIndex: record.normalized.relativeIndex ?? null,
+              caveat: cleanValue(record.normalized.caveat),
+            }
+          : null,
         method: cleanValue(record.extractionMethod),
       };
     }
