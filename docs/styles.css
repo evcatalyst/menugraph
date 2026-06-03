@@ -1540,6 +1540,73 @@ body.chat-expanded .chat-form {
   fill: var(--gold);
 }
 
+.flow-canvas {
+  fill: rgba(255, 255, 255, 0.58);
+  stroke: rgba(47, 58, 63, 0.08);
+}
+
+.flow-box,
+.flow-metric-box {
+  fill: rgba(255, 253, 248, 0.9);
+  stroke: rgba(90, 104, 112, 0.22);
+  stroke-width: 1;
+}
+
+.flow-box--strong {
+  fill: rgba(49, 111, 115, 0.1);
+  stroke: rgba(49, 111, 115, 0.45);
+}
+
+.flow-connector {
+  stroke: rgba(47, 58, 63, 0.34);
+  stroke-width: 1.6;
+}
+
+.flow-title {
+  fill: var(--ink);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.flow-box-title,
+.flow-source-label {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.flow-box-metric,
+.flow-metric {
+  fill: #24363b;
+  font-weight: 850;
+}
+
+.flow-box-metric {
+  font-size: 18px;
+}
+
+.flow-metric {
+  font-size: 17px;
+}
+
+.flow-muted {
+  fill: var(--muted);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.flow-bar-bg {
+  fill: rgba(47, 58, 63, 0.08);
+}
+
+.flow-bar-fill {
+  fill: var(--teal);
+}
+
+.flow-bar-fill--secondary {
+  fill: var(--gold);
+}
+
 .tooltip {
   position: absolute;
   pointer-events: none;

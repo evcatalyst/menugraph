@@ -22,6 +22,8 @@ const state = {
   dateEstimateByMenu: new Map(),
   includeEstimatedDates: true,
   matches: null,
+  graphOverlay: null,
+  graphOverlayByMenu: new Map(),
   ontologyCategory: "ingredients",
   priceMode: "todayUsd",
   priceCurrency: null,
@@ -410,6 +412,7 @@ async function loadMenus(refresh = false) {
     if (els.priceStatus) els.priceStatus.textContent = "offline";
   });
   loadMatches().catch(() => {});
+  loadGraphOverlay().catch(() => {});
 }
 
 async function loadOntology(refresh = false) {
@@ -470,6 +473,22 @@ async function loadDateEstimates(refresh = false) {
 async function loadMatches(refresh = false) {
   const payload = await getJson(`/api/matches/__index__${refresh ? "?refresh=1" : ""}`).catch(() => null);
   state.matches = payload?.relationships ? payload : state.matches;
+}
+
+async function loadGraphOverlay(refresh = false) {
+  const graphOverlay = await getJson(`/api/graph${refresh ? "?refresh=1" : ""}`);
+  state.graphOverlay = graphOverlay;
+  state.graphOverlayByMenu = new Map();
+  const records = graphOverlay?.menuOverlays?.records || {};
+  for (const [menuId, overlay] of Object.entries(records)) {
+    state.graphOverlayByMenu.set(menuId, overlay);
+    const ciaMatch = menuId.match(/^cia:(\d+)$/);
+    if (ciaMatch) state.graphOverlayByMenu.set(ciaMatch[1], overlay);
+  }
+  if (state.activeLens === "graph") {
+    describeGraphOverlay();
+    renderViz();
+  }
 }
 
 function filteredMenus(options = {}) {
@@ -1924,6 +1943,7 @@ function renderViz() {
     place: renderBarLens,
     type: renderTypeLens,
     lineage: renderLineageLens,
+    graph: renderGraphLens,
     ontology: renderOntologyLens,
     prices: renderPriceLens,
   };
@@ -1936,6 +1956,7 @@ function lensCopy() {
     place: ["Place Lens", "Where Dining Records Cluster"],
     type: ["Type Lens", "Formats, Courses, and Occasions"],
     lineage: ["Lineage Lens", "Collectors and Collection Memory"],
+    graph: ["Graph Lens", "Application Structure And Data Flow"],
     ontology: ["Food Lens", `${categoryLabels[state.ontologyCategory]} Across Time`],
     prices: ["Price Lens", priceLensTitle()],
     chat: ["Ask Lens", "Ask Across The MenuGraph"],
@@ -2282,6 +2303,241 @@ function renderPriceLens(svg, width, height) {
   const note = svgEl("text", { x: width - pad.right, y: pad.top - 16, "text-anchor": "end", class: "price-note" });
   note.textContent = `${records.length.toLocaleString()} observations; low confidence hidden until selected`;
   svg.appendChild(note);
+}
+
+function renderGraphLens(svg, width, height) {
+  lensCopy();
+  const graph = state.graphOverlay;
+  if (!graph?.manifest) {
+    const text = svgEl("text", { x: width / 2, y: height / 2, "text-anchor": "middle", class: "axis-label" });
+    text.textContent = "Graph overlay loading";
+    svg.appendChild(text);
+    return;
+  }
+
+  const summary = graph.manifest.summary || {};
+  const sourceSummary = summary.sourceCapabilities || {};
+  const core = summary.core || {};
+  const evidence = summary.evidence || {};
+  const overlays = summary.overlays || {};
+  const pad = { top: 26, right: 24, bottom: 24, left: 24 };
+  const compactMode = width < 720;
+
+  svg.appendChild(svgEl("rect", { x: 12, y: 12, width: width - 24, height: height - 24, rx: 8, class: "flow-canvas" }));
+
+  const title = svgEl("text", { x: pad.left, y: pad.top + 2, class: "flow-title" });
+  title.textContent = "Static-first graph overlay";
+  svg.appendChild(title);
+  const subtitle = svgEl("text", { x: pad.left, y: pad.top + 21, class: "flow-muted" });
+  subtitle.textContent = `${formatNumber(summary.menus || state.allMenus.length)} menu rows now; ${formatNumber(sourceSummary.sources || 0)} evaluated sources available as capability knowledge.`;
+  svg.appendChild(subtitle);
+
+  const metricY = pad.top + 44;
+  const metricW = compactMode ? (width - pad.left - pad.right - 10) / 2 : (width - pad.left - pad.right - 30) / 4;
+  const metrics = [
+    { label: "Menus", value: formatNumber(summary.menus || state.allMenus.length), detail: sourceIngestLabel() },
+    { label: "Graph Nodes", value: formatNumber(core.nodes || 0), detail: `${formatNumber(core.edges || 0)} edges` },
+    {
+      label: "Evidence",
+      value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0)),
+      detail: "date / price / match",
+    },
+    { label: "Sources", value: formatNumber(sourceSummary.sources || 0), detail: `${formatNumber(sourceSummary.capabilities || 0)} capabilities` },
+  ];
+  metrics.forEach((metric, index) => {
+    const col = compactMode ? index % 2 : index;
+    const row = compactMode ? Math.floor(index / 2) : 0;
+    drawFlowMetric(svg, pad.left + col * (metricW + 10), metricY + row * 58, metricW, metric);
+  });
+
+  const flowY = metricY + (compactMode ? 132 : 78);
+  const flowH = compactMode ? 54 : 88;
+  const availableW = width - pad.left - pad.right;
+  const flowBoxes = [
+    {
+      title: "Source Knowledge",
+      metric: `${formatNumber(sourceSummary.sources || 0)} sources`,
+      detail: "Dataset rights, access, coverage, ML fit, recipes, Sifter",
+    },
+    {
+      title: "Static Snapshots",
+      metric: `${formatNumber(summary.menus || state.allMenus.length)} menus`,
+      detail: "menus, matches, analytics, prices, date estimates, ontology",
+    },
+    {
+      title: "Graph Builder",
+      metric: "contracted",
+      detail: "Valid IDs, provenance, compact edges, no raw OCR or vectors",
+    },
+    {
+      title: "Browser Overlay",
+      metric: `${formatNumber(overlays.menus || 0)} overlays`,
+      detail: "Detail evidence, Ask context, food lens links, flow view",
+    },
+  ];
+
+  if (compactMode) {
+    const boxW = availableW;
+    flowBoxes.forEach((box, index) => {
+      const y = flowY + index * (flowH + 14);
+      drawFlowBox(svg, pad.left, y, boxW, flowH, box, index === 2);
+      if (index < flowBoxes.length - 1) {
+        const x = pad.left + boxW / 2;
+        svg.appendChild(svgEl("line", { x1: x, y1: y + flowH, x2: x, y2: y + flowH + 14, class: "flow-connector" }));
+      }
+    });
+  } else {
+    const gap = 16;
+    const boxW = (availableW - gap * (flowBoxes.length - 1)) / flowBoxes.length;
+    flowBoxes.forEach((box, index) => {
+      const x = pad.left + index * (boxW + gap);
+      drawFlowBox(svg, x, flowY, boxW, flowH, box, index === 2);
+      if (index < flowBoxes.length - 1) {
+        svg.appendChild(svgEl("line", { x1: x + boxW, y1: flowY + flowH / 2, x2: x + boxW + gap, y2: flowY + flowH / 2, class: "flow-connector" }));
+      }
+    });
+  }
+
+  const lowerY = compactMode ? flowY + flowBoxes.length * (flowH + 14) + 8 : flowY + flowH + 28;
+  const lowerH = height - lowerY - pad.bottom;
+  if (lowerH < 82) return;
+
+  if (compactMode) {
+    drawEvidenceStack(svg, pad.left, lowerY, availableW, Math.min(138, lowerH), summary);
+  } else {
+    const leftW = Math.max(320, availableW * 0.43);
+    drawEvidenceStack(svg, pad.left, lowerY, leftW, lowerH, summary);
+    drawSourceCapabilityTable(svg, pad.left + leftW + 18, lowerY, availableW - leftW - 18, lowerH, graph);
+  }
+}
+
+function sourceIngestLabel() {
+  const counts = uniqueCount(state.allMenus, (menu) => menu.sourceKey || "cia").slice(0, 3);
+  if (!counts.length) return "CIA / NYPL static rows";
+  return counts.map((item) => `${String(item.name).toUpperCase()} ${formatNumber(item.count)}`).join(" / ");
+}
+
+function drawFlowMetric(svg, x, y, width, metric) {
+  svg.appendChild(svgEl("rect", { x, y, width, height: 46, rx: 6, class: "flow-metric-box" }));
+  const value = svgEl("text", { x: x + 12, y: y + 21, class: "flow-metric" });
+  value.textContent = metric.value;
+  svg.appendChild(value);
+  const label = svgEl("text", { x: x + 12, y: y + 37, class: "flow-muted" });
+  label.textContent = `${metric.label} / ${metric.detail}`.slice(0, Math.max(18, Math.floor(width / 5.6)));
+  svg.appendChild(label);
+}
+
+function drawFlowBox(svg, x, y, width, height, box, strong = false) {
+  const group = svgEl("g");
+  group.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: strong ? "flow-box flow-box--strong" : "flow-box" }));
+  const title = svgEl("text", { x: x + 12, y: y + 22, class: "flow-box-title" });
+  title.textContent = box.title;
+  group.appendChild(title);
+  const metric = svgEl("text", { x: x + 12, y: y + 46, class: "flow-box-metric" });
+  metric.textContent = box.metric;
+  group.appendChild(metric);
+  const detail = svgEl("text", { x: x + 12, y: y + height - 14, class: "flow-muted" });
+  detail.textContent = box.detail.slice(0, Math.max(24, Math.floor((width - 18) / 5.5)));
+  group.appendChild(detail);
+  svg.appendChild(group);
+}
+
+function drawEvidenceStack(svg, x, y, width, height, summary) {
+  const overlays = summary.overlays || {};
+  const evidence = summary.evidence || {};
+  const rows = [
+    { label: "Dish overlays", value: overlays.withDishes || 0, total: overlays.menus || summary.menus || 1 },
+    { label: "Date evidence", value: overlays.withDateEvidence || evidence.dateEvidence || 0, total: overlays.menus || summary.menus || 1 },
+    { label: "Price overlays", value: overlays.withPrices || 0, total: overlays.menus || summary.menus || 1 },
+    { label: "Cross-source matches", value: overlays.withMatches || 0, total: overlays.menus || summary.menus || 1 },
+  ];
+  svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
+  const title = svgEl("text", { x: x + 12, y: y + 22, class: "flow-box-title" });
+  title.textContent = "Evidence overlay coverage";
+  svg.appendChild(title);
+  const rowH = Math.min(29, Math.max(22, (height - 38) / rows.length));
+  rows.forEach((row, index) => {
+    const yy = y + 38 + index * rowH;
+    const label = svgEl("text", { x: x + 12, y: yy + 14, class: "flow-muted" });
+    label.textContent = row.label;
+    svg.appendChild(label);
+    const barX = x + Math.min(150, width * 0.42);
+    const barW = Math.max(80, width - (barX - x) - 84);
+    svg.appendChild(svgEl("rect", { x: barX, y: yy + 4, width: barW, height: 10, rx: 5, class: "flow-bar-bg" }));
+    svg.appendChild(svgEl("rect", { x: barX, y: yy + 4, width: barW * clamp(row.value / Math.max(row.total, 1), 0, 1), height: 10, rx: 5, class: "flow-bar-fill" }));
+    const value = svgEl("text", { x: x + width - 12, y: yy + 14, "text-anchor": "end", class: "flow-muted" });
+    value.textContent = formatNumber(row.value);
+    svg.appendChild(value);
+  });
+}
+
+function drawSourceCapabilityTable(svg, x, y, width, height, graph) {
+  const rows = graphCapabilityRows(graph);
+  svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
+  const title = svgEl("text", { x: x + 12, y: y + 22, class: "flow-box-title" });
+  title.textContent = "Evaluated sources and strongest capability";
+  svg.appendChild(title);
+  const subtitle = svgEl("text", { x: x + 12, y: y + 40, class: "flow-muted" });
+  subtitle.textContent = "Regional and recipe datasets are modeled here before row-level ingestion.";
+  svg.appendChild(subtitle);
+
+  const rowH = 24;
+  const maxRows = Math.max(2, Math.floor((height - 54) / rowH));
+  rows.slice(0, maxRows).forEach((row, index) => {
+    const yy = y + 58 + index * rowH;
+    const label = svgEl("text", { x: x + 12, y: yy + 13, class: "flow-source-label" });
+    label.textContent = row.label.slice(0, Math.max(14, Math.floor(width / 15)));
+    svg.appendChild(label);
+    const barX = x + width * 0.44;
+    const barW = width * 0.24;
+    svg.appendChild(svgEl("rect", { x: barX, y: yy + 4, width: barW, height: 9, rx: 5, class: "flow-bar-bg" }));
+    svg.appendChild(svgEl("rect", { x: barX, y: yy + 4, width: barW * row.weight, height: 9, rx: 5, class: row.ingested ? "flow-bar-fill" : "flow-bar-fill flow-bar-fill--secondary" }));
+    const cap = svgEl("text", { x: x + width - 12, y: yy + 13, "text-anchor": "end", class: "flow-muted" });
+    cap.textContent = `${row.capability} ${row.ingested ? "ingested" : "planned"}`.slice(0, Math.max(16, Math.floor(width / 11)));
+    svg.appendChild(cap);
+  });
+}
+
+function graphCapabilityRows(graph) {
+  const nodes = graph?.sourceCapabilities?.nodes || [];
+  const edges = graph?.sourceCapabilities?.edges || [];
+  const sources = nodes.filter((node) => node.type === "Source");
+  const capabilityById = new Map(nodes.filter((node) => node.type === "Capability").map((node) => [node.id, node]));
+  const edgesBySource = new Map();
+  for (const edge of edges.filter((edge) => edge.type === "SUPPORTS_CAPABILITY")) {
+    if (!edgesBySource.has(edge.from)) edgesBySource.set(edge.from, []);
+    edgesBySource.get(edge.from).push(edge);
+  }
+  return sources
+    .map((source) => {
+      const sourceEdges = edgesBySource.get(source.id) || [];
+      const topEdge = sourceEdges.sort((a, b) => Number(b.weight || 0) - Number(a.weight || 0))[0];
+      const capability = capabilityById.get(topEdge?.to);
+      const scores = source.scores || {};
+      const scoreAvg =
+        (Number(scores.dq || 0) + Number(scores.access || 0) + Number(scores.coverage || 0) + Number(scores.integrationFit || 0) + Number(scores.mlReady || 0)) / 5;
+      return {
+        label: source.label || source.id,
+        capability: capability?.label || "Capability",
+        weight: clamp(Number(topEdge?.weight || 0), 0, 1),
+        scoreAvg,
+        ingested: Boolean(source.sourceKey),
+      };
+    })
+    .sort((a, b) => Number(b.ingested) - Number(a.ingested) || b.weight - a.weight || b.scoreAvg - a.scoreAvg);
+}
+
+function describeGraphOverlay() {
+  const summary = state.graphOverlay?.manifest?.summary || {};
+  const sources = summary.sourceCapabilities?.sources || 0;
+  const nodes = summary.core?.nodes || 0;
+  const evidence = summary.evidence || {};
+  setActivity({
+    label: "Graph Lens",
+    title: "Static graph overlay loaded",
+    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.priceObservations || 0)} price items, and ${formatNumber(evidence.matches || 0)} match links.`,
+    progress: 1,
+  });
 }
 
 function decadeSortValue(decade) {
@@ -2639,11 +2895,85 @@ function renderPageStrip(detail) {
   );
 }
 
+function graphOverlayForMenu(menu) {
+  if (!menu) return null;
+  const keys = [menuKey(menu), menu.uid, menu.id, menu.sourceRecordId, menu.pointer]
+    .map((item) => compact(item, ""))
+    .filter(Boolean);
+  for (const key of keys) {
+    const overlay = state.graphOverlayByMenu.get(key);
+    if (overlay) return overlay;
+    if (/^\d+$/.test(key)) {
+      const ciaOverlay = state.graphOverlayByMenu.get(`cia:${key}`);
+      if (ciaOverlay) return ciaOverlay;
+    }
+  }
+  return null;
+}
+
+function graphEvidenceIndex() {
+  return state.graphOverlay?.evidenceIndex || {};
+}
+
+function hasGraphEvidence(overlay) {
+  if (!overlay) return false;
+  const counts = overlay.counts || {};
+  return Boolean(
+    Number(counts.dishMentions || 0) ||
+      Number(counts.priceObservations || 0) ||
+      Number(counts.dateEvidence || 0) ||
+      Number(counts.matches || 0) ||
+      Number(counts.ontologyTerms || 0)
+  );
+}
+
+function renderGraphEvidence(overlay) {
+  if (!overlay || !hasGraphEvidence(overlay)) return [];
+  const index = graphEvidenceIndex();
+  const nodes = [];
+  const counts = overlay.counts || {};
+  const title = document.createElement("strong");
+  title.textContent = "Graph overlay";
+  nodes.push(title);
+
+  const summary = document.createElement("div");
+  summary.className = "evidence-item";
+  const countParts = [
+    counts.dishMentions ? `${counts.dishMentions} dish signal${counts.dishMentions === 1 ? "" : "s"}` : "",
+    counts.priceObservations ? `${counts.priceObservations} price observation${counts.priceObservations === 1 ? "" : "s"}` : "",
+    counts.dateEvidence ? `${counts.dateEvidence} date evidence` : "",
+    counts.matches ? `${counts.matches} match edge${counts.matches === 1 ? "" : "s"}` : "",
+  ].filter(Boolean);
+  const topDishes = (overlay.topDishes || []).slice(0, 4).join("; ");
+  const priceRows = (overlay.priceObservationIds || [])
+    .slice(0, 3)
+    .map((id) => index.priceObservations?.[id])
+    .filter(Boolean)
+    .map((record) => `${record.item}${record.rawPrice ? ` ${record.rawPrice}` : ""}`);
+  const dateRows = (overlay.dateEvidenceIds || [])
+    .slice(0, 2)
+    .map((id) => index.dateEvidence?.[id])
+    .filter(Boolean)
+    .map((record) => `${record.confidence} ${record.decade || record.centerYear || ""}`.trim());
+
+  summary.innerHTML = `
+    <span>
+      <b>Structured evidence layer</b>
+      <em>${countParts.join(" / ") || "Evidence indexed"}</em>
+    </span>
+    <span>${topDishes || priceRows.join("; ") || "Derived graph evidence is available for this menu."}</span>
+    <small>${[priceRows.length ? `Prices: ${priceRows.join("; ")}` : "", dateRows.length ? `Dates: ${dateRows.join("; ")}` : ""].filter(Boolean).join(" | ")}</small>
+  `;
+  nodes.push(summary);
+  return nodes;
+}
+
 function renderEvidence(matches, menu) {
   if (!els.detailEvidence) return;
   els.detailEvidence.replaceChildren();
   const estimate = dateEstimateFor(menu);
-  if (!matches.length && !estimate) {
+  const graphOverlay = graphOverlayForMenu(menu);
+  if (!matches.length && !estimate && !hasGraphEvidence(graphOverlay)) {
     els.detailEvidence.classList.add("hidden");
     return;
   }
@@ -2663,6 +2993,9 @@ function renderEvidence(matches, menu) {
       <small>${(estimate.evidence || []).slice(0, 3).map((item) => `${item.source}: ${item.effect}`).join("; ")}</small>
     `;
     els.detailEvidence.appendChild(dateNote);
+  }
+  for (const item of renderGraphEvidence(graphOverlay)) {
+    els.detailEvidence.appendChild(item);
   }
   if (matches.length) {
     const crossTitle = document.createElement("strong");
@@ -3719,6 +4052,7 @@ function bindEvents() {
       renderViz();
       if (state.activeLens === "prices") describePricesLoaded();
       if (state.activeLens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
+      if (state.activeLens === "graph") describeGraphOverlay();
       if (state.activeLens === "chat") {
         setActivity({
           label: "Ask Lens",

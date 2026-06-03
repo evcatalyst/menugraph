@@ -1,0 +1,177 @@
+version: 1
+updated_at: "2026-06-02"
+notes: >
+  Source registry for MenuGraph ingestion, rights, export policy, and enrichment
+  routing. Treat this file as the control plane for all raw capture, normalized
+  records, external model export, and public static overlay decisions.
+
+defaults:
+  grok_safe_default: false
+  cache_raw_images: false
+  publish_derived_metadata: true
+  publish_source_images: false
+  require_rights_review_for_external_export: true
+
+sources:
+  cia_menu_collection:
+    name: "CIA Menu Collection"
+    source_type: "historical_menu_images_metadata"
+    priority: 1
+    access:
+      method: "contentdm_api"
+      bulk_available: true
+      base_url: "https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1"
+      api_url: "https://ciadigitalcollections.culinary.edu/digital/api"
+    rights:
+      category: "mixed_source_item_rights"
+      license: "Rights status supplied by CIA Digital Collections"
+      terms_url: "https://ciadigitalcollections.culinary.edu/digital/collection/p16940coll1"
+      grok_safe_default: false
+      public_static_fields:
+        - source metadata
+        - source links
+        - derived confidence scores
+        - derived date evidence
+      restricted_fields:
+        - raw full-page images unless rights-cleared
+        - large OCR excerpts unless rights-cleared
+    enrichment:
+      role: "primary_unknown_date_target"
+      local_first: true
+      external_routing_default: "only_sanitized_high_value_cases"
+      target_outputs:
+        - extracted_text_span
+        - dish_mention
+        - price_observation
+        - date_evidence
+        - image_feature
+
+  nypl_wotm:
+    name: "NYPL What's on the Menu"
+    source_type: "historical_menu_structured"
+    priority: 1
+    access:
+      method: "static_csv"
+      bulk_available: true
+      source_url: "https://www.nypl.org/research/support/whats-on-the-menu"
+      kaggle_url: "https://www.kaggle.com/datasets/nypl/whats-on-the-menu"
+    rights:
+      category: "open_metadata_mixed_images"
+      license: "CC0/public-domain dataset; images follow NYPL item rights"
+      grok_safe_default: false
+      public_static_fields:
+        - menu metadata
+        - dish names
+        - transcribed prices
+        - derived analytics
+      restricted_fields:
+        - image reuse beyond item-level rights
+    enrichment:
+      role: "structured_training_spine"
+      local_first: true
+      external_routing_default: "rare_validation_only"
+      target_outputs:
+        - canonical_dish_seed
+        - price_training_row
+        - date_training_label
+
+  lapl_menu_collection:
+    name: "Los Angeles Public Library Menu Collection"
+    source_type: "historical_menu_database_images"
+    priority: 2
+    access:
+      method: "web_database"
+      bulk_available: false
+      source_url: "https://www.lapl.org/collections-resources/visual-collections/menu-collection"
+    rights:
+      category: "mixed"
+      license: "Source item rights"
+      grok_safe_default: false
+    enrichment:
+      role: "regional_and_phone_address_evidence"
+      local_first: true
+      external_routing_default: "sanitized_metadata_only"
+
+  cornell_nestle_menu_collection:
+    name: "Cornell Nestle/SHA Menu Collection"
+    source_type: "historical_menu_finding_aid_images"
+    priority: 2
+    access:
+      method: "finding_aid_and_digitized_items"
+      bulk_available: "partial"
+      source_url: "https://rmc.library.cornell.edu/EAD/htmldocs/RMM06452.html"
+    rights:
+      category: "mixed"
+      license: "Source item rights"
+      grok_safe_default: false
+    enrichment:
+      role: "hospitality_metadata_and_design_evidence"
+      local_first: true
+      external_routing_default: "sanitized_metadata_only"
+
+  uh_1850s_1860s_menus:
+    name: "University of Houston 1850s-1860s Hotel and Restaurant Menus"
+    source_type: "historical_menu_images_metadata"
+    priority: 2
+    access:
+      method: "digital_collection"
+      bulk_available: "small_manual_or_api"
+      source_url: "https://digitalcollections.lib.uh.edu/collections/g158bj49n"
+    rights:
+      category: "mixed"
+      license: "Source item rights"
+      grok_safe_default: false
+    enrichment:
+      role: "early_period_calibration"
+      local_first: true
+
+  northwestern_transport_menus:
+    name: "Northwestern Transportation Library Menu Collection"
+    source_type: "transport_menu_images_metadata"
+    priority: 2
+    access:
+      method: "api_and_iiif"
+      bulk_available: true
+      source_url: "https://www.library.northwestern.edu/libraries-collections/distinctive-special-collections/transportation-library/collection/transportation-library.html"
+      api_url: "https://api.dc.library.northwestern.edu/docs/v2/"
+    rights:
+      category: "mixed"
+      license: "Source item rights"
+      grok_safe_default: false
+    enrichment:
+      role: "transport_style_and_venue_evidence"
+      local_first: true
+
+  dotlas_structured_menus:
+    name: "Dotlas Structured Menu Dataset"
+    source_type: "modern_structured_menu_commercial"
+    priority: 3
+    access:
+      method: "commercial_marketplace"
+      bulk_available: true
+      source_url: "https://catalog.dotlas.com/restaurants/menus/"
+    rights:
+      category: "commercial_contract_required"
+      license: "Contract/EULA"
+      grok_safe_default: false
+    enrichment:
+      role: "modern_schema_and_price_baseline"
+      local_first: false
+      external_routing_default: "contract_dependent"
+
+  recipe_corpora:
+    name: "Recipe corpora composite"
+    source_type: "recipe_enrichment"
+    priority: 3
+    access:
+      method: "mixed_downloads"
+      bulk_available: "varies"
+    rights:
+      category: "mixed_research_noncommercial_scraped"
+      license: "Dataset-specific"
+      grok_safe_default: false
+    enrichment:
+      role: "dish_ingredient_embedding_and_nutrition_proxy"
+      local_first: true
+      external_routing_default: "derived_summaries_only"
+
