@@ -488,6 +488,7 @@ async function loadGraphOverlay(refresh = false) {
   if (state.activeLens === "graph") {
     describeGraphOverlay();
     renderViz();
+    renderResults();
   }
 }
 
@@ -2400,7 +2401,10 @@ function renderGraphLens(svg, width, height) {
 
   const lowerY = compactMode ? flowY + flowBoxes.length * (flowH + 14) + 8 : flowY + flowH + 28;
   const lowerH = height - lowerY - pad.bottom;
-  if (lowerH < 82) return;
+  if (lowerH < 82) {
+    drawCompactEvidenceFooter(svg, pad.left, Math.max(flowY + flowH + 18, height - pad.bottom - 40), availableW, summary);
+    return;
+  }
 
   if (compactMode) {
     drawEvidenceStack(svg, pad.left, lowerY, availableW, Math.min(138, lowerH), summary);
@@ -2442,6 +2446,29 @@ function drawFlowBox(svg, x, y, width, height, box, strong = false) {
   svg.appendChild(group);
 }
 
+function drawCompactEvidenceFooter(svg, x, y, width, summary) {
+  const overlays = summary.overlays || {};
+  const evidence = summary.evidence || {};
+  const rows = [
+    { label: "Dishes", value: overlays.withDishes || 0 },
+    { label: "Dates", value: overlays.withDateEvidence || evidence.dateEvidence || 0 },
+    { label: "Prices", value: overlays.withPrices || 0 },
+    { label: "Matches", value: overlays.withMatches || 0 },
+  ];
+  const height = 32;
+  svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
+  const colW = width / rows.length;
+  rows.forEach((row, index) => {
+    const xx = x + index * colW + 10;
+    const value = svgEl("text", { x: xx, y: y + 14, class: "flow-box-title" });
+    value.textContent = formatNumber(row.value);
+    svg.appendChild(value);
+    const label = svgEl("text", { x: xx, y: y + 26, class: "flow-muted" });
+    label.textContent = row.label;
+    svg.appendChild(label);
+  });
+}
+
 function drawEvidenceStack(svg, x, y, width, height, summary) {
   const overlays = summary.overlays || {};
   const evidence = summary.evidence || {};
@@ -2472,7 +2499,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
 }
 
 function drawSourceCapabilityTable(svg, x, y, width, height, graph) {
-  const rows = graphCapabilityRows(graph);
+  const rows = graphSourceRows(graph);
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
   const title = svgEl("text", { x: x + 12, y: y + 22, class: "flow-box-title" });
   title.textContent = "Evaluated sources and strongest capability";
@@ -2491,18 +2518,29 @@ function drawSourceCapabilityTable(svg, x, y, width, height, graph) {
     const barX = x + width * 0.44;
     const barW = width * 0.24;
     svg.appendChild(svgEl("rect", { x: barX, y: yy + 4, width: barW, height: 9, rx: 5, class: "flow-bar-bg" }));
-    svg.appendChild(svgEl("rect", { x: barX, y: yy + 4, width: barW * row.weight, height: 9, rx: 5, class: row.ingested ? "flow-bar-fill" : "flow-bar-fill flow-bar-fill--secondary" }));
+    svg.appendChild(
+      svgEl("rect", {
+        x: barX,
+        y: yy + 4,
+        width: barW * row.weight,
+        height: 9,
+        rx: 5,
+        class: row.statusKind === "ingested" ? "flow-bar-fill" : "flow-bar-fill flow-bar-fill--secondary",
+      })
+    );
     const cap = svgEl("text", { x: x + width - 12, y: yy + 13, "text-anchor": "end", class: "flow-muted" });
-    cap.textContent = `${row.capability} ${row.ingested ? "ingested" : "planned"}`.slice(0, Math.max(16, Math.floor(width / 11)));
+    cap.textContent = `${row.capability} ${row.statusLabel.toLowerCase()}`.slice(0, Math.max(16, Math.floor(width / 11)));
     svg.appendChild(cap);
   });
 }
 
-function graphCapabilityRows(graph) {
+function graphSourceRows(graph) {
   const nodes = graph?.sourceCapabilities?.nodes || [];
   const edges = graph?.sourceCapabilities?.edges || [];
   const sources = nodes.filter((node) => node.type === "Source");
   const capabilityById = new Map(nodes.filter((node) => node.type === "Capability").map((node) => [node.id, node]));
+  const probes = graph?.evidenceIndex?.sourceProbes || {};
+  const sourceCounts = sourceRecordCounts();
   const edgesBySource = new Map();
   for (const edge of edges.filter((edge) => edge.type === "SUPPORTS_CAPABILITY")) {
     if (!edgesBySource.has(edge.from)) edgesBySource.set(edge.from, []);
@@ -2516,15 +2554,53 @@ function graphCapabilityRows(graph) {
       const scores = source.scores || {};
       const scoreAvg =
         (Number(scores.dq || 0) + Number(scores.access || 0) + Number(scores.coverage || 0) + Number(scores.integrationFit || 0) + Number(scores.mlReady || 0)) / 5;
+      const sourceId = source.provenance?.sourceId || String(source.id || "").replace(/^source:/, "");
+      const probe = probes[sourceId] || null;
+      const ingestedCount = source.sourceKey ? sourceCounts.get(source.sourceKey) || 0 : 0;
+      const sampleItems = Array.isArray(probe?.sampleItems) ? probe.sampleItems : [];
+      const statusKind = ingestedCount ? "ingested" : probe ? "probed" : "evaluated";
+      const statusLabel = ingestedCount ? "Ingested" : probe ? "Probed" : "Evaluated";
+      const statusDetail = ingestedCount
+        ? `${formatNumber(ingestedCount)} menu rows in static app`
+        : probe?.publicItemCount
+          ? `${formatNumber(probe.publicItemCount)} public items observed`
+          : probe?.status
+            ? `${titleCase(probe.status)} metadata probe`
+            : "capability and rights model only";
+      const sampleText = sampleItems
+        .slice(0, 2)
+        .map((item) => [item.title, item.date].filter(Boolean).join(" / "))
+        .join("; ");
       return {
+        id: sourceId,
         label: source.label || source.id,
         capability: capability?.label || "Capability",
         weight: clamp(Number(topEdge?.weight || 0), 0, 1),
         scoreAvg,
-        ingested: Boolean(source.sourceKey),
+        statusKind,
+        statusLabel,
+        statusDetail,
+        sourceUrl: probe?.sourceUrl || "",
+        publicItemCount: probe?.publicItemCount || null,
+        sampleText,
+        notes: ingestedCount
+          ? "Row-level menu metadata is in the static app; graph overlays add dish, price, date, and match evidence where available."
+          : probe?.notes || "",
       };
     })
-    .sort((a, b) => Number(b.ingested) - Number(a.ingested) || b.weight - a.weight || b.scoreAvg - a.scoreAvg);
+    .sort((a, b) => {
+      const rank = { ingested: 0, probed: 1, evaluated: 2 };
+      return rank[a.statusKind] - rank[b.statusKind] || b.weight - a.weight || b.scoreAvg - a.scoreAvg;
+    });
+}
+
+function sourceRecordCounts() {
+  const counts = new Map();
+  for (const menu of state.allMenus || []) {
+    const key = menu?.sourceKey || "cia";
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return counts;
 }
 
 function describeGraphOverlay() {
@@ -2643,6 +2719,11 @@ function scrollDetailIntoViewOnMobile() {
 }
 
 function renderResults() {
+  if (state.activeLens === "graph") {
+    renderGraphSourceResults();
+    return;
+  }
+
   const menus = state.visibleMenus.slice(0, 80);
   els.resultsCount.textContent = state.visibleMenus.length.toLocaleString();
   els.resultsLabel.textContent = state.selectedOntologyTerm
@@ -2665,6 +2746,56 @@ function renderResults() {
       setImageSource(button.querySelector("img"), menu.imageUrl, menu.title);
       button.addEventListener("click", () => selectMenu(menuKey(menu)));
       return button;
+    })
+  );
+}
+
+function renderGraphSourceResults() {
+  const rows = graphSourceRows(state.graphOverlay);
+  els.resultsCount.textContent = rows.length.toLocaleString();
+  els.resultsLabel.textContent = "Source Status";
+  if (!rows.length) {
+    const empty = document.createElement("div");
+    empty.className = "loading";
+    empty.textContent = "Graph source metadata is loading.";
+    els.resultList.replaceChildren(empty);
+    return;
+  }
+
+  els.resultList.replaceChildren(
+    ...rows.map((row) => {
+      const card = document.createElement("article");
+      card.className = `source-result-card source-result-card--${row.statusKind}`;
+
+      const top = document.createElement("div");
+      top.className = "source-result-card__top";
+      const status = document.createElement("span");
+      status.className = "source-status-pill";
+      status.textContent = row.statusLabel;
+      const score = document.createElement("small");
+      score.textContent = `fit ${formatNumber(row.scoreAvg)}/10`;
+      top.append(status, score);
+
+      const title = document.createElement("h3");
+      title.textContent = row.label;
+
+      const meta = document.createElement("p");
+      meta.textContent = `${row.capability} ${Math.round(row.weight * 10)}/10 / ${row.statusDetail}`;
+
+      const note = document.createElement("p");
+      note.className = "source-result-card__note";
+      note.textContent = row.sampleText || row.notes || "Evaluation-only source; row-level ingestion is planned after rights and export review.";
+
+      card.append(top, title, meta, note);
+      if (row.sourceUrl) {
+        const link = document.createElement("a");
+        link.href = row.sourceUrl;
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        link.textContent = "Open source";
+        card.appendChild(link);
+      }
+      return card;
     })
   );
 }
@@ -4050,6 +4181,7 @@ function bindEvents() {
       state.activeLens = button.dataset.lens;
       activateLensButton(state.activeLens);
       renderViz();
+      renderResults();
       if (state.activeLens === "prices") describePricesLoaded();
       if (state.activeLens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
       if (state.activeLens === "graph") describeGraphOverlay();

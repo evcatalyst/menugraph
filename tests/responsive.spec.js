@@ -452,6 +452,29 @@ test("NYPL detail uses NYPL source links, larger images, and item transcriptions
   await expect(page.locator("#detail-text")).toContainText("Sample item rows");
 });
 
+test("graph lens exposes source status and application data flow", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openApp(page);
+
+  await page.locator(".drawer-lens-controls button[data-lens='graph']").click();
+  await expect(page.locator("body")).toHaveAttribute("data-active-lens", "graph");
+  await expect(page.locator("#result-title")).toContainText("Application Structure");
+  await expect(page.locator("#results-label")).toHaveText("Source Status");
+  await expect(page.locator(".source-result-card")).toHaveCount(14);
+  await expect(page.locator("svg")).toContainText("Static-first graph overlay");
+  await expect(page.locator("svg")).toContainText(/Dish/);
+
+  const sourceStripText = await page.locator("#result-list").textContent();
+  expect(sourceStripText).toContain("Ingested");
+  expect(sourceStripText).toContain("Probed");
+  expect(sourceStripText).toContain("NYPL What's on the Menu");
+  expect(sourceStripText).toContain("The Sifter");
+
+  const metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+  expectNoResultClipping(metrics);
+});
+
 for (const viewport of [
   { width: 1440, height: 900 },
   { width: 1920, height: 1080 },

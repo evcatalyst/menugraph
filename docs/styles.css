@@ -1929,6 +1929,95 @@ body.chat-expanded .chat-form {
   line-height: 1.3;
 }
 
+body[data-active-lens="graph"] .result-list {
+  grid-auto-columns: minmax(260px, 340px);
+  height: 122px;
+}
+
+.source-result-card {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  gap: 5px;
+  min-width: 0;
+  min-height: 110px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdfc;
+  padding: 10px;
+}
+
+.source-result-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.source-status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  border-radius: 999px;
+  background: rgba(49, 111, 115, 0.1);
+  color: var(--teal);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  padding: 0 8px;
+  text-transform: uppercase;
+}
+
+.source-result-card--probed .source-status-pill {
+  background: rgba(170, 127, 46, 0.14);
+  color: #7c5c1e;
+}
+
+.source-result-card--evaluated .source-status-pill {
+  background: rgba(47, 58, 63, 0.08);
+  color: var(--muted);
+}
+
+.source-result-card small {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.source-result-card h3,
+.source-result-card p {
+  margin: 0;
+}
+
+.source-result-card h3 {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-result-card p {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.28;
+}
+
+.source-result-card__note {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.source-result-card a {
+  align-self: end;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
 .loading {
   padding: 18px;
   color: var(--muted);

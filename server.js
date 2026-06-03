@@ -859,6 +859,21 @@ async function readOptionalStaticJson(filename, fallback) {
   }
 }
 
+async function getGraphOverlay(refresh = false) {
+  const [manifest, sourceCapabilities, menuOverlays, evidenceIndex] = await Promise.all([
+    readStaticJson("graph/manifest.json", refresh),
+    readStaticJson("graph/source-capabilities.json", refresh),
+    readStaticJson("graph/menu-overlays.json", refresh),
+    readStaticJson("graph/evidence-index.json", refresh),
+  ]);
+  return {
+    manifest,
+    sourceCapabilities,
+    menuOverlays,
+    evidenceIndex,
+  };
+}
+
 function compactChatMatches(matches) {
   return (matches || []).slice(0, 12).map((match) => ({
     title: match.title,
@@ -1062,6 +1077,11 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    if (url.pathname === "/api/graph") {
+      sendJson(res, await getGraphOverlay(url.searchParams.get("refresh") === "1"));
+      return;
+    }
+
     if (url.pathname === "/api/chat") {
       const answer = await answerChat(req, url);
       sendJson(res, answer.error ? answer : answer, answer.statusCode || (answer.error ? 400 : 200));
@@ -1130,6 +1150,7 @@ module.exports = {
   getMenus,
   getOntology,
   getDateEstimates,
+  getGraphOverlay,
   ontologyStatus,
   searchMenus,
   selectOntologySample,

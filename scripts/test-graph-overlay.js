@@ -36,6 +36,14 @@ assert(!hasRawBlob(core), "core graph must not contain raw OCR or image blobs");
 assert(!hasRawBlob(menuOverlays), "menu overlays must not contain raw OCR or image blobs");
 assert(!hasRawBlob(evidenceIndex), "evidence index must not contain raw OCR or image blobs");
 
+const sourceNodeIds = new Set(sourceCapabilities.nodes.filter((node) => node.type === "Source").map((node) => node.id));
+assert(sourceNodeIds.has("source:the_sifter"), "recipe/history sources should be represented in source graph");
+assert(sourceNodeIds.has("source:recipe1m_plus"), "recipe enrichment source should be represented in source graph");
+for (const sourceId of Object.keys(evidenceIndex.sourceProbes || {})) {
+  assert(sourceNodeIds.has(`source:${sourceId}`), `source probe ${sourceId} should resolve to a source node`);
+}
+assert(Object.keys(evidenceIndex.sourceProbes || {}).length >= 4, "expected probed external sources in evidence index");
+
 for (const source of evaluations.sources) {
   for (const value of Object.values(source.scores || {})) {
     assert(Number(value) >= 1 && Number(value) <= 10, "source scores should stay on the 1-10 scale");
