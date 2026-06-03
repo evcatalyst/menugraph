@@ -196,6 +196,33 @@ sources:
       local_first: true
       external_routing_default: "sanitized_metadata_only"
 
+  nola_menu_collection:
+    name: "New Orleans Public Library Menu Collection"
+    source_type: "regional_menu_images_metadata"
+    priority: 2
+    access:
+      method: "contentdm_api"
+      bulk_available: true
+      source_url: "https://archives-nolalibrary.contentdm.oclc.org/digital/collection/p16880coll68"
+      api_url: "https://archives-nolalibrary.contentdm.oclc.org/digital/api"
+    rights:
+      category: "mixed"
+      license: "Source item rights; New Orleans Public Library permission required for image reuse"
+      grok_safe_default: false
+      public_static_fields:
+        - source metadata
+        - source links
+        - derived date evidence
+        - derived dish and ingredient hints
+        - derived image metadata features
+      restricted_fields:
+        - raw full-page images unless rights-cleared
+        - raw OCR if added later unless rights-cleared
+    enrichment:
+      role: "louisiana_new_orleans_regional_evidence"
+      local_first: true
+      external_routing_default: "sanitized_metadata_only"
+
   dotlas_structured_menus:
     name: "Dotlas Structured Menu Dataset"
     source_type: "modern_structured_menu_commercial"

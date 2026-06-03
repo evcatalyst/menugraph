@@ -5,6 +5,7 @@ const { assessExternalImages } = require("./external-image-assessment");
 const { buildLaplSource } = require("./lapl-source");
 const { buildLocalEnrichment, optionsFromArgs } = require("./local-enrichment");
 const { buildMilwaukeeSource } = require("./milwaukee-source");
+const { buildNolaSource } = require("./nola-source");
 const { buildNorthwesternSource } = require("./northwestern-source");
 const { buildUhSource } = require("./uh-source");
 const { buildUwSource } = require("./uw-source");
@@ -26,6 +27,7 @@ const DEFAULT_ARGS = [
   "--uh-limit=100",
   "--milwaukee-limit=100",
   "--uw-limit=300",
+  "--nola-limit=100",
 ];
 
 function timestamp() {
@@ -94,6 +96,11 @@ async function runExternalSources(args) {
       sourceId: "uw_menus_collection",
       limit: sourceLimit(args, "uw-limit", 300),
       run: (limit) => buildUwSource({ limit, timeoutMs, dryRun }),
+    },
+    {
+      sourceId: "nola_menu_collection",
+      limit: sourceLimit(args, "nola-limit", 100),
+      run: (limit) => buildNolaSource({ limit, timeoutMs, dryRun }),
     },
   ];
 

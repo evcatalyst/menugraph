@@ -72,6 +72,13 @@
       "capabilityWeights": { "regional_evidence": 10, "transport_evidence": 7, "date_estimation": 7, "visual_style_cv": 7, "dish_entity_resolution": 4 }
     },
     {
+      "id": "nola_menu_collection",
+      "label": "New Orleans Public Library Menu Collection",
+      "sourceKey": "nola",
+      "scores": { "dq": 6, "access": 8, "coverage": 3, "uniqueValue": 8, "integrationFit": 7, "mlReady": 5, "risk": 6 },
+      "capabilityWeights": { "regional_evidence": 10, "date_estimation": 6, "visual_style_cv": 6, "dish_entity_resolution": 5, "transport_evidence": 4 }
+    },
+    {
       "id": "dotlas_structured_menus",
       "label": "Dotlas Structured Menu Dataset",
       "scores": { "dq": 9, "access": 4, "coverage": 8, "uniqueValue": 9, "integrationFit": 9, "mlReady": 8, "risk": 4 },
