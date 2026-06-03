@@ -101,12 +101,14 @@ if (manifest.summary.externalMenus?.records) {
     "core graph should link UW source to external menu nodes"
   );
   assert(
-    Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "lapl_menu_collection" && record.scalar?.pageCount),
-    "LAPL image metadata features should be indexed"
+    Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "lapl_menu_collection" && record.scalar?.width && record.scalar?.height),
+    "LAPL image metadata dimensions should be indexed"
   );
   assert(
-    Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "milwaukee_historic_menus" && record.scalar?.pageCount),
-    "Milwaukee image metadata features should be indexed"
+    Object.values(evidenceIndex.imageFeatures || {}).some(
+      (record) => record.sourceId === "milwaukee_historic_menus" && record.scalar?.width && record.scalar?.height
+    ),
+    "Milwaukee image metadata dimensions should be indexed"
   );
   assert(
     Object.values(evidenceIndex.imageFeatures || {}).some(
@@ -121,8 +123,8 @@ if (manifest.summary.externalMenus?.records) {
     "UH image metadata dimensions should be indexed"
   );
   assert(
-    Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "uw_menus_collection" && record.scalar?.pageCount),
-    "UW image metadata features should be indexed"
+    Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "uw_menus_collection" && record.scalar?.width && record.scalar?.height),
+    "UW image metadata dimensions should be indexed"
   );
 }
 

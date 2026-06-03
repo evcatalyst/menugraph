@@ -98,6 +98,20 @@ function assessmentUrlFor(record, feature = {}) {
   return cleanValue(sourceFeature.iiifInfoUri || record.iiifInfoUri || record.iiifManifestUrl);
 }
 
+function contentdmPageIiifInfoUrls(record, url) {
+  const pageIds = Array.isArray(record?.pageIds) ? record.pageIds.map(cleanValue).filter(Boolean) : [];
+  if (!pageIds.length) return [];
+  const match = cleanValue(url).match(/^(.*\/iiif\/2\/[^/:]+:)([^/?#]+)(\/info\.json(?:[?#].*)?)$/i);
+  if (!match) return [];
+  return pageIds.slice(0, 4).map((pageId) => `${match[1]}${encodeURIComponent(pageId)}${match[3]}`);
+}
+
+function assessmentUrlsFor(record, feature = {}) {
+  const primary = assessmentUrlFor(record, feature);
+  const urls = [primary, ...contentdmPageIiifInfoUrls(record, primary)].filter(Boolean);
+  return [...new Set(urls)];
+}
+
 function mergeImageFeature(record, dimensions, url) {
   const features = Array.isArray(record.imageFeatures) ? record.imageFeatures : [];
   const existing =
@@ -128,7 +142,7 @@ function mergeImageFeature(record, dimensions, url) {
     featureType: "iiif_metadata_assessed",
     scalar,
     sourceImageUrl: cleanValue(existing?.sourceImageUrl || record.imageUri || record.thumbnailUrl),
-    iiifInfoUri: cleanValue(existing?.iiifInfoUri || record.iiifInfoUri),
+    iiifInfoUri: cleanValue(url || existing?.iiifInfoUri || record.iiifInfoUri),
     iiifManifestUrl: cleanValue(existing?.iiifManifestUrl || record.iiifManifestUrl),
     modelName: "external_iiif_metadata_assessment",
     modelVersion: "0.1.0",
@@ -212,33 +226,59 @@ async function assessPayload(payload, sourceFile, options, stats) {
     if (options.limit && candidates.length >= options.limit) break;
     if (sourceFilter.size && !sourceFilter.has(cleanValue(record.sourceId || record.sourceKey))) continue;
     const firstFeature = Array.isArray(record.imageFeatures) ? record.imageFeatures[0] : null;
-    const url = assessmentUrlFor(record, firstFeature);
-    if (!url) continue;
-    candidates.push({ record, url });
+    const urls = assessmentUrlsFor(record, firstFeature);
+    if (!urls.length) continue;
+    candidates.push({ record, urls });
   }
 
   let nextIndex = 0;
   async function worker() {
     while (nextIndex < candidates.length) {
-      const { record, url } = candidates[nextIndex++];
+      const { record, urls } = candidates[nextIndex++];
       stats.recordsExamined += 1;
+      const errors = [];
+      let foundDimensions = false;
       try {
-        const iiifPayload = await fetchJsonCached(url, options, stats);
-        const dimensions = dimensionsFromIiifPayload(iiifPayload, url);
-        if (!dimensions) {
-          stats.noDimensions += 1;
-          continue;
+        for (const [urlIndex, url] of urls.entries()) {
+          if (urlIndex > 0) stats.fallbackAttempts += 1;
+          try {
+            const iiifPayload = await fetchJsonCached(url, options, stats);
+            const dimensions = dimensionsFromIiifPayload(iiifPayload, url);
+            if (!dimensions) {
+              errors.push({
+                sourceFile: path.relative(DATA_DIR, sourceFile),
+                menuId: cleanValue(record.menuId || record.id),
+                url,
+                error: "No dimensions in IIIF metadata",
+              });
+              continue;
+            }
+            record.imageFeatures = mergeImageFeature(record, dimensions, url).slice(0, 3);
+            changed = true;
+            foundDimensions = true;
+            stats.featuresUpdated += 1;
+            if (urlIndex > 0) stats.fallbackSuccesses += 1;
+            const key = cleanValue(record.sourceId || record.sourceKey || "external");
+            stats.bySource[key] = (stats.bySource[key] || 0) + 1;
+            break;
+          } catch (error) {
+            errors.push({
+              sourceFile: path.relative(DATA_DIR, sourceFile),
+              menuId: cleanValue(record.menuId || record.id),
+              url,
+              error: error.message,
+            });
+          }
         }
-        record.imageFeatures = mergeImageFeature(record, dimensions, url).slice(0, 3);
-        changed = true;
-        stats.featuresUpdated += 1;
-        const key = cleanValue(record.sourceId || record.sourceKey || "external");
-        stats.bySource[key] = (stats.bySource[key] || 0) + 1;
+        if (!foundDimensions) {
+          stats.noDimensions += 1;
+          stats.errors.push(...errors.slice(-2));
+        }
       } catch (error) {
         stats.errors.push({
           sourceFile: path.relative(DATA_DIR, sourceFile),
           menuId: cleanValue(record.menuId || record.id),
-          url,
+          url: cleanValue(urls[0]),
           error: error.message,
         });
       }
@@ -260,6 +300,8 @@ async function assessExternalImages(options = {}) {
     featuresUpdated: 0,
     fetched: 0,
     cacheHits: 0,
+    fallbackAttempts: 0,
+    fallbackSuccesses: 0,
     noDimensions: 0,
     bySource: {},
     errors: [],
@@ -321,6 +363,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  assessmentUrlsFor,
   assessExternalImages,
   dimensionsFromIiifPayload,
   mergeImageFeature,

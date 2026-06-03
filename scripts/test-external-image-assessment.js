@@ -1,5 +1,6 @@
 const assert = require("assert");
 const {
+  assessmentUrlsFor,
   dimensionsFromIiifPayload,
   mergeImageFeature,
   optionsFromArgs,
@@ -76,6 +77,35 @@ function run() {
   assert.strictEqual(features[0].scalar.width, 2400);
   assert.strictEqual(features[0].scalar.pageCount, 2);
   assert.strictEqual(features[0].provenance.assessmentSourceKind, "iiif_info");
+
+  const compoundRecord = {
+    id: "uw:866",
+    menuId: "uw:866",
+    sourceId: "uw_menus_collection",
+    sourceKey: "uw",
+    sourceRecordId: "866",
+    pageIds: ["862", "863", "864", "865", "999"],
+    iiifInfoUri: "https://digitalcollections.lib.washington.edu/iiif/2/menus:866/info.json",
+    imageFeatures: [
+      {
+        id: "uw-image",
+        menuId: "uw:866",
+        iiifInfoUri: "https://digitalcollections.lib.washington.edu/iiif/2/menus:866/info.json",
+        scalar: { pageCount: 4, hasIiifInfo: true },
+      },
+    ],
+  };
+  assert.deepStrictEqual(assessmentUrlsFor(compoundRecord), [
+    "https://digitalcollections.lib.washington.edu/iiif/2/menus:866/info.json",
+    "https://digitalcollections.lib.washington.edu/iiif/2/menus:862/info.json",
+    "https://digitalcollections.lib.washington.edu/iiif/2/menus:863/info.json",
+    "https://digitalcollections.lib.washington.edu/iiif/2/menus:864/info.json",
+    "https://digitalcollections.lib.washington.edu/iiif/2/menus:865/info.json",
+  ]);
+  const fallbackFeatures = mergeImageFeature(compoundRecord, infoDims, "https://digitalcollections.lib.washington.edu/iiif/2/menus:862/info.json");
+  assert.strictEqual(fallbackFeatures[0].id, "uw-image");
+  assert.strictEqual(fallbackFeatures[0].iiifInfoUri, "https://digitalcollections.lib.washington.edu/iiif/2/menus:862/info.json");
+  assert.strictEqual(fallbackFeatures[0].scalar.pageCount, 4);
 
   const options = optionsFromArgs(["--source=milwaukee_historic_menus,lapl_menu_collection", "--limit=20", "--timeout-ms=9000", "--concurrency=4", "--refresh", "--dry-run"]);
   assert.deepStrictEqual(options.sources, ["milwaukee_historic_menus", "lapl_menu_collection"]);
