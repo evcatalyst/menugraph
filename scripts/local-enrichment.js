@@ -363,6 +363,15 @@ function cacheFileForMenu(menu) {
   return path.join(TRANSCRIPT_CACHE_DIR, `${recordUid(menu).replace(/[^a-z0-9_-]+/gi, "_")}.txt`);
 }
 
+function withTimeout(promise, timeoutMs, label) {
+  if (!timeoutMs) return promise;
+  let timeout = null;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeout = setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeout));
+}
+
 async function cachedTranscript(menu, options) {
   const filePath = cacheFileForMenu(menu);
   try {
@@ -370,7 +379,7 @@ async function cachedTranscript(menu, options) {
   } catch (error) {
     if (!options.fetchCiaText || (menu.sourceKey || "cia") !== "cia") return "";
   }
-  const text = await fetchMenuText(menu.id);
+  const text = await withTimeout(fetchMenuText(menu.id), options.menuTimeoutMs, `transcript ${recordUid(menu)}`);
   if (text) {
     await fs.mkdir(TRANSCRIPT_CACHE_DIR, { recursive: true });
     await fs.writeFile(filePath, text, "utf8");
@@ -843,6 +852,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     probeSources: hasFlag(args, "probe-sources"),
     dryRun: hasFlag(args, "dry-run"),
     requestTimeoutMs: Math.max(2000, Number(argValue(args, "timeout-ms", "20000")) || 20000),
+    menuTimeoutMs: Math.max(5000, Number(argValue(args, "menu-timeout-ms", "45000")) || 45000),
     timeBudgetMs: timeBudgetMin > 0 ? timeBudgetMin * 60 * 1000 : 0,
     maxDishMentionsPerMenu: Math.max(10, Number(argValue(args, "max-dish-mentions-per-menu", "120")) || 120),
     publicDishLimit: Math.max(1000, Number(argValue(args, "public-dish-limit", "60000")) || 60000),

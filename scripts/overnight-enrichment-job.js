@@ -39,7 +39,17 @@ async function writeStatus(payload) {
 async function main() {
   const args = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ARGS;
   const options = optionsFromArgs(args);
-  options.onProgress = (message) => console.log(`[${timestamp()}] ${message}`);
+  options.onProgress = (message) => {
+    console.log(`[${timestamp()}] ${message}`);
+    writeStatus({
+      status: "running",
+      phase: "local-enrichment",
+      pid: process.pid,
+      args,
+      lastProgress: message,
+      progressAt: timestamp(),
+    }).catch(() => {});
+  };
 
   await writeStatus({
     status: "running",
