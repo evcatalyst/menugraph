@@ -11,6 +11,7 @@ const { buildSeattleSource } = require("./seattle-source");
 const { buildUhSource } = require("./uh-source");
 const { buildUwSource } = require("./uw-source");
 const { buildDenverSource } = require("./denver-source");
+const { buildCornellSource } = require("./cornell-source");
 const { retagEnrichment } = require("./retag-enrichment");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -34,6 +35,7 @@ const DEFAULT_ARGS = [
   "--nola-limit=100",
   "--seattle-limit=300",
   "--denver-limit=100",
+  "--cornell-limit=800",
 ];
 
 function timestamp() {
@@ -117,6 +119,11 @@ async function runExternalSources(args) {
       sourceId: "denver_menu_collection",
       limit: sourceLimit(args, "denver-limit", 100),
       run: (limit) => buildDenverSource({ limit, timeoutMs, dryRun }),
+    },
+    {
+      sourceId: "cornell_nestle_menu_collection",
+      limit: sourceLimit(args, "cornell-limit", 800),
+      run: (limit) => buildCornellSource({ limit, timeoutMs, dryRun }),
     },
   ];
 

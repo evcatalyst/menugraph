@@ -36,6 +36,7 @@
     {
       "id": "cornell_nestle_menu_collection",
       "label": "Cornell Nestle/SHA Menu Collection",
+      "sourceKey": "cornell",
       "scores": { "dq": 7, "access": 4, "coverage": 8, "uniqueValue": 8, "integrationFit": 8, "mlReady": 6, "risk": 5 },
       "capabilityWeights": { "date_estimation": 7, "visual_style_cv": 8, "dish_entity_resolution": 6, "regional_evidence": 5 }
     },
