@@ -1,5 +1,5 @@
 version: 1
-updated_at: "2026-06-02"
+updated_at: "2026-06-03"
 notes: >
   Source registry for MenuGraph ingestion, rights, export policy, and enrichment
   routing. Treat this file as the control plane for all raw capture, normalized
@@ -166,6 +166,33 @@ sources:
         - raw OCR if added later unless rights-cleared
     enrichment:
       role: "regional_venue_address_style_evidence"
+      local_first: true
+      external_routing_default: "sanitized_metadata_only"
+
+  uw_menus_collection:
+    name: "University of Washington Menus Collection"
+    source_type: "regional_menu_images_metadata"
+    priority: 2
+    access:
+      method: "contentdm_api"
+      bulk_available: true
+      source_url: "https://digitalcollections.lib.washington.edu/digital/collection/menus"
+      api_url: "https://digitalcollections.lib.washington.edu/digital/api"
+    rights:
+      category: "mixed"
+      license: "Source item rights; UW Special Collections reproduction and permissions policy applies"
+      grok_safe_default: false
+      public_static_fields:
+        - source metadata
+        - source links
+        - derived date evidence
+        - derived dish and ingredient hints
+        - derived image metadata features
+      restricted_fields:
+        - raw full-page images unless rights-cleared
+        - raw OCR if added later unless rights-cleared
+    enrichment:
+      role: "pacific_northwest_regional_transport_style_evidence"
       local_first: true
       external_routing_default: "sanitized_metadata_only"
 

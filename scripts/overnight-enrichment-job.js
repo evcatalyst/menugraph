@@ -7,6 +7,7 @@ const { buildLocalEnrichment, optionsFromArgs } = require("./local-enrichment");
 const { buildMilwaukeeSource } = require("./milwaukee-source");
 const { buildNorthwesternSource } = require("./northwestern-source");
 const { buildUhSource } = require("./uh-source");
+const { buildUwSource } = require("./uw-source");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
@@ -24,6 +25,7 @@ const DEFAULT_ARGS = [
   "--northwestern-limit=160",
   "--uh-limit=100",
   "--milwaukee-limit=100",
+  "--uw-limit=300",
 ];
 
 function timestamp() {
@@ -87,6 +89,11 @@ async function runExternalSources(args) {
       sourceId: "milwaukee_historic_menus",
       limit: sourceLimit(args, "milwaukee-limit", 100),
       run: (limit) => buildMilwaukeeSource({ limit, timeoutMs, dryRun }),
+    },
+    {
+      sourceId: "uw_menus_collection",
+      limit: sourceLimit(args, "uw-limit", 300),
+      run: (limit) => buildUwSource({ limit, timeoutMs, dryRun }),
     },
   ];
 

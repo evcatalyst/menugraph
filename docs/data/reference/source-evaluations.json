@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-02",
+  "updatedAt": "2026-06-03",
   "scoreScale": "1-10; risk means lower operational/legal risk",
   "capabilities": [
     { "id": "date_estimation", "label": "Date estimation" },
@@ -63,6 +63,13 @@
       "sourceKey": "milwaukee",
       "scores": { "dq": 6, "access": 8, "coverage": 3, "uniqueValue": 7, "integrationFit": 7, "mlReady": 5, "risk": 6 },
       "capabilityWeights": { "regional_evidence": 9, "date_estimation": 6, "visual_style_cv": 7, "dish_entity_resolution": 4 }
+    },
+    {
+      "id": "uw_menus_collection",
+      "label": "University of Washington Menus Collection",
+      "sourceKey": "uw",
+      "scores": { "dq": 7, "access": 8, "coverage": 4, "uniqueValue": 8, "integrationFit": 8, "mlReady": 6, "risk": 7 },
+      "capabilityWeights": { "regional_evidence": 10, "transport_evidence": 7, "date_estimation": 7, "visual_style_cv": 7, "dish_entity_resolution": 4 }
     },
     {
       "id": "dotlas_structured_menus",
