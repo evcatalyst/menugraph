@@ -70,6 +70,7 @@ assert(byteLength(evidenceIndexArtifact) <= manifest.sizeBudgetBytes, "evidence 
 assert(manifest.summary.core.ingredientTerms >= 100, "core graph should expose expanded ingredient taxonomy terms");
 assert(manifest.summary.overlays.withIngredients >= 15500, "ingredient overlays should cover the enriched menu set");
 assert(manifest.summary.recipeBridge?.clusters >= 100, "recipe bridge should summarize deterministic recipe clusters");
+assert(Number.isFinite(Number(manifest.summary.runPlan?.pendingCandidates)), "run plan should summarize pending OCR candidates");
 assert(manifest.summary.evidence.recipeClusters >= 100, "recipe clusters should be indexed as compact evidence");
 assert(manifest.summary.overlays.withRecipeClusters >= 100, "recipe bridge clusters should appear in menu overlays");
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");

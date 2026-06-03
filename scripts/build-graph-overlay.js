@@ -1678,6 +1678,7 @@ async function buildGraphOverlay(options = {}) {
     sourceProbes,
     externalMenuRecords,
     recipeBridge,
+    runPlan,
   ] = await Promise.all([
     readJson(path.join(DATA_DIR, "menus.json"), { menus: [] }),
     readJson(path.join(DATA_DIR, "matches.json"), { relationships: [], matches: {} }),
@@ -1696,6 +1697,7 @@ async function buildGraphOverlay(options = {}) {
     readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),
     readExternalMenuRecords(),
     readJson(path.join(DATA_DIR, "enrichment", "recipe-bridge.json"), { clusters: [], dishLinks: [], summary: {} }),
+    readJson(path.join(DATA_DIR, "enrichment", "run-plan.json"), { summary: {}, recommendedSequence: [] }),
   ]);
 
   const evaluationErrors = graphContract.validateSourceEvaluations(evaluations);
@@ -1713,6 +1715,7 @@ async function buildGraphOverlay(options = {}) {
     sourceProbes,
     externalMenuRecords,
     recipeBridge,
+    runPlan,
   };
   const sourceCapabilities = buildSourceCapabilities(evaluations, generatedAt);
   const sourceErrors = graphContract.validateGraph(sourceCapabilities, { maxBytes: SIZE_BUDGET_BYTES });
@@ -1804,6 +1807,7 @@ async function buildGraphOverlay(options = {}) {
       },
       recipeBridge: recipeBridge.summary || {},
       coverage: coverageReport.summary || {},
+      runPlan: runPlan.summary || {},
     },
     artifacts: Object.entries(artifacts).map(([name, payload]) => artifactInfo(name, payload)),
     shardPlan: {

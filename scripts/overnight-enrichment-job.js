@@ -17,6 +17,7 @@ const { buildLocalVisionOcrEnrichment } = require("./local-vision-ocr-enrichment
 const { retagEnrichment } = require("./retag-enrichment");
 const { buildEnrichmentCoverageReport } = require("./build-enrichment-coverage-report");
 const { buildRecipeBridge } = require("./build-recipe-bridge");
+const { buildEnrichmentRunPlan } = require("./build-enrichment-run-plan");
 const {
   DEFAULT_MIN_FREE_MB,
   assertStoragePreflight,
@@ -376,6 +377,27 @@ async function main() {
 
   await writeStatus({
     status: "running",
+    phase: "run-plan",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+    externalSources,
+    externalImageAssessment,
+    retagged: postOcrRetagged,
+    ocrTriage: ocrTriage.summary,
+    localOcr: localOcr.summary || localOcr,
+    recipeBridge: recipeBridge.summary,
+    coverageReport: coverageReport.summary,
+  });
+
+  const runPlan = await buildEnrichmentRunPlan({
+    dryRun: hasFlag(args, "dry-run"),
+    externalCostPerImageUsd: Number(argValue(args, "external-cost-per-image", "0.01")) || 0.01,
+  });
+  console.log(`[${timestamp()}] Run plan complete: ${JSON.stringify(runPlan.summary)}`);
+
+  await writeStatus({
+    status: "running",
     phase: "graph-build",
     pid: process.pid,
     args,
@@ -387,6 +409,7 @@ async function main() {
     localOcr: localOcr.summary || localOcr,
     recipeBridge: recipeBridge.summary,
     coverageReport: coverageReport.summary,
+    runPlan: runPlan.summary,
   });
 
   const graph = await buildGraphOverlay();
@@ -406,6 +429,7 @@ async function main() {
     localOcr: localOcr.summary || localOcr,
     recipeBridge: recipeBridge.summary,
     coverageReport: coverageReport.summary,
+    runPlan: runPlan.summary,
     graphSummary: graph.manifest.summary,
   });
 }

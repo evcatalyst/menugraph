@@ -2385,6 +2385,7 @@ function renderGraphLens(svg, width, height) {
   const evidence = summary.evidence || {};
   const overlays = summary.overlays || {};
   const coverage = summary.coverage || {};
+  const runPlan = summary.runPlan || {};
   const pad = { top: 26, right: 24, bottom: 24, left: 24 };
   const compactMode = width < 720;
 
@@ -2407,7 +2408,7 @@ function renderGraphLens(svg, width, height) {
       value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0) + (evidence.recipeClusters || 0)),
       detail: "date / price / recipe",
     },
-    { label: "Coverage", value: formatNumber(coverage.rowLevelSources || sourceSummary.sources || 0), detail: `${formatNumber(coverage.averageCoverageScore ? Math.round(coverage.averageCoverageScore * 100) : 0)} avg score` },
+    { label: "Run Plan", value: formatNumber(runPlan.pendingImages || coverage.ocrCandidates || 0), detail: runPlan.storageOk ? "pending images" : "blocked by disk" },
   ];
   metrics.forEach((metric, index) => {
     const col = compactMode ? index % 2 : index;
@@ -2431,8 +2432,8 @@ function renderGraphLens(svg, width, height) {
     },
     {
       title: "Local Enricher",
-      metric: "Mac-first",
-      detail: "OCR spans, dish mentions, prices, dates, image features",
+      metric: runPlan.nextAction === "free_disk_before_ocr" ? "free disk" : "Mac-first",
+      detail: `${formatNumber(runPlan.localRunnableImages || 0)} local images queued`,
     },
     {
       title: "Recipe Bridge",
@@ -2464,7 +2465,7 @@ function renderGraphLens(svg, width, height) {
     {
       title: "Enrichment",
       metric: `${formatNumber(summary.recipeBridge?.clusters || evidence.recipeClusters || 0)} recipes`,
-      detail: "OCR, dishes, prices, images, recipe links feed silver rows",
+      detail: `${formatNumber(runPlan.pendingImages || 0)} OCR images queued`,
     },
     {
       title: "Overlay",
@@ -2576,12 +2577,13 @@ function drawFlowBox(svg, x, y, width, height, box, strong = false) {
 function drawCompactEvidenceFooter(svg, x, y, width, summary) {
   const overlays = summary.overlays || {};
   const evidence = summary.evidence || {};
+  const runPlan = summary.runPlan || {};
   const rows = [
     { label: "Dishes", value: overlays.withDishes || 0 },
     { label: "Dates", value: overlays.withDateEvidence || evidence.dateEvidence || 0 },
     { label: "Prices", value: overlays.withPrices || 0 },
     { label: "Matches", value: overlays.withMatches || 0 },
-    { label: "Recipes", value: overlays.withRecipeClusters || evidence.recipeClusters || 0 },
+    { label: "Queue", value: runPlan.pendingImages || overlays.withRecipeClusters || evidence.recipeClusters || 0 },
   ];
   const height = 32;
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
@@ -2597,15 +2599,23 @@ function drawCompactEvidenceFooter(svg, x, y, width, summary) {
   });
 }
 
+function coverageSafeTotal(summary) {
+  const runPlan = summary.runPlan || {};
+  const coverage = summary.coverage || {};
+  return Math.max(1, Number(runPlan.pendingImages || 0) + Number(coverage.ocrProcessedMenus || 0) + Number(coverage.ocrFailures || 0));
+}
+
 function drawEvidenceStack(svg, x, y, width, height, summary) {
   const overlays = summary.overlays || {};
   const evidence = summary.evidence || {};
+  const runPlan = summary.runPlan || {};
   const rows = [
     { label: "Dish overlays", value: overlays.withDishes || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Date evidence", value: overlays.withDateEvidence || evidence.dateEvidence || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Price overlays", value: overlays.withPrices || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Cross-source matches", value: overlays.withMatches || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Recipe bridges", value: overlays.withRecipeClusters || evidence.recipeClusters || 0, total: overlays.menus || summary.menus || 1 },
+    { label: runPlan.storageOk ? "Runnable OCR queue" : "OCR queue blocked", value: runPlan.pendingImages || 0, total: Math.max(runPlan.pendingImages || 0, coverageSafeTotal(summary)) },
   ];
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
   const title = svgEl("text", { x: x + 12, y: y + 22, class: "flow-box-title" });
