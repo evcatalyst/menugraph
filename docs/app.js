@@ -69,6 +69,7 @@ const ASK_SECRET_STORAGE_KEY = "menugraph:ask-secret-hash:v1";
 const ASK_ENTRY_SESSION_STORAGE_KEY = "menugraph:ask-entry-sessions:v1";
 const ASK_ENTRY_ACTIVE_SESSION_KEY = "menugraph:ask-entry-active:v1";
 const ASK_ENTRY_MAX_SESSIONS = 8;
+const VALID_LENSES = new Set(["time", "place", "type", "lineage", "graph", "ontology", "prices", "chat"]);
 const MOBILE_LAB_VARIANTS = new Set(["cards", "journey", "chat", "recipe", "hybrid"]);
 const MOBILE_LAB_MODE_BY_VARIANT = {
   cards: "menus",
@@ -1663,6 +1664,11 @@ function askEntryBackHref() {
     return `${rootPath}${query ? `?${query}` : ""}`;
   }
   return `${window.location.pathname}${query ? `?${query}` : ""}`;
+}
+
+function setupInitialLens() {
+  const requestedLens = new URLSearchParams(window.location.search).get("lens");
+  if (VALID_LENSES.has(requestedLens)) state.activeLens = requestedLens;
 }
 
 function serializeAskEntryMessage(message) {
@@ -4610,7 +4616,9 @@ function showFatal(error) {
   });
 }
 
+setupInitialLens();
 setupAskEntry();
 setupMobileLab();
 bindEvents();
+activateLensButton(state.activeLens);
 loadMenus().catch(showFatal);

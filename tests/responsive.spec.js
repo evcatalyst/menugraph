@@ -1,7 +1,7 @@
 const { expect, test } = require("@playwright/test");
 
-async function openApp(page) {
-  await page.goto("/");
+async function openApp(page, path = "/") {
+  await page.goto(path);
   await expect(page.locator("#viz")).toBeVisible();
   await expect(page.locator("#record-count")).toContainText(/CIA|NYPL|menus/i);
 }
@@ -454,9 +454,8 @@ test("NYPL detail uses NYPL source links, larger images, and item transcriptions
 
 test("graph lens exposes source status and application data flow", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await openApp(page);
+  await openApp(page, "/?lens=graph");
 
-  await page.locator(".drawer-lens-controls button[data-lens='graph']").click();
   await expect(page.locator("body")).toHaveAttribute("data-active-lens", "graph");
   await expect(page.locator("#result-title")).toContainText("Application Structure");
   await expect(page.locator("#results-label")).toHaveText("Source Status");
@@ -468,8 +467,9 @@ test("graph lens exposes source status and application data flow", async ({ page
   const sourceStripText = await page.locator("#result-list").textContent();
   expect(sourceStripText).toContain("Ingested");
   expect(sourceStripText).toContain("Graph Rows");
-  expect(sourceStripText).toContain("Probed");
+  expect(sourceStripText).toContain("Evaluated");
   expect(sourceStripText).toContain("NYPL What's on the Menu");
+  expect(sourceStripText).toContain("Cornell");
   expect(sourceStripText).toContain("Northwestern");
   expect(sourceStripText).toContain("Milwaukee");
   expect(sourceStripText).toContain("University of Washington");
