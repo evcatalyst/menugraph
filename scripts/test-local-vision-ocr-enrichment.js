@@ -8,6 +8,7 @@ const {
   iiifServiceImageUrl,
   menuLike,
   nonRetryableFailedPageKeys,
+  retryableFailedPageKeys,
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
   selectOcrCandidates,
@@ -249,6 +250,15 @@ assert.deepStrictEqual(
     ]),
   ],
   [successfulPageKey("ocrtriage:partial", 2)]
+);
+assert.deepStrictEqual(
+  [
+    ...retryableFailedPageKeys([
+      { status: "error", candidateId: "ocrtriage:partial", pageNumber: 2, errorMessage: "HTTP 403" },
+      { status: "error", candidateId: "ocrtriage:retry", pageNumber: 2, errorMessage: "socket hang up" },
+    ]),
+  ],
+  [successfulPageKey("ocrtriage:retry", 2)]
 );
 assert.deepStrictEqual(
   selectOcrCandidates(

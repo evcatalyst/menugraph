@@ -117,6 +117,13 @@ assert.strictEqual(processedEasy.priceObservations, 1);
 const failedHard = processingForCandidate(hardExternal, processingIndex, 3);
 assert.strictEqual(failedHard.status, "failed_review");
 assert.strictEqual(failedHard.failureClasses.access_denied, 1);
+const retryProcessingIndex = buildProcessingIndex(
+  [{ candidateId: "ocrtriage:retry", status: "error" }],
+  [{ candidateId: "ocrtriage:retry", retryable: true, errorClass: "transient_network", nextAction: "retry_local" }]
+);
+const retryableFailed = processingForCandidate({ ...easyUnknown, id: "ocrtriage:retry", estimatedImages: 1 }, retryProcessingIndex, 1);
+assert.strictEqual(retryableFailed.status, "retryable_failed");
+assert.strictEqual(retryableFailed.retryableFailedPages, 1);
 const mixedProcessingIndex = buildProcessingIndex(
   [
     { candidateId: "ocrtriage:mixed", status: "ok", dishMentionIds: ["dish:1"], priceObservationIds: [] },
@@ -137,10 +144,13 @@ const pendingPlan = progressiveRunPlan([
     processing: { status: "partial", pendingImages: 1 },
   },
   { ...hardExternal, priorityBatch: "backlog", priorityRank: 2, processing: failedHard },
+  { ...easyUnknown, id: "ocrtriage:retry", priorityBatch: "backlog", priorityRank: 3, processing: retryableFailed },
 ]);
 assert.strictEqual(pendingPlan.runs.find((run) => run.label === "phase1_easy_local").candidates, 0);
 assert.strictEqual(pendingPlan.runs.find((run) => run.label === "continue_partial_second_pages").candidates, 1);
 assert(pendingPlan.runs.find((run) => run.label === "continue_partial_second_pages").command.includes("--continue-partial"));
+assert.strictEqual(pendingPlan.runs.find((run) => run.label === "retryable_local_failures").estimatedImages, 1);
+assert(pendingPlan.runs.find((run) => run.label === "retryable_local_failures").command.includes("--pages-per-menu=2"));
 
 const options = optionsFromArgs([
   "--source=milwaukee_historic_menus,uw_menus_collection",

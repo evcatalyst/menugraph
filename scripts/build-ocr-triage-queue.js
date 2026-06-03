@@ -346,6 +346,10 @@ function progressiveRunPlan(candidates, options = {}) {
   const retryable = pending.filter((record) => record.processing?.status === "retryable_failed");
   const metadataOnly = pending.filter((record) => record.route === "metadata_only_no_image");
   const externalReview = pending.filter((record) => /external|rights_review/.test(record.route));
+  const retryableRun = runSlice(retryable, "retryable_local_failures", ["--limit=25", "--batch=all", "--retry-retryable", "--pages-per-menu=2"], 25);
+  retryableRun.estimatedImages = retryable
+    .slice(0, 25)
+    .reduce((sum, record) => sum + Number(record.processing?.retryableFailedPages || record.processing?.failedPages || 0), 0);
   return {
     localFirst: true,
     rawPayloadPolicy: "no_raw_ocr_no_image_blobs_no_vectors",
@@ -362,7 +366,7 @@ function progressiveRunPlan(candidates, options = {}) {
       runSlice(phase1Medium, "phase1_medium_local", ["--limit=25", "--batch=phase1", "--tier=medium", "--pages-per-menu=1"], 25),
       runSlice(partialLocal, "continue_partial_second_pages", ["--limit=25", "--batch=all", "--continue-partial", "--pages-per-menu=2"], 25),
       runSlice(backlogLocal, "backlog_local", ["--limit=50", "--batch=all", "--tier=all", "--pages-per-menu=1"], 50),
-      runSlice(retryable, "retryable_local_failures", ["--limit=25", "--batch=all", "--retry-retryable", "--pages-per-menu=1"], 25),
+      retryableRun,
     ],
     nonOcrActions: [
       {
@@ -400,6 +404,7 @@ function buildProcessingIndex(extractionRecords = [], failureRecords = []) {
         dishMentions: 0,
         priceObservations: 0,
         retryableFailure: false,
+        retryableFailedPages: 0,
         failureClasses: {},
         nextAction: "",
       });
@@ -419,6 +424,7 @@ function buildProcessingIndex(extractionRecords = [], failureRecords = []) {
     const state = ensure(record.candidateId);
     if (!state) continue;
     state.retryableFailure = state.retryableFailure || Boolean(record.retryable);
+    if (record.retryable) state.retryableFailedPages += 1;
     const failureClass = cleanValue(record.errorClass || "unknown_error");
     state.failureClasses[failureClass] = (state.failureClasses[failureClass] || 0) + 1;
     state.nextAction = cleanValue(record.nextAction || state.nextAction);
@@ -439,6 +445,7 @@ function processingForCandidate(candidate, processingIndex, pagesPerMenu = DEFAU
       dishMentions: 0,
       priceObservations: 0,
       retryableFailure: false,
+      retryableFailedPages: 0,
     };
   }
   const coveredImages = state.processedPages + state.failedPages;
@@ -459,6 +466,7 @@ function processingForCandidate(candidate, processingIndex, pagesPerMenu = DEFAU
     dishMentions: state.dishMentions,
     priceObservations: state.priceObservations,
     retryableFailure: Boolean(state.retryableFailure),
+    retryableFailedPages: state.retryableFailedPages,
     failureClasses: state.failureClasses,
     nextAction: cleanValue(state.nextAction),
   };

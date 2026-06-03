@@ -443,6 +443,15 @@ function nonRetryableFailedPageKeys(records = []) {
   );
 }
 
+function retryableFailedPageKeys(records = []) {
+  return new Set(
+    (records || [])
+      .filter((record) => record?.status === "error" && classifyOcrError(record.errorMessage).retryable)
+      .map((record) => successfulPageKey(record.candidateId, record.pageNumber))
+      .filter((key) => key !== "|0")
+  );
+}
+
 function hasActionablePendingPage(candidate, options = {}) {
   const successfulPages = options.successfulPageKeys instanceof Set ? options.successfulPageKeys : new Set();
   const nonRetryablePages = options.nonRetryableFailedPageKeys instanceof Set ? options.nonRetryableFailedPageKeys : new Set();
@@ -634,6 +643,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
   );
   const previousSuccessfulPages = successfulPageKeys(previous.records || []);
   const previousNonRetryableFailedPages = nonRetryableFailedPageKeys(previous.records || []);
+  const previousRetryableFailedPages = retryableFailedPageKeys(previous.records || []);
   const candidates = selectOcrCandidates(queue.records || [], previous.records || [], { ...options, retryCandidateIds });
 
   const extractionRecords = [];
@@ -654,6 +664,9 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
         continue;
       }
       if (options.continuePartial && !options.refresh && previousNonRetryableFailedPages.has(successfulPageKey(candidate.id, pageNumber))) {
+        continue;
+      }
+      if (options.retryRetryable && !options.refresh && !previousRetryableFailedPages.has(successfulPageKey(candidate.id, pageNumber))) {
         continue;
       }
       let cached = null;
@@ -881,6 +894,7 @@ module.exports = {
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
   nonRetryableFailedPageKeys,
+  retryableFailedPageKeys,
   selectOcrCandidates,
   successfulPageKeys,
   successfulPageKey,
