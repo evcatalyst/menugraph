@@ -1,7 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 const { cleanValue } = require("../docs/multisource");
-const { readEnrichmentPayload } = require("./enrichment-shards");
+const { readEnrichmentPayload, readRecipeBridgePayload } = require("./enrichment-shards");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -443,7 +443,7 @@ async function buildEnrichmentCoverageReport(options = {}) {
     readEnrichmentPayload(path.join(ENRICHMENT_DIR, "ocr-extractions.json"), { records: [] }),
     readJson(path.join(ENRICHMENT_DIR, "ocr-failures.json"), { records: [] }),
     readJson(path.join(ENRICHMENT_DIR, "source-probes.json"), { records: [] }),
-    readJson(path.join(ENRICHMENT_DIR, "recipe-bridge.json"), { clusters: [], summary: {} }),
+    readRecipeBridgePayload(path.join(ENRICHMENT_DIR, "recipe-bridge.json"), { clusters: [], summary: {} }),
   ]);
   const extRecords = await externalRecords();
   const sources = new Map();

@@ -5,6 +5,7 @@ const {
   DEFAULT_MIN_FREE_MB,
   storagePreflight,
 } = require("./storage-preflight");
+const { readRecipeBridgePayload } = require("./enrichment-shards");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -413,7 +414,7 @@ async function buildEnrichmentRunPlan(options = {}) {
     readJson(path.join(ENRICHMENT_DIR, "ocr-triage-queue.json"), { records: [] }),
     readJson(path.join(ENRICHMENT_DIR, "ocr-failures.json"), { records: [] }),
     readJson(path.join(ENRICHMENT_DIR, "coverage-report.json"), { records: [], summary: {} }),
-    readJson(path.join(ENRICHMENT_DIR, "recipe-bridge.json"), { clusters: [], dishLinks: [], summary: {} }),
+    readRecipeBridgePayload(path.join(ENRICHMENT_DIR, "recipe-bridge.json"), { clusters: [], dishLinks: [], summary: {} }),
   ]);
   const payload = buildRunPlanPayload({ ocrQueue, ocrFailures, coverageReport, recipeBridge }, options);
   if (!options.dryRun) await writeJson(options.outputPath || OUTPUT_PATH, payload);

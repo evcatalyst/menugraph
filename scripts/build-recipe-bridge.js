@@ -3,7 +3,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const { cleanValue } = require("../docs/multisource");
 const { INGREDIENT_META, normalizeText } = require("../docs/food-taxonomy");
-const { readEnrichmentPayload } = require("./enrichment-shards");
+const { readEnrichmentPayload, writeRecipeBridgePayload } = require("./enrichment-shards");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
@@ -12,6 +12,7 @@ const OUTPUT_PATH = path.join(ENRICHMENT_DIR, "recipe-bridge.json");
 const VERSION = 1;
 const DEFAULT_CLUSTER_LIMIT = 500;
 const DEFAULT_DISH_LINK_LIMIT = 1600;
+const DEFAULT_SHARD_BYTES = 4 * 1024 * 1024;
 const RECIPE_SOURCE_IDS = [
   "the_sifter",
   "recipe1m_plus",
@@ -41,11 +42,6 @@ async function readJson(filePath, fallback = {}) {
   } catch (error) {
     return fallback;
   }
-}
-
-async function writeJson(filePath, payload) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, `${JSON.stringify(payload)}\n`, "utf8");
 }
 
 async function readExternalMenuRecords() {
@@ -448,7 +444,12 @@ async function buildRecipeBridge(options = {}) {
     clusters: selectedClusters,
     dishLinks,
   };
-  if (!options.dryRun) await writeJson(OUTPUT_PATH, payload);
+  if (!options.dryRun) {
+    await writeRecipeBridgePayload(options.outputPath || OUTPUT_PATH, payload, {
+      shard: options.shard !== false,
+      maxShardBytes: Number(options.maxShardBytes || DEFAULT_SHARD_BYTES),
+    });
+  }
   return payload;
 }
 
@@ -456,6 +457,8 @@ function optionsFromArgs(args = process.argv.slice(2)) {
   return {
     clusterLimit: Number(argValue(args, "cluster-limit", DEFAULT_CLUSTER_LIMIT)),
     dishLinkLimit: Number(argValue(args, "dish-link-limit", DEFAULT_DISH_LINK_LIMIT)),
+    maxShardBytes: Number(argValue(args, "max-shard-bytes", DEFAULT_SHARD_BYTES)),
+    shard: !args.includes("--no-shard"),
     dryRun: args.includes("--dry-run"),
   };
 }
@@ -472,6 +475,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  DEFAULT_SHARD_BYTES,
   VERSION,
   buildRecipeBridge,
   clusterScore,

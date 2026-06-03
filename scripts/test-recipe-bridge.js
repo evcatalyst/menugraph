@@ -44,10 +44,14 @@ assert(
   "historical, ingredient-rich, price-linked clusters should rank higher"
 );
 
-const options = optionsFromArgs(["--cluster-limit=25", "--dish-link-limit=40", "--dry-run"]);
+const options = optionsFromArgs(["--cluster-limit=25", "--dish-link-limit=40", "--max-shard-bytes=2048", "--dry-run"]);
 assert.strictEqual(options.clusterLimit, 25);
 assert.strictEqual(options.dishLinkLimit, 40);
+assert.strictEqual(options.maxShardBytes, 2048);
+assert.strictEqual(options.shard, true);
 assert.strictEqual(options.dryRun, true);
+
+assert.strictEqual(optionsFromArgs(["--no-shard"]).shard, false);
 
 const externalClusters = new Map();
 const observedExternal = observeExternalMenuRecord(externalClusters, {
