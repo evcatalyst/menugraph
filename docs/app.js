@@ -2950,10 +2950,12 @@ function renderGraphExternalSourceResults() {
 }
 
 function externalRecordEvidenceLabel(record) {
+  const overlay = state.graphOverlayByMenu.get(record.id);
   const parts = [
     record.priceObservationCount ? `${record.priceObservationCount} price${record.priceObservationCount === 1 ? "" : "s"}` : "",
     record.dishHints?.length ? `${record.dishHints.length} dish hint${record.dishHints.length === 1 ? "" : "s"}` : "",
     record.ingredientTags?.length ? `${record.ingredientTags.length} ingredient tag${record.ingredientTags.length === 1 ? "" : "s"}` : "",
+    overlay?.counts?.imageFeatures ? `${overlay.counts.imageFeatures} image feature${overlay.counts.imageFeatures === 1 ? "" : "s"}` : "",
   ].filter(Boolean);
   return parts.join(" / ") || "metadata graph row";
 }
@@ -2981,6 +2983,7 @@ function renderExternalMenuDetail(record) {
     ["Mode", record.transportMode],
     ["Prices", record.priceObservationCount ? `${record.priceObservationCount} compact observation${record.priceObservationCount === 1 ? "" : "s"}` : ""],
     ["Ingredients", (record.ingredientTags || []).join(", ")],
+    ["Image Features", externalImageFeatureSummary(record.id)],
   ].filter(([, value]) => compact(value, ""));
 
   els.detailMeta.replaceChildren(
@@ -3282,8 +3285,30 @@ function hasGraphEvidence(overlay) {
       Number(counts.priceObservations || 0) ||
       Number(counts.dateEvidence || 0) ||
       Number(counts.matches || 0) ||
-      Number(counts.ontologyTerms || 0)
+      Number(counts.ontologyTerms || 0) ||
+      Number(counts.imageFeatures || 0)
   );
+}
+
+function imageFeatureLabel(record) {
+  if (!record) return "";
+  const scalar = record.scalar || {};
+  const width = Number(scalar.width || 0);
+  const height = Number(scalar.height || 0);
+  const dimensions = width && height ? `${formatNumber(width)} x ${formatNumber(height)}` : "";
+  return [dimensions, scalar.orientation, scalar.pageCount ? `${formatNumber(scalar.pageCount)} page${scalar.pageCount === 1 ? "" : "s"}` : ""]
+    .filter(Boolean)
+    .join(" / ");
+}
+
+function externalImageFeatureSummary(menuId) {
+  const overlay = state.graphOverlayByMenu.get(menuId);
+  const index = graphEvidenceIndex();
+  const labels = (overlay?.imageFeatureIds || [])
+    .slice(0, 2)
+    .map((id) => imageFeatureLabel(index.imageFeatures?.[id]))
+    .filter(Boolean);
+  return labels.join("; ");
 }
 
 function renderGraphEvidence(overlay) {
@@ -3302,6 +3327,7 @@ function renderGraphEvidence(overlay) {
     counts.priceObservations ? `${counts.priceObservations} price observation${counts.priceObservations === 1 ? "" : "s"}` : "",
     counts.dateEvidence ? `${counts.dateEvidence} date evidence` : "",
     counts.matches ? `${counts.matches} match edge${counts.matches === 1 ? "" : "s"}` : "",
+    counts.imageFeatures ? `${counts.imageFeatures} image feature${counts.imageFeatures === 1 ? "" : "s"}` : "",
   ].filter(Boolean);
   const topDishes = (overlay.topDishes || []).slice(0, 4).join("; ");
   const priceRows = (overlay.priceObservationIds || [])
@@ -3314,6 +3340,10 @@ function renderGraphEvidence(overlay) {
     .map((id) => index.dateEvidence?.[id])
     .filter(Boolean)
     .map((record) => `${record.confidence} ${record.decade || record.centerYear || ""}`.trim());
+  const imageRows = (overlay.imageFeatureIds || [])
+    .slice(0, 2)
+    .map((id) => imageFeatureLabel(index.imageFeatures?.[id]))
+    .filter(Boolean);
 
   summary.innerHTML = `
     <span>
@@ -3321,7 +3351,13 @@ function renderGraphEvidence(overlay) {
       <em>${countParts.join(" / ") || "Evidence indexed"}</em>
     </span>
     <span>${topDishes || priceRows.join("; ") || "Derived graph evidence is available for this menu."}</span>
-    <small>${[priceRows.length ? `Prices: ${priceRows.join("; ")}` : "", dateRows.length ? `Dates: ${dateRows.join("; ")}` : ""].filter(Boolean).join(" | ")}</small>
+    <small>${[
+      priceRows.length ? `Prices: ${priceRows.join("; ")}` : "",
+      dateRows.length ? `Dates: ${dateRows.join("; ")}` : "",
+      imageRows.length ? `Images: ${imageRows.join("; ")}` : "",
+    ]
+      .filter(Boolean)
+      .join(" | ")}</small>
   `;
   nodes.push(summary);
   return nodes;

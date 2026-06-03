@@ -101,6 +101,18 @@ if (manifest.summary.externalMenus?.records) {
     Object.values(evidenceIndex.imageFeatures || {}).some((record) => record.sourceId === "milwaukee_historic_menus" && record.scalar?.pageCount),
     "Milwaukee image metadata features should be indexed"
   );
+  assert(
+    Object.values(evidenceIndex.imageFeatures || {}).some(
+      (record) => record.sourceId === "northwestern_transport_menus" && record.scalar?.width && record.scalar?.height
+    ),
+    "Northwestern image metadata dimensions should be indexed"
+  );
+  assert(
+    Object.values(evidenceIndex.imageFeatures || {}).some(
+      (record) => record.sourceId === "uh_1850s_1860s_menus" && record.scalar?.width && record.scalar?.height
+    ),
+    "UH image metadata dimensions should be indexed"
+  );
 }
 
 for (const source of evaluations.sources) {

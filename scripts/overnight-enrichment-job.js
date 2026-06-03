@@ -1,6 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 const { buildGraphOverlay } = require("./build-graph-overlay");
+const { assessExternalImages } = require("./external-image-assessment");
 const { buildLaplSource } = require("./lapl-source");
 const { buildLocalEnrichment, optionsFromArgs } = require("./local-enrichment");
 const { buildMilwaukeeSource } = require("./milwaukee-source");
@@ -125,6 +126,17 @@ async function runExternalSources(args) {
   return { skipped: false, sources: results };
 }
 
+async function runExternalImageAssessment(args) {
+  if (hasFlag(args, "skip-external-image-assessment")) {
+    return { skipped: true };
+  }
+  const timeoutMs = Math.max(3000, Number(argValue(args, "external-image-timeout-ms", argValue(args, "external-timeout-ms", "15000"))) || 15000);
+  const dryRun = hasFlag(args, "dry-run");
+  const limit = Math.max(0, Number(argValue(args, "external-image-limit", "0")) || 0);
+  console.log(`[${timestamp()}] Assessing external IIIF image metadata${limit ? ` with limit=${limit}` : ""}`);
+  return assessExternalImages({ timeoutMs, dryRun, limit, sources: [], refresh: hasFlag(args, "refresh-external-images") });
+}
+
 async function main() {
   const args = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ARGS;
   const options = optionsFromArgs(args);
@@ -163,11 +175,23 @@ async function main() {
 
   await writeStatus({
     status: "running",
+    phase: "external-image-assessment",
+    pid: process.pid,
+    args,
+    enrichmentSummary: enrichment.status.summary,
+    externalSources,
+  });
+
+  const externalImageAssessment = await runExternalImageAssessment(args);
+
+  await writeStatus({
+    status: "running",
     phase: "graph-build",
     pid: process.pid,
     args,
     enrichmentSummary: enrichment.status.summary,
     externalSources,
+    externalImageAssessment,
   });
 
   const graph = await buildGraphOverlay();
@@ -181,6 +205,7 @@ async function main() {
     finishedAt: timestamp(),
     enrichmentSummary: enrichment.status.summary,
     externalSources,
+    externalImageAssessment,
     graphSummary: graph.manifest.summary,
   });
 }
