@@ -269,6 +269,63 @@ function observePriceRecord(clusters, record, menuYears = new Map()) {
   observeYear(cluster, record.year || menuYears.get(menuId));
 }
 
+function observeExternalMenuRecord(clusters, record, menuYears = new Map()) {
+  const menuId = cleanValue(record.menuId || record.id);
+  if (!menuId) return { dishMentions: 0, priceObservations: 0 };
+  const year = record.year || record.pointYear || record.lowerYear || menuYears.get(menuId);
+  const sourceKey = cleanValue(record.sourceKey || record.sourceId || "external");
+  const sourceId = cleanValue(record.sourceId);
+  const sourceRecordId = cleanValue(record.sourceRecordId || menuId);
+  const dishRows = (record.dishMentions || []).length ? record.dishMentions : record.dishHints || [];
+  let dishCount = 0;
+  let priceCount = 0;
+  for (const [index, dish] of dishRows.entries()) {
+    const rawName = cleanValue(dish.rawName || dish.normalizedName);
+    if (!rawName) continue;
+    observeDishRecord(
+      clusters,
+      {
+        ...dish,
+        id: cleanValue(dish.id) || stableId("externaldishmention", [menuId, rawName, index]),
+        menuId,
+        sourceKey,
+        sourceId,
+        sourceRecordId,
+        rawName,
+        normalizedName: dish.normalizedName || normalizeText(rawName),
+        canonicalDishId: dish.canonicalDishId || `dish:${slug(rawName)}`,
+        year,
+        extractionMethod: dish.extractionMethod || "external_menu_metadata",
+      },
+      menuYears
+    );
+    dishCount += 1;
+  }
+  for (const [index, price] of (record.priceObservations || []).entries()) {
+    const rawName = cleanValue(price.rawName || price.item || price.normalizedName);
+    if (!rawName) continue;
+    observePriceRecord(
+      clusters,
+      {
+        ...price,
+        id: cleanValue(price.id) || stableId("externalprice", [menuId, rawName, price.rawPrice || price.amount, index]),
+        menuId,
+        sourceKey,
+        sourceId,
+        sourceRecordId,
+        rawName,
+        normalizedName: price.normalizedName || normalizeText(rawName),
+        canonicalDishId: price.canonicalDishId || `dish:${slug(rawName)}`,
+        year: price.year || year,
+        extractionMethod: price.extractionMethod || "external_menu_price",
+      },
+      menuYears
+    );
+    priceCount += 1;
+  }
+  return { dishMentions: dishCount, priceObservations: priceCount };
+}
+
 function compactCluster(cluster) {
   const ingredientTags = [...cluster.ingredientTags].filter(Boolean).sort().slice(0, 12);
   const techniqueTags = [...cluster.techniqueTags].sort().slice(0, 8);
@@ -334,14 +391,22 @@ async function buildRecipeBridge(options = {}) {
   const generatedAt = new Date().toISOString();
   const clusterLimit = Math.max(10, Number(options.clusterLimit || DEFAULT_CLUSTER_LIMIT));
   const dishLinkLimit = Math.max(10, Number(options.dishLinkLimit || DEFAULT_DISH_LINK_LIMIT));
-  const [dishMentions, priceObservations] = await Promise.all([
+  const [dishMentions, priceObservations, externalRecords] = await Promise.all([
     readEnrichmentPayload(path.join(ENRICHMENT_DIR, "dish-mentions.json"), { records: [] }),
     readEnrichmentPayload(path.join(ENRICHMENT_DIR, "price-observations.json"), { records: [] }),
+    readExternalMenuRecords(),
   ]);
   const menuYears = await menuYearIndex();
   const clusters = new Map();
   for (const record of dishMentions.records || []) observeDishRecord(clusters, record, menuYears);
   for (const record of priceObservations.records || []) observePriceRecord(clusters, record, menuYears);
+  let externalDishMentions = 0;
+  let externalPriceObservations = 0;
+  for (const record of externalRecords || []) {
+    const observed = observeExternalMenuRecord(clusters, record, menuYears);
+    externalDishMentions += observed.dishMentions;
+    externalPriceObservations += observed.priceObservations;
+  }
 
   const rankedClusters = [...clusters.values()]
     .filter((cluster) => cluster.observedDishMentionCount >= 2 || cluster.priceObservationCount || cluster.ingredientTags.size)
@@ -365,6 +430,9 @@ async function buildRecipeBridge(options = {}) {
       clusters: selectedClusters.length,
       dishLinks: dishLinks.length,
       menusRepresented: new Set(selectedClusters.flatMap((cluster) => cluster.menuIds)).size,
+      externalMenuRecords: externalRecords.length,
+      externalDishMentions,
+      externalPriceObservations,
       priceLinkedClusters: selectedClusters.filter((cluster) => cluster.priceObservationCount).length,
       historicalClusters: selectedClusters.filter((cluster) => cluster.firstSeenYear && cluster.firstSeenYear < 1950).length,
       ingredientTags: ingredientCounts.size,
@@ -410,4 +478,5 @@ module.exports = {
   optionsFromArgs,
   sourceCandidatesForCluster,
   techniqueTagsFor,
+  observeExternalMenuRecord,
 };

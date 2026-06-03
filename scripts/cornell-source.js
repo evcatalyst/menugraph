@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const fs = require("fs/promises");
 const path = require("path");
 const { cleanValue, normalizeText } = require("../docs/multisource");
+const { extractPricesFromText, normalizePrice, contextForEntry } = require("../docs/price-utils");
 const { dishTypeFor, ingredientTagsFor, normalizedDishName } = require("./local-enrichment");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -24,6 +25,27 @@ const DISH_HINT_PATTERNS = [
   ["railroad dining", /\brailroad\b|\brailway\b|\bpullman\b|\bdining car\b/i],
   ["ship dining", /\bsteamship\b|\bship\b|\bcruise\b|\bhurtigruten\b/i],
   ["wine list", /\bwine list\b|\bplats du jour\b/i],
+];
+
+const TITLE_FOOD_PATTERNS = [
+  ["wine list", /\b(?:carte des vins|wine list|wine menu|wine selection|wine vaults?)\b/i, ["wine"]],
+  ["plats du jour", /\bplats du jour\b/i, []],
+  ["coffee service", /\b(?:cafe|café|coffee shop|coffee house)\b/i, ["coffee"]],
+  ["tea service", /\b(?:tea room|afternoon tea)\b/i, ["tea"]],
+  ["brunch menu", /\bbrunch\b/i, []],
+  ["supper menu", /\bsupper\b/i, []],
+  ["dessert menu", /\b(?:dessert|ice cream|pasticceria)\b/i, ["cream"]],
+  ["tempura", /\btempura\b/i, []],
+  ["sukiyaki", /\bsukiyaki\b/i, ["beef"]],
+  ["oyster bar", /\boyster\b/i, ["oyster"]],
+  ["lobster house", /\blobster\b/i, ["lobster"]],
+  ["steak house", /\bsteak\b/i, ["beef"]],
+  ["roast beef", /\broast beef\b/i, ["beef"]],
+  ["fish and chips", /\bfish\s*(?:&|and)\s*chips\b/i, ["fish", "potato"]],
+  ["crab restaurant", /\bcrab\b/i, ["crab"]],
+  ["apple pie bakery", /\bapple pie\b/i, ["apple"]],
+  ["bagel deli", /\bbagel\b/i, ["bread"]],
+  ["kosher breakfast", /\bkosher\b.*\bbreakfast\b|\bbreakfast\b.*\bkosher\b/i, []],
 ];
 
 const CUISINE_PATTERNS = [
@@ -164,10 +186,18 @@ function countryForPlace(placeText) {
   return matches.find(([, pattern]) => pattern.test(text))?.[0] || "";
 }
 
-function dishMentionFor(record, rawName, contextText) {
+function mergeUnique(values) {
+  return [...new Set(values.map(cleanValue).filter(Boolean))].sort();
+}
+
+function titleFoodLabels(title) {
+  return TITLE_FOOD_PATTERNS.filter(([, pattern]) => pattern.test(title)).map(([label, , ingredientTags]) => ({ label, ingredientTags }));
+}
+
+function dishMentionFor(record, rawName, contextText, options = {}) {
   const normalizedName = normalizedDishName(rawName);
   if (!normalizedName) return null;
-  const tags = [...new Set([...ingredientTagsFor(rawName), ...ingredientTagsFor(contextText)])].sort();
+  const tags = mergeUnique([...(options.ingredientTags || []), ...ingredientTagsFor(rawName)]);
   return {
     id: stableId("cornelldish", [record.menuId, normalizedName]),
     menuId: record.menuId,
@@ -176,17 +206,68 @@ function dishMentionFor(record, rawName, contextText) {
     rawName: cleanValue(rawName),
     normalizedName,
     canonicalDishId: `dish:${normalizedName.replace(/\s+/g, "-").slice(0, 96)}`,
-    sectionName: "finding aid title",
+    sectionName: options.sectionName || "finding aid title",
     dishType: dishTypeFor(rawName),
     ingredientTags: tags,
-    extractionMethod: "cornell_finding_aid_keyword",
-    confidence: 0.42,
+    extractionMethod: options.extractionMethod || "cornell_finding_aid_keyword",
+    confidence: Number(options.confidence || 0.42),
     provenance: {
       sourceFile: "enrichment/external-sources/cornell_nestle_menu_collection.json",
       sourceRecordId: record.sourceRecordId,
       sourceUrl: SOURCE_URL,
     },
   };
+}
+
+function priceObservationsFor(record, contextText, references = {}, contextEvents = []) {
+  if (!/[£$€¢]/.test(contextText)) return [];
+  const parsed = extractPricesFromText(contextText, {
+    id: record.menuId,
+    title: record.title,
+    year: record.year || record.pointYear || null,
+    decade: record.decade,
+    country: record.country || "unknown",
+    itemUrl: SOURCE_URL,
+  }).filter((entry) => /[£$€¢]/.test(entry.rawPrice || ""));
+  return parsed.map((entry, index) => {
+    const item = /\bper person\b/i.test(entry.rawLine || contextText)
+      ? "per-person menu price"
+      : cleanValue(entry.item).length > 3 && !/persons?/i.test(entry.item)
+        ? entry.item
+        : "metadata title price";
+    const rawName = cleanValue(item);
+    const price = {
+      id: stableId("cornellprice", [record.menuId, entry.rawPrice, index, rawName]),
+      menuId: record.menuId,
+      menuUid: record.menuId,
+      sourceId: SOURCE_ID,
+      sourceKey: SOURCE_KEY,
+      item: rawName,
+      rawName,
+      normalizedName: normalizedDishName(rawName),
+      rawPrice: entry.rawPrice,
+      rawPriceText: entry.rawPrice,
+      amount: entry.amount,
+      currency: entry.currency,
+      currencyCode: entry.currency,
+      year: record.year || record.pointYear || null,
+      confidence: entry.confidence === "high" ? "medium" : entry.confidence || "low",
+      scale: "cornell-finding-aid-explicit-currency",
+      dishType: dishTypeFor(rawName),
+      ingredientTags: ingredientTagsFor(rawName),
+      extractionMethod: "cornell_finding_aid_title_price",
+      provenance: {
+        sourceFile: "enrichment/external-sources/cornell_nestle_menu_collection.json",
+        sourceRecordId: record.sourceRecordId,
+        sourceUrl: SOURCE_URL,
+      },
+    };
+    return {
+      ...price,
+      normalized: normalizePrice(price, references),
+      context: contextForEntry(price, contextEvents),
+    };
+  });
 }
 
 function rawRowsFromHtml(html) {
@@ -226,12 +307,17 @@ function rawRowsFromHtml(html) {
   return rows;
 }
 
-function normalizeRow(row) {
+function normalizeRow(row, options = {}) {
   const parsedDate = parseDateRange(row.dateText);
   const sourceRecordId = stableId("cornellrow", [row.rowIndex, row.box, row.folder, row.description, row.dateText, row.placeText]).replace(/^cornellrow:/, "");
   const menuId = `${SOURCE_KEY}:${sourceRecordId}`;
   const contextText = [row.description, row.placeText, row.series].map(cleanValue).filter(Boolean).join(" ");
-  const dishLabels = tagsFor(contextText, DISH_HINT_PATTERNS);
+  const genericDishLabels = tagsFor(contextText, DISH_HINT_PATTERNS).map((label) => ({ label, confidence: 0.42, extractionMethod: "cornell_finding_aid_keyword", ingredientTags: [] }));
+  const specificDishLabels = titleFoodLabels(row.description).map((item) => ({
+    ...item,
+    confidence: 0.52,
+    extractionMethod: "cornell_finding_aid_title_food_keyword",
+  }));
   const baseRecord = {
     id: menuId,
     menuId,
@@ -260,7 +346,7 @@ function normalizeRow(row) {
     cuisineTags: [...new Set(tagsFor(contextText, CUISINE_PATTERNS))].sort(),
     formatTags: ["finding aid"],
     styleTags: [],
-    ingredientTags: ingredientTagsFor(contextText),
+    ingredientTags: [],
     descriptionSummary: [row.series, row.box, row.folder].filter(Boolean).join("; ").slice(0, 420),
     notes: "Derived from Cornell EAD container-list metadata; no item images, OCR, or full recipe/menu text copied.",
     containerText: [row.box, row.folder].filter(Boolean).join(", "),
@@ -273,7 +359,11 @@ function normalizeRow(row) {
       rightsNote: "Derived finding-aid metadata only; verify collection use terms before item-level image/OCR harvest.",
     },
   };
-  const dishMentions = dishLabels.map((label) => dishMentionFor(baseRecord, label, contextText)).filter(Boolean);
+  const dishMentions = [...genericDishLabels, ...specificDishLabels]
+    .filter((item, index, all) => all.findIndex((candidate) => candidate.label === item.label) === index)
+    .map((item) => dishMentionFor(baseRecord, item.label, contextText, item))
+    .filter(Boolean);
+  const priceObservations = priceObservationsFor(baseRecord, contextText, options.references, options.contextEvents);
   const ingredientTags = [...new Set([...(baseRecord.ingredientTags || []), ...dishMentions.flatMap((dish) => dish.ingredientTags || [])])].sort();
   return {
     ...baseRecord,
@@ -285,7 +375,7 @@ function normalizeRow(row) {
       ingredientTags: dish.ingredientTags,
       confidence: dish.confidence,
     })),
-    priceObservations: [],
+    priceObservations,
     imageFeatures: [],
     ingredientTags,
   };
@@ -305,7 +395,7 @@ function recordScore(record) {
 
 function parseFindingAid(html, options = {}) {
   const rows = rawRowsFromHtml(html);
-  const records = rows.map(normalizeRow);
+  const records = rows.map((row) => normalizeRow(row, options));
   const limit = Math.max(1, Number(options.limit || records.length) || records.length);
   return records.sort((a, b) => recordScore(b) - recordScore(a) || cleanValue(a.title).localeCompare(cleanValue(b.title))).slice(0, limit);
 }
@@ -330,6 +420,14 @@ async function writeJson(filePath, payload) {
   await fs.writeFile(filePath, `${JSON.stringify(payload)}\n`, "utf8");
 }
 
+async function readJson(filePath, fallback = {}) {
+  try {
+    return JSON.parse(await fs.readFile(filePath, "utf8"));
+  } catch (error) {
+    return fallback;
+  }
+}
+
 function countBy(records, getter) {
   const counts = new Map();
   for (const record of records || []) {
@@ -343,9 +441,15 @@ async function buildCornellSource(options = {}) {
   const startedAt = new Date().toISOString();
   const limit = Math.min(2500, Math.max(1, Number(options.limit || 800) || 800));
   const html = options.html || (await fetchText(SOURCE_URL, options.timeoutMs || 30000));
-  const records = parseFindingAid(html, { limit });
+  const [cpiUs, cpiCountry, contextEvents] = await Promise.all([
+    readJson(path.join(DATA_DIR, "reference", "cpi-us.json"), {}),
+    readJson(path.join(DATA_DIR, "reference", "cpi-country.json"), {}),
+    readJson(path.join(DATA_DIR, "reference", "context-events.json"), []),
+  ]);
+  const records = parseFindingAid(html, { limit, references: { cpiUs, cpiCountry }, contextEvents });
   const generatedAt = new Date().toISOString();
   const dishMentions = records.flatMap((record) => record.dishMentions || []);
+  const priceObservations = records.flatMap((record) => record.priceObservations || []);
   const output = {
     version: VERSION,
     generatedAt,
@@ -357,7 +461,7 @@ async function buildCornellSource(options = {}) {
       total: records.length,
       totalParsedRows: rawRowsFromHtml(html).length,
       dishMentions: dishMentions.length,
-      priceObservations: 0,
+      priceObservations: priceObservations.length,
       withDates: records.filter((record) => record.lowerYear || record.upperYear || record.year).length,
       withVenues: records.filter((record) => record.venueText).length,
       withPlaces: records.filter((record) => record.placeText).length,
@@ -409,6 +513,8 @@ module.exports = {
   optionsFromArgs,
   parseDateRange,
   parseFindingAid,
+  priceObservationsFor,
   rawRowsFromHtml,
+  titleFoodLabels,
   transportModeFor,
 };
