@@ -10,6 +10,7 @@ const { buildNorthwesternSource } = require("./northwestern-source");
 const { buildSeattleSource } = require("./seattle-source");
 const { buildUhSource } = require("./uh-source");
 const { buildUwSource } = require("./uw-source");
+const { buildDenverSource } = require("./denver-source");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
@@ -30,6 +31,7 @@ const DEFAULT_ARGS = [
   "--uw-limit=300",
   "--nola-limit=100",
   "--seattle-limit=300",
+  "--denver-limit=100",
 ];
 
 function timestamp() {
@@ -108,6 +110,11 @@ async function runExternalSources(args) {
       sourceId: "seattle_room_menu_collection",
       limit: sourceLimit(args, "seattle-limit", 300),
       run: (limit) => buildSeattleSource({ limit, timeoutMs, dryRun }),
+    },
+    {
+      sourceId: "denver_menu_collection",
+      limit: sourceLimit(args, "denver-limit", 100),
+      run: (limit) => buildDenverSource({ limit, timeoutMs, dryRun }),
     },
   ];
 

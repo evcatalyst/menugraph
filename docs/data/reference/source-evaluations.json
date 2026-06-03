@@ -86,6 +86,13 @@
       "capabilityWeights": { "regional_evidence": 10, "date_estimation": 8, "dish_entity_resolution": 7, "visual_style_cv": 7, "price_trends": 5 }
     },
     {
+      "id": "denver_menu_collection",
+      "label": "Denver Public Library Digital Collections",
+      "sourceKey": "denver",
+      "scores": { "dq": 6, "access": 6, "coverage": 3, "uniqueValue": 7, "integrationFit": 7, "mlReady": 5, "risk": 5 },
+      "capabilityWeights": { "regional_evidence": 9, "date_estimation": 6, "visual_style_cv": 6, "dish_entity_resolution": 4, "price_trends": 3 }
+    },
+    {
       "id": "dotlas_structured_menus",
       "label": "Dotlas Structured Menu Dataset",
       "scores": { "dq": 9, "access": 4, "coverage": 8, "uniqueValue": 9, "integrationFit": 9, "mlReady": 8, "risk": 4 },

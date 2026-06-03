@@ -252,6 +252,36 @@ sources:
       local_first: true
       external_routing_default: "sanitized_metadata_only"
 
+  denver_menu_collection:
+    name: "Denver Public Library Digital Collections menu records"
+    source_type: "regional_menu_images_metadata"
+    priority: 2
+    access:
+      method: "recollect_search_and_item_html"
+      bulk_available: false
+      source_url: "https://digital.denverlibrary.org"
+      api_url: "https://digital.denverlibrary.org/nodes/search_result"
+    rights:
+      category: "mixed"
+      license: "Source item rights; Denver Public Library Digital Collections terms and item rights statements apply"
+      grok_safe_default: false
+      public_static_fields:
+        - source metadata
+        - source links
+        - derived date evidence
+        - derived dish and ingredient hints
+        - derived price observations from metadata text
+        - derived image metadata features
+      restricted_fields:
+        - raw full-page images unless rights-cleared
+        - raw OCR or transcription unless rights-cleared
+        - downloaded PDFs or image files
+        - embedding vectors and external LLM payloads
+    enrichment:
+      role: "colorado_regional_restaurant_hotel_style_evidence"
+      local_first: true
+      external_routing_default: "sanitized_metadata_only"
+
   dotlas_structured_menus:
     name: "Dotlas Structured Menu Dataset"
     source_type: "modern_structured_menu_commercial"
