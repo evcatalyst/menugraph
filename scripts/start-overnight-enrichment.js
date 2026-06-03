@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
+const { pruneCache } = require("./prune-enrichment-cache");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
@@ -11,6 +12,18 @@ function stamp() {
 
 function main() {
   fs.mkdirSync(CACHE_DIR, { recursive: true });
+  let cachePrune = null;
+  try {
+    cachePrune = pruneCache({
+      cacheDir: CACHE_DIR,
+      keepLogs: 5,
+      pruneLogs: true,
+      pruneTranscripts: true,
+    });
+  } catch (error) {
+    cachePrune = { error: error.message };
+    console.warn(`Cache prune failed; continuing overnight launch: ${error.message}`);
+  }
   const logPath = path.join(CACHE_DIR, `overnight-${stamp()}.log`);
   const statusPath = path.join(CACHE_DIR, "overnight-status.json");
   const currentPath = path.join(CACHE_DIR, "overnight-current.json");
@@ -27,6 +40,7 @@ function main() {
     startedAt: new Date().toISOString(),
     logPath,
     statusPath,
+    cachePrune,
     args: process.argv.slice(2),
   };
   fs.writeFileSync(currentPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
