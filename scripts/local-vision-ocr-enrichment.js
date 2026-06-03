@@ -19,6 +19,7 @@ const ENRICHMENT_DIR = path.join(DATA_DIR, "enrichment");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment", "ocr-images");
 const SWIFT_HELPER = path.join(__dirname, "vision-ocr.swift");
 const OUTPUT_PATH = path.join(ENRICHMENT_DIR, "ocr-extractions.json");
+const FAILURE_OUTPUT_PATH = path.join(ENRICHMENT_DIR, "ocr-failures.json");
 const CONTENTDM_HOST = "ciadigitalcollections.culinary.edu";
 const CIA_COLLECTION = "p16940coll1";
 const VERSION = 1;
@@ -352,12 +353,150 @@ function dedupeExtractionRecords(records) {
   for (const record of [...(records || [])].reverse()) {
     const pageKey = [record?.candidateId, record?.pageNumber].map(cleanValue).join("|");
     if (record?.status === "error" && successByPage.has(pageKey)) continue;
-    const key = record?.status === "error" ? [pageKey, "error", record?.imageHash].map(cleanValue).join("|") : [pageKey, "ok"].map(cleanValue).join("|");
+    const key = [pageKey, record?.status === "error" ? "error" : "ok"].map(cleanValue).join("|");
     if (!pageKey || pageKey === "|" || seen.has(key)) continue;
     seen.add(key);
     output.push(record);
   }
   return output.reverse();
+}
+
+function classifyOcrError(message = "") {
+  const text = cleanValue(message).toLowerCase();
+  if (/http\s*403/.test(text)) {
+    return {
+      errorClass: "access_denied",
+      retryable: false,
+      nextAction: "source_access_review",
+    };
+  }
+  if (/http\s*404/.test(text)) {
+    return {
+      errorClass: "missing_image",
+      retryable: false,
+      nextAction: "source_metadata_review",
+    };
+  }
+  if (/http\s*501/.test(text)) {
+    return {
+      errorClass: "unsupported_image_endpoint",
+      retryable: false,
+      nextAction: "alternate_image_route",
+    };
+  }
+  if (/timed?\s*out|timeout|socket hang up|econnreset|network|enotfound|eai_again/.test(text)) {
+    return {
+      errorClass: "transient_network",
+      retryable: true,
+      nextAction: "retry_local",
+    };
+  }
+  if (/non-image payload|returned non-image|html/.test(text)) {
+    return {
+      errorClass: "non_image_payload",
+      retryable: false,
+      nextAction: "source_metadata_review",
+    };
+  }
+  if (/vision|ocr|swift|parse/.test(text)) {
+    return {
+      errorClass: "local_ocr_failure",
+      retryable: true,
+      nextAction: "retry_local_or_external_review",
+    };
+  }
+  return {
+    errorClass: "unknown_error",
+    retryable: true,
+    nextAction: "retry_local",
+  };
+}
+
+function countBy(records, keyFn) {
+  const counts = new Map();
+  for (const record of records || []) {
+    const key = cleanValue(keyFn(record) || "unknown") || "unknown";
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
+}
+
+function selectOcrCandidates(queueRecords, previousRecords, options = {}) {
+  const processed = new Set((previousRecords || []).map((record) => cleanValue(record.candidateId)).filter(Boolean));
+  const failedCandidateIds = new Set(
+    (previousRecords || [])
+      .filter((record) => record?.status === "error")
+      .map((record) => cleanValue(record.candidateId))
+      .filter(Boolean)
+  );
+  const sourceFilter = cleanValue(options.source || "all");
+  const tierFilter = cleanValue(options.tier || "all");
+  const batch = cleanValue(options.batch || "phase1");
+  const limit = Math.max(1, Number(options.limit || 10) || 10);
+  return (queueRecords || [])
+    .filter((candidate) => (options.retryErrors ? failedCandidateIds.has(candidate.id) : !processed.has(candidate.id) || options.refresh))
+    .filter((candidate) => sourceFilter === "all" || candidate.sourceKey === sourceFilter || candidate.sourceId === sourceFilter)
+    .filter((candidate) => tierFilter === "all" || candidate.localTier === tierFilter)
+    .filter((candidate) => batch === "all" || candidate.priorityBatch === batch)
+    .sort((a, b) => Number(a.priorityRank || 999999) - Number(b.priorityRank || 999999))
+    .slice(0, limit);
+}
+
+function buildOcrFailureReport({ records = [], queueRecords = [], generatedAt = new Date().toISOString() } = {}) {
+  const candidates = new Map((queueRecords || []).map((record) => [cleanValue(record.id), record]));
+  const failures = (records || [])
+    .filter((record) => record?.status === "error")
+    .map((record) => {
+      const candidate = candidates.get(cleanValue(record.candidateId)) || {};
+      const classification = classifyOcrError(record.errorMessage);
+      return {
+        id: stableId("ocrfailure", [record.candidateId, record.pageNumber, record.imageHash, record.errorMessage]),
+        candidateId: cleanValue(record.candidateId),
+        menuId: cleanValue(record.menuId),
+        sourceId: cleanValue(record.sourceId),
+        sourceKey: cleanValue(record.sourceKey),
+        sourceRecordId: cleanValue(record.sourceRecordId),
+        title: cleanValue(record.title || candidate.title),
+        pageNumber: Number(record.pageNumber || 0) || null,
+        errorClass: classification.errorClass,
+        errorMessage: cleanValue(record.errorMessage).slice(0, 320),
+        retryable: classification.retryable,
+        nextAction: classification.nextAction,
+        route: cleanValue(candidate.route),
+        localTier: cleanValue(candidate.localTier),
+        priorityRank: candidate.priorityRank ?? null,
+        priorityBatch: cleanValue(candidate.priorityBatch),
+        valueScore: Number(candidate.valueScore || 0),
+        difficultyScore: Number(candidate.difficultyScore || 0),
+        provenance: {
+          sourceFile: "enrichment/ocr-extractions.json",
+          candidateSourceFile: cleanValue(candidate.provenance?.sourceFile || "ocr-triage-queue.json"),
+          sourceRecordId: cleanValue(record.sourceRecordId),
+          publicSafe: true,
+        },
+      };
+    })
+    .sort(
+      (a, b) =>
+        Number(Boolean(b.retryable)) - Number(Boolean(a.retryable)) ||
+        Number(a.priorityRank || 999999) - Number(b.priorityRank || 999999) ||
+        a.sourceId.localeCompare(b.sourceId) ||
+        a.menuId.localeCompare(b.menuId)
+    );
+
+  return {
+    version: VERSION,
+    generatedAt,
+    summary: {
+      total: failures.length,
+      retryable: failures.filter((record) => record.retryable).length,
+      notRetryable: failures.filter((record) => !record.retryable).length,
+      byClass: countBy(failures, (record) => record.errorClass),
+      bySource: countBy(failures, (record) => record.sourceId),
+      byNextAction: countBy(failures, (record) => record.nextAction),
+    },
+    records: failures,
+  };
 }
 
 async function sourceRecordMap() {
@@ -381,6 +520,10 @@ async function sourceRecordMap() {
 }
 
 async function appendEnrichmentPayload(relativePath, newRecords, summaryExtras = {}) {
+  if (!(newRecords || []).length) {
+    const existing = await readEnrichmentPayload(path.join(DATA_DIR, relativePath), { version: VERSION, records: [] });
+    return (existing.records || []).length;
+  }
   const filePath = path.join(DATA_DIR, relativePath);
   const payload = await readEnrichmentPayload(filePath, { version: VERSION, records: [] });
   const records = dedupeRecords([...(payload.records || []), ...newRecords]);
@@ -410,6 +553,7 @@ async function updateStatus(summary) {
     ocrDishMentions: cumulative.dishMentions ?? summary.dishMentions,
     ocrPriceObservations: cumulative.priceObservations ?? summary.priceObservations,
     ocrPagesFailed: cumulative.pagesFailed ?? summary.pagesFailed ?? 0,
+    ocrFailures: summary.failureSummary || null,
     ocrLastBatch: {
       candidatesSelected: summary.candidatesSelected,
       pagesAttempted: summary.pagesAttempted,
@@ -435,17 +579,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
     readJson(path.join(DATA_DIR, "reference", "context-events.json"), []),
   ]);
   const references = { cpiUs, cpiCountry };
-  const processed = new Set((previous.records || []).map((record) => cleanValue(record.candidateId)).filter(Boolean));
-  const sourceFilter = cleanValue(options.source || "all");
-  const tierFilter = cleanValue(options.tier || "all");
-  const batch = cleanValue(options.batch || "phase1");
-  const candidates = (queue.records || [])
-    .filter((candidate) => !processed.has(candidate.id) || options.refresh)
-    .filter((candidate) => sourceFilter === "all" || candidate.sourceKey === sourceFilter || candidate.sourceId === sourceFilter)
-    .filter((candidate) => tierFilter === "all" || candidate.localTier === tierFilter)
-    .filter((candidate) => batch === "all" || candidate.priorityBatch === batch)
-    .sort((a, b) => Number(a.priorityRank || 999999) - Number(b.priorityRank || 999999))
-    .slice(0, options.limit);
+  const candidates = selectOcrCandidates(queue.records || [], previous.records || [], options);
 
   const extractionRecords = [];
   const dishMentions = [];
@@ -576,9 +710,10 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
   }
 
   const finishedAt = new Date().toISOString();
-  const records = dedupeExtractionRecords(dedupeRecords([...(previous.records || []), ...extractionRecords]));
+  const records = dedupeExtractionRecords([...(previous.records || []), ...extractionRecords]);
   const successfulExtractions = extractionRecords.filter((record) => record.status !== "error");
   const cumulativeSuccessfulExtractions = records.filter((record) => record.status !== "error");
+  const failureReport = buildOcrFailureReport({ records, queueRecords: queue.records || [], generatedAt: finishedAt });
   const summary = {
     startedAt,
     finishedAt,
@@ -611,6 +746,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
         }, new Map())
       ),
     },
+    failureSummary: failureReport.summary,
     events,
   };
   const payload = {
@@ -628,6 +764,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
   };
   if (!options.dryRun) {
     await writeMaybeShardedJson(OUTPUT_PATH, payload, { shard: true });
+    await writeJson(FAILURE_OUTPUT_PATH, failureReport);
     await appendEnrichmentPayload("enrichment/dish-mentions.json", dishMentions, { ocrVisionAdded: dishMentions.length });
     await appendEnrichmentPayload("enrichment/price-observations.json", priceObservations, { ocrVisionAdded: priceObservations.length });
     await updateStatus(summary);
@@ -647,6 +784,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     requestTimeoutMs: Math.max(5000, Number(argValue(args, "timeout-ms", "30000")) || 30000),
     ocrTimeoutMs: Math.max(10000, Number(argValue(args, "ocr-timeout-ms", "90000")) || 90000),
     refresh: hasFlag(args, "refresh"),
+    retryErrors: hasFlag(args, "retry-errors"),
     refreshImages: hasFlag(args, "refresh-images"),
     keepImages: hasFlag(args, "keep-images"),
     dryRun: hasFlag(args, "dry-run"),
@@ -666,6 +804,8 @@ if (require.main === module) {
 module.exports = {
   VERSION,
   buildLocalVisionOcrEnrichment,
+  buildOcrFailureReport,
+  classifyOcrError,
   imageUrlsForRecord,
   imageUrlsForIiifManifestPayload,
   resolveImageUrlsForRecord,
@@ -676,5 +816,6 @@ module.exports = {
   menuLike,
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
+  selectOcrCandidates,
   textSpansFromOcr,
 };

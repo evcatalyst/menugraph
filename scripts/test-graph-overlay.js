@@ -40,6 +40,8 @@ const sourceCapabilities = readJson(path.join(GRAPH_DIR, "source-capabilities.js
 const core = readJson(path.join(GRAPH_DIR, "core.json"));
 const menuOverlays = readJson(path.join(GRAPH_DIR, "menu-overlays.json"));
 const evidenceIndex = readJson(path.join(GRAPH_DIR, "evidence-index.json"));
+const ocrFailuresPath = path.join(DATA_DIR, "enrichment", "ocr-failures.json");
+const ocrFailures = fs.existsSync(ocrFailuresPath) ? readJson(ocrFailuresPath) : { summary: { total: 0 }, records: [] };
 
 assert.deepStrictEqual(graphContract.validateGraph(sourceCapabilities, { maxBytes: manifest.sizeBudgetBytes }), [], "source graph should validate");
 assert.deepStrictEqual(graphContract.validateGraph(core, { maxBytes: manifest.sizeBudgetBytes }), [], "core graph should validate");
@@ -51,6 +53,14 @@ assert(manifest.summary.overlays.withIngredients >= 15500, "ingredient overlays 
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");
 assert(manifest.summary.overlays.withOcrCandidates >= 1000, "OCR triage should appear as menu overlay evidence");
 assert(Object.keys(evidenceIndex.ocrCandidates || {}).length >= 1000, "OCR triage evidence should be indexed compactly");
+if (ocrFailures.summary?.total) {
+  assert.strictEqual(manifest.summary.enrichment.ocrFailures, ocrFailures.summary.total, "OCR failure count should be summarized in the enrichment graph");
+  assert(Object.keys(evidenceIndex.ocrFailures || {}).length > 0, "OCR failure evidence should be indexed compactly");
+  assert(
+    Object.values(evidenceIndex.ocrFailures || {}).every((record) => record.errorClass && record.nextAction),
+    "OCR failures should include class and next action"
+  );
+}
 assert(
   core.nodes.some((node) => node.type === "Term" && node.category === "ingredients" && node.label === "potato"),
   "core graph should include high-signal ingredient term nodes"
@@ -216,6 +226,13 @@ assert(
   (ocrPriceOverlay.dishMentionIds || []).some((id) => evidenceIndex.dishMentions[id]?.method === "local_vision_ocr_dish"),
   "expected local Vision OCR dish evidence to resolve through graph overlays"
 );
+
+if (ocrFailures.summary?.total) {
+  const ocrFailureOverlay = Object.values(overlayRecords).find((record) =>
+    (record.ocrFailureIds || []).some((id) => evidenceIndex.ocrFailures?.[id])
+  );
+  assert(ocrFailureOverlay, "expected persistent OCR failures to resolve through graph overlays");
+}
 
 assert(
   core.edges.some((edge) => edge.type === "MATCHES_MENU"),

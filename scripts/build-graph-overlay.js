@@ -20,6 +20,7 @@ const MAX_INGREDIENT_TERMS = 120;
 const MAX_DISH_EVIDENCE_INDEX = 7000;
 const MAX_IMAGE_EVIDENCE_INDEX = 2000;
 const MAX_OCR_CANDIDATE_INDEX = 1000;
+const MAX_OCR_FAILURE_INDEX = 500;
 const MAX_EXTERNAL_DISH_EDGES_PER_MENU = 3;
 
 function cleanValue(value) {
@@ -424,6 +425,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     dishMentions: {},
     imageFeatures: {},
     ocrCandidates: {},
+    ocrFailures: {},
     sourceProbes: {},
     externalMenus: {},
   };
@@ -452,6 +454,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         ontologyTerms: 0,
         ingredientTags: 0,
         imageFeatures: 0,
+        ocrFailures: 0,
       },
       topDishes: (menu.topDishes || []).slice(0, 3).map(cleanValue).filter(Boolean),
       ingredientTags: [],
@@ -460,6 +463,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       dateEvidenceIds: [],
       matchIds: [],
       imageFeatureIds: [],
+      ocrFailureIds: [],
     };
     overlays[uid].counts.dishMentions = initialDishes.size;
   }
@@ -489,6 +493,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         ontologyTerms: 0,
         ingredientTags: ingredientTags.size,
         imageFeatures: imageFeatures.length || (record.iiifManifestUrl || record.iiifInfoUri || record.imageUri || record.thumbnailUrl ? 1 : 0),
+        ocrFailures: 0,
       },
       topDishes: (record.dishHints || dishMentions || []).slice(0, 3).map((dish) => cleanValue(dish.rawName || dish.normalizedName)).filter(Boolean),
       ingredientTags: [...ingredientTags].sort().slice(0, 8),
@@ -497,6 +502,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       dateEvidenceIds: [],
       matchIds: [],
       imageFeatureIds: [],
+      ocrFailureIds: [],
     };
     evidenceIndex.externalMenus[uid] = {
       id: uid,
@@ -757,6 +763,33 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         difficultyScore: Number(record.difficultyScore || 0),
         estimatedImages: Number(record.estimatedImages || 0),
       };
+  }
+
+  let ocrFailureEvidenceIndexed = 0;
+  for (const record of enrichmentRecords(enrichment, "ocrFailures")) {
+    const uid = cleanValue(record.menuId);
+    if (!menuIds.has(uid) || !overlays[uid]) continue;
+    const overlay = overlays[uid];
+    overlay.counts.ocrFailures = Number(overlay.counts.ocrFailures || 0) + 1;
+    if (!overlay.ocrFailureIds) overlay.ocrFailureIds = [];
+    if (overlay.ocrFailureIds.length >= 2 || ocrFailureEvidenceIndexed >= MAX_OCR_FAILURE_INDEX) continue;
+    overlay.ocrFailureIds.push(record.id);
+    ocrFailureEvidenceIndexed += 1;
+    evidenceIndex.ocrFailures[record.id] = {
+      id: cleanValue(record.id),
+      candidateId: cleanValue(record.candidateId),
+      menuId: uid,
+      sourceId: cleanValue(record.sourceId),
+      sourceKey: cleanValue(record.sourceKey),
+      pageNumber: record.pageNumber ?? null,
+      errorClass: cleanValue(record.errorClass),
+      errorMessage: cleanValue(record.errorMessage).slice(0, 160),
+      retryable: Boolean(record.retryable),
+      nextAction: cleanValue(record.nextAction),
+      route: cleanValue(record.route),
+      localTier: cleanValue(record.localTier),
+      priorityRank: record.priorityRank ?? null,
+    };
   }
 
   for (const record of enrichmentRecords(enrichment, "sourceProbes")) {
@@ -1286,6 +1319,7 @@ function overlaySummary(records) {
     withIngredients: values.filter((item) => item.counts.ingredientTags).length,
     withImageFeatures: values.filter((item) => item.counts.imageFeatures).length,
     withOcrCandidates: values.filter((item) => item.counts.ocrCandidates).length,
+    withOcrFailures: values.filter((item) => item.counts.ocrFailures).length,
   };
 }
 
@@ -1350,6 +1384,7 @@ async function buildGraphOverlay(options = {}) {
     enrichmentPrices,
     imageFeatures,
     ocrTriage,
+    ocrFailures,
     sourceProbes,
     externalMenuRecords,
   ] = await Promise.all([
@@ -1365,6 +1400,7 @@ async function buildGraphOverlay(options = {}) {
     readEnrichmentPayload(path.join(DATA_DIR, "enrichment", "price-observations.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "image-features.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "ocr-triage-queue.json"), { records: [] }),
+    readJson(path.join(DATA_DIR, "enrichment", "ocr-failures.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),
     readExternalMenuRecords(),
   ]);
@@ -1379,6 +1415,7 @@ async function buildGraphOverlay(options = {}) {
     priceObservations: enrichmentPrices,
     imageFeatures,
     ocrTriage,
+    ocrFailures,
     sourceProbes,
     externalMenuRecords,
   };
@@ -1414,6 +1451,7 @@ async function buildGraphOverlay(options = {}) {
     dishMentions: Object.keys(evidenceIndex.dishMentions).length,
     imageFeatures: Object.keys(evidenceIndex.imageFeatures).length,
     ocrCandidates: Object.keys(evidenceIndex.ocrCandidates).length,
+    ocrFailures: Object.keys(evidenceIndex.ocrFailures).length,
     sourceProbes: Object.keys(evidenceIndex.sourceProbes).length,
     externalMenus: Object.keys(evidenceIndex.externalMenus).length,
   };
@@ -1456,9 +1494,10 @@ async function buildGraphOverlay(options = {}) {
         priceObservations: enrichmentRecords(enrichment, "priceObservations").length,
         imageFeatures: enrichmentRecords(enrichment, "imageFeatures").length,
         ocrCandidates: enrichmentRecords(enrichment, "ocrTriage").length,
+        ocrFailures: enrichmentRecords(enrichment, "ocrFailures").length,
         sourceProbes: enrichmentRecords(enrichment, "sourceProbes").length,
         externalMenuRecords: enrichmentRecords(enrichment, "externalMenuRecords").length,
-        statusGeneratedAt: enrichmentStatus.finishedAt || enrichmentStatus.generatedAt || null,
+        statusGeneratedAt: enrichmentStatus.summary?.ocrUpdatedAt || enrichmentStatus.finishedAt || enrichmentStatus.generatedAt || null,
       },
     },
     artifacts: Object.entries(artifacts).map(([name, payload]) => artifactInfo(name, payload)),

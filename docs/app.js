@@ -3360,7 +3360,8 @@ function hasGraphEvidence(overlay) {
       Number(counts.matches || 0) ||
       Number(counts.ontologyTerms || 0) ||
       Number(counts.imageFeatures || 0) ||
-      Number(counts.ocrCandidates || 0)
+      Number(counts.ocrCandidates || 0) ||
+      Number(counts.ocrFailures || 0)
   );
 }
 
@@ -3403,6 +3404,7 @@ function renderGraphEvidence(overlay) {
     counts.matches ? `${counts.matches} match edge${counts.matches === 1 ? "" : "s"}` : "",
     counts.imageFeatures ? `${counts.imageFeatures} image feature${counts.imageFeatures === 1 ? "" : "s"}` : "",
     counts.ocrCandidates ? `${counts.ocrCandidates} OCR candidate${counts.ocrCandidates === 1 ? "" : "s"}` : "",
+    counts.ocrFailures ? `${counts.ocrFailures} OCR gap${counts.ocrFailures === 1 ? "" : "s"}` : "",
   ].filter(Boolean);
   const topDishes = (overlay.topDishes || []).slice(0, 4).join("; ");
   const priceRows = (overlay.priceObservationIds || [])
@@ -3424,6 +3426,11 @@ function renderGraphEvidence(overlay) {
     .map((id) => index.ocrCandidates?.[id])
     .filter(Boolean)
     .map((record) => `${titleCase(record.localTier || "OCR")} / ${record.route || "queued"} / rank ${record.priorityRank || "backlog"}`);
+  const ocrFailureRows = (overlay.ocrFailureIds || [])
+    .slice(0, 2)
+    .map((id) => index.ocrFailures?.[id])
+    .filter(Boolean)
+    .map((record) => `${titleCase(record.errorClass || "error")} / ${record.nextAction || "review"}`);
 
   summary.innerHTML = `
     <span>
@@ -3436,6 +3443,7 @@ function renderGraphEvidence(overlay) {
       dateRows.length ? `Dates: ${dateRows.join("; ")}` : "",
       imageRows.length ? `Images: ${imageRows.join("; ")}` : "",
       ocrRows.length ? `OCR: ${ocrRows.join("; ")}` : "",
+      ocrFailureRows.length ? `OCR gaps: ${ocrFailureRows.join("; ")}` : "",
     ]
       .filter(Boolean)
       .join(" | ")}</small>

@@ -1,5 +1,7 @@
 const assert = require("assert");
 const {
+  buildOcrFailureReport,
+  classifyOcrError,
   dedupeExtractionRecords,
   imageUrlsForRecord,
   imageUrlsForIiifManifestPayload,
@@ -7,6 +9,7 @@ const {
   menuLike,
   optionsFromArgs,
   resizedIiifImageUrlFromInfo,
+  selectOcrCandidates,
   textSpansFromOcr,
 } = require("./local-vision-ocr-enrichment");
 
@@ -155,6 +158,83 @@ assert.strictEqual(options.pagesPerMenu, 1);
 assert.strictEqual(options.imageWidth, 1200);
 assert.strictEqual(options.dryRun, true);
 
+const retryOptions = optionsFromArgs(["--limit=10", "--retry-errors", "--batch=all"]);
+assert.strictEqual(retryOptions.retryErrors, true);
+assert.deepStrictEqual(
+  selectOcrCandidates(
+    [
+      { id: "ocrtriage:a", priorityRank: 3, priorityBatch: "phase1", sourceKey: "cia", sourceId: "cia_menu_collection", localTier: "easy" },
+      { id: "ocrtriage:b", priorityRank: 2, priorityBatch: "phase1", sourceKey: "lapl", sourceId: "lapl_menu_collection", localTier: "easy" },
+      { id: "ocrtriage:c", priorityRank: 1, priorityBatch: "phase1", sourceKey: "cia", sourceId: "cia_menu_collection", localTier: "easy" },
+    ],
+    [
+      { status: "ok", candidateId: "ocrtriage:a", pageNumber: 1 },
+      { status: "error", candidateId: "ocrtriage:b", pageNumber: 1 },
+    ],
+    retryOptions
+  ).map((candidate) => candidate.id),
+  ["ocrtriage:b"],
+  "retry-errors should select only candidates with previous error records"
+);
+
+assert.deepStrictEqual(classifyOcrError("HTTP 403"), {
+  errorClass: "access_denied",
+  retryable: false,
+  nextAction: "source_access_review",
+});
+assert.deepStrictEqual(classifyOcrError("socket hang up"), {
+  errorClass: "transient_network",
+  retryable: true,
+  nextAction: "retry_local",
+});
+
+const failureReport = buildOcrFailureReport({
+  generatedAt: "2026-06-03T00:00:00.000Z",
+  queueRecords: [
+    {
+      id: "ocrtriage:b",
+      title: "Sample Menu",
+      sourceId: "lapl_menu_collection",
+      localTier: "difficult",
+      route: "external_llm_review",
+      priorityRank: 42,
+      priorityBatch: "phase1",
+      valueScore: 8,
+      difficultyScore: 6,
+    },
+  ],
+  records: [
+    {
+      status: "error",
+      candidateId: "ocrtriage:b",
+      menuId: "lapl:1",
+      sourceId: "lapl_menu_collection",
+      sourceKey: "lapl",
+      sourceRecordId: "1",
+      pageNumber: 1,
+      imageHash: "abc",
+      errorMessage: "HTTP 501",
+    },
+    {
+      status: "error",
+      candidateId: "ocrtriage:c",
+      menuId: "cia:2",
+      sourceId: "cia_menu_collection",
+      sourceKey: "cia",
+      sourceRecordId: "2",
+      pageNumber: 1,
+      imageHash: "def",
+      errorMessage: "socket hang up",
+    },
+  ],
+});
+assert.strictEqual(failureReport.summary.total, 2);
+assert.strictEqual(failureReport.summary.retryable, 1);
+assert.strictEqual(failureReport.summary.byClass.unsupported_image_endpoint, 1);
+assert.strictEqual(failureReport.summary.byClass.transient_network, 1);
+assert.strictEqual(failureReport.records[0].nextAction, "retry_local");
+assert(!JSON.stringify(failureReport).includes("data:image/"), "failure report must not include image blobs");
+
 const deduped = dedupeExtractionRecords([
   { id: "old-error", status: "error", candidateId: "ocrtriage:1", pageNumber: 1, imageHash: "a" },
   { id: "old-ok", status: "ok", candidateId: "ocrtriage:2", pageNumber: 1, imageHash: "b" },
@@ -164,6 +244,16 @@ const deduped = dedupeExtractionRecords([
 assert.deepStrictEqual(
   deduped.map((record) => record.id),
   ["new-ok", "recovered-ok"]
+);
+
+const dedupedFailures = dedupeExtractionRecords([
+  { id: "old-error", status: "error", candidateId: "ocrtriage:3", pageNumber: 1, imageHash: "a" },
+  { id: "new-error", status: "error", candidateId: "ocrtriage:3", pageNumber: 1, imageHash: "b" },
+]);
+assert.deepStrictEqual(
+  dedupedFailures.map((record) => record.id),
+  ["new-error"],
+  "latest failure should replace older failure for the same candidate page"
 );
 
 console.log("local Vision OCR enrichment tests passed");

@@ -25,6 +25,7 @@ The enricher should never overwrite source metadata directly. It should write ne
 | Date clue | `date_evidence` | Include interval/point year, method, confidence, hard-bound flag. |
 | Layout/style feature | `image_feature` | Store scalar features locally and large vectors by reference. |
 | OCR routing candidate | `extraction_run` metrics or queue artifact | Store page counts, difficulty, expected yield, and route; no OCR text or image blobs. |
+| OCR failure triage | `extraction_run` status or failure artifact | Store error class, retryability, next action, and provenance; no image bytes or raw OCR. |
 | Text/image vector | `embedding` | Store vector references, not giant blobs in static JSON. |
 | Canonical link | `entity_link` | Use candidate links before changing canonical dish/venue entities. |
 | Review decision | `entity_link` or evidence row update | Preserve machine output and reviewer decision. |
@@ -88,8 +89,10 @@ Use this order:
 2. Local OCR/layout.
 3. Local dish/price/date extraction.
 4. Local confidence scoring and candidate linking.
-5. External adjudication for high-value hard cases only.
-6. Human review for conflicts or important low-confidence claims.
+5. Retry only transient OCR failures with `--retry-errors`.
+6. Route persistent failures by class: alternate image route for unsupported endpoints, source metadata review for missing images, and rights/access review for denied images.
+7. External adjudication for high-value hard cases only.
+8. Human review for conflicts or important low-confidence claims.
 
 ## Static Overlay Rules
 
@@ -108,6 +111,7 @@ Recommended static artifacts:
 - `docs/data/enrichment/dish-mentions.json` as a manifest with records sharded under `docs/data/enrichment/shards/dish-mentions/`
 - `docs/data/enrichment/price-observations.json` as a manifest with records sharded under `docs/data/enrichment/shards/price-observations/`
 - `docs/data/enrichment/ocr-extractions.json` as a manifest with records sharded under `docs/data/enrichment/shards/ocr-extractions/`
+- `docs/data/enrichment/ocr-failures.json` for compact retry/source-review triage
 - `docs/data/graph/core.json`
 - `docs/data/graph/evidence-index.json`
 - `docs/data/graph/menu-overlays.json` plus source shards under `docs/data/graph/menu-overlays/by-source/`
