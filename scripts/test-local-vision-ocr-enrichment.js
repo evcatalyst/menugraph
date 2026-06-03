@@ -90,6 +90,34 @@ assert.deepStrictEqual(uhManifestUrls, [
   "https://media.lib.uh.edu/images/q237hs53h%2Ffiles%2F647aa5e8-589e-489f-b203-4efdd8905103/full/1000,/0/default.jpg",
 ]);
 
+const v3ManifestUrls = imageUrlsForIiifManifestPayload(
+  {
+    type: "Manifest",
+    items: [
+      {
+        type: "Canvas",
+        items: [
+          {
+            items: [
+              {
+                body: [
+                  {
+                    type: "Image",
+                    id: "https://example.org/iiif/image-id/full/max/0/default.jpg",
+                    service: [{ id: "https://example.org/iiif/image-id", type: "ImageService2" }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  { imageWidth: 900, pagesPerMenu: 1 }
+);
+assert.deepStrictEqual(v3ManifestUrls, ["https://example.org/iiif/image-id/full/900,/0/default.jpg"]);
+
 const menu = menuLike(
   { menuId: "lapl:1247", sourceKey: "lapl", sourceRecordId: "1247", title: "A. Sabella's Capri Room" },
   { placeText: "San Francisco, California", pointYear: 1954, country: "United States" }

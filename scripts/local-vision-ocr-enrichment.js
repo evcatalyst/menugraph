@@ -164,8 +164,13 @@ async function fetchJsonLoose(url, timeoutMs = 20000) {
   return JSON.parse(buffer.toString("utf8"));
 }
 
+function firstEntry(value) {
+  return Array.isArray(value) ? value.find(Boolean) : value;
+}
+
 function iiifServiceImageUrl(service, fallbackImageUrl = "", width = 1400) {
-  const serviceId = cleanValue(service?.id || service?.["@id"]);
+  const firstService = firstEntry(service);
+  const serviceId = cleanValue(firstService?.id || firstService?.["@id"]);
   if (serviceId) return `${serviceId.replace(/\/$/, "")}/full/${width},/0/default.jpg`;
   const raw = cleanValue(fallbackImageUrl);
   if (!raw) return "";
@@ -175,8 +180,9 @@ function iiifServiceImageUrl(service, fallbackImageUrl = "", width = 1400) {
 }
 
 function canvasImageBody(canvas) {
+  const annotationBody = canvas?.items?.[0]?.items?.[0]?.body;
   return (
-    canvas?.items?.[0]?.items?.[0]?.body ||
+    firstEntry(annotationBody) ||
     canvas?.images?.[0]?.resource ||
     canvas?.thumbnail?.[0] ||
     canvas?.thumbnail ||
@@ -196,7 +202,7 @@ function imageUrlsForIiifManifestPayload(payload, options = {}) {
   for (const canvas of canvases) {
     const body = canvasImageBody(canvas);
     if (!body) continue;
-    const imageUrl = iiifServiceImageUrl(body.service || body.service?.[0], body.id || body["@id"], width);
+    const imageUrl = iiifServiceImageUrl(body.service, body.id || body["@id"], width);
     if (imageUrl) urls.push(imageUrl);
     if (urls.length >= limit) break;
   }
