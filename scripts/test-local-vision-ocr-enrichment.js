@@ -177,6 +177,27 @@ assert.deepStrictEqual(
   "retry-errors should select only candidates with previous error records"
 );
 
+assert.deepStrictEqual(
+  selectOcrCandidates(
+    [
+      { id: "ocrtriage:a", priorityRank: 1, priorityBatch: "phase1", sourceKey: "uw", sourceId: "uw_menus_collection", localTier: "easy" },
+      { id: "ocrtriage:b", priorityRank: 2, priorityBatch: "phase1", sourceKey: "uw", sourceId: "uw_menus_collection", localTier: "easy" },
+    ],
+    [
+      { status: "error", candidateId: "ocrtriage:a", pageNumber: 1 },
+      { status: "error", candidateId: "ocrtriage:b", pageNumber: 1 },
+    ],
+    {
+      ...retryOptions,
+      retryErrors: false,
+      retryRetryable: true,
+      retryCandidateIds: new Set(["ocrtriage:b"]),
+    }
+  ).map((candidate) => candidate.id),
+  ["ocrtriage:b"],
+  "retry-retryable should select only candidates classified as retryable"
+);
+
 assert.deepStrictEqual(classifyOcrError("HTTP 403"), {
   errorClass: "access_denied",
   retryable: false,

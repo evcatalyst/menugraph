@@ -3,12 +3,14 @@ const { spawnSync } = require("child_process");
 const fs = require("fs/promises");
 const path = require("path");
 const { cleanValue, recordUid } = require("../docs/multisource");
+const { readEnrichmentPayload } = require("./enrichment-shards");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
 const ENRICHMENT_DIR = path.join(DATA_DIR, "enrichment");
 const EXTERNAL_SOURCE_DIR = path.join(ENRICHMENT_DIR, "external-sources");
 const OUTPUT_PATH = path.join(ENRICHMENT_DIR, "ocr-triage-queue.json");
+const OCR_EXTRACTIONS_PATH = path.join(ENRICHMENT_DIR, "ocr-extractions.json");
 const VERSION = 1;
 const DEFAULT_RECORD_LIMIT = 5000;
 const DEFAULT_EARLY_LIMIT = 100;
@@ -42,6 +44,13 @@ function localOcrAvailable() {
 
 function asArray(value) {
   return Array.isArray(value) ? value : value ? [value] : [];
+}
+
+function splitList(value = "") {
+  return cleanValue(value)
+    .split(",")
+    .map(cleanValue)
+    .filter(Boolean);
 }
 
 function sourceIdForMenu(menu) {
@@ -283,6 +292,7 @@ async function writeJson(filePath, payload) {
 }
 
 async function readExternalRecords() {
+  const seen = new Set();
   let files = [];
   try {
     files = (await fs.readdir(EXTERNAL_SOURCE_DIR)).filter((name) => name.endsWith(".json")).sort();
@@ -290,9 +300,25 @@ async function readExternalRecords() {
     files = [];
   }
   const records = [];
+  const legacy = await readJson(path.join(ENRICHMENT_DIR, "external-menu-records.json"), { records: [] });
+  for (const record of legacy.records || []) {
+    const key = [record.sourceId, record.menuId || record.id || record.sourceRecordId].map(cleanValue).join("|");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    records.push({
+      ...record,
+      provenance: {
+        ...(record.provenance || {}),
+        sourceFile: record.provenance?.sourceFile || "enrichment/external-menu-records.json",
+      },
+    });
+  }
   for (const file of files) {
     const payload = await readJson(path.join(EXTERNAL_SOURCE_DIR, file), { records: [] });
     for (const record of payload.records || []) {
+      const key = [record.sourceId, record.menuId || record.id || record.sourceRecordId].map(cleanValue).join("|");
+      if (seen.has(key)) continue;
+      seen.add(key);
       records.push({
         ...record,
         provenance: {
@@ -303,6 +329,28 @@ async function readExternalRecords() {
     }
   }
   return records;
+}
+
+async function attemptedCandidateIds() {
+  const payload = await readEnrichmentPayload(OCR_EXTRACTIONS_PATH, { records: [] });
+  return new Set((payload.records || []).map((record) => cleanValue(record.candidateId)).filter(Boolean));
+}
+
+function sourceMatches(candidate, sourceFilter) {
+  if (!sourceFilter.size) return true;
+  return sourceFilter.has(cleanValue(candidate.sourceId)) || sourceFilter.has(cleanValue(candidate.sourceKey));
+}
+
+function dedupeCandidates(records) {
+  const seen = new Set();
+  const output = [];
+  for (const record of records || []) {
+    const id = cleanValue(record.id);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    output.push(record);
+  }
+  return output;
 }
 
 function shouldQueueMenu(menu) {
@@ -345,6 +393,9 @@ async function buildOcrTriageQueue(options = {}) {
   const earlyLimit = Math.max(1, Number(options.earlyLimit || DEFAULT_EARLY_LIMIT));
   const pagesPerMenu = Math.max(1, Number(options.pagesPerMenu || DEFAULT_PAGES_PER_MENU));
   const localOcr = options.localOcrAvailable ?? localOcrAvailable();
+  const sourceFilter = new Set(splitList(options.source || options.sources || ""));
+  const excludeAttempted = Boolean(options.excludeAttempted);
+  const attempted = excludeAttempted ? await attemptedCandidateIds() : new Set();
   const menusPayload = await readJson(path.join(DATA_DIR, "menus.json"), { menus: [] });
   const imagePayload = await readJson(path.join(ENRICHMENT_DIR, "image-features.json"), { records: [] });
   const imageFeatureByMenu = new Map((imagePayload.records || []).map((record) => [cleanValue(record.menuId), record]));
@@ -357,9 +408,13 @@ async function buildOcrTriageQueue(options = {}) {
   }));
   const rawCandidates = [...externalRecords, ...menuRecords]
     .map((record) => candidateForRecord(record, { imageFeatureByMenu, localOcrAvailable: localOcr, pagesPerMenu }))
+    .filter((candidate) => sourceMatches(candidate, sourceFilter))
+    .filter((candidate) => !attempted.has(candidate.id))
     .filter((candidate) => candidate.priorityScore > 0 || candidate.localTier !== "metadata_only")
     .sort((a, b) => b.priorityScore - a.priorityScore || b.valueScore - a.valueScore || a.difficultyScore - b.difficultyScore || a.title.localeCompare(b.title));
-  const records = markEarlyBatch(rawCandidates.slice(0, recordLimit), earlyLimit);
+  const selectedRecords = markEarlyBatch(rawCandidates.slice(0, recordLimit), earlyLimit);
+  const existing = options.appendExisting ? await readJson(options.outputPath || OUTPUT_PATH, { records: [] }) : { records: [] };
+  const records = options.appendExisting ? dedupeCandidates([...(existing.records || []), ...selectedRecords]) : selectedRecords;
   const payload = {
     version: VERSION,
     generatedAt,
@@ -379,12 +434,16 @@ async function buildOcrTriageQueue(options = {}) {
     },
     summary: {
       allCandidates: rawCandidates.length,
+      selectedCandidates: selectedRecords.length,
       recordLimit,
+      sourceFilter: [...sourceFilter],
+      appendExisting: Boolean(options.appendExisting),
+      excludeAttempted,
       ...summarize(records, { externalCostPerImageUsd: options.externalCostPerImageUsd }),
     },
     records,
   };
-  if (!options.dryRun) await writeJson(OUTPUT_PATH, payload);
+  if (!options.dryRun) await writeJson(options.outputPath || OUTPUT_PATH, payload);
   return payload;
 }
 
@@ -394,6 +453,10 @@ function optionsFromArgs(args) {
     recordLimit: Number(argValue(args, "record-limit", DEFAULT_RECORD_LIMIT)),
     earlyLimit: Number(argValue(args, "early-limit", DEFAULT_EARLY_LIMIT)),
     pagesPerMenu: Number(argValue(args, "pages-per-menu", DEFAULT_PAGES_PER_MENU)),
+    source: argValue(args, "source", argValue(args, "sources", "")),
+    appendExisting: hasFlag(args, "append-existing"),
+    excludeAttempted: hasFlag(args, "exclude-attempted"),
+    outputPath: argValue(args, "output", OUTPUT_PATH),
     externalCostPerImageUsd: Number(argValue(args, "external-cost-per-image", "0")) || null,
   };
 }
@@ -413,10 +476,12 @@ module.exports = {
   VERSION,
   buildOcrTriageQueue,
   candidateForRecord,
+  dedupeCandidates,
   difficultyScoreFor,
   expectedYield,
   localOcrAvailable,
   localOcrEngine,
+  optionsFromArgs,
   routeForCandidate,
   summarize,
   tierForDifficulty,

@@ -429,12 +429,19 @@ function selectOcrCandidates(queueRecords, previousRecords, options = {}) {
       .map((record) => cleanValue(record.candidateId))
       .filter(Boolean)
   );
+  const retryCandidateIds = options.retryCandidateIds instanceof Set ? options.retryCandidateIds : new Set();
   const sourceFilter = cleanValue(options.source || "all");
   const tierFilter = cleanValue(options.tier || "all");
   const batch = cleanValue(options.batch || "phase1");
   const limit = Math.max(1, Number(options.limit || 10) || 10);
   return (queueRecords || [])
-    .filter((candidate) => (options.retryErrors ? failedCandidateIds.has(candidate.id) : !processed.has(candidate.id) || options.refresh))
+    .filter((candidate) =>
+      options.retryRetryable
+        ? retryCandidateIds.has(candidate.id)
+        : options.retryErrors
+          ? failedCandidateIds.has(candidate.id)
+          : !processed.has(candidate.id) || options.refresh
+    )
     .filter((candidate) => sourceFilter === "all" || candidate.sourceKey === sourceFilter || candidate.sourceId === sourceFilter)
     .filter((candidate) => tierFilter === "all" || candidate.localTier === tierFilter)
     .filter((candidate) => batch === "all" || candidate.priorityBatch === batch)
@@ -506,6 +513,10 @@ async function sourceRecordMap() {
     const uid = recordUid(menu);
     records.set(uid, { ...menu, menuId: uid });
   }
+  const legacyExternal = await readJson(path.join(ENRICHMENT_DIR, "external-menu-records.json"), { records: [] });
+  for (const record of legacyExternal.records || []) {
+    records.set(cleanValue(record.menuId || record.id), record);
+  }
   let files = [];
   try {
     files = (await fs.readdir(path.join(ENRICHMENT_DIR, "external-sources"))).filter((name) => name.endsWith(".json"));
@@ -572,6 +583,7 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
   const startedAt = new Date().toISOString();
   const queue = await readJson(path.join(ENRICHMENT_DIR, "ocr-triage-queue.json"), { records: [] });
   const previous = await readEnrichmentPayload(OUTPUT_PATH, { records: [] });
+  const previousFailures = await readJson(FAILURE_OUTPUT_PATH, { records: [] });
   const sources = await sourceRecordMap();
   const [cpiUs, cpiCountry, contextEvents] = await Promise.all([
     readJson(path.join(DATA_DIR, "reference", "cpi-us.json"), {}),
@@ -579,7 +591,13 @@ async function buildLocalVisionOcrEnrichment(options = {}) {
     readJson(path.join(DATA_DIR, "reference", "context-events.json"), []),
   ]);
   const references = { cpiUs, cpiCountry };
-  const candidates = selectOcrCandidates(queue.records || [], previous.records || [], options);
+  const retryCandidateIds = new Set(
+    (previousFailures.records || [])
+      .filter((record) => record.retryable)
+      .map((record) => cleanValue(record.candidateId))
+      .filter(Boolean)
+  );
+  const candidates = selectOcrCandidates(queue.records || [], previous.records || [], { ...options, retryCandidateIds });
 
   const extractionRecords = [];
   const dishMentions = [];
@@ -785,6 +803,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     ocrTimeoutMs: Math.max(10000, Number(argValue(args, "ocr-timeout-ms", "90000")) || 90000),
     refresh: hasFlag(args, "refresh"),
     retryErrors: hasFlag(args, "retry-errors"),
+    retryRetryable: hasFlag(args, "retry-retryable"),
     refreshImages: hasFlag(args, "refresh-images"),
     keepImages: hasFlag(args, "keep-images"),
     dryRun: hasFlag(args, "dry-run"),

@@ -1,6 +1,8 @@
 const assert = require("assert");
 const {
   candidateForRecord,
+  dedupeCandidates,
+  optionsFromArgs,
   routeForCandidate,
   summarize,
   tierForDifficulty,
@@ -61,6 +63,16 @@ assert(!hardExternal.routingPolicy.externalAllowed, "external routing must be bl
 assert.strictEqual(tierForDifficulty(0, false), "metadata_only");
 assert.strictEqual(routeForCandidate({ tier: "easy", localOcr: false, grokSafe: false }), "install_local_ocr");
 
+assert.deepStrictEqual(
+  dedupeCandidates([
+    { id: "ocrtriage:1", title: "Existing" },
+    { id: "ocrtriage:1", title: "Duplicate" },
+    { id: "ocrtriage:2", title: "New" },
+  ]).map((record) => record.title),
+  ["Existing", "New"],
+  "queue append should preserve the first candidate for a stable id"
+);
+
 const summary = summarize([
   { ...easyUnknown, priorityBatch: "phase1" },
   { ...hardExternal, priorityBatch: "backlog" },
@@ -69,5 +81,22 @@ assert.strictEqual(summary.total, 2);
 assert.strictEqual(summary.earlyBatch.candidates, 1);
 assert.strictEqual(summary.byRoute.local_ocr, 1);
 assert.strictEqual(summary.byRoute.rights_review_before_external_vlm, 1);
+
+const options = optionsFromArgs([
+  "--source=milwaukee_historic_menus,uw_menus_collection",
+  "--record-limit=250",
+  "--early-limit=25",
+  "--pages-per-menu=1",
+  "--append-existing",
+  "--exclude-attempted",
+  "--output=/tmp/ocr-targeted.json",
+]);
+assert.strictEqual(options.source, "milwaukee_historic_menus,uw_menus_collection");
+assert.strictEqual(options.recordLimit, 250);
+assert.strictEqual(options.earlyLimit, 25);
+assert.strictEqual(options.pagesPerMenu, 1);
+assert.strictEqual(options.appendExisting, true);
+assert.strictEqual(options.excludeAttempted, true);
+assert.strictEqual(options.outputPath, "/tmp/ocr-targeted.json");
 
 console.log("ocr triage queue tests passed");
