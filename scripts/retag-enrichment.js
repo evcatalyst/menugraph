@@ -56,25 +56,19 @@ function mergeIngredientTags(...values) {
 
 function retagDishRecord(record, extraText = "") {
   const recordText = textForRecord(record);
-  const text = [recordText, extraText].map(cleanValue).filter(Boolean).join(" ");
-  const recordType = dishTypeFor(recordText);
-  const dishType = recordType !== "dish" ? recordType : dishTypeFor(text);
   return {
     ...record,
-    dishType: dishType !== "dish" ? dishType : cleanValue(record.dishType || "dish"),
-    ingredientTags: ingredientTagsFor(text),
+    dishType: dishTypeFor(recordText),
+    ingredientTags: ingredientTagsFor(recordText),
   };
 }
 
 function retagPriceRecord(record, extraText = "") {
   const recordText = textForRecord(record);
-  const text = [recordText, extraText].map(cleanValue).filter(Boolean).join(" ");
-  const recordType = dishTypeFor(recordText);
-  const dishType = recordType !== "dish" ? recordType : dishTypeFor(text);
   return {
     ...record,
-    dishType: dishType !== "dish" ? dishType : cleanValue(record.dishType || "dish"),
-    ingredientTags: ingredientTagsFor(text),
+    dishType: dishTypeFor(recordText),
+    ingredientTags: ingredientTagsFor(recordText),
   };
 }
 

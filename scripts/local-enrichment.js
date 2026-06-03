@@ -288,15 +288,24 @@ function withTimeout(promise, timeoutMs, label) {
 
 async function cachedTranscript(menu, options) {
   const filePath = cacheFileForMenu(menu);
-  try {
-    return await fs.readFile(filePath, "utf8");
-  } catch (error) {
-    if (!options.fetchCiaText || (menu.sourceKey || "cia") !== "cia") return "";
+  if (options.transcriptCache !== false) {
+    try {
+      return await fs.readFile(filePath, "utf8");
+    } catch (error) {
+      if (!options.fetchCiaText || (menu.sourceKey || "cia") !== "cia") return "";
+    }
+  } else if (!options.fetchCiaText || (menu.sourceKey || "cia") !== "cia") {
+    return "";
   }
   const text = await withTimeout(fetchCiaTranscriptBounded(menu, options), options.menuTimeoutMs, `transcript ${recordUid(menu)}`);
-  if (text) {
-    await fs.mkdir(TRANSCRIPT_CACHE_DIR, { recursive: true });
-    await fs.writeFile(filePath, text, "utf8");
+  if (text && options.transcriptCache !== false) {
+    try {
+      await fs.mkdir(TRANSCRIPT_CACHE_DIR, { recursive: true });
+      await fs.writeFile(filePath, text, "utf8");
+    } catch (error) {
+      if (!["ENOSPC", "EDQUOT"].includes(error.code)) throw error;
+      options.onProgress?.(`transcript cache skipped for ${recordUid(menu)}: ${error.code}`);
+    }
   }
   return text || "";
 }
@@ -734,6 +743,7 @@ async function buildLocalEnrichment(options = {}) {
       limit: options.limit,
       unknownOnly: options.unknownOnly,
       fetchCiaText: options.fetchCiaText,
+      transcriptCache: options.transcriptCache,
       imageLimit: options.imageLimit,
       probeSources: options.probeSources,
       timeBudgetMs: options.timeBudgetMs,
@@ -796,6 +806,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     limit: limit || 250,
     unknownOnly: hasFlag(args, "unknown-only"),
     fetchCiaText: hasFlag(args, "fetch-cia-text"),
+    transcriptCache: !hasFlag(args, "skip-transcript-cache"),
     imageLimit,
     probeSources: hasFlag(args, "probe-sources"),
     dryRun: hasFlag(args, "dry-run"),

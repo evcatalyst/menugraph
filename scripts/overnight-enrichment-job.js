@@ -18,6 +18,7 @@ const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
 const STATUS_PATH = path.join(CACHE_DIR, "overnight-status.json");
 const DEFAULT_ARGS = [
   "--fetch-cia-text",
+  "--skip-transcript-cache",
   "--probe-sources",
   "--unknown-only",
   "--limit=1200",

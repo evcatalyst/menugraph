@@ -60,7 +60,16 @@ function run() {
   assert.strictEqual(dims.height, 480);
   assert.strictEqual(dims.mediaType, "image/png");
 
-  const options = optionsFromArgs(["--fetch-cia-text", "--unknown-only", "--limit=12", "--image-limit=3", "--time-budget-min=1", "--menu-timeout-ms=9000", "--max-transcript-pages=4"]);
+  const options = optionsFromArgs([
+    "--fetch-cia-text",
+    "--unknown-only",
+    "--limit=12",
+    "--image-limit=3",
+    "--time-budget-min=1",
+    "--menu-timeout-ms=9000",
+    "--max-transcript-pages=4",
+    "--skip-transcript-cache",
+  ]);
   assert.strictEqual(options.fetchCiaText, true);
   assert.strictEqual(options.unknownOnly, true);
   assert.strictEqual(options.limit, 12);
@@ -68,6 +77,7 @@ function run() {
   assert.strictEqual(options.timeBudgetMs, 60000);
   assert.strictEqual(options.menuTimeoutMs, 9000);
   assert.strictEqual(options.maxTranscriptPages, 4);
+  assert.strictEqual(options.transcriptCache, false);
 
   console.log("local enrichment tests passed");
 }

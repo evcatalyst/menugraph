@@ -27,7 +27,10 @@ function run() {
     id: "external:1",
     title: "Barcelona Wine Bar menu",
     descriptionSummary: "Tapas with shrimp, olives, peppers, and wine.",
-    dishMentions: [{ id: "d1", rawName: "shrimp tapas", dishType: "dish", ingredientTags: [] }],
+    dishMentions: [
+      { id: "d1", rawName: "shrimp tapas", dishType: "dish", ingredientTags: [] },
+      { id: "d2", rawName: "pizza", dishType: "dish", ingredientTags: [] },
+    ],
     priceObservations: [{ id: "p1", item: "olive plate", dishType: "dish", ingredientTags: [] }],
     ingredientTags: [],
   });
@@ -36,6 +39,9 @@ function run() {
   assert(menu.ingredientTags.includes("wine"));
   assert.strictEqual(menu.dishMentions[0].dishType, "seafood");
   assert(menu.dishHints[0].ingredientTags.includes("shrimp"));
+  assert.strictEqual(menu.dishMentions[1].dishType, "dish");
+  assert(!menu.dishMentions[1].ingredientTags.includes("wine"));
+  assert.strictEqual(menu.dishHints[1].rawName, "pizza");
 
   const payload = retagExternalSourcePayload({
     sourceId: "fixture",
@@ -43,7 +49,7 @@ function run() {
     records: [menu],
   });
   assert.strictEqual(payload.summary.total, 1);
-  assert.strictEqual(payload.summary.dishMentions, 1);
+  assert.strictEqual(payload.summary.dishMentions, 2);
   assert(payload.summary.ingredientTags.shrimp >= 1);
 
   console.log("retag enrichment tests passed");
