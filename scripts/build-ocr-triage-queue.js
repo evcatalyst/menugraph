@@ -11,6 +11,7 @@ const ENRICHMENT_DIR = path.join(DATA_DIR, "enrichment");
 const EXTERNAL_SOURCE_DIR = path.join(ENRICHMENT_DIR, "external-sources");
 const OUTPUT_PATH = path.join(ENRICHMENT_DIR, "ocr-triage-queue.json");
 const OCR_EXTRACTIONS_PATH = path.join(ENRICHMENT_DIR, "ocr-extractions.json");
+const OCR_FAILURES_PATH = path.join(ENRICHMENT_DIR, "ocr-failures.json");
 const VERSION = 1;
 const DEFAULT_RECORD_LIMIT = 5000;
 const DEFAULT_EARLY_LIMIT = 100;
@@ -253,10 +254,11 @@ function summarize(candidates, options = {}) {
       }, new Map()).entries()].sort((a, b) => a[0].localeCompare(b[0]))
     );
   const early = candidates.filter((record) => record.priorityBatch === "phase1");
+  const pending = candidates.filter((record) => !record.processing || ["pending", "partial", "retryable_failed"].includes(record.processing.status));
   const externalCostPerImageUsd = Number(options.externalCostPerImageUsd || 0) || null;
-  const externalImages = candidates
+  const externalImages = pending
     .filter((record) => /external|rights_review/.test(record.route))
-    .reduce((sum, record) => sum + Number(record.estimatedImages || 0), 0);
+    .reduce((sum, record) => sum + Number(record.processing?.pendingImages ?? record.estimatedImages ?? 0), 0);
   return {
     total: candidates.length,
     estimatedImages: candidates.reduce((sum, record) => sum + Number(record.estimatedImages || 0), 0),
@@ -275,6 +277,184 @@ function summarize(candidates, options = {}) {
       estimatedUsd: externalCostPerImageUsd ? Number((externalImages * externalCostPerImageUsd).toFixed(2)) : null,
       note: externalCostPerImageUsd ? "Configurable planning estimate; verify current provider pricing before routing." : "Set --external-cost-per-image for a planning estimate; external routing is rights-gated by default.",
     },
+    processing: processingSummary(candidates),
+    progressiveRunPlan: progressiveRunPlan(candidates, options),
+  };
+}
+
+function processingSummary(candidates) {
+  const countBy = (rows, getter) =>
+    Object.fromEntries(
+      [...rows.reduce((counts, record) => {
+        const key = cleanValue(getter(record) || "unknown");
+        counts.set(key, (counts.get(key) || 0) + 1);
+        return counts;
+      }, new Map()).entries()].sort((a, b) => a[0].localeCompare(b[0]))
+    );
+  const pending = candidates.filter((record) => !record.processing || ["pending", "partial", "retryable_failed"].includes(record.processing.status));
+  const completed = candidates.filter((record) => record.processing?.status === "processed");
+  const failed = candidates.filter((record) => ["failed_review", "retryable_failed"].includes(record.processing?.status));
+  return {
+    byStatus: countBy(candidates, (record) => record.processing?.status || "pending"),
+    pendingCandidates: pending.length,
+    pendingEstimatedImages: pending.reduce((sum, record) => sum + Number(record.processing?.pendingImages ?? record.estimatedImages ?? 0), 0),
+    processedCandidates: completed.length,
+    failedCandidates: failed.length,
+    retryableFailures: failed.filter((record) => record.processing?.retryableFailure).length,
+    pendingBySource: countBy(pending, (record) => record.sourceId || record.sourceKey),
+    pendingByTier: countBy(pending, (record) => record.localTier),
+    pendingByRoute: countBy(pending, (record) => record.route),
+    pendingByBatch: countBy(pending, (record) => record.priorityBatch),
+  };
+}
+
+function estimateKeepImagesMb(records, limit, mbPerImage = 0.75) {
+  const images = records.slice(0, limit).reduce((sum, record) => sum + Number(record.processing?.pendingImages ?? record.estimatedImages ?? 0), 0);
+  return Number((images * mbPerImage).toFixed(1));
+}
+
+function runSlice(rows, label, args, limit = 25) {
+  const selected = rows.slice(0, limit);
+  return {
+    label,
+    candidates: selected.length,
+    estimatedImages: selected.reduce((sum, record) => sum + Number(record.processing?.pendingImages ?? record.estimatedImages ?? 0), 0),
+    topCandidateIds: selected.slice(0, 8).map((record) => record.id),
+    command: `npm run enrich:ocr:local -- ${args.join(" ")}`,
+  };
+}
+
+function countRows(rows, getter) {
+  return Object.fromEntries(
+    [...rows.reduce((counts, record) => {
+      const key = cleanValue(getter(record) || "unknown");
+      counts.set(key, (counts.get(key) || 0) + 1);
+      return counts;
+    }, new Map()).entries()].sort((a, b) => a[0].localeCompare(b[0]))
+  );
+}
+
+function progressiveRunPlan(candidates, options = {}) {
+  const pending = candidates
+    .filter((record) => !record.processing || ["pending", "partial", "retryable_failed"].includes(record.processing.status))
+    .sort((a, b) => Number(a.priorityRank || 999999) - Number(b.priorityRank || 999999));
+  const phase1Easy = pending.filter((record) => record.route === "local_ocr" && record.priorityBatch === "phase1" && record.localTier === "easy");
+  const phase1Medium = pending.filter((record) => record.route === "local_ocr" && record.priorityBatch === "phase1" && record.localTier === "medium");
+  const backlogLocal = pending.filter((record) => record.route === "local_ocr" && record.priorityBatch !== "phase1");
+  const retryable = pending.filter((record) => record.processing?.status === "retryable_failed");
+  const metadataOnly = pending.filter((record) => record.route === "metadata_only_no_image");
+  const externalReview = pending.filter((record) => /external|rights_review/.test(record.route));
+  return {
+    localFirst: true,
+    rawPayloadPolicy: "no_raw_ocr_no_image_blobs_no_vectors",
+    defaultImageCachePolicy: "temporary_images_deleted_after_each_page_unless_keep_images_is_set",
+    storageEstimate: {
+      defaultPeakTempMb: 2,
+      keepImagesMbPerImageAssumption: 0.75,
+      keepImagesIfLimit25Mb: estimateKeepImagesMb(pending, 25),
+      keepImagesIfLimit100Mb: estimateKeepImagesMb(pending, 100),
+      note: "The local OCR runner is sequential and deletes cached page images by default, so peak disk use stays low unless --keep-images is used.",
+    },
+    runs: [
+      runSlice(phase1Easy, "phase1_easy_local", ["--limit=25", "--batch=phase1", "--tier=easy", "--pages-per-menu=1"], 25),
+      runSlice(phase1Medium, "phase1_medium_local", ["--limit=25", "--batch=phase1", "--tier=medium", "--pages-per-menu=1"], 25),
+      runSlice(backlogLocal, "backlog_local", ["--limit=50", "--batch=all", "--tier=all", "--pages-per-menu=1"], 50),
+      runSlice(retryable, "retryable_local_failures", ["--limit=25", "--batch=all", "--retry-retryable", "--pages-per-menu=1"], 25),
+    ],
+    nonOcrActions: [
+      {
+        label: "metadata_only_no_image",
+        candidates: metadataOnly.length,
+        bySource: countRows(metadataOnly, (record) => record.sourceId || record.sourceKey),
+        action: "Use source-specific metadata parsers and title/description rules; do not route to OCR unless an image route is later discovered.",
+        followUpCommands: ["npm run enrich:cornell", "npm run enrich:recipe-bridge", "npm run enrich:coverage", "npm run build:graph"],
+      },
+      {
+        label: "rights_review_before_external_vlm",
+        candidates: externalReview.length,
+        estimatedImages: externalReview.reduce((sum, record) => sum + Number(record.processing?.pendingImages ?? record.estimatedImages ?? 0), 0),
+        topCandidateIds: externalReview.slice(0, 8).map((record) => record.id),
+        action: "Perform source rights review before sending sanitized page images or crops to Grok or another external VLM.",
+      },
+    ],
+    planningAssumptions: {
+      pagesPerMenu: Number(options.pagesPerMenu || DEFAULT_PAGES_PER_MENU),
+      externalCostPerImageUsd: Number(options.externalCostPerImageUsd || 0) || null,
+    },
+  };
+}
+
+function buildProcessingIndex(extractionRecords = [], failureRecords = []) {
+  const index = new Map();
+  const ensure = (candidateId) => {
+    const id = cleanValue(candidateId);
+    if (!id) return null;
+    if (!index.has(id)) {
+      index.set(id, {
+        attemptedPages: 0,
+        processedPages: 0,
+        failedPages: 0,
+        dishMentions: 0,
+        priceObservations: 0,
+        retryableFailure: false,
+        failureClasses: {},
+        nextAction: "",
+      });
+    }
+    return index.get(id);
+  };
+  for (const record of extractionRecords || []) {
+    const state = ensure(record.candidateId);
+    if (!state) continue;
+    state.attemptedPages += 1;
+    if (record.status === "error") state.failedPages += 1;
+    else state.processedPages += 1;
+    state.dishMentions += Array.isArray(record.dishMentionIds) ? record.dishMentionIds.length : 0;
+    state.priceObservations += Array.isArray(record.priceObservationIds) ? record.priceObservationIds.length : 0;
+  }
+  for (const record of failureRecords || []) {
+    const state = ensure(record.candidateId);
+    if (!state) continue;
+    state.retryableFailure = state.retryableFailure || Boolean(record.retryable);
+    const failureClass = cleanValue(record.errorClass || "unknown_error");
+    state.failureClasses[failureClass] = (state.failureClasses[failureClass] || 0) + 1;
+    state.nextAction = cleanValue(record.nextAction || state.nextAction);
+  }
+  return index;
+}
+
+function processingForCandidate(candidate, processingIndex, pagesPerMenu = DEFAULT_PAGES_PER_MENU) {
+  const targetImages = Math.max(0, Number(candidate.estimatedImages || Math.min(candidate.pageCount || pagesPerMenu, pagesPerMenu)) || 0);
+  const state = processingIndex.get(cleanValue(candidate.id));
+  if (!state) {
+    return {
+      status: "pending",
+      attemptedPages: 0,
+      processedPages: 0,
+      failedPages: 0,
+      pendingImages: targetImages,
+      dishMentions: 0,
+      priceObservations: 0,
+      retryableFailure: false,
+    };
+  }
+  const pendingImages = Math.max(0, targetImages - state.processedPages - state.failedPages);
+  let status = "pending";
+  if (state.processedPages >= targetImages && targetImages > 0) status = "processed";
+  else if (state.processedPages > 0) status = "partial";
+  else if (state.failedPages > 0 && state.retryableFailure) status = "retryable_failed";
+  else if (state.failedPages > 0) status = "failed_review";
+  return {
+    status,
+    attemptedPages: state.attemptedPages,
+    processedPages: state.processedPages,
+    failedPages: state.failedPages,
+    pendingImages,
+    dishMentions: state.dishMentions,
+    priceObservations: state.priceObservations,
+    retryableFailure: Boolean(state.retryableFailure),
+    failureClasses: state.failureClasses,
+    nextAction: cleanValue(state.nextAction),
   };
 }
 
@@ -329,11 +509,6 @@ async function readExternalRecords() {
     }
   }
   return records;
-}
-
-async function attemptedCandidateIds() {
-  const payload = await readEnrichmentPayload(OCR_EXTRACTIONS_PATH, { records: [] });
-  return new Set((payload.records || []).map((record) => cleanValue(record.candidateId)).filter(Boolean));
 }
 
 function sourceMatches(candidate, sourceFilter) {
@@ -395,7 +570,12 @@ async function buildOcrTriageQueue(options = {}) {
   const localOcr = options.localOcrAvailable ?? localOcrAvailable();
   const sourceFilter = new Set(splitList(options.source || options.sources || ""));
   const excludeAttempted = Boolean(options.excludeAttempted);
-  const attempted = excludeAttempted ? await attemptedCandidateIds() : new Set();
+  const [previousOcr, previousFailures] = await Promise.all([
+    readEnrichmentPayload(OCR_EXTRACTIONS_PATH, { records: [] }),
+    readJson(OCR_FAILURES_PATH, { records: [] }),
+  ]);
+  const attempted = excludeAttempted ? new Set((previousOcr.records || []).map((record) => cleanValue(record.candidateId)).filter(Boolean)) : new Set();
+  const processingIndex = buildProcessingIndex(previousOcr.records || [], previousFailures.records || []);
   const menusPayload = await readJson(path.join(DATA_DIR, "menus.json"), { menus: [] });
   const imagePayload = await readJson(path.join(ENRICHMENT_DIR, "image-features.json"), { records: [] });
   const imageFeatureByMenu = new Map((imagePayload.records || []).map((record) => [cleanValue(record.menuId), record]));
@@ -414,7 +594,10 @@ async function buildOcrTriageQueue(options = {}) {
     .sort((a, b) => b.priorityScore - a.priorityScore || b.valueScore - a.valueScore || a.difficultyScore - b.difficultyScore || a.title.localeCompare(b.title));
   const selectedRecords = markEarlyBatch(rawCandidates.slice(0, recordLimit), earlyLimit);
   const existing = options.appendExisting ? await readJson(options.outputPath || OUTPUT_PATH, { records: [] }) : { records: [] };
-  const records = options.appendExisting ? dedupeCandidates([...(existing.records || []), ...selectedRecords]) : selectedRecords;
+  const records = (options.appendExisting ? dedupeCandidates([...(existing.records || []), ...selectedRecords]) : selectedRecords).map((record) => ({
+    ...record,
+    processing: processingForCandidate(record, processingIndex, pagesPerMenu),
+  }));
   const payload = {
     version: VERSION,
     generatedAt,
@@ -439,7 +622,7 @@ async function buildOcrTriageQueue(options = {}) {
       sourceFilter: [...sourceFilter],
       appendExisting: Boolean(options.appendExisting),
       excludeAttempted,
-      ...summarize(records, { externalCostPerImageUsd: options.externalCostPerImageUsd }),
+      ...summarize(records, { externalCostPerImageUsd: options.externalCostPerImageUsd, pagesPerMenu }),
     },
     records,
   };
@@ -482,7 +665,11 @@ module.exports = {
   localOcrAvailable,
   localOcrEngine,
   optionsFromArgs,
+  processingForCandidate,
+  processingSummary,
+  progressiveRunPlan,
   routeForCandidate,
   summarize,
   tierForDifficulty,
+  buildProcessingIndex,
 };

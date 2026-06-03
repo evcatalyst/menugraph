@@ -1,9 +1,12 @@
 const assert = require("assert");
 const {
+  buildProcessingIndex,
   candidateForRecord,
   dedupeCandidates,
   optionsFromArgs,
+  processingForCandidate,
   routeForCandidate,
+  progressiveRunPlan,
   summarize,
   tierForDifficulty,
 } = require("./build-ocr-triage-queue");
@@ -81,6 +84,44 @@ assert.strictEqual(summary.total, 2);
 assert.strictEqual(summary.earlyBatch.candidates, 1);
 assert.strictEqual(summary.byRoute.local_ocr, 1);
 assert.strictEqual(summary.byRoute.rights_review_before_external_vlm, 1);
+assert.strictEqual(summary.processing.pendingCandidates, 2);
+assert.strictEqual(summary.progressiveRunPlan.storageEstimate.defaultPeakTempMb, 2);
+assert(summary.progressiveRunPlan.runs.some((run) => run.label === "phase1_easy_local" && run.command.includes("--tier=easy")));
+
+const processingIndex = buildProcessingIndex(
+  [
+    {
+      candidateId: easyUnknown.id,
+      status: "ok",
+      dishMentionIds: ["dish:1", "dish:2"],
+      priceObservationIds: ["price:1"],
+    },
+    {
+      candidateId: hardExternal.id,
+      status: "error",
+    },
+  ],
+  [
+    {
+      candidateId: hardExternal.id,
+      retryable: false,
+      errorClass: "access_denied",
+      nextAction: "source_access_review",
+    },
+  ]
+);
+const processedEasy = processingForCandidate(easyUnknown, processingIndex, 2);
+assert.strictEqual(processedEasy.status, "processed");
+assert.strictEqual(processedEasy.dishMentions, 2);
+assert.strictEqual(processedEasy.priceObservations, 1);
+const failedHard = processingForCandidate(hardExternal, processingIndex, 3);
+assert.strictEqual(failedHard.status, "failed_review");
+assert.strictEqual(failedHard.failureClasses.access_denied, 1);
+const pendingPlan = progressiveRunPlan([
+  { ...easyUnknown, priorityBatch: "phase1", priorityRank: 1, processing: processedEasy },
+  { ...hardExternal, priorityBatch: "backlog", priorityRank: 2, processing: failedHard },
+]);
+assert.strictEqual(pendingPlan.runs.find((run) => run.label === "phase1_easy_local").candidates, 0);
 
 const options = optionsFromArgs([
   "--source=milwaukee_historic_menus,uw_menus_collection",
