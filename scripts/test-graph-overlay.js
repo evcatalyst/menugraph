@@ -44,12 +44,19 @@ for (const sourceId of Object.keys(evidenceIndex.sourceProbes || {})) {
 }
 assert(Object.keys(evidenceIndex.sourceProbes || {}).length >= 4, "expected probed external sources in evidence index");
 if (manifest.summary.externalMenus?.records) {
-  assert.strictEqual(manifest.summary.externalMenus.bySource.northwestern_transport_menus, manifest.summary.externalMenus.records, "external Northwestern rows should be summarized by source");
+  assert(manifest.summary.externalMenus.bySource.northwestern_transport_menus > 0, "external Northwestern rows should be summarized by source");
+  assert(manifest.summary.externalMenus.bySource.uh_1850s_1860s_menus > 0, "external UH rows should be summarized by source");
   assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("northwestern:")), "external Northwestern menu evidence should be indexed");
+  assert(Object.keys(evidenceIndex.externalMenus || {}).some((id) => id.startsWith("uh:")), "external UH menu evidence should be indexed");
   assert(core.nodes.some((node) => node.id.startsWith("menu:northwestern:")), "core graph should include external Northwestern menu nodes");
+  assert(core.nodes.some((node) => node.id.startsWith("menu:uh:")), "core graph should include external UH menu nodes");
   assert(
     core.edges.some((edge) => edge.type === "HAS_MENU" && edge.from === "source:northwestern_transport_menus" && edge.to.startsWith("menu:northwestern:")),
     "core graph should link Northwestern source to external menu nodes"
+  );
+  assert(
+    core.edges.some((edge) => edge.type === "HAS_MENU" && edge.from === "source:uh_1850s_1860s_menus" && edge.to.startsWith("menu:uh:")),
+    "core graph should link UH source to external menu nodes"
   );
 }
 

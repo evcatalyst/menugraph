@@ -124,6 +124,81 @@ async function readJson(filePath, fallback = {}) {
   }
 }
 
+async function readExternalMenuRecords() {
+  const payloads = [];
+  const legacyPath = path.join(DATA_DIR, "enrichment", "external-menu-records.json");
+  const legacy = await readJson(legacyPath, null);
+  if (legacy?.records?.length) {
+    payloads.push({
+      sourceFile: "enrichment/external-menu-records.json",
+      payload: legacy,
+    });
+  }
+
+  const sourceDir = path.join(DATA_DIR, "enrichment", "external-sources");
+  let sourceFiles = [];
+  try {
+    sourceFiles = (await fs.readdir(sourceDir)).filter((name) => name.endsWith(".json")).sort();
+  } catch (error) {
+    sourceFiles = [];
+  }
+  for (const fileName of sourceFiles) {
+    const payload = await readJson(path.join(sourceDir, fileName), null);
+    if (payload?.records?.length) {
+      payloads.push({
+        sourceFile: `enrichment/external-sources/${fileName}`,
+        payload,
+      });
+    }
+  }
+
+  const recordsById = new Map();
+  const sources = {};
+  for (const { sourceFile, payload } of payloads) {
+    const sourceId = cleanValue(payload.sourceId || payload.sourceKey || path.basename(sourceFile, ".json"));
+    if (sourceId) {
+      sources[sourceId] = {
+        sourceId,
+        sourceKey: cleanValue(payload.sourceKey),
+        sourceFile,
+        generatedAt: payload.generatedAt || null,
+        summary: payload.summary || {},
+      };
+    }
+    for (const record of payload.records || []) {
+      const id = cleanValue(record.menuId || record.id);
+      if (!id) continue;
+      recordsById.set(id, {
+        ...record,
+        provenance: {
+          ...(record.provenance || {}),
+          sourceFile: record.provenance?.sourceFile || sourceFile,
+        },
+      });
+    }
+  }
+
+  return {
+    version: VERSION,
+    generatedAt: new Date().toISOString(),
+    summary: {
+      total: recordsById.size,
+      sources: Object.keys(sources).length,
+      bySource: Object.fromEntries(
+        [...recordsById.values()]
+          .reduce((counts, record) => {
+            const key = cleanValue(record.sourceId || record.sourceKey || "external");
+            counts.set(key, (counts.get(key) || 0) + 1);
+            return counts;
+          }, new Map())
+          .entries()
+      ),
+    },
+    sources,
+    records: [...recordsById.values()],
+  };
+}
+
 function addNode(map, next) {
   if (!next?.id || map.has(next.id)) return;
   map.set(next.id, next);
@@ -259,6 +334,10 @@ function enrichmentRecords(enrichment, key) {
   return enrichment?.[key]?.records || [];
 }
 
+function externalSourceFile(record) {
+  return cleanValue(record?.provenance?.sourceFile || record?.sourceFile || "enrichment/external-menu-records.json");
+}
+
 function buildDishCounts({ menus, analytics, ontology, prices, enrichment }) {
   const counts = new Map();
   const add = (name, amount, source) => {
@@ -351,6 +430,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
   for (const record of externalMenus) {
     const uid = cleanValue(record.menuId || record.id);
     if (!uid) continue;
+    const sourceFile = externalSourceFile(record);
     const dishMentions = record.dishMentions || [];
     const priceObservations = record.priceObservations || [];
     const ingredientTags = new Set([
@@ -413,7 +493,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         confidence: record.dateConfidence || "C",
         methods: ["external_source_date_created"],
         reviewStatus: "source_metadata",
-        sourceFile: "enrichment/external-menu-records.json",
+        sourceFile,
         evidence: [
           {
             method: "date_created",
@@ -440,7 +520,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
           sectionName: cleanValue(dish.sectionName),
           confidence: Number(dish.confidence || 0),
           method: cleanValue(dish.extractionMethod || "external"),
-          sourceFile: "enrichment/external-menu-records.json",
+          sourceFile,
         };
       }
     }
@@ -466,7 +546,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
               caveat: cleanValue(price.normalized.caveat),
             }
           : null,
-        sourceFile: "enrichment/external-menu-records.json",
+        sourceFile,
         external: true,
       };
     }
@@ -797,12 +877,13 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
   for (const record of externalMenus) {
     const uid = cleanValue(record.menuId || record.id);
     if (!uid) continue;
+    const sourceFile = externalSourceFile(record);
     menuIdSet.add(uid);
     const sourceId = cleanValue(record.sourceId) || sourceIdForKey(record.sourceKey || "external");
     addNode(
       coreNodes,
       node(menuNodeId(uid), "Menu", record.title || uid, record.sourceKey || sourceId, Number(record.confidence || 0.68), {
-        sourceFile: "enrichment/external-menu-records.json",
+        sourceFile,
         sourceRecordId: cleanValue(record.sourceRecordId),
         sourceKey: cleanValue(record.sourceKey || "external"),
         sourceId,
@@ -811,7 +892,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
     addEdge(
       edges,
       edge("HAS_MENU", externalMenuSourceNodeId(record), menuNodeId(uid), 0.82, Number(record.confidence || 0.68), {
-        sourceFile: "enrichment/external-menu-records.json",
+        sourceFile,
         sourceRecordId: cleanValue(record.sourceRecordId),
         sourceId,
       }),
@@ -824,7 +905,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       addNode(
         coreNodes,
         node(venueId, "Venue", label, record.sourceKey || "external-menu-metadata", 0.52, {
-          sourceFile: "enrichment/external-menu-records.json",
+          sourceFile,
           sourceRecordId: cleanValue(record.sourceRecordId),
           provisional: true,
         }, {
@@ -836,7 +917,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       addEdge(
         edges,
         edge("SERVED_AT", menuNodeId(uid), venueId, 0.62, 0.52, {
-          sourceFile: "enrichment/external-menu-records.json",
+          sourceFile,
           sourceRecordId: cleanValue(record.sourceRecordId),
           provisional: true,
         }),
@@ -865,7 +946,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       addEdge(
         edges,
         edge("MENTIONS_DISH", menuNodeId(uid), dishId, 0.66, dish.confidence, {
-          sourceFile: "enrichment/external-menu-records.json",
+          sourceFile,
           sourceRecordId: cleanValue(record.sourceRecordId),
           extraction: dish.method,
         }),
@@ -882,7 +963,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       addNode(
         coreNodes,
         node(termId, "Term", term.term, "external-menu-records", 0.66, {
-          sourceFile: "enrichment/external-menu-records.json",
+          sourceFile,
           sourceRecordId: cleanValue(record.sourceRecordId),
         }, {
           category: term.category,
@@ -891,7 +972,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       addEdge(
         edges,
         edge("HAS_ONTOLOGY_TERM", menuNodeId(uid), termId, 0.48, 0.66, {
-          sourceFile: "enrichment/external-menu-records.json",
+          sourceFile,
           sourceRecordId: cleanValue(record.sourceRecordId),
         }),
         seenEdges
@@ -1080,7 +1161,7 @@ async function buildGraphOverlay(options = {}) {
     readJson(path.join(DATA_DIR, "enrichment", "price-observations.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "image-features.json"), { records: [] }),
     readJson(path.join(DATA_DIR, "enrichment", "source-probes.json"), { records: [] }),
-    readJson(path.join(DATA_DIR, "enrichment", "external-menu-records.json"), { records: [] }),
+    readExternalMenuRecords(),
   ]);
 
   const evaluationErrors = graphContract.validateSourceEvaluations(evaluations);
