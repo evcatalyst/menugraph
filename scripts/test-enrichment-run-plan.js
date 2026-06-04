@@ -51,12 +51,25 @@ const refreshRows = sourceRefreshRows([
     primaryNextAction: "source_route_review",
     nextActions: [{ id: "source_route_review" }],
   },
+  {
+    sourceId: "cornell_nestle_menu_collection",
+    label: "Cornell",
+    sourceType: "menu",
+    rowCount: 765,
+    dishCoverage: 0.9,
+    priceCoverage: 0.9,
+    imageCoverage: 0.2,
+    primaryNextAction: "iiif_image_assessment",
+    nextActions: [{ id: "iiif_image_assessment" }],
+  },
 ]);
-assert.strictEqual(refreshRows.length, 2);
+assert.strictEqual(refreshRows.length, 3);
 assert.strictEqual(refreshRows[0].sourceId, "tulane_louisiana_menu_collection");
 assert.strictEqual(refreshRows[0].command, "");
 assert.strictEqual(refreshRows[1].sourceId, "denver_menu_collection");
 assert(refreshRows[1].command.includes("enrich:denver"));
+assert.strictEqual(refreshRows[2].sourceId, "cornell_nestle_menu_collection");
+assert.strictEqual(refreshRows[2].command, "");
 
 const payload = buildRunPlanPayload(
   {
@@ -258,6 +271,25 @@ const metadataPlan = metadataOnlyQueuePlan(
 );
 assert.strictEqual(metadataPlan.candidates, 1);
 assert.strictEqual(metadataPlan.pendingImages, 0);
+
+const metadataReviewPlan = metadataOnlyQueuePlan(
+  [
+    {
+      id: "ocrtriage:meta-review",
+      sourceId: "cornell_nestle_menu_collection",
+      sourceKey: "cornell",
+      route: "metadata_only_no_image",
+      localTier: "metadata_only",
+      estimatedImages: 0,
+      processing: { status: "metadata_only_review", pendingImages: 0 },
+    },
+  ],
+  { sampleLimit: 1 }
+);
+assert.strictEqual(metadataReviewPlan.status, "source_route_review");
+assert.strictEqual(metadataReviewPlan.candidates, 0);
+assert.strictEqual(metadataReviewPlan.reviewCandidates, 1);
+assert.strictEqual(metadataReviewPlan.reviewBySource.cornell_nestle_menu_collection, 1);
 
 const graphQueue = graphGapQueuePlan(
   {

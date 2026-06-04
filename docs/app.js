@@ -2530,6 +2530,7 @@ function renderGraphLens(svg, width, height) {
   const runPlan = summary.runPlan || {};
   const assimilation = summary.assimilationPlan || {};
   const metadataOnly = assimilation.metadataOnlyQueue || {};
+  const sourceRouteReview = assimilation.sourceRouteReview || summary.sourceRouteReview || {};
   const pad = { top: 26, right: 24, bottom: 24, left: 24 };
   const compactMode = width < 720;
 
@@ -2557,14 +2558,19 @@ function renderGraphLens(svg, width, height) {
           (evidence.recipeClusters || 0) +
           (evidence.ingredientAnalytics || 0) +
           (evidence.dishAnalytics || 0) +
-          (evidence.enrichmentGaps || 0)
+          (evidence.enrichmentGaps || 0) +
+          (evidence.sourceRouteReview || 0)
       ),
-      detail: "date / dish / gap",
+      detail: "date / dish / gap / route",
     },
     {
       label: "Assimilation",
       value: `${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)}`,
-      detail: metadataOnly.candidates ? `${formatNumber(metadataOnly.candidates)} metadata rows` : assimilation.storageOk || runPlan.storageOk ? "ready streams" : "disk-gated",
+      detail: sourceRouteReview.sources
+        ? `${formatNumber(sourceRouteReview.sources)} route reviews`
+        : metadataOnly.candidates
+          ? `${formatNumber(metadataOnly.candidates)} metadata rows`
+          : assimilation.storageOk || runPlan.storageOk ? "ready streams" : "disk-gated",
     },
   ];
   metrics.forEach((metric, index) => {
@@ -2590,7 +2596,7 @@ function renderGraphLens(svg, width, height) {
     {
       title: "Local Enricher",
       metric: assimilation.storageOk || runPlan.storageOk ? "Mac-first" : "free disk",
-      detail: `${formatNumber(runPlan.localRunnableImages || assimilation.ocr?.localRunnableImages || 0)} OCR images / ${formatNumber(runPlan.metadataOnlyCandidates || metadataOnly.candidates || 0)} metadata rows`,
+      detail: `${formatNumber(runPlan.localRunnableImages || assimilation.ocr?.localRunnableImages || 0)} OCR images / ${formatNumber(sourceRouteReview.sources || 0)} route reviews`,
     },
     {
       title: "Recipe Bridge",
@@ -2624,7 +2630,7 @@ function renderGraphLens(svg, width, height) {
     {
       title: "Enrichment",
       metric: `${formatNumber(summary.recipeBridge?.clusters || evidence.recipeClusters || 0)} recipes`,
-      detail: `${formatNumber(assimilation.readyWorkstreams || 0)} ready / ${formatNumber(runPlan.pendingImages || 0)} OCR / ${formatNumber(runPlan.metadataOnlyCandidates || metadataOnly.candidates || 0)} metadata`,
+      detail: `${formatNumber(assimilation.readyWorkstreams || 0)} ready / ${formatNumber(runPlan.pendingImages || 0)} OCR / ${formatNumber(sourceRouteReview.sources || 0)} route reviews`,
     },
     {
       title: "Overlay",
@@ -2737,12 +2743,13 @@ function drawCompactEvidenceFooter(svg, x, y, width, summary) {
   const overlays = summary.overlays || {};
   const evidence = summary.evidence || {};
   const runPlan = summary.runPlan || {};
+  const sourceRouteReview = summary.sourceRouteReview || summary.assimilationPlan?.sourceRouteReview || {};
   const rows = [
     { label: "Dishes", value: overlays.withDishes || 0 },
     { label: "Dates", value: overlays.withDateEvidence || evidence.dateEvidence || 0 },
     { label: "Prices", value: overlays.withPrices || 0 },
     { label: "Matches", value: overlays.withMatches || 0 },
-    { label: "Queue", value: runPlan.pendingImages || overlays.withRecipeClusters || evidence.recipeClusters || 0 },
+    { label: "Route", value: sourceRouteReview.sources || evidence.sourceRouteReview || runPlan.pendingImages || 0 },
   ];
   const height = 32;
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
@@ -2769,6 +2776,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
   const evidence = summary.evidence || {};
   const runPlan = summary.runPlan || {};
   const metadataOnly = summary.assimilationPlan?.metadataOnlyQueue || {};
+  const sourceRouteReview = summary.sourceRouteReview || summary.assimilationPlan?.sourceRouteReview || {};
   const rows = [
     { label: "Dish overlays", value: overlays.withDishes || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Dish analytics", value: evidence.dishAnalytics || 0, total: Math.max(evidence.dishAnalytics || 0, 1) },
@@ -2780,6 +2788,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
     { label: "Recipe bridges", value: overlays.withRecipeClusters || evidence.recipeClusters || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Ingredient analytics", value: evidence.ingredientAnalytics || 0, total: Math.max(evidence.ingredientAnalytics || 0, 1) },
     { label: "Metadata-only queue", value: metadataOnly.candidates || runPlan.metadataOnlyCandidates || 0, total: Math.max(metadataOnly.candidates || runPlan.metadataOnlyCandidates || 0, 1) },
+    { label: "Source route review", value: sourceRouteReview.sources || evidence.sourceRouteReview || 0, total: Math.max(sourceRouteReview.sources || evidence.sourceRouteReview || 0, 1) },
     { label: runPlan.storageOk ? "Runnable OCR queue" : "OCR queue blocked", value: runPlan.pendingImages || 0, total: Math.max(runPlan.pendingImages || 0, coverageSafeTotal(summary)) },
   ];
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
@@ -2845,6 +2854,7 @@ function graphSourceRows(graph) {
   const capabilityById = new Map(nodes.filter((node) => node.type === "Capability").map((node) => [node.id, node]));
   const probes = graph?.evidenceIndex?.sourceProbes || {};
   const coverage = graph?.evidenceIndex?.sourceCoverage || {};
+  const routeReviews = graph?.evidenceIndex?.sourceRouteReview || {};
   const sourceCounts = sourceRecordCounts();
   const externalCounts = graph?.manifest?.summary?.externalMenus?.bySource || {};
   const edgesBySource = new Map();
@@ -2863,6 +2873,7 @@ function graphSourceRows(graph) {
       const sourceId = source.provenance?.sourceId || String(source.id || "").replace(/^source:/, "");
       const probe = probes[sourceId] || null;
       const coverageRow = coverage[sourceId] || null;
+      const routeReview = routeReviews[sourceId] || null;
       const ingestedCount = source.sourceKey ? sourceCounts.get(source.sourceKey) || 0 : 0;
       const externalCount = Number(externalCounts[sourceId] || probe?.externalRows || 0);
       const recipeBridgeCount = Math.max(Number(coverageRow?.recipeBridgeClusters || 0), Number(probe?.recipeBridgeClusters || 0));
@@ -2886,6 +2897,9 @@ function graphSourceRows(graph) {
             : probe?.status
               ? `${displayIdLabel(probe.status)} metadata probe`
               : "capability and rights model only");
+      const routeReviewText = routeReview?.reviewTypes?.length
+        ? `${formatNumber(routeReview.reviewTypes.length)} route review signal${routeReview.reviewTypes.length === 1 ? "" : "s"}`
+        : "";
       const sampleText = sampleItems
         .slice(0, 2)
         .map((item) => [item.title, item.date].filter(Boolean).join(" / "))
@@ -2913,6 +2927,9 @@ function graphSourceRows(graph) {
         accessMethod: probe?.accessMethod || "",
         coverageScore: Number(coverageRow?.coverageScore || 0),
         primaryNextAction: coverageRow?.primaryNextAction || "",
+        routeReviewCount: routeReview ? 1 : 0,
+        routeReviewStatus: routeReview?.status || "",
+        routeReviewText,
         sampleText,
         scaleText,
         evidenceText,
@@ -2922,6 +2939,8 @@ function graphSourceRows(graph) {
             ? `Derived external metadata is in the static graph overlay; raw images, OCR, and vectors remain out of public artifacts.${evidenceText ? ` ${evidenceText}.` : ""}`
           : recipeBridgeCount
             ? `Derived menu dish and ingredient clusters target this recipe source; no full recipe text or recipe rows are stored yet.${scaleText ? ` ${scaleText}.` : ""}`
+          : routeReviewText
+            ? `Route review is needed before deeper source ingestion or local OCR can continue. ${routeReviewText}.`
             : probe?.notes || "",
       };
     })
@@ -2972,6 +2991,15 @@ function sourceOverlayArtifact(row) {
     label: "Open overlays",
     href: staticDataHref(`graph/menu-overlays/by-source/${graphShardKeyForSource(row.sourceKey)}.json`),
     title: "Open the source-specific menu overlay shard.",
+  };
+}
+
+function sourceRouteReviewArtifact(row) {
+  if (!Number(row?.routeReviewCount || 0)) return null;
+  return {
+    label: "Open route review",
+    href: staticDataHref("enrichment/source-route-review.json"),
+    title: "Open the compact source/image route review queue.",
   };
 }
 
@@ -3324,6 +3352,7 @@ function renderGraphSourceResults() {
         actions.appendChild(openRows);
       }
       appendArtifactLink(actions, sourceDataArtifact(row));
+      appendArtifactLink(actions, sourceRouteReviewArtifact(row));
       if (row.externalCount || row.ingestedCount) appendArtifactLink(actions, sourceOverlayArtifact(row));
       if (row.sourceUrl) {
         const link = document.createElement("a");
@@ -3360,6 +3389,7 @@ function renderGraphExternalSourceResults() {
   });
   sourceActions.appendChild(backButton);
   appendArtifactLink(sourceActions, sourceDataArtifact(source));
+  appendArtifactLink(sourceActions, sourceRouteReviewArtifact(source));
   appendArtifactLink(sourceActions, sourceOverlayArtifact(source));
   const sourceTitle = document.createElement("h3");
   sourceTitle.textContent = source?.label || "External source";

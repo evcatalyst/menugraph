@@ -19,6 +19,7 @@ const { retagEnrichment } = require("./retag-enrichment");
 const { buildEnrichmentCoverageReport } = require("./build-enrichment-coverage-report");
 const { buildRecipeBridge } = require("./build-recipe-bridge");
 const { buildEnrichmentRunPlan } = require("./build-enrichment-run-plan");
+const { buildSourceRouteReview } = require("./build-source-route-review");
 const { buildAssimilationPlan } = require("./build-assimilation-plan");
 const { buildSourceProbes } = require("./build-source-probes");
 const { readRecipeBridgePayload } = require("./enrichment-shards");
@@ -379,6 +380,9 @@ async function runStorageLightPipeline(args, storageCheck) {
   });
   console.log(`[${timestamp()}] Run plan complete: ${JSON.stringify(runPlan.summary)}`);
 
+  const sourceRouteReview = await buildSourceRouteReview({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Source route review complete: ${JSON.stringify(sourceRouteReview.summary)}`);
+
   const assimilationPlan = await buildAssimilationPlan({ dryRun: hasFlag(args, "dry-run") });
   console.log(`[${timestamp()}] Assimilation plan complete: ${JSON.stringify(assimilationPlan.summary)}`);
 
@@ -403,6 +407,7 @@ async function runStorageLightPipeline(args, storageCheck) {
     sourceProbes: sourceProbes.summary,
     coverageReport: coverageReport.summary,
     runPlan: runPlan.summary,
+    sourceRouteReview: sourceRouteReview.summary,
     assimilationPlan: assimilationPlan.summary,
     graphSummary: graph.manifest.summary,
   });
@@ -614,6 +619,9 @@ async function main() {
   });
   console.log(`[${timestamp()}] Run plan complete: ${JSON.stringify(runPlan.summary)}`);
 
+  const sourceRouteReview = await buildSourceRouteReview({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Source route review complete: ${JSON.stringify(sourceRouteReview.summary)}`);
+
   const assimilationPlan = await buildAssimilationPlan({ dryRun: hasFlag(args, "dry-run") });
   console.log(`[${timestamp()}] Assimilation plan complete: ${JSON.stringify(assimilationPlan.summary)}`);
 
@@ -633,6 +641,7 @@ async function main() {
     sourceProbes: sourceProbes.summary,
     coverageReport: coverageReport.summary,
     runPlan: runPlan.summary,
+    sourceRouteReview: sourceRouteReview.summary,
     assimilationPlan: assimilationPlan.summary,
   });
 
@@ -656,6 +665,7 @@ async function main() {
     sourceProbes: sourceProbes.summary,
     coverageReport: coverageReport.summary,
     runPlan: runPlan.summary,
+    sourceRouteReview: sourceRouteReview.summary,
     assimilationPlan: assimilationPlan.summary,
     graphSummary: graph.manifest.summary,
   });

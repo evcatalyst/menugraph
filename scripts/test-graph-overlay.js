@@ -61,6 +61,8 @@ const ocrFailuresPath = path.join(DATA_DIR, "enrichment", "ocr-failures.json");
 const ocrFailures = fs.existsSync(ocrFailuresPath) ? readJson(ocrFailuresPath) : { summary: { total: 0 }, records: [] };
 const coverageReportPath = path.join(DATA_DIR, "enrichment", "coverage-report.json");
 const coverageReport = fs.existsSync(coverageReportPath) ? readJson(coverageReportPath) : { summary: { sources: 0 }, records: [] };
+const sourceRouteReviewPath = path.join(DATA_DIR, "enrichment", "source-route-review.json");
+const sourceRouteReview = fs.existsSync(sourceRouteReviewPath) ? readJson(sourceRouteReviewPath) : { summary: { sources: 0 }, records: [] };
 
 assert.deepStrictEqual(graphContract.validateGraph(sourceCapabilities, { maxBytes: manifest.sizeBudgetBytes }), [], "source graph should validate");
 assert.deepStrictEqual(graphContract.validateGraph(core, { maxBytes: manifest.sizeBudgetBytes }), [], "core graph should validate");
@@ -192,6 +194,26 @@ if (coverageReport.summary?.sources) {
   assert(
     ["recipe_bridge_sampling", "recipe_bridge_expansion"].includes(evidenceIndex.sourceCoverage.the_sifter?.primaryNextAction),
     "recipe sources should retain bridge next actions"
+  );
+}
+if (sourceRouteReview.summary?.sources) {
+  assert.strictEqual(
+    manifest.summary.enrichment.sourceRouteReview,
+    sourceRouteReview.summary.sources,
+    "source route review count should be summarized in the enrichment graph"
+  );
+  assert.strictEqual(
+    manifest.summary.sourceRouteReview.sources,
+    sourceRouteReview.summary.sources,
+    "source route review summary should be included in the graph manifest"
+  );
+  assert(
+    Object.keys(evidenceIndex.sourceRouteReview || {}).length >= sourceRouteReview.summary.sources,
+    "source route review should be indexed compactly"
+  );
+  assert(
+    Object.values(evidenceIndex.sourceRouteReview || {}).every((record) => !JSON.stringify(record).includes("data:image/")),
+    "source route review evidence must not include image blobs"
   );
 }
 if (ocrFailures.summary?.total) {

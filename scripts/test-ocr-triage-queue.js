@@ -162,8 +162,9 @@ const failedHard = processingForCandidate(hardExternal, processingIndex, 3);
 assert.strictEqual(failedHard.status, "failed_review");
 assert.strictEqual(failedHard.failureClasses.access_denied, 1);
 const pendingMetadata = processingForCandidate(metadataOnly, new Map(), 2);
-assert.strictEqual(pendingMetadata.status, "pending");
+assert.strictEqual(pendingMetadata.status, "metadata_only_review");
 assert.strictEqual(pendingMetadata.pendingImages, 0, "metadata-only candidates should not inflate pending image totals");
+assert.strictEqual(pendingMetadata.nextAction, "source_metadata_or_image_route_review");
 const retryProcessingIndex = buildProcessingIndex(
   [{ candidateId: "ocrtriage:retry", status: "error" }],
   [{ candidateId: "ocrtriage:retry", retryable: true, errorClass: "transient_network", nextAction: "retry_local" }]

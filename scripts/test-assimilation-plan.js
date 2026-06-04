@@ -193,6 +193,84 @@ const exhaustedLocalPayload = buildAssimilationPlanPayload(
 assert.strictEqual(exhaustedLocalPayload.summary.recommendedNext, "run_metadata_refresh");
 assert(exhaustedLocalPayload.workstreams.some((stream) => stream.id === "price_gap_pass" && stream.status === "monitor"));
 
+const sourceRouteReviewPayload = buildAssimilationPlanPayload(
+  {
+    coverageReport: {
+      records: [
+        {
+          sourceId: "cornell_nestle_menu_collection",
+          sourceKey: "cornell",
+          label: "Cornell",
+          sourceType: "menu",
+          rowCount: 10,
+          dishMenus: 2,
+          priceMenus: 1,
+          ingredientMenus: 1,
+          imageMenus: 0,
+          ocrCandidates: 10,
+          ocrFailures: 0,
+          dishCoverage: 0.2,
+          priceCoverage: 0.1,
+          ingredientCoverage: 0.1,
+          imageCoverage: 0,
+          primaryNextAction: "iiif_image_assessment",
+        },
+      ],
+      prioritizedActions: [{ id: "iiif_image_assessment" }],
+    },
+    runPlan: {
+      summary: {
+        storageOk: true,
+        pendingImages: 0,
+        localRunnableImages: 0,
+        estimatedLocalRuntimeMinutes: 0,
+        metadataOnlyCandidates: 0,
+        metadataOnlyReviewCandidates: 4,
+      },
+      metadataOnlyQueue: {
+        candidates: 0,
+        reviewCandidates: 4,
+        pendingImages: 0,
+        bySource: {},
+        reviewBySource: { cornell_nestle_menu_collection: 4 },
+      },
+      localBatches: [],
+      sourceRefresh: {
+        sources: [
+          {
+            sourceId: "cornell_nestle_menu_collection",
+            primaryNextAction: "iiif_image_assessment",
+            command: "",
+          },
+        ],
+      },
+      graphGapQueue: { summary: { actionableLocalOcrGaps: 0 } },
+    },
+    recipeBridge: { summary: { clusters: 10, totalCandidateClusters: 10 } },
+    sourceRouteReview: {
+      summary: {
+        sources: 1,
+        metadataOnlyReviewCandidates: 4,
+        failedReviewCandidates: 0,
+        sourceRouteSources: 0,
+        iiifReviewSources: 1,
+        imageRouteReviewSources: 0,
+        recommendedNext: "review_source_routes",
+      },
+      records: [{ sourceId: "cornell_nestle_menu_collection" }],
+    },
+    storagePreflight: { ok: true, availableFormatted: "3.5 GB", minFreeFormatted: "1.0 GB" },
+  },
+  { generatedAt: "2026-06-03T00:00:00.000Z" }
+);
+
+assert.strictEqual(sourceRouteReviewPayload.summary.recommendedNext, "source_route_review");
+assert.strictEqual(sourceRouteReviewPayload.summary.metadataOnlyQueue.reviewCandidates, 4);
+assert.strictEqual(sourceRouteReviewPayload.summary.sourceRouteReview.sources, 1);
+assert.strictEqual(sourceRouteReviewPayload.summary.sourceRouteReview.iiifReviewSources, 1);
+assert(sourceRouteReviewPayload.workstreams.some((stream) => stream.id === "source_route_review_queue" && stream.status === "ready"));
+assert(sourceRouteReviewPayload.workstreams.some((stream) => stream.id === "metadata_only_queue" && stream.status === "source_route_review"));
+
 const args = optionsFromArgs(["--dry-run", "--gap-limit=12", "--output=/tmp/assimilation.json"]);
 assert.strictEqual(args.dryRun, true);
 assert.strictEqual(args.gapLimit, 12);

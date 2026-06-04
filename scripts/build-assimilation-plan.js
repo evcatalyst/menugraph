@@ -140,7 +140,7 @@ function commandList(items = [], limit = 6) {
     .slice(0, limit);
 }
 
-function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
+function workstreams({ gaps, coverageReport, runPlan, recipeBridge, sourceRouteReview, storage }) {
   const menuGaps = gaps.filter((gap) => gap.sourceType === "menu");
   const sourceRefresh = runPlan.sourceRefresh?.sources || [];
   const localBatches = runPlan.localBatches || [];
@@ -149,6 +149,15 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
   const metadataOnlyQueue = runPlan.metadataOnlyQueue || {};
   const runnableLocalBatches = localBatches.filter((batch) => batch.runnable);
   const hasRunnableLocalOcr = number(runPlan.summary?.localRunnableImages, 0) > 0 || runnableLocalBatches.length > 0;
+  const sourceRefreshCommands = commandList(sourceRefresh);
+  const metadataOnlyReviewCandidates = number(metadataOnlyQueue.reviewCandidates || runPlan.summary?.metadataOnlyReviewCandidates, 0);
+  const sourceRouteSummary = sourceRouteReview?.summary || {};
+  const sourceRouteRecords = sourceRouteReview?.records || [];
+  const sourceRouteReviewNeeded = Boolean(
+    metadataOnlyReviewCandidates ||
+      number(sourceRouteSummary.sources, 0) ||
+      sourceRefresh.some((row) => ["source_route_review", "iiif_image_assessment"].includes(cleanValue(row.primaryNextAction)))
+  );
   const recipeSummary = recipeBridge.summary || {};
   const currentClusters = number(recipeSummary.clusters, 0);
   const totalCandidateClusters = number(recipeSummary.totalCandidateClusters, 0);
@@ -168,6 +177,22 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
     .slice(0, 10);
 
   return [
+    {
+      id: "source_route_review_queue",
+      label: "Resolve source and image route review queue",
+      status: number(sourceRouteSummary.sources, 0) ? "ready" : sourceRouteReviewNeeded ? "source_route_review" : "monitor",
+      priority: number(sourceRouteSummary.sources, 0) ? 7.9 : sourceRouteReviewNeeded ? 6.7 : 3,
+      impact: {
+        sources: number(sourceRouteSummary.sources, 0),
+        metadataOnlyReviewCandidates: number(sourceRouteSummary.metadataOnlyReviewCandidates, metadataOnlyReviewCandidates),
+        sourceRouteSources: number(sourceRouteSummary.sourceRouteSources, 0),
+        iiifReviewSources: number(sourceRouteSummary.iiifReviewSources, 0),
+        imageRouteReviewSources: number(sourceRouteSummary.imageRouteReviewSources, 0),
+      },
+      reason: "This queue turns exhausted local OCR/no-image states into explicit route, rights, and IIIF decisions before another enrichment pass.",
+      commands: ["npm run enrich:source-route-review", "npm run enrich:coverage", "npm run enrich:run-plan", "npm run enrich:assimilation-plan", "npm run build:graph"],
+      sourceIds: sourceRouteRecords.map((row) => row.sourceId).filter(Boolean).slice(0, 12),
+    },
     {
       id: "free_disk_for_local_ocr",
       label: "Free disk for local OCR/image assessment",
@@ -207,30 +232,37 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
     {
       id: "metadata_source_refresh",
       label: "Refresh and retag metadata-only source evidence",
-      status: sourceRefresh.length ? "ready" : "monitor",
-      priority: sourceRefresh.length ? 8 : 4,
+      status: sourceRefreshCommands.length ? "ready" : sourceRouteReviewNeeded ? "source_route_review" : "monitor",
+      priority: sourceRefreshCommands.length ? 8 : sourceRouteReviewNeeded ? 6.5 : 4,
       impact: {
         sources: sourceRefresh.length,
-        commands: commandList(sourceRefresh).length,
+        commands: sourceRefreshCommands.length,
         prioritizedActions: nextActions.length,
       },
-      reason: "Metadata refresh is the cheapest path while disk blocks OCR; it can improve dates, venues, image routes, dish hints, and source coverage.",
-      commands: [...commandList(sourceRefresh), "npm run enrich:external-metadata", "npm run enrich:retag", "npm run enrich:coverage", "npm run enrich:run-plan", "npm run build:graph"],
+      reason: sourceRefreshCommands.length
+        ? "Metadata refresh is the cheapest path while disk blocks OCR; it can improve dates, venues, image routes, dish hints, and source coverage."
+        : "No connector command remains for these source gaps; review item image routes, rights, or source availability.",
+      commands: sourceRefreshCommands.length
+        ? [...sourceRefreshCommands, "npm run enrich:external-metadata", "npm run enrich:retag", "npm run enrich:coverage", "npm run enrich:run-plan", "npm run build:graph"]
+        : [],
       sourceIds: sourceRefresh.map((row) => row.sourceId).slice(0, 12),
     },
     {
       id: "metadata_only_queue",
       label: "Process metadata-only no-image records",
-      status: number(metadataOnlyQueue.candidates, 0) ? "ready" : "monitor",
-      priority: number(metadataOnlyQueue.candidates, 0) ? 8.1 : 3,
+      status: number(metadataOnlyQueue.candidates, 0) ? "ready" : metadataOnlyReviewCandidates ? "source_route_review" : "monitor",
+      priority: number(metadataOnlyQueue.candidates, 0) ? 8.1 : metadataOnlyReviewCandidates ? 6.6 : 3,
       impact: {
         candidates: number(metadataOnlyQueue.candidates, 0),
+        reviewCandidates: metadataOnlyReviewCandidates,
         pendingImages: number(metadataOnlyQueue.pendingImages, 0),
-        sources: Object.keys(metadataOnlyQueue.bySource || {}).length,
+        sources: new Set([...Object.keys(metadataOnlyQueue.bySource || {}), ...Object.keys(metadataOnlyQueue.reviewBySource || {})]).size,
       },
-      reason: "These records can add dish, venue, date, and ingredient hints without image downloads or OCR storage.",
+      reason: metadataOnlyReviewCandidates
+        ? "Metadata-only records have no image route and no executable OCR work; move them to source-route or collection-rights review."
+        : "These records can add dish, venue, date, and ingredient hints without image downloads or OCR storage.",
       commands: commandList(metadataOnlyQueue.sourceCommands || []).concat(metadataOnlyQueue.followUpCommands || []).filter((command, index, all) => command && all.indexOf(command) === index).slice(0, 8),
-      sourceIds: Object.keys(metadataOnlyQueue.bySource || {}).slice(0, 12),
+      sourceIds: [...new Set([...Object.keys(metadataOnlyQueue.bySource || {}), ...Object.keys(metadataOnlyQueue.reviewBySource || {})])].slice(0, 12),
     },
     {
       id: "metadata_dish_ingredient_gap_pass",
@@ -300,10 +332,11 @@ function phases(streams, runPlan) {
       label: "Now: storage-light assimilation",
       status: "ready",
       workstreamIds: streams
-        .filter((stream) => ["metadata_source_refresh", "metadata_only_queue", "metadata_dish_ingredient_gap_pass", "recipe_bridge_expansion"].includes(stream.id))
+        .filter((stream) => ["source_route_review_queue", "metadata_source_refresh", "metadata_only_queue", "metadata_dish_ingredient_gap_pass", "recipe_bridge_expansion"].includes(stream.id))
         .map((stream) => stream.id),
       commands: [
         "npm run enrich:coverage",
+        "npm run enrich:source-route-review",
         "npm run enrich:external-metadata",
         ...(runPlan.metadataOnlyQueue?.sourceCommands || []).map((row) => row.command),
         runPlan.recipeBridge?.command,
@@ -337,6 +370,7 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
   const coverageReport = inputs.coverageReport || {};
   const runPlan = inputs.runPlan || {};
   const recipeBridge = inputs.recipeBridge || {};
+  const sourceRouteReview = inputs.sourceRouteReview || {};
   const storage = inputs.storagePreflight || storagePreflight({
     targetDir: ROOT_DIR,
     minFreeMb: options.minFreeMb ?? DEFAULT_MIN_FREE_MB,
@@ -344,7 +378,7 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
   });
   const gaps = (coverageReport.records || []).map(coverageGap);
   const gapSummary = summarizeGaps(gaps);
-  const streams = workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage });
+  const streams = workstreams({ gaps, coverageReport, runPlan, recipeBridge, sourceRouteReview, storage });
   const streamById = Object.fromEntries(streams.map((stream) => [stream.id, stream]));
   const planPhases = phases(streams, runPlan);
   const recommendedNext = storage.ok
@@ -352,7 +386,14 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
       ? "run_graph_gap_queue_batch"
       : streamById.price_gap_pass?.status === "ready_for_ocr"
       ? "run_local_ocr_price_batch"
-      : "run_metadata_refresh"
+      : streamById.metadata_source_refresh?.status === "ready" || streamById.metadata_only_queue?.status === "ready"
+        ? "run_metadata_refresh"
+      : streamById.source_route_review_queue?.status === "ready" ||
+          streamById.source_route_review_queue?.status === "source_route_review" ||
+          streamById.metadata_source_refresh?.status === "source_route_review" ||
+          streamById.metadata_only_queue?.status === "source_route_review"
+      ? "source_route_review"
+      : "monitor"
     : "storage_light_metadata_and_recipe_assimilation";
 
   return {
@@ -390,8 +431,19 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
       },
       metadataOnlyQueue: {
         candidates: number(runPlan.metadataOnlyQueue?.candidates || runPlan.summary?.metadataOnlyCandidates, 0),
+        reviewCandidates: number(runPlan.metadataOnlyQueue?.reviewCandidates || runPlan.summary?.metadataOnlyReviewCandidates, 0),
         pendingImages: number(runPlan.metadataOnlyQueue?.pendingImages, 0),
         bySource: runPlan.metadataOnlyQueue?.bySource || runPlan.summary?.metadataOnlyBySource || {},
+        reviewBySource: runPlan.metadataOnlyQueue?.reviewBySource || runPlan.summary?.metadataOnlyReviewBySource || {},
+      },
+      sourceRouteReview: {
+        sources: number(sourceRouteReview.summary?.sources, 0),
+        metadataOnlyReviewCandidates: number(sourceRouteReview.summary?.metadataOnlyReviewCandidates, 0),
+        failedReviewCandidates: number(sourceRouteReview.summary?.failedReviewCandidates, 0),
+        sourceRouteSources: number(sourceRouteReview.summary?.sourceRouteSources, 0),
+        iiifReviewSources: number(sourceRouteReview.summary?.iiifReviewSources, 0),
+        imageRouteReviewSources: number(sourceRouteReview.summary?.imageRouteReviewSources, 0),
+        recommendedNext: cleanValue(sourceRouteReview.summary?.recommendedNext),
       },
       graphGapQueue: {
         menuGaps: number(runPlan.graphGapQueue?.summary?.menuGaps || runPlan.summary?.graphGapQueue?.menuGaps, 0),
@@ -414,12 +466,13 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
 }
 
 async function buildAssimilationPlan(options = {}) {
-  const [coverageReport, runPlan, recipeBridge] = await Promise.all([
+  const [coverageReport, runPlan, recipeBridge, sourceRouteReview] = await Promise.all([
     readJson(path.join(ENRICHMENT_DIR, "coverage-report.json"), { records: [], summary: {} }),
     readJson(path.join(ENRICHMENT_DIR, "run-plan.json"), { summary: {} }),
     readJson(path.join(ENRICHMENT_DIR, "recipe-bridge.json"), { summary: {} }),
+    readJson(path.join(ENRICHMENT_DIR, "source-route-review.json"), { records: [], summary: {} }),
   ]);
-  const payload = buildAssimilationPlanPayload({ coverageReport, runPlan, recipeBridge }, options);
+  const payload = buildAssimilationPlanPayload({ coverageReport, runPlan, recipeBridge, sourceRouteReview }, options);
   if (!options.dryRun) await writeJson(options.outputPath || OUTPUT_PATH, payload);
   return payload;
 }

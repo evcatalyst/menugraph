@@ -378,6 +378,7 @@ function sourceRefreshRows(coverageRows = []) {
     .filter((row) => row.sourceType === "menu")
     .map((row) => {
       const actionIds = (row.nextActions || []).map((item) => item.id).filter((id) => interestingActions.has(id));
+      const commandableAction = actionIds.some((id) => ["expand_source_limit", "metadata_dish_hint_pass", "source_probe_or_ingest"].includes(id));
       return {
         sourceId: cleanValue(row.sourceId),
         label: cleanValue(row.label || row.sourceId),
@@ -394,7 +395,7 @@ function sourceRefreshRows(coverageRows = []) {
             (row.primaryNextAction === "source_probe_or_ingest" || row.primaryNextAction === "source_route_review" ? 2 : 0),
           2
         ),
-        command: SOURCE_COMMANDS[row.sourceId] || "",
+        command: commandableAction ? SOURCE_COMMANDS[row.sourceId] || "" : "",
       };
     })
     .filter((row) => row.nextActions.length || row.primaryNextAction === "source_probe_or_ingest")
@@ -434,11 +435,13 @@ function recipeBridgePlan(recipeBridge = {}, coverageRows = [], options = {}) {
 }
 
 function metadataOnlyQueuePlan(queueRecords = [], options = {}) {
-  const pending = queueRecords
-    .filter((candidate) => ["pending", "partial"].includes(candidateStatus(candidate)))
+  const metadataOnly = queueRecords
     .filter((candidate) => cleanValue(candidate.route) === "metadata_only_no_image")
     .sort(candidateSort);
+  const pending = metadataOnly.filter((candidate) => ["pending", "partial"].includes(candidateStatus(candidate)));
+  const review = metadataOnly.filter((candidate) => candidateStatus(candidate) === "metadata_only_review");
   const bySource = countBy(pending, (candidate) => candidate.sourceId || candidate.sourceKey);
+  const reviewBySource = countBy(review, (candidate) => candidate.sourceId || candidate.sourceKey);
   const sourceCommands = Object.entries(bySource).map(([sourceId, candidates]) => ({
     sourceId,
     candidates,
@@ -447,12 +450,15 @@ function metadataOnlyQueuePlan(queueRecords = [], options = {}) {
   return {
     id: "metadata_only_queue",
     label: "Metadata-only enrichment queue",
-    status: pending.length ? "ready" : "empty",
+    status: pending.length ? "ready" : review.length ? "source_route_review" : "empty",
     candidates: pending.length,
+    reviewCandidates: review.length,
     pendingImages: 0,
     bySource,
+    reviewBySource,
     sourceCommands,
     sampleCandidates: pending.slice(0, options.sampleLimit || DEFAULT_SAMPLE_LIMIT).map(compactCandidate),
+    sampleReviewCandidates: review.slice(0, options.sampleLimit || DEFAULT_SAMPLE_LIMIT).map(compactCandidate),
     followUpCommands: [
       "npm run enrich:external-metadata",
       "npm run enrich:retag",
@@ -583,6 +589,11 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
   const pendingImagesTotal = sumImages(pending);
   const localImagesTotal = sumImages(pendingLocal);
   const graphGapBatchReady = graphGapQueue.localBatches.some((batch) => batch.candidateCount);
+  const sourceRefreshWithCommands = sourceRefresh.filter((row) => row.command).length;
+  const sourceRouteReviewNeeded = Boolean(
+    metadataOnlyQueue.reviewCandidates ||
+      sourceRefresh.some((row) => ["source_route_review", "iiif_image_assessment"].includes(cleanValue(row.primaryNextAction)))
+  );
   const summary = {
     totalCandidates: queueRecords.length,
     processedCandidates: queueRecords.filter((candidate) => candidateStatus(candidate) === "processed").length,
@@ -595,13 +606,24 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     externalAllowedCandidates: externalReview.allowedCandidates,
     externalAllowedImages: externalReview.allowedImages,
     metadataOnlyCandidates: metadataOnlyQueue.candidates,
+    metadataOnlyReviewCandidates: metadataOnlyQueue.reviewCandidates,
     estimatedFullExternalCost: costEstimate(pendingImagesTotal, externalCostPerImageUsd),
     estimatedLocalRuntimeMinutes: round(localImagesTotal * localMinutesPerImage, 1),
     storageOk: Boolean(storage.ok),
     storageAvailableFormatted: storage.availableFormatted,
     storageRequiredFormatted: storage.minFreeFormatted,
     nextAction: storage.ok
-      ? graphGapBatchReady ? "run_graph_gap_queue_batch" : sourceTargetBatches.length ? "run_source_targeted_ocr_batch" : pendingLocal.length ? "run_local_ocr_batch" : sourceRefresh.length ? "run_metadata_refresh" : "monitor"
+      ? graphGapBatchReady
+        ? "run_graph_gap_queue_batch"
+        : sourceTargetBatches.length
+          ? "run_source_targeted_ocr_batch"
+          : pendingLocal.length
+            ? "run_local_ocr_batch"
+            : metadataOnlyQueue.candidates || sourceRefreshWithCommands
+              ? "run_metadata_refresh"
+              : sourceRouteReviewNeeded
+                ? "source_route_review"
+                : "monitor"
       : "free_disk_before_ocr",
     graphGapQueue: {
       records: graphGapQueue.summary.records,
@@ -635,6 +657,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     byRoute: countBy(queueRecords, (candidate) => candidate.route),
     bySource: countBy(queueRecords, (candidate) => candidate.sourceId),
     metadataOnlyBySource: metadataOnlyQueue.bySource,
+    metadataOnlyReviewBySource: metadataOnlyQueue.reviewBySource,
   };
 
   return {
@@ -679,13 +702,17 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
       },
       {
         step: "metadata_refresh",
-        status: sourceRefresh.length ? "ready" : "monitor",
-        detail: "Run metadata-only source connectors first; this adds dish/date/venue/image-route hints with low storage impact.",
+        status: sourceRefreshWithCommands ? "ready" : sourceRouteReviewNeeded ? "source_route_review" : "monitor",
+        detail: sourceRefreshWithCommands
+          ? "Run metadata-only source connectors first; this adds dish/date/venue/image-route hints with low storage impact."
+          : "No metadata connector command remains; review source/image routes or rights manually.",
       },
       {
         step: "metadata_only_queue",
-        status: metadataOnlyQueue.candidates ? "ready" : "empty",
-        detail: `${metadataOnlyQueue.candidates.toLocaleString()} pending metadata-only candidate(s), 0 pending image(s).`,
+        status: metadataOnlyQueue.candidates ? "ready" : metadataOnlyQueue.reviewCandidates ? "source_route_review" : "empty",
+        detail: metadataOnlyQueue.candidates
+          ? `${metadataOnlyQueue.candidates.toLocaleString()} pending metadata-only candidate(s), 0 pending image(s).`
+          : `${metadataOnlyQueue.reviewCandidates.toLocaleString()} metadata-only no-image candidate(s) require source-route review.`,
       },
       {
         step: "graph_gap_queue",

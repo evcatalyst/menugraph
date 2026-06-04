@@ -548,6 +548,21 @@ function processingForCandidate(candidate, processingIndex, pagesPerMenu = DEFAU
     0,
     Number.isFinite(estimatedImages) ? estimatedImages : Number(Math.min(candidate.pageCount || pagesPerMenu, pagesPerMenu)) || 0
   );
+  const metadataOnly = cleanValue(candidate.route) === "metadata_only_no_image" || cleanValue(candidate.localTier) === "metadata_only";
+  if (metadataOnly && targetImages === 0) {
+    return {
+      status: "metadata_only_review",
+      attemptedPages: 0,
+      processedPages: 0,
+      failedPages: 0,
+      pendingImages: 0,
+      dishMentions: 0,
+      priceObservations: 0,
+      retryableFailure: false,
+      retryableFailedPages: 0,
+      nextAction: "source_metadata_or_image_route_review",
+    };
+  }
   const state = processingIndex.get(cleanValue(candidate.id));
   if (!state) {
     return {
