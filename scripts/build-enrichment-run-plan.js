@@ -343,7 +343,7 @@ function sourceTargetBatchesFromQueue(ocrQueue = {}, queueRecords = [], options 
     .filter((run) => /^source_price_gap_/.test(cleanValue(run.label)))
     .map((run) => {
       const topIds = (run.topCandidateIds || []).map(cleanValue).filter(Boolean);
-      return {
+      const batch = {
         id: cleanValue(run.label),
         label: cleanValue(run.label).replace(/_/g, " "),
         route: "local_ocr",
@@ -363,7 +363,31 @@ function sourceTargetBatchesFromQueue(ocrQueue = {}, queueRecords = [], options 
           .slice(0, options.sampleLimit || DEFAULT_SAMPLE_LIMIT)
           .map(compactCandidate),
       };
-    });
+      return {
+        ...batch,
+        yieldMetrics: sourceTargetYieldMetrics(batch),
+      };
+    })
+    .sort((a, b) => (
+      number(b.yieldMetrics?.score, 0) - number(a.yieldMetrics?.score, 0) ||
+      number(b.yieldMetrics?.pricePerProcessedMenu, 0) - number(a.yieldMetrics?.pricePerProcessedMenu, 0) ||
+      number(b.candidateCount, 0) - number(a.candidateCount, 0) ||
+      cleanValue(a.sourceKey).localeCompare(cleanValue(b.sourceKey))
+    ));
+}
+
+function sourceTargetYieldMetrics(batch = {}) {
+  const basis = batch.priorityBasis || {};
+  const observedProcessed = Math.max(1, number(basis.observedProcessed, 0));
+  const observedDishMentions = number(basis.observedDishMentions, 0);
+  const observedPriceObservations = number(basis.observedPriceObservations, 0);
+  const pricePerProcessedMenu = observedPriceObservations / observedProcessed;
+  const dishPerProcessedMenu = observedDishMentions / observedProcessed;
+  return {
+    score: round(pricePerProcessedMenu * 10 + dishPerProcessedMenu, 3),
+    pricePerProcessedMenu: round(pricePerProcessedMenu, 3),
+    dishPerProcessedMenu: round(dishPerProcessedMenu, 3),
+  };
 }
 
 function sourceRefreshRows(coverageRows = []) {
@@ -651,6 +675,9 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
       observedDishMentions: number(batch.priorityBasis?.observedDishMentions, 0),
       observedPriceObservations: number(batch.priorityBasis?.observedPriceObservations, 0),
       observedYieldMultiplier: number(batch.priorityBasis?.observedYieldMultiplier, 0),
+      yieldScore: number(batch.yieldMetrics?.score, 0),
+      observedPricePerProcessedMenu: number(batch.yieldMetrics?.pricePerProcessedMenu, 0),
+      observedDishPerProcessedMenu: number(batch.yieldMetrics?.dishPerProcessedMenu, 0),
     })),
     byStatus: countBy(queueRecords, candidateStatus),
     byTier: countBy(queueRecords, (candidate) => candidate.localTier),

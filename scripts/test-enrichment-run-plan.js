@@ -92,6 +92,21 @@ const payload = buildRunPlanPayload(
                 observedYieldMultiplier: 1.25,
               },
             },
+            {
+              label: "source_price_gap_lapl",
+              candidates: 1,
+              estimatedImages: 1,
+              topCandidateIds: ["ocrtriage:3"],
+              command: "npm run enrich:ocr:local -- --limit=25 --batch=all --source=lapl --tier=easy --pages-per-menu=1",
+              sourceKey: "lapl",
+              sourceId: "lapl_menu_collection",
+              priorityBasis: {
+                observedProcessed: 10,
+                observedDishMentions: 250,
+                observedPriceObservations: 100,
+                observedYieldMultiplier: 1.25,
+              },
+            },
           ],
         },
       },
@@ -231,11 +246,12 @@ assert.strictEqual(payload.summary.metadataOnlyBySource.cornell_nestle_menu_coll
 assert.strictEqual(payload.summary.storageOk, false);
 assert.strictEqual(payload.summary.nextAction, "free_disk_before_ocr");
 assert.strictEqual(payload.localBatches[0].blockedReason, "low_disk_preflight");
-assert.strictEqual(payload.sourceTargetBatches.length, 1);
-assert.strictEqual(payload.sourceTargetBatches[0].sourceKey, "cia");
-assert.strictEqual(payload.sourceTargetBatches[0].sampleCandidates[0].id, "ocrtriage:1");
+assert.strictEqual(payload.sourceTargetBatches.length, 2);
+assert.strictEqual(payload.sourceTargetBatches[0].sourceKey, "lapl");
+assert.strictEqual(payload.sourceTargetBatches[0].sampleCandidates[0].id, "ocrtriage:3");
 assert.strictEqual(payload.sourceTargetBatches[0].blockedReason, "low_disk_preflight");
-assert.strictEqual(payload.summary.sourceTargetBatches[0].observedPriceObservations, 20);
+assert.strictEqual(payload.summary.sourceTargetBatches[0].observedPriceObservations, 100);
+assert(payload.summary.sourceTargetBatches[0].yieldScore > payload.summary.sourceTargetBatches[1].yieldScore);
 assert.strictEqual(payload.externalReview.allowedCandidates, 1);
 assert.strictEqual(payload.externalReview.estimatedPilotCost.estimatedCostUsd, 0.02);
 assert.strictEqual(payload.recipeBridge.targetClusterLimit, 100);
