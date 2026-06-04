@@ -166,6 +166,16 @@ const displayIdLabels = {
   run_local_ocr: "Run Local OCR",
   price_ocr_pass: "Price OCR Pass",
 };
+const externalSourceDataFiles = {
+  cornell_nestle_menu_collection: "cornell_nestle_menu_collection.json",
+  denver_menu_collection: "denver_menu_collection.json",
+  lapl_menu_collection: "lapl_menu_collection.json",
+  milwaukee_historic_menus: "milwaukee_historic_menus.json",
+  nola_menu_collection: "nola_menu_collection.json",
+  seattle_room_menu_collection: "seattle_room_menu_collection.json",
+  uh_1850s_1860s_menus: "uh_1850s_1860s_menus.json",
+  uw_menus_collection: "uw_menus_collection.json",
+};
 
 try {
   state.askSecretHash = sessionStorage.getItem(ASK_SECRET_STORAGE_KEY) || "";
@@ -185,6 +195,22 @@ function titleCase(value) {
 function displayIdLabel(value) {
   const key = String(value || "").trim();
   return displayIdLabels[key] || titleCase(key.replace(/[_-]+/g, " "));
+}
+
+function appRootPath() {
+  const path = window.location.pathname || "/";
+  if (path.endsWith("/chat")) return `${path.slice(0, -5) || "/"}`.replace(/\/?$/, "/");
+  if (path.endsWith("/index.html")) return path.slice(0, -10) || "/";
+  if (path.endsWith("/")) return path;
+  if (/\.[a-z0-9]+$/i.test(path)) return path.replace(/[^/]*$/, "");
+  return `${path}/`;
+}
+
+function staticDataHref(file) {
+  const clean = String(file || "")
+    .replace(/^\/+/, "")
+    .replace(/^data\/+/, "");
+  return `${appRootPath()}data/${clean}`;
 }
 
 function compact(value, fallback = "Unknown") {
@@ -2871,6 +2897,7 @@ function graphSourceRows(graph) {
       return {
         id: sourceId,
         label: source.label || source.id,
+        sourceKey: source.sourceKey || coverageRow?.sourceKey || probe?.sourceKey || "",
         capability: capability?.label || "Capability",
         weight: clamp(Number(topEdge?.weight || 0), 0, 1),
         scoreAvg,
@@ -2906,6 +2933,58 @@ function graphSourceRows(graph) {
 
 function graphSourceRowById(sourceId) {
   return graphSourceRows(state.graphOverlay).find((row) => row.id === sourceId) || null;
+}
+
+function sourceDataArtifact(row) {
+  if (!row) return null;
+  if (Number(row.ingestedCount || 0)) {
+    return {
+      label: "Open app rows",
+      href: staticDataHref("menus.json"),
+      title: "Open the committed menu row snapshot used by the static app.",
+    };
+  }
+  if (Number(row.externalCount || 0)) {
+    const sourceFile = externalSourceDataFiles[row.id];
+    return {
+      label: sourceFile ? "Open source rows" : "Open graph rows",
+      href: staticDataHref(sourceFile ? `enrichment/external-sources/${sourceFile}` : "graph/evidence/by-type/externalmenus.json"),
+      title: "Open the compact external menu rows available in the graph overlay.",
+    };
+  }
+  if (Number(row.recipeBridgeCount || 0)) {
+    return {
+      label: "Open recipe bridge",
+      href: staticDataHref("enrichment/recipe-bridge.json"),
+      title: "Open the deterministic dish-to-recipe bridge clusters.",
+    };
+  }
+  return {
+    label: "Open source model",
+    href: staticDataHref("graph/source-capabilities.json"),
+    title: "Open the source evaluation and capability graph.",
+  };
+}
+
+function sourceOverlayArtifact(row) {
+  if (!row?.sourceKey) return null;
+  return {
+    label: "Open overlays",
+    href: staticDataHref(`graph/menu-overlays/by-source/${graphShardKeyForSource(row.sourceKey)}.json`),
+    title: "Open the source-specific menu overlay shard.",
+  };
+}
+
+function appendArtifactLink(parent, artifact) {
+  if (!artifact?.href) return null;
+  const link = document.createElement("a");
+  link.href = artifact.href;
+  link.target = "_blank";
+  link.rel = "noreferrer";
+  link.textContent = artifact.label;
+  if (artifact.title) link.title = artifact.title;
+  parent.appendChild(link);
+  return link;
 }
 
 function graphExternalMenuRecords(sourceId) {
@@ -3198,7 +3277,15 @@ function renderGraphSourceResults() {
   queueOpen.type = "button";
   queueOpen.textContent = `View ${formatNumber(gapRecords.length)} gaps`;
   queueOpen.addEventListener("click", showGraphGapQueue);
-  queueCard.append(queueTop, queueTitle, queueMeta, queueNote, queueOpen);
+  const queueActions = document.createElement("div");
+  queueActions.className = "source-result-card__actions";
+  queueActions.appendChild(queueOpen);
+  appendArtifactLink(queueActions, {
+    label: "Open gap data",
+    href: staticDataHref("graph/evidence/by-type/enrichmentgaps.json"),
+    title: "Open the compact enrichment gap evidence index.",
+  });
+  queueCard.append(queueTop, queueTitle, queueMeta, queueNote, queueActions);
 
   els.resultList.replaceChildren(
     queueCard,
@@ -3226,22 +3313,27 @@ function renderGraphSourceResults() {
       note.textContent = row.sampleText || row.scaleText || row.notes || "Evaluation-only source; row-level ingestion is planned after rights and export review.";
 
       card.append(top, title, meta, note);
+      const actions = document.createElement("div");
+      actions.className = "source-result-card__actions";
       if (row.externalCount) {
         const openRows = document.createElement("button");
         openRows.className = "source-result-card__open";
         openRows.type = "button";
         openRows.textContent = `View ${formatNumber(row.externalCount)} rows`;
         openRows.addEventListener("click", () => showGraphSourceRows(row));
-        card.appendChild(openRows);
+        actions.appendChild(openRows);
       }
+      appendArtifactLink(actions, sourceDataArtifact(row));
+      if (row.externalCount || row.ingestedCount) appendArtifactLink(actions, sourceOverlayArtifact(row));
       if (row.sourceUrl) {
         const link = document.createElement("a");
         link.href = row.sourceUrl;
         link.target = "_blank";
         link.rel = "noreferrer";
         link.textContent = "Open source";
-        card.appendChild(link);
+        actions.appendChild(link);
       }
+      if (actions.children.length) card.appendChild(actions);
       return card;
     })
   );
@@ -3256,14 +3348,19 @@ function renderGraphExternalSourceResults() {
 
   const back = document.createElement("article");
   back.className = "external-record-card external-record-card--summary";
+  const sourceActions = document.createElement("div");
+  sourceActions.className = "external-record-card__actions";
   const backButton = document.createElement("button");
-    backButton.type = "button";
-    backButton.textContent = "All sources";
-    backButton.addEventListener("click", () => {
-      state.selectedGraphSourceId = null;
-      state.selectedGraphGapQueue = false;
-      renderResults();
-    });
+  backButton.type = "button";
+  backButton.textContent = "All sources";
+  backButton.addEventListener("click", () => {
+    state.selectedGraphSourceId = null;
+    state.selectedGraphGapQueue = false;
+    renderResults();
+  });
+  sourceActions.appendChild(backButton);
+  appendArtifactLink(sourceActions, sourceDataArtifact(source));
+  appendArtifactLink(sourceActions, sourceOverlayArtifact(source));
   const sourceTitle = document.createElement("h3");
   sourceTitle.textContent = source?.label || "External source";
   const sourceMeta = document.createElement("p");
@@ -3272,7 +3369,7 @@ function renderGraphExternalSourceResults() {
     : `${formatNumber(records.length)} compact graph rows`;
   const sourceNote = document.createElement("small");
   sourceNote.textContent = "Derived metadata only. No raw OCR dumps, image blobs, or embedding vectors are stored in this static overlay.";
-  back.append(backButton, sourceTitle, sourceMeta, sourceNote);
+  back.append(sourceActions, sourceTitle, sourceMeta, sourceNote);
 
   const cards = records.slice(0, 80).map((record) => {
     const button = document.createElement("button");
@@ -3306,12 +3403,25 @@ function renderGraphGapQueueResults() {
 
   const back = document.createElement("article");
   back.className = "external-record-card external-record-card--summary";
+  const queueActions = document.createElement("div");
+  queueActions.className = "external-record-card__actions";
   const backButton = document.createElement("button");
   backButton.type = "button";
   backButton.textContent = "All sources";
   backButton.addEventListener("click", () => {
     state.selectedGraphGapQueue = false;
     renderResults();
+  });
+  queueActions.appendChild(backButton);
+  appendArtifactLink(queueActions, {
+    label: "Open gap data",
+    href: staticDataHref("graph/evidence/by-type/enrichmentgaps.json"),
+    title: "Open the compact enrichment gap evidence index.",
+  });
+  appendArtifactLink(queueActions, {
+    label: "Open run plan",
+    href: staticDataHref("enrichment/run-plan.json"),
+    title: "Open the latest local OCR and metadata run plan.",
   });
   const title = document.createElement("h3");
   title.textContent = "Prioritized enrichment gaps";
@@ -3323,7 +3433,7 @@ function renderGraphGapQueueResults() {
     : `${formatNumber(records.length)} menu gaps`;
   const note = document.createElement("small");
   note.textContent = "Compact routing evidence for local OCR, metadata dish hint passes, and source image route review.";
-  back.append(backButton, title, meta, note);
+  back.append(queueActions, title, meta, note);
 
   const cards = records.slice(0, 96).map((record) => {
     const button = document.createElement("button");
