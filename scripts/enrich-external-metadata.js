@@ -77,6 +77,20 @@ const METADATA_FOOD_SIGNALS = [
   { pattern: /\blibations?\b/i, label: "cocktails and beverages", confidence: 0.36 },
 ];
 
+const VENUE_NAME_FOOD_SIGNALS = [
+  { pattern: /\b(?:blue claw|crab house|crab restaurant)\b/i, label: "crab dishes", confidence: 0.42 },
+  { pattern: /\b(?:fish house|fish market|sea grill|seafood|pier\s+4|bahrs?|castagnola)\b/i, label: "seafood options", confidence: 0.4 },
+  { pattern: /\b(?:angus|good steer|steak\s*house|steakhouse)\b/i, label: "steak dishes", confidence: 0.4 },
+  { pattern: /\b(?:bistro\s+francais|beaujolais|cheval blanc|le rivage|le vert galant|les pyrenees|ren[ée]?\s+pujol|chez|brasserie|auberge)\b/i, label: "french dishes", confidence: 0.35 },
+  { pattern: /\b(?:barbetta|castiello'?s|ristorante|trattoria|pizzeria|piazza\s+repubblica)\b/i, label: "italian dishes", confidence: 0.36 },
+  { pattern: /\b(?:benihana|hisae'?s|sukiyaki|tempura)\b/i, label: "japanese dishes", confidence: 0.36 },
+  { pattern: /\b(?:bali hai|balinese room)\b/i, label: "polynesian dishes", confidence: 0.34 },
+  { pattern: /\bbangkik\b/i, label: "thai dishes", confidence: 0.34 },
+  { pattern: /\b(?:chi-?chi'?s|fonda|el nuevo|la paloma)\b/i, label: "mexican dishes", confidence: 0.34 },
+  { pattern: /\b(?:luchow'?s|bavarian|stadtkeller|swiss center)\b/i, label: "german dishes", confidence: 0.34 },
+  { pattern: /\b(?:antoine'?s|brennan'?s|commander'?s palace)\b/i, label: "creole dishes", confidence: 0.34 },
+];
+
 const EXPLICIT_METADATA_PRICE_TOKEN =
   /(?:US\$|\$|€|£)\s*\d|\b\d+(?:[.,]\d+)?\s*(?:¢|cents?|cts?\.?)\b|\b(?:frs?\.?|francs?|marks?|mk\.?)\s*\d|\b\d+(?:[.,]\d{1,2})?\s+dollars?\b/i;
 
@@ -157,7 +171,7 @@ function sourceRecordId(record) {
   return cleanValue(record.sourceRecordId || String(record.id || "").split(":").slice(1).join(":") || record.id);
 }
 
-function makeDishMention(record, rawName, confidence, fileName, method = "external_metadata_topic_signal") {
+function makeDishMention(record, rawName, confidence, fileName, method = "external_metadata_topic_signal", options = {}) {
   const normalizedName = normalizedDishName(rawName);
   if (!normalizedName) return null;
   const menuId = menuIdForRecord(record);
@@ -173,7 +187,7 @@ function makeDishMention(record, rawName, confidence, fileName, method = "extern
     canonicalDishId: `dish:${normalizedIdPart(rawName)}`,
     sectionName: "metadata topic signal",
     dishType: dishTypeFor(rawName),
-    ingredientTags: ingredientTagsFor(rawName),
+    ingredientTags: [...new Set([...(options.ingredientTags || []), ...ingredientTagsFor(rawName)].map(cleanValue).filter(Boolean))].sort(),
     extractionMethod: method,
     confidence,
     provenance: {
@@ -192,6 +206,16 @@ function metadataDishCandidates(record, options = {}) {
   }
   for (const signal of METADATA_FOOD_SIGNALS) {
     if (signal.pattern.test(text)) candidates.push({ rawName: signal.label, confidence: signal.confidence });
+  }
+  for (const signal of VENUE_NAME_FOOD_SIGNALS) {
+    if (signal.pattern.test(text)) {
+      candidates.push({
+        rawName: signal.label,
+        confidence: signal.confidence,
+        method: "external_metadata_venue_name_signal",
+        ingredientTags: signal.ingredientTags || [],
+      });
+    }
   }
   for (const tag of record.cuisineTags || []) {
     const normalizedTag = cleanValue(tag).toLowerCase();
@@ -482,7 +506,7 @@ function dishHintsFromMentions(dishMentions) {
 function enrichExternalRecord(record, context = {}) {
   const fileName = context.fileName || "external-source.json";
   const additions = metadataDishCandidates(record, context.options)
-    .map((candidate) => makeDishMention(record, candidate.rawName, candidate.confidence, fileName))
+    .map((candidate) => makeDishMention(record, candidate.rawName, candidate.confidence, fileName, candidate.method, candidate))
     .filter(Boolean);
   const priceAdditions = metadataPriceObservations(record, context.references || {}, context.contextEvents || [], fileName);
   const dishMentions = mergeDishMentions(record, additions);

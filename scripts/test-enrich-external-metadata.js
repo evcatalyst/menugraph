@@ -95,6 +95,23 @@ assert(cuisineSubjectCandidates.some((candidate) => candidate.rawName === "ethio
 assert(cuisineSubjectCandidates.some((candidate) => candidate.rawName === "indian dishes"));
 assert(cuisineSubjectCandidates.some((candidate) => candidate.rawName === "greek dishes"));
 
+const venueNameCandidates = metadataDishCandidates(
+  {
+    id: "sample:4c",
+    menuId: "sample:4c",
+    sourceId: "sample_source",
+    sourceKey: "sample",
+    title: "A&J Blue Claw Restaurant and Bistro Francais",
+    descriptionSummary: "Finding-aid restaurant title only.",
+    dishMentions: [],
+    priceObservations: [],
+    ingredientTags: [],
+  },
+  { ingredientLimit: 2 }
+);
+assert(venueNameCandidates.some((candidate) => candidate.rawName === "crab dishes"));
+assert(venueNameCandidates.some((candidate) => candidate.rawName === "french dishes"));
+
 const prices = metadataPriceObservations(record, { cpiUs: {} }, [], "sample.json");
 assert.strictEqual(prices.length, 1);
 assert.strictEqual(prices[0].rawPrice, "$1.25");
@@ -186,6 +203,29 @@ assert(enriched.dishMentions.length >= 3);
 assert.strictEqual(enriched.priceObservations.length, 1);
 assert(enriched.ingredientTags.includes("oyster"));
 assert(enriched.ingredientTags.includes("wine"));
+const venueEnriched = enrichExternalRecord(
+  {
+    id: "sample:8",
+    menuId: "sample:8",
+    sourceId: "sample_source",
+    sourceKey: "sample",
+    sourceRecordId: "8",
+    title: "Angus Barn and Bali Hai",
+    descriptionSummary: "Restaurant title only.",
+    dishMentions: [],
+    priceObservations: [],
+  },
+  {
+    fileName: "sample.json",
+    generatedAt: "2026-06-03T00:00:00.000Z",
+    references: { cpiUs: {} },
+    contextEvents: [],
+    options: { ingredientLimit: 2 },
+  }
+);
+assert(venueEnriched.dishMentions.some((dish) => dish.rawName === "steak dishes" && dish.extractionMethod === "external_metadata_venue_name_signal"));
+assert(venueEnriched.dishMentions.some((dish) => dish.rawName === "polynesian dishes"));
+assert(venueEnriched.ingredientTags.includes("beef"));
 assert.strictEqual(enriched.metadataEnrichment.dishMentionsAdded, enriched.dishMentions.length);
 assert.strictEqual(enriched.metadataEnrichment.priceObservationsAdded, 1);
 assert(enriched.dishHints.every((hint) => hint.normalizedName));

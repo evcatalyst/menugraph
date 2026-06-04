@@ -22,6 +22,7 @@ function run() {
   assert.strictEqual(dishTypeFor("Milk-fed veal cutlet"), "meat");
   assert.strictEqual(dishTypeFor("Chicken with water chestnuts"), "poultry");
   assert.strictEqual(dishTypeFor("Spaghetti marinara"), "pasta");
+  assert.strictEqual(dishTypeFor("Seafood options"), "seafood");
   assert.strictEqual(dishTypeFor("Club sandwich"), "sandwich");
   assert.strictEqual(dishTypeFor("Toasted bagel"), "bread");
   assert.strictEqual(dishTypeFor("Cheese omelet"), "egg");

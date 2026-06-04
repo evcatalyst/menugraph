@@ -136,7 +136,7 @@
     ["beverage", /\b(coffee|tea|wine|beer|ale|lager|stout|cocktail|champagne|whiskey|whisky|brandy|gin|rum|vodka|liqueur|cordial|vermouth|absinthe|sake|martini|cider|soda|water(?!\s+chestnuts?)|milk(?![-\s]+fed)|buttermilk|punch|lemonade)\b/],
     ["dessert", /\b(ice cream|cake|pie|pudding|sherbet|dessert|pastry|tart|fruit|compote|custard|souffle|mousse|parfait)\b/],
     ["soup", /\b(soup|consomme|bisque|chowder|broth|bouillon|potage|gumbo)\b/],
-    ["seafood", /\b(oyster|lobster|clam|crab|fish|salmon|shrimp|shrimps|prawn|prawns|crevette|crevettes|sole|cod|bass|trout|halibut|scallop|mussel|sardine|tuna|shellfish)\b/],
+    ["seafood", /\b(seafood|oyster|lobster|clam|crab|fish|salmon|shrimp|shrimps|prawn|prawns|crevette|crevettes|sole|cod|bass|trout|halibut|scallop|mussel|sardine|tuna|shellfish)\b/],
     ["poultry", /\b(chicken|turkey|duck|duckling|squab|fowl|poulet|canard)\b/],
     ["meat", /\b(beef|steak|mutton|lamb|veal|pork|bacon|ham|venison|chop|roast|sausage|sweetbread|filet mignon)\b/],
     ["sandwich", /\b(sandwich|club sandwich|hamburger|burger|toastie)\b/],
