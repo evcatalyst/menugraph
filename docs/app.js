@@ -151,6 +151,17 @@ const chatSuggestions = window.MenuGraphChat?.suggestedQuestions || [
   "lobster prices in Boston and New York",
   "estimated 1980s French restaurants with desserts",
 ];
+const displayIdLabels = {
+  iiif_image_assessment: "IIIF Image Assessment",
+  source_image_route_review: "Image Route Review",
+  source_route_review: "Source Route Review",
+  metadata_dish_hint_pass: "Metadata Dish Hints",
+  recipe_bridge_expansion: "Recipe Bridge Expansion",
+  storage_light_metadata_and_recipe_assimilation: "Metadata And Recipe Assimilation",
+  license_diligence: "License Diligence",
+  source_probe_or_ingest: "Probe Or Ingest",
+  license_required: "License Required",
+};
 
 try {
   state.askSecretHash = sessionStorage.getItem(ASK_SECRET_STORAGE_KEY) || "";
@@ -165,6 +176,11 @@ function titleCase(value) {
     .split(/\s+/)
     .map((word) => (word ? word[0].toUpperCase() + word.slice(1) : ""))
     .join(" ");
+}
+
+function displayIdLabel(value) {
+  const key = String(value || "").trim();
+  return displayIdLabels[key] || titleCase(key.replace(/[_-]+/g, " "));
 }
 
 function compact(value, fallback = "Unknown") {
@@ -498,8 +514,9 @@ async function loadGraphOverlay(refresh = false) {
   if (Object.keys(records).length) {
     state.graphOverlayLoadedShards.add("legacy");
   }
-  if (state.activeLens === "graph" || state.activeLens === "architecture") {
-    describeGraphOverlay();
+  if (usesGraphSourceResults()) {
+    if (state.activeLens === "lineage") describeSourceCatalog();
+    else describeGraphOverlay();
     renderViz();
     renderResults();
   }
@@ -2020,7 +2037,7 @@ function lensCopy() {
     time: ["Time Lens", "Menus Across Time"],
     place: ["Place Lens", "Where Dining Records Cluster"],
     type: ["Type Lens", "Formats, Courses, and Occasions"],
-    lineage: ["Lineage Lens", "Collectors and Collection Memory"],
+    lineage: ["Source Lens", "External Sources And Evidence Coverage"],
     graph: ["Graph Lens", "Static Graph Overlay Coverage"],
     architecture: ["Flow Lens", "Application Structure And Data Flow"],
     ontology: ["Food Lens", `${categoryLabels[state.ontologyCategory]} Across Time`],
@@ -2170,8 +2187,97 @@ function renderTypeLens(svg, width, height) {
 
 function renderLineageLens(svg, width, height) {
   lensCopy();
+  const sourceRows = graphSourceRows(state.graphOverlay);
+  if (sourceRows.length) {
+    renderSourceCatalogLens(svg, width, height, sourceRows);
+    return;
+  }
   const counts = uniqueCount(state.visibleMenus, (menu) => menu.sourceLabel || menu.donor || sourceFamily(menu.source)).slice(0, 22);
   renderBars(svg, width, height, counts, "lineage");
+}
+
+function sourceRowVolume(row) {
+  return Math.max(
+    Number(row.ingestedCount || 0),
+    Number(row.externalCount || 0),
+    Number(row.recipeBridgeCount || 0),
+    Number(row.publicItemCount || 0),
+    1
+  );
+}
+
+function sourceRowStatusText(row) {
+  if (row.ingestedCount) return `${formatNumber(row.ingestedCount)} app rows`;
+  if (row.externalCount) return `${formatNumber(row.externalCount)} graph rows`;
+  if (row.recipeBridgeCount) return `${formatNumber(row.recipeBridgeCount)} recipe clusters`;
+  if (row.publicItemCount) return `${formatNumber(row.publicItemCount)} public items`;
+  return displayIdLabel(row.statusLabel || "evaluated");
+}
+
+function renderSourceCatalogLens(svg, width, height, rows) {
+  const pad = { top: 48, right: 26, bottom: 40, left: Math.min(250, Math.max(150, width * 0.28)) };
+  const availableH = Math.max(160, height - pad.top - pad.bottom);
+  const maxRows = Math.max(5, Math.min(16, Math.floor(availableH / 28)));
+  const visibleRows = rows.slice(0, maxRows);
+  const maxVolume = Math.max(...visibleRows.map(sourceRowVolume), 1);
+  const scale = (value) => Math.log10(value + 1) / Math.max(Math.log10(maxVolume + 1), 1);
+  const plotW = Math.max(120, width - pad.left - pad.right - 170);
+  const rowH = availableH / Math.max(visibleRows.length, 1);
+
+  const heading = svgEl("text", { x: 18, y: 24, class: "flow-box-title" });
+  heading.textContent = "Source assimilation status";
+  svg.appendChild(heading);
+  const subheading = svgEl("text", { x: 18, y: 42, class: "flow-muted" });
+  subheading.textContent = "Click graph-row sources to inspect compact external menu records.";
+  svg.appendChild(subheading);
+
+  visibleRows.forEach((row, index) => {
+    const y = pad.top + index * rowH;
+    const barW = Math.max(4, plotW * scale(sourceRowVolume(row)));
+    const group = svgEl("g", { class: row.externalCount ? "bar source-catalog-row" : "source-catalog-row", tabindex: row.externalCount ? 0 : -1 });
+
+    group.appendChild(svgEl("line", { x1: pad.left, y1: y + rowH - 4, x2: width - pad.right, y2: y + rowH - 4, class: "grid-line" }));
+    const label = svgEl("text", { x: pad.left - 10, y: y + rowH / 2 + 4, "text-anchor": "end", class: "axis-label" });
+    label.textContent = row.label.slice(0, 30);
+    group.appendChild(label);
+
+    group.appendChild(svgEl("rect", { x: pad.left, y: y + 7, width: plotW, height: Math.max(rowH - 14, 7), rx: 5, class: "bar-bg" }));
+    group.appendChild(
+      svgEl("rect", {
+        x: pad.left,
+        y: y + 7,
+        width: barW,
+        height: Math.max(rowH - 14, 7),
+        rx: 5,
+        fill: colorFor(row.statusKind || row.id),
+        opacity: row.externalCount || row.ingestedCount ? 0.9 : 0.58,
+      })
+    );
+
+    const status = svgEl("text", { x: pad.left + plotW + 12, y: y + rowH / 2 + 4, class: "axis-label" });
+    status.textContent = sourceRowStatusText(row).slice(0, 24);
+    group.appendChild(status);
+
+    const next = svgEl("text", { x: width - pad.right, y: y + rowH / 2 + 4, "text-anchor": "end", class: "flow-muted" });
+    next.textContent = displayIdLabel(row.primaryNextAction || row.statusLabel || "monitor").slice(0, 26);
+    group.appendChild(next);
+
+    group.addEventListener("mousemove", (event) => {
+      showTooltip(
+        event,
+        `<strong>${row.label}</strong><br>${row.statusDetail}<br>${row.notes || "Capability evidence is modeled in the static graph."}`
+      );
+    });
+    group.addEventListener("mouseleave", removeTooltip);
+    if (row.externalCount) {
+      group.style.cursor = "pointer";
+      group.addEventListener("click", () => showGraphSourceRows(row));
+      group.addEventListener("keyup", (event) => {
+        if (event.key === "Enter") showGraphSourceRows(row);
+      });
+    }
+    svg.appendChild(group);
+  });
 }
 
 function renderOntologyLens(svg, width, height) {
@@ -2731,8 +2837,8 @@ function graphSourceRows(graph) {
       const statusLabel = ingestedCount ? "Ingested" : externalCount ? "Graph Rows" : recipeBridgeCount ? "Bridge Targets" : licenseRequired ? "License Req" : probe ? "Probed" : "Evaluated";
       const coverageDetail = coverageRow
         ? recipeBridgeCount
-          ? `${formatNumber(recipeBridgeCount)} bridge clusters / ${titleCase(coverageRow.primaryNextAction || "monitor")}`
-          : `${formatNumber(Math.round(Number(coverageRow.coverageScore || 0) * 100))} coverage / ${titleCase(coverageRow.primaryNextAction || "monitor")}`
+          ? `${formatNumber(recipeBridgeCount)} bridge clusters / ${displayIdLabel(coverageRow.primaryNextAction || "monitor")}`
+          : `${formatNumber(Math.round(Number(coverageRow.coverageScore || 0) * 100))} coverage / ${displayIdLabel(coverageRow.primaryNextAction || "monitor")}`
         : "";
       const statusDetail = coverageDetail || (ingestedCount
         ? `${formatNumber(ingestedCount)} menu rows in static app`
@@ -2743,7 +2849,7 @@ function graphSourceRows(graph) {
           : probe?.publicItemCount
             ? `${formatNumber(probe.publicItemCount)} public items observed`
             : probe?.status
-              ? `${titleCase(probe.status)} metadata probe`
+              ? `${displayIdLabel(probe.status)} metadata probe`
               : "capability and rights model only");
       const sampleText = sampleItems
         .slice(0, 2)
@@ -2805,6 +2911,22 @@ function graphExternalMenuRecords(sourceId) {
     });
 }
 
+function usesGraphSourceResults(lens = state.activeLens) {
+  return lens === "lineage" || lens === "graph" || lens === "architecture";
+}
+
+function showGraphSourceRows(row) {
+  if (!row?.externalCount) return;
+  state.selectedGraphSourceId = row.id;
+  renderResults();
+  setActivity({
+    label: "Graph Source",
+    title: `${row.label} rows`,
+    detail: "Showing compact external graph records with provenance and source links; raw OCR and image payloads stay outside the public graph.",
+    progress: 1,
+  });
+}
+
 function sourceRecordCounts() {
   const counts = new Map();
   for (const menu of state.allMenus || []) {
@@ -2821,12 +2943,26 @@ function describeGraphOverlay() {
   const evidence = summary.evidence || {};
   const assimilation = summary.assimilationPlan || {};
   const assimilationDetail = assimilation.workstreams
-    ? ` Assimilation: ${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)} workstreams ready; next ${titleCase(assimilation.recommendedNext || "monitor")}.`
+    ? ` Assimilation: ${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)} workstreams ready; next ${displayIdLabel(assimilation.recommendedNext || "monitor")}.`
     : "";
   setActivity({
     label: "Graph Lens",
     title: "Static graph overlay loaded",
     detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.dishAnalytics || 0)} dish analytics, ${formatNumber(evidence.priceAnalytics || 0)} price analytics, ${formatNumber(evidence.ingredientAnalytics || 0)} ingredient analytics, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
+    progress: 1,
+  });
+}
+
+function describeSourceCatalog() {
+  const rows = graphSourceRows(state.graphOverlay);
+  const summary = state.graphOverlay?.manifest?.summary || {};
+  const externalRows = summary.externalMenus?.records || rows.reduce((sum, row) => sum + Number(row.externalCount || 0), 0);
+  const recipeClusters = summary.recipeBridge?.clusters || rows.reduce((sum, row) => sum + Number(row.recipeBridgeCount || 0), 0);
+  const sourceRows = rows.filter((row) => row.externalCount).length;
+  setActivity({
+    label: "Source Lens",
+    title: `${formatNumber(rows.length)} evaluated sources`,
+    detail: `${formatNumber(externalRows)} compact external menu rows across ${formatNumber(sourceRows)} sources, plus ${formatNumber(recipeClusters)} recipe bridge clusters. Source cards expose provenance, access status, and drill-down rows where available.`,
     progress: 1,
   });
 }
@@ -2934,7 +3070,7 @@ function scrollDetailIntoViewOnMobile() {
 }
 
 function renderResults() {
-  if (state.activeLens === "graph" || state.activeLens === "architecture") {
+  if (usesGraphSourceResults()) {
     renderGraphSourceResults();
     return;
   }
@@ -3013,16 +3149,7 @@ function renderGraphSourceResults() {
         openRows.className = "source-result-card__open";
         openRows.type = "button";
         openRows.textContent = `View ${formatNumber(row.externalCount)} rows`;
-        openRows.addEventListener("click", () => {
-          state.selectedGraphSourceId = row.id;
-          renderResults();
-          setActivity({
-            label: "Graph Source",
-            title: `${row.label} rows`,
-            detail: "Showing compact external graph records with provenance and source links; raw OCR and image payloads stay outside the public graph.",
-            progress: 1,
-          });
-        });
+        openRows.addEventListener("click", () => showGraphSourceRows(row));
         card.appendChild(openRows);
       }
       if (row.sourceUrl) {
@@ -4107,6 +4234,7 @@ function activateMobileLabLens(lens) {
   activateLensButton(lens);
   renderViz();
   state.mobileLab.mode = "data";
+  if (lens === "lineage") describeSourceCatalog();
   if (lens === "prices") describePricesLoaded();
   if (lens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
   renderMobileLab();
@@ -4605,10 +4733,11 @@ function bindEvents() {
   els.lensButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.activeLens = button.dataset.lens;
-      if (state.activeLens !== "graph" && state.activeLens !== "architecture") state.selectedGraphSourceId = null;
+      if (!usesGraphSourceResults()) state.selectedGraphSourceId = null;
       activateLensButton(state.activeLens);
       renderViz();
       renderResults();
+      if (state.activeLens === "lineage") describeSourceCatalog();
       if (state.activeLens === "prices") describePricesLoaded();
       if (state.activeLens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
       if (state.activeLens === "graph" || state.activeLens === "architecture") describeGraphOverlay();
