@@ -77,6 +77,7 @@ assert(manifest.summary.evidence.recipeClusters >= 100, "recipe clusters should 
 assert(manifest.summary.overlays.withRecipeClusters >= 100, "recipe bridge clusters should appear in menu overlays");
 assert(manifest.summary.evidence.ingredientAnalytics >= 500, "ingredient analytics should be indexed as compact evidence");
 assert(manifest.summary.evidence.priceAnalytics >= 500, "price analytics should be indexed as compact evidence");
+assert(manifest.summary.evidence.dishAnalytics >= 1000, "dish analytics should be indexed as compact evidence");
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");
 assert(manifest.summary.overlays.withOcrCandidates >= 1000, "OCR triage should appear as menu overlay evidence");
 assert(Object.keys(evidenceIndex.ocrCandidates || {}).length >= 1000, "OCR triage evidence should be indexed compactly");
@@ -129,6 +130,35 @@ assert(
 assert(
   Object.values(evidenceIndex.priceAnalytics || {}).some((record) => record.type === "price_method_summary" && /nypl|ocr|price/i.test(record.method)),
   "price analytics should include extraction method summaries"
+);
+assert.strictEqual(
+  Object.keys(evidenceIndex.dishAnalytics || {}).length,
+  manifest.summary.evidence.dishAnalytics,
+  "dish analytics shard count should match manifest summary"
+);
+assert(
+  Object.values(evidenceIndex.dishAnalytics || {}).some((record) => record.type === "dish_term_summary" && record.normalizedName && record.menuCount > 0),
+  "dish analytics should include canonical dish summaries"
+);
+assert(
+  Object.values(evidenceIndex.dishAnalytics || {}).some((record) => record.type === "dish_by_source" && record.sourceId === "cia_menu_collection"),
+  "dish analytics should include source-level dish rollups"
+);
+assert(
+  Object.values(evidenceIndex.dishAnalytics || {}).some((record) => record.type === "dish_by_decade" && record.decade && record.decade !== "unknown"),
+  "dish analytics should include decade dish rollups"
+);
+assert(
+  Object.values(evidenceIndex.dishAnalytics || {}).some((record) => record.type === "dish_type_by_source" && record.dishType === "seafood"),
+  "dish analytics should include dish-type/source rollups"
+);
+assert(
+  Object.values(evidenceIndex.dishAnalytics || {}).some((record) => record.type === "price_linked_dish" && record.priceObservationCount > 0 && record.medianAmount !== null),
+  "dish analytics should include price-linked dish summaries"
+);
+assert(
+  Object.values(evidenceIndex.dishAnalytics || {}).some((record) => record.type === "recipe_linked_dish" && record.recipeClusterCount > 0),
+  "dish analytics should include recipe-linked dish summaries"
 );
 if (coverageReport.summary?.sources) {
   assert.strictEqual(manifest.summary.enrichment.sourceCoverage, coverageReport.summary.sources, "source coverage count should be summarized in the enrichment graph");

@@ -2418,9 +2418,10 @@ function renderGraphLens(svg, width, height) {
           (evidence.priceAnalytics || 0) +
           (evidence.matches || 0) +
           (evidence.recipeClusters || 0) +
-          (evidence.ingredientAnalytics || 0)
+          (evidence.ingredientAnalytics || 0) +
+          (evidence.dishAnalytics || 0)
       ),
-      detail: "date / price / ingredient",
+      detail: "date / dish / price",
     },
     {
       label: "Assimilation",
@@ -2631,6 +2632,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
   const runPlan = summary.runPlan || {};
   const rows = [
     { label: "Dish overlays", value: overlays.withDishes || 0, total: overlays.menus || summary.menus || 1 },
+    { label: "Dish analytics", value: evidence.dishAnalytics || 0, total: Math.max(evidence.dishAnalytics || 0, 1) },
     { label: "Date evidence", value: overlays.withDateEvidence || evidence.dateEvidence || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Price overlays", value: overlays.withPrices || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Price analytics", value: evidence.priceAnalytics || 0, total: Math.max(evidence.priceAnalytics || 0, 1) },
@@ -2824,7 +2826,7 @@ function describeGraphOverlay() {
   setActivity({
     label: "Graph Lens",
     title: "Static graph overlay loaded",
-    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.priceObservations || 0)} price items, ${formatNumber(evidence.priceAnalytics || 0)} price analytics, ${formatNumber(evidence.ingredientAnalytics || 0)} ingredient analytics, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
+    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.dishAnalytics || 0)} dish analytics, ${formatNumber(evidence.priceAnalytics || 0)} price analytics, ${formatNumber(evidence.ingredientAnalytics || 0)} ingredient analytics, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
     progress: 1,
   });
 }
