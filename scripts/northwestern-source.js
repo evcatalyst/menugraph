@@ -12,6 +12,8 @@ const SOURCE_ID = "northwestern_transport_menus";
 const SOURCE_KEY = "northwestern";
 const API_URL = "https://api.dc.library.northwestern.edu/api/v2/search";
 const VERSION = 1;
+const DEFAULT_LIMIT = 120;
+const MAX_LIMIT = 2000;
 
 const SOURCE_FIELDS = [
   "id",
@@ -354,7 +356,7 @@ function countBy(records, getter) {
 
 function optionsFromArgs(args = process.argv.slice(2)) {
   return {
-    limit: Math.min(500, Math.max(1, Number(argValue(args, "limit", "120")) || 120)),
+    limit: Math.min(MAX_LIMIT, Math.max(1, Number(argValue(args, "limit", String(DEFAULT_LIMIT))) || DEFAULT_LIMIT)),
     query: cleanValue(argValue(args, "query", "menu transportation dining")),
     timeoutMs: Math.max(5000, Number(argValue(args, "timeout-ms", "30000")) || 30000),
     dryRun: hasFlag(args, "dry-run"),
@@ -381,6 +383,7 @@ if (require.main === module) {
 
 module.exports = {
   buildNorthwesternSource,
+  MAX_LIMIT,
   normalizeHit,
   optionsFromArgs,
   parseDateRange,

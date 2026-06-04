@@ -1,5 +1,6 @@
 const assert = require("assert");
 const {
+  MAX_LIMIT,
   normalizeHit,
   optionsFromArgs,
   parseDateRange,
@@ -62,11 +63,14 @@ function run() {
   assert.strictEqual(record.priceObservations[0].amount, 2);
   assert.strictEqual(record.priceObservations[0].currency, "USD");
 
-  const options = optionsFromArgs(["--limit=9999", "--query=railroad menu", "--timeout-ms=12000", "--dry-run"]);
-  assert.strictEqual(options.limit, 500);
-  assert.strictEqual(options.query, "railroad menu");
-  assert.strictEqual(options.timeoutMs, 12000);
-  assert.strictEqual(options.dryRun, true);
+  const expandedOptions = optionsFromArgs(["--limit=1000", "--query=railroad menu", "--timeout-ms=12000", "--dry-run"]);
+  assert.strictEqual(expandedOptions.limit, 1000);
+  assert.strictEqual(expandedOptions.query, "railroad menu");
+  assert.strictEqual(expandedOptions.timeoutMs, 12000);
+  assert.strictEqual(expandedOptions.dryRun, true);
+
+  const cappedOptions = optionsFromArgs(["--limit=9999"]);
+  assert.strictEqual(cappedOptions.limit, MAX_LIMIT);
 
   console.log("northwestern source tests passed");
 }
