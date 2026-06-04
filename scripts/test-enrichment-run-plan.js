@@ -4,6 +4,7 @@ const {
   candidateStatus,
   costEstimate,
   graphGapQueuePlan,
+  metadataOnlyQueuePlan,
   optionsFromArgs,
   pendingImages,
   sourceRefreshRows,
@@ -12,6 +13,7 @@ const {
 assert.strictEqual(candidateStatus({}), "pending");
 assert.strictEqual(candidateStatus({ processing: { status: "partial" } }), "partial");
 assert.strictEqual(pendingImages({ estimatedImages: 3 }), 3);
+assert.strictEqual(pendingImages({ route: "metadata_only_no_image", estimatedImages: 0 }), 0);
 assert.strictEqual(pendingImages({ processing: { status: "processed" }, estimatedImages: 3 }), 0);
 assert.deepStrictEqual(costEstimate(25, 0.02), { images: 25, costPerImageUsd: 0.02, estimatedCostUsd: 0.5 });
 
@@ -120,6 +122,18 @@ const payload = buildRunPlanPayload(
           routingPolicy: { externalAllowed: true },
           processing: { status: "pending" },
         },
+        {
+          id: "ocrtriage:4",
+          menuId: "cornell:1",
+          sourceId: "cornell_nestle_menu_collection",
+          sourceKey: "cornell",
+          title: "Metadata-only menu",
+          route: "metadata_only_no_image",
+          localTier: "metadata_only",
+          estimatedImages: 0,
+          priorityRank: 4,
+          processing: { status: "pending", pendingImages: 0 },
+        },
       ],
     },
     ocrFailures: {
@@ -196,9 +210,11 @@ const payload = buildRunPlanPayload(
   }
 );
 
-assert.strictEqual(payload.summary.totalCandidates, 3);
-assert.strictEqual(payload.summary.pendingCandidates, 2);
+assert.strictEqual(payload.summary.totalCandidates, 4);
+assert.strictEqual(payload.summary.pendingCandidates, 3);
 assert.strictEqual(payload.summary.pendingImages, 3);
+assert.strictEqual(payload.summary.metadataOnlyCandidates, 1);
+assert.strictEqual(payload.summary.metadataOnlyBySource.cornell_nestle_menu_collection, 1);
 assert.strictEqual(payload.summary.storageOk, false);
 assert.strictEqual(payload.summary.nextAction, "free_disk_before_ocr");
 assert.strictEqual(payload.localBatches[0].blockedReason, "low_disk_preflight");
@@ -220,8 +236,28 @@ assert.strictEqual(payload.graphGapQueue.localBatches[0].runnable, false);
 assert(payload.graphGapQueue.localBatches[0].command.includes("--candidate-ids=ocrtriage:1"));
 assert.strictEqual(payload.graphGapQueue.summary.sampleGaps[0].provenance.method, "test_gap_rollup");
 assert(payload.recommendedSequence.some((step) => step.step === "graph_gap_queue" && step.status === "blocked_low_disk"));
+assert(payload.recommendedSequence.some((step) => step.step === "metadata_only_queue" && step.status === "ready"));
+assert.strictEqual(payload.metadataOnlyQueue.pendingImages, 0);
+assert.strictEqual(payload.metadataOnlyQueue.sourceCommands[0].command, "npm run enrich:cornell -- --limit=2500");
 assert.strictEqual(payload.recommendedSequence[0].status, "required");
 assert(!JSON.stringify(payload).includes("data:image/"), "run plan must not contain image blobs");
+
+const metadataPlan = metadataOnlyQueuePlan(
+  [
+    {
+      id: "ocrtriage:meta",
+      sourceId: "cornell_nestle_menu_collection",
+      sourceKey: "cornell",
+      route: "metadata_only_no_image",
+      localTier: "metadata_only",
+      estimatedImages: 0,
+      processing: { status: "pending", pendingImages: 0 },
+    },
+  ],
+  { sampleLimit: 1 }
+);
+assert.strictEqual(metadataPlan.candidates, 1);
+assert.strictEqual(metadataPlan.pendingImages, 0);
 
 const graphQueue = graphGapQueuePlan(
   {

@@ -71,7 +71,10 @@ function pendingImages(candidate) {
   const processing = candidate.processing || {};
   if (candidateStatus(candidate) === "processed") return 0;
   if (Number.isFinite(Number(processing.pendingImages))) return Math.max(0, Number(processing.pendingImages));
-  return Math.max(1, Number(candidate.estimatedImages || candidate.pageCount || 1) || 1);
+  const estimatedImages = Number(candidate.estimatedImages);
+  if (Number.isFinite(estimatedImages)) return Math.max(0, estimatedImages);
+  if (cleanValue(candidate.route) === "metadata_only_no_image" || cleanValue(candidate.localTier) === "metadata_only") return 0;
+  return Math.max(1, Number(candidate.pageCount || 1) || 1);
 }
 
 function compactCandidate(candidate) {
@@ -430,6 +433,37 @@ function recipeBridgePlan(recipeBridge = {}, coverageRows = [], options = {}) {
   };
 }
 
+function metadataOnlyQueuePlan(queueRecords = [], options = {}) {
+  const pending = queueRecords
+    .filter((candidate) => ["pending", "partial"].includes(candidateStatus(candidate)))
+    .filter((candidate) => cleanValue(candidate.route) === "metadata_only_no_image")
+    .sort(candidateSort);
+  const bySource = countBy(pending, (candidate) => candidate.sourceId || candidate.sourceKey);
+  const sourceCommands = Object.entries(bySource).map(([sourceId, candidates]) => ({
+    sourceId,
+    candidates,
+    command: SOURCE_COMMANDS[sourceId] || "npm run enrich:external-metadata",
+  }));
+  return {
+    id: "metadata_only_queue",
+    label: "Metadata-only enrichment queue",
+    status: pending.length ? "ready" : "empty",
+    candidates: pending.length,
+    pendingImages: 0,
+    bySource,
+    sourceCommands,
+    sampleCandidates: pending.slice(0, options.sampleLimit || DEFAULT_SAMPLE_LIMIT).map(compactCandidate),
+    followUpCommands: [
+      "npm run enrich:external-metadata",
+      "npm run enrich:retag",
+      "npm run enrich:recipe-bridge",
+      "npm run enrich:coverage",
+      "npm run enrich:run-plan",
+      "npm run build:graph",
+    ],
+  };
+}
+
 function externalReviewPlan(queueRecords = [], failureRecords = [], options = {}) {
   const allowed = queueRecords
     .filter((candidate) => candidate.routingPolicy?.externalAllowed)
@@ -543,6 +577,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     externalPilotImages: options.externalPilotImages,
     sampleLimit,
   });
+  const metadataOnlyQueue = metadataOnlyQueuePlan(queueRecords, { sampleLimit });
   const recipePlan = recipeBridgePlan(recipeBridge, coverageRows, options);
 
   const pendingImagesTotal = sumImages(pending);
@@ -559,6 +594,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     failedReviewCandidates: queueRecords.filter((candidate) => candidateStatus(candidate) === "failed_review").length,
     externalAllowedCandidates: externalReview.allowedCandidates,
     externalAllowedImages: externalReview.allowedImages,
+    metadataOnlyCandidates: metadataOnlyQueue.candidates,
     estimatedFullExternalCost: costEstimate(pendingImagesTotal, externalCostPerImageUsd),
     estimatedLocalRuntimeMinutes: round(localImagesTotal * localMinutesPerImage, 1),
     storageOk: Boolean(storage.ok),
@@ -598,6 +634,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     byTier: countBy(queueRecords, (candidate) => candidate.localTier),
     byRoute: countBy(queueRecords, (candidate) => candidate.route),
     bySource: countBy(queueRecords, (candidate) => candidate.sourceId),
+    metadataOnlyBySource: metadataOnlyQueue.bySource,
   };
 
   return {
@@ -631,6 +668,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
       },
       sources: sourceRefresh.slice(0, 40),
     },
+    metadataOnlyQueue,
     recipeBridge: recipePlan,
     externalReview,
     recommendedSequence: [
@@ -643,6 +681,11 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
         step: "metadata_refresh",
         status: sourceRefresh.length ? "ready" : "monitor",
         detail: "Run metadata-only source connectors first; this adds dish/date/venue/image-route hints with low storage impact.",
+      },
+      {
+        step: "metadata_only_queue",
+        status: metadataOnlyQueue.candidates ? "ready" : "empty",
+        detail: `${metadataOnlyQueue.candidates.toLocaleString()} pending metadata-only candidate(s), 0 pending image(s).`,
       },
       {
         step: "graph_gap_queue",
@@ -728,6 +771,7 @@ module.exports = {
   compactGraphGap,
   costEstimate,
   graphGapQueuePlan,
+  metadataOnlyQueuePlan,
   optionsFromArgs,
   pendingImages,
   sourceRefreshRows,

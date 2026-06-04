@@ -2503,6 +2503,7 @@ function renderGraphLens(svg, width, height) {
   const coverage = summary.coverage || {};
   const runPlan = summary.runPlan || {};
   const assimilation = summary.assimilationPlan || {};
+  const metadataOnly = assimilation.metadataOnlyQueue || {};
   const pad = { top: 26, right: 24, bottom: 24, left: 24 };
   const compactMode = width < 720;
 
@@ -2537,7 +2538,7 @@ function renderGraphLens(svg, width, height) {
     {
       label: "Assimilation",
       value: `${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)}`,
-      detail: assimilation.storageOk || runPlan.storageOk ? "ready streams" : "disk-gated",
+      detail: metadataOnly.candidates ? `${formatNumber(metadataOnly.candidates)} metadata rows` : assimilation.storageOk || runPlan.storageOk ? "ready streams" : "disk-gated",
     },
   ];
   metrics.forEach((metric, index) => {
@@ -2563,7 +2564,7 @@ function renderGraphLens(svg, width, height) {
     {
       title: "Local Enricher",
       metric: assimilation.storageOk || runPlan.storageOk ? "Mac-first" : "free disk",
-      detail: `${formatNumber(runPlan.localRunnableImages || assimilation.ocr?.localRunnableImages || 0)} local images queued`,
+      detail: `${formatNumber(runPlan.localRunnableImages || assimilation.ocr?.localRunnableImages || 0)} OCR images / ${formatNumber(runPlan.metadataOnlyCandidates || metadataOnly.candidates || 0)} metadata rows`,
     },
     {
       title: "Recipe Bridge",
@@ -2597,7 +2598,7 @@ function renderGraphLens(svg, width, height) {
     {
       title: "Enrichment",
       metric: `${formatNumber(summary.recipeBridge?.clusters || evidence.recipeClusters || 0)} recipes`,
-      detail: `${formatNumber(assimilation.readyWorkstreams || 0)} ready streams / ${formatNumber(runPlan.pendingImages || 0)} OCR queued`,
+      detail: `${formatNumber(assimilation.readyWorkstreams || 0)} ready / ${formatNumber(runPlan.pendingImages || 0)} OCR / ${formatNumber(runPlan.metadataOnlyCandidates || metadataOnly.candidates || 0)} metadata`,
     },
     {
       title: "Overlay",
@@ -2741,6 +2742,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
   const overlays = summary.overlays || {};
   const evidence = summary.evidence || {};
   const runPlan = summary.runPlan || {};
+  const metadataOnly = summary.assimilationPlan?.metadataOnlyQueue || {};
   const rows = [
     { label: "Dish overlays", value: overlays.withDishes || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Dish analytics", value: evidence.dishAnalytics || 0, total: Math.max(evidence.dishAnalytics || 0, 1) },
@@ -2751,6 +2753,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
     { label: "Cross-source matches", value: overlays.withMatches || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Recipe bridges", value: overlays.withRecipeClusters || evidence.recipeClusters || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Ingredient analytics", value: evidence.ingredientAnalytics || 0, total: Math.max(evidence.ingredientAnalytics || 0, 1) },
+    { label: "Metadata-only queue", value: metadataOnly.candidates || runPlan.metadataOnlyCandidates || 0, total: Math.max(metadataOnly.candidates || runPlan.metadataOnlyCandidates || 0, 1) },
     { label: runPlan.storageOk ? "Runnable OCR queue" : "OCR queue blocked", value: runPlan.pendingImages || 0, total: Math.max(runPlan.pendingImages || 0, coverageSafeTotal(summary)) },
   ];
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
@@ -2989,8 +2992,9 @@ function describeGraphOverlay() {
   const nodes = summary.core?.nodes || 0;
   const evidence = summary.evidence || {};
   const assimilation = summary.assimilationPlan || {};
+  const metadataOnly = assimilation.metadataOnlyQueue || {};
   const assimilationDetail = assimilation.workstreams
-    ? ` Assimilation: ${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)} workstreams ready; next ${displayIdLabel(assimilation.recommendedNext || "monitor")}.`
+    ? ` Assimilation: ${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)} workstreams ready; ${formatNumber(metadataOnly.candidates || 0)} metadata-only rows; next ${displayIdLabel(assimilation.recommendedNext || "monitor")}.`
     : "";
   setActivity({
     label: "Graph Lens",

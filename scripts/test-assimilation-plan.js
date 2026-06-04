@@ -70,6 +70,13 @@ const payload = buildAssimilationPlanPayload(
       sourceRefresh: {
         sources: [{ sourceId: "cia_menu_collection", command: "npm run enrich:local" }],
       },
+      metadataOnlyQueue: {
+        candidates: 3,
+        pendingImages: 0,
+        bySource: { cornell_nestle_menu_collection: 3 },
+        sourceCommands: [{ sourceId: "cornell_nestle_menu_collection", command: "npm run enrich:cornell -- --limit=2500" }],
+        followUpCommands: ["npm run enrich:retag", "npm run build:graph"],
+      },
       localBatches: [{ command: "npm run enrich:ocr:local -- --limit=50", runnable: false }],
       graphGapQueue: {
         summary: {
@@ -122,7 +129,11 @@ assert.strictEqual(payload.summary.recommendedNext, "storage_light_metadata_and_
 assert.strictEqual(payload.summary.storageOk, false);
 assert.strictEqual(payload.summary.graphGapQueue.localOcrGaps, 1);
 assert.strictEqual(payload.summary.graphGapQueue.actionableLocalOcrGaps, 1);
+assert.strictEqual(payload.summary.metadataOnlyQueue.candidates, 3);
+assert.strictEqual(payload.summary.metadataOnlyQueue.pendingImages, 0);
 assert(payload.workstreams.some((stream) => stream.id === "metadata_source_refresh" && stream.status === "ready"));
+assert(payload.workstreams.some((stream) => stream.id === "metadata_only_queue" && stream.status === "ready" && stream.impact.pendingImages === 0));
+assert(payload.workstreams.some((stream) => stream.id === "metadata_only_queue" && stream.commands.includes("npm run enrich:cornell -- --limit=2500")));
 assert(payload.workstreams.some((stream) => stream.id === "price_gap_pass" && stream.status === "blocked_low_disk"));
 assert(payload.workstreams.some((stream) => stream.id === "graph_gap_queue_ocr" && stream.status === "blocked_low_disk"));
 assert(payload.workstreams.some((stream) => stream.id === "graph_gap_queue_ocr" && stream.commands[0].includes("--candidate-ids=ocrtriage:1")));

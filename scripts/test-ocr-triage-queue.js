@@ -93,6 +93,20 @@ assert.strictEqual(hardExternal.route, "rights_review_before_external_vlm");
 assert.strictEqual(hardExternal.estimatedImages, 1);
 assert(!hardExternal.routingPolicy.externalAllowed, "external routing must be blocked until rights review by default");
 
+const metadataOnly = candidateForRecord(
+  {
+    menuId: "cornell:1",
+    sourceId: "cornell_nestle_menu_collection",
+    sourceKey: "cornell",
+    sourceRecordId: "1",
+    title: "Metadata-only restaurant record",
+  },
+  { localOcrAvailable: true }
+);
+assert.strictEqual(metadataOnly.localTier, "metadata_only");
+assert.strictEqual(metadataOnly.route, "metadata_only_no_image");
+assert.strictEqual(metadataOnly.estimatedImages, 0);
+
 assert.strictEqual(tierForDifficulty(0, false), "metadata_only");
 assert.strictEqual(routeForCandidate({ tier: "easy", localOcr: false, grokSafe: false }), "install_local_ocr");
 
@@ -147,6 +161,9 @@ assert.strictEqual(processedEasy.priceObservations, 1);
 const failedHard = processingForCandidate(hardExternal, processingIndex, 3);
 assert.strictEqual(failedHard.status, "failed_review");
 assert.strictEqual(failedHard.failureClasses.access_denied, 1);
+const pendingMetadata = processingForCandidate(metadataOnly, new Map(), 2);
+assert.strictEqual(pendingMetadata.status, "pending");
+assert.strictEqual(pendingMetadata.pendingImages, 0, "metadata-only candidates should not inflate pending image totals");
 const retryProcessingIndex = buildProcessingIndex(
   [{ candidateId: "ocrtriage:retry", status: "error" }],
   [{ candidateId: "ocrtriage:retry", retryable: true, errorClass: "transient_network", nextAction: "retry_local" }]

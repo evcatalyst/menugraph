@@ -146,6 +146,7 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
   const localBatches = runPlan.localBatches || [];
   const graphGapQueue = runPlan.graphGapQueue || {};
   const graphGapBatches = graphGapQueue.localBatches || [];
+  const metadataOnlyQueue = runPlan.metadataOnlyQueue || {};
   const recipeSummary = recipeBridge.summary || {};
   const currentClusters = number(recipeSummary.clusters, 0);
   const totalCandidateClusters = number(recipeSummary.totalCandidateClusters, 0);
@@ -214,6 +215,20 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
       sourceIds: sourceRefresh.map((row) => row.sourceId).slice(0, 12),
     },
     {
+      id: "metadata_only_queue",
+      label: "Process metadata-only no-image records",
+      status: number(metadataOnlyQueue.candidates, 0) ? "ready" : "monitor",
+      priority: number(metadataOnlyQueue.candidates, 0) ? 8.1 : 3,
+      impact: {
+        candidates: number(metadataOnlyQueue.candidates, 0),
+        pendingImages: number(metadataOnlyQueue.pendingImages, 0),
+        sources: Object.keys(metadataOnlyQueue.bySource || {}).length,
+      },
+      reason: "These records can add dish, venue, date, and ingredient hints without image downloads or OCR storage.",
+      commands: commandList(metadataOnlyQueue.sourceCommands || []).concat(metadataOnlyQueue.followUpCommands || []).filter((command, index, all) => command && all.indexOf(command) === index).slice(0, 8),
+      sourceIds: Object.keys(metadataOnlyQueue.bySource || {}).slice(0, 12),
+    },
+    {
       id: "metadata_dish_ingredient_gap_pass",
       label: "Close dish and ingredient metadata gaps",
       status: metadataSources.length ? "ready" : "monitor",
@@ -279,11 +294,12 @@ function phases(streams, runPlan) {
       label: "Now: storage-light assimilation",
       status: "ready",
       workstreamIds: streams
-        .filter((stream) => ["metadata_source_refresh", "metadata_dish_ingredient_gap_pass", "recipe_bridge_expansion"].includes(stream.id))
+        .filter((stream) => ["metadata_source_refresh", "metadata_only_queue", "metadata_dish_ingredient_gap_pass", "recipe_bridge_expansion"].includes(stream.id))
         .map((stream) => stream.id),
       commands: [
         "npm run enrich:coverage",
         "npm run enrich:external-metadata",
+        ...(runPlan.metadataOnlyQueue?.sourceCommands || []).map((row) => row.command),
         runPlan.recipeBridge?.command,
         "npm run enrich:retag",
         "npm run enrich:run-plan",
@@ -365,6 +381,11 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
         localRunnableImages: number(runPlan.summary?.localRunnableImages, 0),
         estimatedLocalRuntimeMinutes: number(runPlan.summary?.estimatedLocalRuntimeMinutes, 0),
         estimatedFullExternalCost: runPlan.summary?.estimatedFullExternalCost || {},
+      },
+      metadataOnlyQueue: {
+        candidates: number(runPlan.metadataOnlyQueue?.candidates || runPlan.summary?.metadataOnlyCandidates, 0),
+        pendingImages: number(runPlan.metadataOnlyQueue?.pendingImages, 0),
+        bySource: runPlan.metadataOnlyQueue?.bySource || runPlan.summary?.metadataOnlyBySource || {},
       },
       graphGapQueue: {
         menuGaps: number(runPlan.graphGapQueue?.summary?.menuGaps || runPlan.summary?.graphGapQueue?.menuGaps, 0),

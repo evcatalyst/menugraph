@@ -543,7 +543,11 @@ function buildProcessingIndex(extractionRecords = [], failureRecords = []) {
 }
 
 function processingForCandidate(candidate, processingIndex, pagesPerMenu = DEFAULT_PAGES_PER_MENU) {
-  const targetImages = Math.max(0, Number(candidate.estimatedImages || Math.min(candidate.pageCount || pagesPerMenu, pagesPerMenu)) || 0);
+  const estimatedImages = Number(candidate.estimatedImages);
+  const targetImages = Math.max(
+    0,
+    Number.isFinite(estimatedImages) ? estimatedImages : Number(Math.min(candidate.pageCount || pagesPerMenu, pagesPerMenu)) || 0
+  );
   const state = processingIndex.get(cleanValue(candidate.id));
   if (!state) {
     return {
