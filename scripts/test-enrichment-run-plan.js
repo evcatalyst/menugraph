@@ -213,6 +213,7 @@ assert.strictEqual(payload.recipeBridge.targetClusterLimit, 100);
 assert(payload.recipeBridge.command.includes("--cluster-limit=100"));
 assert.strictEqual(payload.summary.graphGapQueue.menuGaps, 2);
 assert.strictEqual(payload.summary.graphGapQueue.localOcrGaps, 1);
+assert.strictEqual(payload.summary.graphGapQueue.actionableLocalOcrGaps, 1);
 assert.strictEqual(payload.summary.graphGapQueue.blockedReason, "low_disk_preflight");
 assert.strictEqual(payload.summary.graphGapQueue.topMissing.price, 1);
 assert.strictEqual(payload.graphGapQueue.localBatches[0].runnable, false);
@@ -245,8 +246,51 @@ const graphQueue = graphGapQueuePlan(
   { storageOk: true, batchSize: 10, sampleLimit: 4 }
 );
 assert.strictEqual(graphQueue.summary.runnable, true);
+assert.strictEqual(graphQueue.summary.actionableLocalOcrGaps, 1);
 assert.strictEqual(graphQueue.localBatches[0].runnable, true);
 assert(graphQueue.localBatches[0].command.includes("--candidate-ids=ocrtriage:2"));
+
+const filteredGraphQueue = graphGapQueuePlan(
+  {
+    records: [
+      {
+        id: "gap:menu:cia-processed",
+        type: "menu_enrichment_gap",
+        menuId: "cia:processed",
+        sourceId: "cia_menu_collection",
+        sourceKey: "cia",
+        title: "Already attempted graph gap",
+        missing: ["price"],
+        priorityScore: 100,
+        priorityBand: "critical",
+        recommendedAction: "run_local_ocr",
+        route: "local_ocr",
+        estimatedImages: 1,
+        candidateId: "ocrtriage:processed",
+      },
+      {
+        id: "gap:menu:cia-pending",
+        type: "menu_enrichment_gap",
+        menuId: "cia:pending",
+        sourceId: "cia_menu_collection",
+        sourceKey: "cia",
+        title: "Pending graph gap",
+        missing: ["price"],
+        priorityScore: 20,
+        priorityBand: "high",
+        recommendedAction: "run_local_ocr",
+        route: "local_ocr",
+        estimatedImages: 1,
+        candidateId: "ocrtriage:pending",
+      },
+    ],
+  },
+  { storageOk: true, batchSize: 10, actionableCandidateIds: new Set(["ocrtriage:pending"]) }
+);
+assert.strictEqual(filteredGraphQueue.summary.localOcrGaps, 2);
+assert.strictEqual(filteredGraphQueue.summary.actionableLocalOcrGaps, 1);
+assert(filteredGraphQueue.localBatches[0].command.includes("--candidate-ids=ocrtriage:pending"));
+assert(!filteredGraphQueue.localBatches[0].command.includes("ocrtriage:processed"));
 
 const args = optionsFromArgs(["--dry-run", "--batch-size=25", "--external-cost-per-image=0.03", "--output=/tmp/run-plan.json"]);
 assert.strictEqual(args.dryRun, true);

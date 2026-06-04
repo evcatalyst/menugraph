@@ -184,12 +184,14 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
     {
       id: "graph_gap_queue_ocr",
       label: "Run graph-prioritized OCR gap queue",
-      status: number(graphGapQueue.summary?.localOcrGaps, 0) ? (storage.ok ? "ready_for_ocr" : "blocked_low_disk") : "monitor",
-      priority: number(graphGapQueue.summary?.localOcrGaps, 0) ? 8.2 : 3,
+      status: number(graphGapQueue.summary?.actionableLocalOcrGaps ?? graphGapQueue.summary?.localOcrGaps, 0) ? (storage.ok ? "ready_for_ocr" : "blocked_low_disk") : "monitor",
+      priority: number(graphGapQueue.summary?.actionableLocalOcrGaps ?? graphGapQueue.summary?.localOcrGaps, 0) ? 8.2 : 3,
       impact: {
         menuGaps: number(graphGapQueue.summary?.menuGaps, 0),
         localOcrGaps: number(graphGapQueue.summary?.localOcrGaps, 0),
+        actionableLocalOcrGaps: number(graphGapQueue.summary?.actionableLocalOcrGaps ?? graphGapQueue.summary?.localOcrGaps, 0),
         estimatedImages: number(graphGapQueue.summary?.estimatedImages, 0),
+        actionableEstimatedImages: number(graphGapQueue.summary?.actionableEstimatedImages ?? graphGapQueue.summary?.estimatedImages, 0),
         metadataGaps: number(graphGapQueue.summary?.metadataGaps, 0),
         topMissing: graphGapQueue.summary?.topMissing || {},
       },
@@ -367,8 +369,10 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
       graphGapQueue: {
         menuGaps: number(runPlan.graphGapQueue?.summary?.menuGaps || runPlan.summary?.graphGapQueue?.menuGaps, 0),
         localOcrGaps: number(runPlan.graphGapQueue?.summary?.localOcrGaps || runPlan.summary?.graphGapQueue?.localOcrGaps, 0),
+        actionableLocalOcrGaps: number(runPlan.graphGapQueue?.summary?.actionableLocalOcrGaps || runPlan.summary?.graphGapQueue?.actionableLocalOcrGaps, 0),
         metadataGaps: number(runPlan.graphGapQueue?.summary?.metadataGaps || runPlan.summary?.graphGapQueue?.metadataGaps, 0),
         estimatedImages: number(runPlan.graphGapQueue?.summary?.estimatedImages || runPlan.summary?.graphGapQueue?.estimatedImages, 0),
+        actionableEstimatedImages: number(runPlan.graphGapQueue?.summary?.actionableEstimatedImages || runPlan.summary?.graphGapQueue?.actionableEstimatedImages, 0),
         blockedReason: cleanValue(runPlan.graphGapQueue?.summary?.blockedReason || runPlan.summary?.graphGapQueue?.blockedReason),
       },
     },

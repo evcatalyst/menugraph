@@ -75,8 +75,10 @@ const payload = buildAssimilationPlanPayload(
         summary: {
           menuGaps: 2,
           localOcrGaps: 1,
+          actionableLocalOcrGaps: 1,
           metadataGaps: 1,
           estimatedImages: 2,
+          actionableEstimatedImages: 2,
           topMissing: { price: 1, dish: 1 },
           topSources: { cia_menu_collection: 1 },
           blockedReason: "low_disk_preflight",
@@ -119,6 +121,7 @@ const payload = buildAssimilationPlanPayload(
 assert.strictEqual(payload.summary.recommendedNext, "storage_light_metadata_and_recipe_assimilation");
 assert.strictEqual(payload.summary.storageOk, false);
 assert.strictEqual(payload.summary.graphGapQueue.localOcrGaps, 1);
+assert.strictEqual(payload.summary.graphGapQueue.actionableLocalOcrGaps, 1);
 assert(payload.workstreams.some((stream) => stream.id === "metadata_source_refresh" && stream.status === "ready"));
 assert(payload.workstreams.some((stream) => stream.id === "price_gap_pass" && stream.status === "blocked_low_disk"));
 assert(payload.workstreams.some((stream) => stream.id === "graph_gap_queue_ocr" && stream.status === "blocked_low_disk"));

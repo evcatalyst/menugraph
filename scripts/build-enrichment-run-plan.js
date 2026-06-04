@@ -227,10 +227,14 @@ function graphGapQueuePlan(graphEnrichmentGaps = {}, options = {}) {
   const localOcrGaps = menuGaps
     .filter((gap) => cleanValue(gap.route || "") === "local_ocr")
     .filter((gap) => cleanValue(gap.candidateId));
+  const actionableCandidateIds = options.actionableCandidateIds instanceof Set ? options.actionableCandidateIds : null;
+  const actionableLocalOcrGaps = actionableCandidateIds
+    ? localOcrGaps.filter((gap) => actionableCandidateIds.has(cleanValue(gap.candidateId)))
+    : localOcrGaps;
   const metadataGaps = menuGaps.filter((gap) => cleanValue(gap.recommendedAction) === "metadata_dish_hint_pass");
   const sourceImageRouteReviewGaps = menuGaps.filter((gap) => cleanValue(gap.recommendedAction) === "source_image_route_review");
   const sourceGroups = new Map();
-  for (const gap of localOcrGaps) {
+  for (const gap of actionableLocalOcrGaps) {
     const key = cleanValue(gap.sourceKey || gap.sourceId || "unknown");
     if (!sourceGroups.has(key)) sourceGroups.set(key, []);
     sourceGroups.get(key).push(gap);
@@ -249,7 +253,7 @@ function graphGapQueuePlan(graphEnrichmentGaps = {}, options = {}) {
       group.gaps,
       { ...options, sourceKey: group.sourceKey }
     ));
-  const topBatch = graphGapBatch("graph_gap_top_priority", "Top graph-prioritized OCR gaps", localOcrGaps, options);
+  const topBatch = graphGapBatch("graph_gap_top_priority", "Top graph-prioritized OCR gaps", actionableLocalOcrGaps, options);
   const localBatches = [topBatch, ...sourceBatches].filter((batch) => batch.candidateCount || batch.poolGaps);
   return {
     summary: {
@@ -257,11 +261,13 @@ function graphGapQueuePlan(graphEnrichmentGaps = {}, options = {}) {
       menuGaps: menuGaps.length,
       sourceSummaries: sourceSummaries.length,
       localOcrGaps: localOcrGaps.length,
+      actionableLocalOcrGaps: actionableLocalOcrGaps.length,
       metadataGaps: metadataGaps.length,
       sourceImageRouteReviewGaps: sourceImageRouteReviewGaps.length,
       estimatedImages: localOcrGaps.reduce((sum, gap) => sum + graphGapImages(gap), 0),
-      runnable: Boolean(options.storageOk && localOcrGaps.length),
-      blockedReason: options.storageOk ? "" : "low_disk_preflight",
+      actionableEstimatedImages: actionableLocalOcrGaps.reduce((sum, gap) => sum + graphGapImages(gap), 0),
+      runnable: Boolean(options.storageOk && actionableLocalOcrGaps.length),
+      blockedReason: !options.storageOk ? "low_disk_preflight" : actionableLocalOcrGaps.length ? "" : "no_actionable_pending_candidates",
       topMissing: countMany(menuGaps, (gap) => gap.missing || []),
       topActions: countBy(menuGaps, (gap) => gap.recommendedAction),
       topSources: countBy(menuGaps, (gap) => gap.sourceId || gap.sourceKey),
@@ -484,6 +490,12 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
   const retryableFailures = failureRecords.filter((record) => record.retryable === true);
   const retryableIds = new Set(retryableFailures.map((record) => cleanValue(record.candidateId)).filter(Boolean));
   const retryableCandidates = queueRecords.filter((candidate) => retryableIds.has(cleanValue(candidate.id)));
+  const pendingCandidateIds = new Set(
+    queueRecords
+      .filter((candidate) => candidateStatus(candidate) === "pending")
+      .map((candidate) => cleanValue(candidate.id))
+      .filter(Boolean)
+  );
 
   const batchOptions = { batchSize, sampleLimit, localMinutesPerImage, storageOk: storage.ok };
   const sourceTargetBatches = sourceTargetBatchesFromQueue(inputs.ocrQueue || {}, queueRecords, {
@@ -496,6 +508,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     sampleLimit,
     localMinutesPerImage,
     storageOk: storage.ok,
+    actionableCandidateIds: pendingCandidateIds,
   });
   const localBatches = [
     localBatch("local_easy_backlog_50", "Next 50 easy local OCR candidates", pendingEasy, {
@@ -558,9 +571,11 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
       records: graphGapQueue.summary.records,
       menuGaps: graphGapQueue.summary.menuGaps,
       localOcrGaps: graphGapQueue.summary.localOcrGaps,
+      actionableLocalOcrGaps: graphGapQueue.summary.actionableLocalOcrGaps,
       metadataGaps: graphGapQueue.summary.metadataGaps,
       sourceImageRouteReviewGaps: graphGapQueue.summary.sourceImageRouteReviewGaps,
       estimatedImages: graphGapQueue.summary.estimatedImages,
+      actionableEstimatedImages: graphGapQueue.summary.actionableEstimatedImages,
       runnable: graphGapQueue.summary.runnable,
       blockedReason: graphGapQueue.summary.blockedReason,
       topMissing: graphGapQueue.summary.topMissing,
@@ -631,8 +646,8 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
       },
       {
         step: "graph_gap_queue",
-        status: storage.ok && graphGapQueue.summary.localOcrGaps ? "ready" : storage.ok ? "empty" : "blocked_low_disk",
-        detail: `${graphGapQueue.summary.localOcrGaps.toLocaleString()} graph-prioritized OCR gap(s), ${graphGapQueue.summary.estimatedImages.toLocaleString()} estimated image(s).`,
+        status: storage.ok && graphGapQueue.summary.actionableLocalOcrGaps ? "ready" : storage.ok ? "empty" : "blocked_low_disk",
+        detail: `${graphGapQueue.summary.actionableLocalOcrGaps.toLocaleString()} pending graph-prioritized OCR gap(s), ${graphGapQueue.summary.actionableEstimatedImages.toLocaleString()} estimated image(s).`,
       },
       {
         step: "local_ocr",
