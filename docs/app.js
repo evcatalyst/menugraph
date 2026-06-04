@@ -2412,7 +2412,14 @@ function renderGraphLens(svg, width, height) {
     { label: "Graph Nodes", value: formatNumber(core.nodes || 0), detail: `${formatNumber(core.edges || 0)} edges` },
     {
       label: "Evidence",
-      value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0) + (evidence.recipeClusters || 0) + (evidence.ingredientAnalytics || 0)),
+      value: formatNumber(
+        (evidence.dateEvidence || 0) +
+          (evidence.priceObservations || 0) +
+          (evidence.priceAnalytics || 0) +
+          (evidence.matches || 0) +
+          (evidence.recipeClusters || 0) +
+          (evidence.ingredientAnalytics || 0)
+      ),
       detail: "date / price / ingredient",
     },
     {
@@ -2626,6 +2633,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
     { label: "Dish overlays", value: overlays.withDishes || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Date evidence", value: overlays.withDateEvidence || evidence.dateEvidence || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Price overlays", value: overlays.withPrices || 0, total: overlays.menus || summary.menus || 1 },
+    { label: "Price analytics", value: evidence.priceAnalytics || 0, total: Math.max(evidence.priceAnalytics || 0, 1) },
     { label: "Cross-source matches", value: overlays.withMatches || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Recipe bridges", value: overlays.withRecipeClusters || evidence.recipeClusters || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Ingredient analytics", value: evidence.ingredientAnalytics || 0, total: Math.max(evidence.ingredientAnalytics || 0, 1) },
@@ -2816,7 +2824,7 @@ function describeGraphOverlay() {
   setActivity({
     label: "Graph Lens",
     title: "Static graph overlay loaded",
-    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.priceObservations || 0)} price items, ${formatNumber(evidence.ingredientAnalytics || 0)} ingredient analytics, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
+    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.priceObservations || 0)} price items, ${formatNumber(evidence.priceAnalytics || 0)} price analytics, ${formatNumber(evidence.ingredientAnalytics || 0)} ingredient analytics, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
     progress: 1,
   });
 }

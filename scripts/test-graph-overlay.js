@@ -76,6 +76,7 @@ assert(manifest.summary.assimilationPlan?.recipeBridge?.targetClusterLimit >= ma
 assert(manifest.summary.evidence.recipeClusters >= 100, "recipe clusters should be indexed as compact evidence");
 assert(manifest.summary.overlays.withRecipeClusters >= 100, "recipe bridge clusters should appear in menu overlays");
 assert(manifest.summary.evidence.ingredientAnalytics >= 500, "ingredient analytics should be indexed as compact evidence");
+assert(manifest.summary.evidence.priceAnalytics >= 500, "price analytics should be indexed as compact evidence");
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");
 assert(manifest.summary.overlays.withOcrCandidates >= 1000, "OCR triage should appear as menu overlay evidence");
 assert(Object.keys(evidenceIndex.ocrCandidates || {}).length >= 1000, "OCR triage evidence should be indexed compactly");
@@ -103,6 +104,31 @@ assert(
 assert(
   Object.values(evidenceIndex.ingredientAnalytics || {}).some((record) => record.type === "ingredient_pair" && record.ingredients?.length === 2),
   "ingredient analytics should include ingredient-pair rollups"
+);
+assert.strictEqual(
+  Object.keys(evidenceIndex.priceAnalytics || {}).length,
+  manifest.summary.evidence.priceAnalytics,
+  "price analytics shard count should match manifest summary"
+);
+assert(
+  Object.values(evidenceIndex.priceAnalytics || {}).some((record) => record.type === "price_by_source_decade" && record.sourceId === "nypl_wotm"),
+  "price analytics should include source/decade rollups"
+);
+assert(
+  Object.values(evidenceIndex.priceAnalytics || {}).some((record) => record.type === "price_by_ingredient" && record.ingredient && record.medianAmount !== null),
+  "price analytics should include ingredient price rollups with numeric stats"
+);
+assert(
+  Object.values(evidenceIndex.priceAnalytics || {}).some((record) => record.type === "price_by_dish_type" && record.dishType === "beverage"),
+  "price analytics should include dish-type price rollups"
+);
+assert(
+  Object.values(evidenceIndex.priceAnalytics || {}).some((record) => record.type === "price_band_by_decade" && record.band && record.decade),
+  "price analytics should include price-band by decade rollups"
+);
+assert(
+  Object.values(evidenceIndex.priceAnalytics || {}).some((record) => record.type === "price_method_summary" && /nypl|ocr|price/i.test(record.method)),
+  "price analytics should include extraction method summaries"
 );
 if (coverageReport.summary?.sources) {
   assert.strictEqual(manifest.summary.enrichment.sourceCoverage, coverageReport.summary.sources, "source coverage count should be summarized in the enrichment graph");
