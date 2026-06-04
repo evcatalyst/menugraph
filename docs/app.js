@@ -27,6 +27,7 @@ const state = {
   graphOverlayShardPromises: new Map(),
   graphOverlayLoadedShards: new Set(),
   selectedGraphSourceId: null,
+  selectedGraphGapQueue: false,
   ontologyCategory: "ingredients",
   priceMode: "todayUsd",
   priceCurrency: null,
@@ -161,6 +162,9 @@ const displayIdLabels = {
   license_diligence: "License Diligence",
   source_probe_or_ingest: "Probe Or Ingest",
   license_required: "License Required",
+  free_disk_then_local_ocr: "Free Disk Then Local OCR",
+  run_local_ocr: "Run Local OCR",
+  price_ocr_pass: "Price OCR Pass",
 };
 
 try {
@@ -2913,18 +2917,59 @@ function graphExternalMenuRecords(sourceId) {
     });
 }
 
+function graphEnrichmentGapRecords() {
+  return Object.values(state.graphOverlay?.evidenceIndex?.enrichmentGaps || {})
+    .filter((record) => record.type === "menu_enrichment_gap")
+    .sort((a, b) => Number(b.priorityScore || 0) - Number(a.priorityScore || 0) || compact(a.title, "").localeCompare(compact(b.title, "")));
+}
+
+function graphEnrichmentGapSources() {
+  return Object.values(state.graphOverlay?.evidenceIndex?.enrichmentGaps || {})
+    .filter((record) => record.type === "source_enrichment_gap_summary")
+    .sort((a, b) => Number(b.priorityScore || 0) - Number(a.priorityScore || 0) || compact(a.sourceId, "").localeCompare(compact(b.sourceId, "")));
+}
+
+function graphGapMenuSummary(gap) {
+  return state.allMenus.find((menu) => {
+    const keys = [menuKey(menu), menu.uid, menu.id, menu.sourceRecordId, menu.pointer].map((value) => compact(value, "")).filter(Boolean);
+    return keys.includes(gap.menuId) || keys.includes(String(gap.menuId || "").replace(/^cia:/, ""));
+  });
+}
+
+function graphGapExternalRecord(gap) {
+  return state.graphOverlay?.evidenceIndex?.externalMenus?.[gap.menuId] || null;
+}
+
+function gapMissingLabel(gap) {
+  return (gap.missing || []).map(displayIdLabel).join(", ") || "metadata";
+}
+
 function usesGraphSourceResults(lens = state.activeLens) {
   return lens === "lineage" || lens === "graph" || lens === "architecture";
 }
 
 function showGraphSourceRows(row) {
   if (!row?.externalCount) return;
+  state.selectedGraphGapQueue = false;
   state.selectedGraphSourceId = row.id;
   renderResults();
   setActivity({
     label: "Graph Source",
     title: `${row.label} rows`,
     detail: "Showing compact external graph records with provenance and source links; raw OCR and image payloads stay outside the public graph.",
+    progress: 1,
+  });
+}
+
+function showGraphGapQueue() {
+  state.selectedGraphSourceId = null;
+  state.selectedGraphGapQueue = true;
+  renderResults();
+  const gaps = graphEnrichmentGapRecords();
+  setActivity({
+    label: "Gap Queue",
+    title: `${formatNumber(gaps.length)} prioritized enrichment gaps`,
+    detail: "Showing compact menu-level gaps for missing dish, price, ingredient, and image evidence. These rows are routed to local OCR or metadata passes without exposing raw OCR or image payloads.",
     progress: 1,
   });
 }
@@ -3104,6 +3149,10 @@ function renderResults() {
 }
 
 function renderGraphSourceResults() {
+  if (state.selectedGraphGapQueue) {
+    renderGraphGapQueueResults();
+    return;
+  }
   if (state.selectedGraphSourceId) {
     renderGraphExternalSourceResults();
     return;
@@ -3121,7 +3170,34 @@ function renderGraphSourceResults() {
     return;
   }
 
+  const gapRecords = graphEnrichmentGapRecords();
+  const gapSources = graphEnrichmentGapSources();
+  const queueCard = document.createElement("article");
+  queueCard.className = "source-result-card source-result-card--gap";
+  const queueTop = document.createElement("div");
+  queueTop.className = "source-result-card__top";
+  const queueStatus = document.createElement("span");
+  queueStatus.className = "source-status-pill";
+  queueStatus.textContent = "Gap Queue";
+  const queueScore = document.createElement("small");
+  queueScore.textContent = `${formatNumber(gapSources.length)} sources`;
+  queueTop.append(queueStatus, queueScore);
+  const queueTitle = document.createElement("h3");
+  queueTitle.textContent = "Enrichment gaps";
+  const queueMeta = document.createElement("p");
+  queueMeta.textContent = `${formatNumber(gapRecords.length)} prioritized menus / missing dish, price, ingredient, image evidence`;
+  const queueNote = document.createElement("p");
+  queueNote.className = "source-result-card__note";
+  queueNote.textContent = "Storage-light queue for the next local OCR and metadata passes; no raw OCR or image payloads.";
+  const queueOpen = document.createElement("button");
+  queueOpen.className = "source-result-card__open";
+  queueOpen.type = "button";
+  queueOpen.textContent = `View ${formatNumber(gapRecords.length)} gaps`;
+  queueOpen.addEventListener("click", showGraphGapQueue);
+  queueCard.append(queueTop, queueTitle, queueMeta, queueNote, queueOpen);
+
   els.resultList.replaceChildren(
+    queueCard,
     ...rows.map((row) => {
       const card = document.createElement("article");
       card.className = `source-result-card source-result-card--${row.statusKind}`;
@@ -3177,12 +3253,13 @@ function renderGraphExternalSourceResults() {
   const back = document.createElement("article");
   back.className = "external-record-card external-record-card--summary";
   const backButton = document.createElement("button");
-  backButton.type = "button";
-  backButton.textContent = "All sources";
-  backButton.addEventListener("click", () => {
-    state.selectedGraphSourceId = null;
-    renderResults();
-  });
+    backButton.type = "button";
+    backButton.textContent = "All sources";
+    backButton.addEventListener("click", () => {
+      state.selectedGraphSourceId = null;
+      state.selectedGraphGapQueue = false;
+      renderResults();
+    });
   const sourceTitle = document.createElement("h3");
   sourceTitle.textContent = source?.label || "External source";
   const sourceMeta = document.createElement("p");
@@ -3214,6 +3291,76 @@ function renderGraphExternalSourceResults() {
     return button;
   });
   els.resultList.replaceChildren(back, ...cards);
+}
+
+function renderGraphGapQueueResults() {
+  const records = graphEnrichmentGapRecords();
+  const sources = graphEnrichmentGapSources();
+  els.resultsCount.textContent = records.length.toLocaleString();
+  els.resultsLabel.textContent = "Enrichment Gap Queue";
+  els.resultList.dataset.graphMode = "gap-records";
+
+  const back = document.createElement("article");
+  back.className = "external-record-card external-record-card--summary";
+  const backButton = document.createElement("button");
+  backButton.type = "button";
+  backButton.textContent = "All sources";
+  backButton.addEventListener("click", () => {
+    state.selectedGraphGapQueue = false;
+    renderResults();
+  });
+  const title = document.createElement("h3");
+  title.textContent = "Prioritized enrichment gaps";
+  const meta = document.createElement("p");
+  const topSource = sources[0];
+  const topSourceLabel = graphSourceRowById(topSource?.sourceId)?.label || displayIdLabel(topSource?.sourceId || "");
+  meta.textContent = topSource
+    ? `${formatNumber(records.length)} menu gaps / top source ${topSourceLabel} / ${formatNumber(topSource.missingPriceMenus || 0)} price gaps`
+    : `${formatNumber(records.length)} menu gaps`;
+  const note = document.createElement("small");
+  note.textContent = "Compact routing evidence for local OCR, metadata dish hint passes, and source image route review.";
+  back.append(backButton, title, meta, note);
+
+  const cards = records.slice(0, 96).map((record) => {
+    const button = document.createElement("button");
+    button.className = `external-record-card gap-record-card gap-record-card--${record.priorityBand || "medium"}`;
+    button.type = "button";
+    const status = document.createElement("span");
+    status.className = "source-status-pill";
+    status.textContent = record.priorityBand || "gap";
+    const itemTitle = document.createElement("h3");
+    itemTitle.textContent = compact(record.title, record.menuId);
+    const itemMeta = document.createElement("p");
+    itemMeta.textContent = [sourceCollectionLabel(record.sourceKey), compact(record.decade, ""), compact(record.placeText, "")].filter(Boolean).join(" / ");
+    const evidence = document.createElement("small");
+    evidence.textContent = `${gapMissingLabel(record)} missing / ${displayIdLabel(record.recommendedAction || "review")} / score ${formatNumber(record.priorityScore || 0)}`;
+    button.append(status, itemTitle, itemMeta, evidence);
+    button.addEventListener("click", async () => openGapRecord(record));
+    return button;
+  });
+  els.resultList.replaceChildren(back, ...cards);
+}
+
+async function openGapRecord(record) {
+  if (record.external) {
+    const external = graphGapExternalRecord(record);
+    if (external) {
+      await loadGraphOverlayShard(external.sourceKey || record.sourceKey).catch(() => null);
+      renderExternalMenuDetail(external);
+      return;
+    }
+  }
+  const menu = graphGapMenuSummary(record);
+  if (menu) {
+    await selectMenu(menuKey(menu));
+    return;
+  }
+  setActivity({
+    label: "Gap Queue",
+    title: compact(record.title, record.menuId),
+    detail: `${gapMissingLabel(record)} missing; recommended action ${displayIdLabel(record.recommendedAction || "review")}. No matching menu detail row is loaded for this compact gap record.`,
+    progress: 1,
+  });
 }
 
 function externalRecordEvidenceLabel(record) {
@@ -4735,7 +4882,10 @@ function bindEvents() {
   els.lensButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.activeLens = button.dataset.lens;
-      if (!usesGraphSourceResults()) state.selectedGraphSourceId = null;
+      if (!usesGraphSourceResults()) {
+        state.selectedGraphSourceId = null;
+        state.selectedGraphGapQueue = false;
+      }
       activateLensButton(state.activeLens);
       renderViz();
       renderResults();

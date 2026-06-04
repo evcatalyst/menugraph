@@ -2067,6 +2067,13 @@ body[data-active-lens="architecture"] .result-list[data-graph-mode="external-rec
   height: 142px;
 }
 
+body[data-active-lens="lineage"] .result-list[data-graph-mode="gap-records"],
+body[data-active-lens="graph"] .result-list[data-graph-mode="gap-records"],
+body[data-active-lens="architecture"] .result-list[data-graph-mode="gap-records"] {
+  grid-auto-columns: minmax(280px, 340px);
+  height: 150px;
+}
+
 .external-record-card {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
@@ -2138,6 +2145,17 @@ button.external-record-card:focus-visible {
   font-size: 11px;
   font-weight: 800;
   line-height: 1.25;
+}
+
+.source-result-card--gap .source-status-pill,
+.gap-record-card--critical .source-status-pill {
+  background: rgba(112, 69, 49, 0.12);
+  color: #704531;
+}
+
+.gap-record-card--high .source-status-pill {
+  background: rgba(170, 127, 46, 0.14);
+  color: #7c5c1e;
 }
 
 .loading {
