@@ -11,6 +11,7 @@ function run() {
   assert.deepStrictEqual(ingredientTagsFor("Rum punch with gin, vermouth, and sake").sort(), ["punch", "spirits"]);
   assert(ingredientTagsFor("Mineral water and seltzer").includes("water"));
   assert(!ingredientTagsFor("Water chestnuts").includes("water"));
+  assert(!ingredientTagsFor("Milk-fed veal cutlet").includes("milk"));
   assert.deepStrictEqual(ingredientTagsFor("Peach Melba").sort(), ["peach"]);
   assert(!ingredientTagsFor("Peach Melba").includes("pea"), "pea should not match inside peach");
   assert(ingredientTagsFor("Foie gras with truffles").includes("foie gras"));
@@ -18,6 +19,8 @@ function run() {
 
   assert.strictEqual(dishTypeFor("Martini cocktail"), "beverage");
   assert.strictEqual(dishTypeFor("Sake and lager"), "beverage");
+  assert.strictEqual(dishTypeFor("Milk-fed veal cutlet"), "meat");
+  assert.strictEqual(dishTypeFor("Chicken with water chestnuts"), "poultry");
   assert.strictEqual(dishTypeFor("Spaghetti marinara"), "pasta");
   assert.strictEqual(dishTypeFor("Club sandwich"), "sandwich");
   assert.strictEqual(dishTypeFor("Toasted bagel"), "bread");

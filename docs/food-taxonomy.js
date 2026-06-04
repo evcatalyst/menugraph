@@ -133,7 +133,7 @@
   ];
 
   const DISH_TYPES = [
-    ["beverage", /\b(coffee|tea|wine|beer|ale|lager|stout|cocktail|champagne|whiskey|whisky|brandy|gin|rum|vodka|liqueur|cordial|vermouth|absinthe|sake|martini|cider|soda|water|milk|buttermilk|punch|lemonade)\b/],
+    ["beverage", /\b(coffee|tea|wine|beer|ale|lager|stout|cocktail|champagne|whiskey|whisky|brandy|gin|rum|vodka|liqueur|cordial|vermouth|absinthe|sake|martini|cider|soda|water(?!\s+chestnuts?)|milk(?![-\s]+fed)|buttermilk|punch|lemonade)\b/],
     ["dessert", /\b(ice cream|cake|pie|pudding|sherbet|dessert|pastry|tart|fruit|compote|custard|souffle|mousse|parfait)\b/],
     ["soup", /\b(soup|consomme|bisque|chowder|broth|bouillon|potage|gumbo)\b/],
     ["seafood", /\b(oyster|lobster|clam|crab|fish|salmon|shrimp|shrimps|prawn|prawns|crevette|crevettes|sole|cod|bass|trout|halibut|scallop|mussel|sardine|tuna|shellfish)\b/],
@@ -182,7 +182,7 @@
   }));
 
   function ingredientTagsFor(value) {
-    const normalized = normalizeText(value);
+    const normalized = normalizeText(value).replace(/\bmilk[-\s]+fed\b/g, " ");
     if (!normalized) return [];
     const tags = [];
     for (const ingredient of INGREDIENT_PATTERNS) {
