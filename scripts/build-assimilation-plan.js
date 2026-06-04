@@ -147,6 +147,8 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
   const graphGapQueue = runPlan.graphGapQueue || {};
   const graphGapBatches = graphGapQueue.localBatches || [];
   const metadataOnlyQueue = runPlan.metadataOnlyQueue || {};
+  const runnableLocalBatches = localBatches.filter((batch) => batch.runnable);
+  const hasRunnableLocalOcr = number(runPlan.summary?.localRunnableImages, 0) > 0 || runnableLocalBatches.length > 0;
   const recipeSummary = recipeBridge.summary || {};
   const currentClusters = number(recipeSummary.clusters, 0);
   const totalCandidateClusters = number(recipeSummary.totalCandidateClusters, 0);
@@ -177,9 +179,11 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
         estimatedLocalRuntimeMinutes: number(runPlan.summary?.estimatedLocalRuntimeMinutes, 0),
       },
       reason: storage.ok
-        ? "Storage preflight passes; run bounded local OCR batches."
+        ? hasRunnableLocalOcr
+          ? "Storage preflight passes; run bounded local OCR batches."
+          : "Storage preflight passes, but the current local OCR queue has no runnable images."
         : `${storage.availableFormatted || runPlan.summary?.storageAvailableFormatted || "unknown"} available; ${storage.minFreeFormatted || runPlan.summary?.storageRequiredFormatted || "1.0 GB"} required before OCR.`,
-      commands: ["npm run enrich:cache:prune", ...(localBatches.filter((batch) => batch.runnable).map((batch) => batch.command).slice(0, 3))],
+      commands: ["npm run enrich:cache:prune", ...runnableLocalBatches.map((batch) => batch.command).slice(0, 3)],
       sourceIds: imageSources.map((gap) => gap.sourceId),
     },
     {
@@ -244,14 +248,16 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
     {
       id: "price_gap_pass",
       label: "Prioritize price extraction gaps",
-      status: priceSources.length ? (storage.ok ? "ready_for_ocr" : "blocked_low_disk") : "monitor",
-      priority: priceSources.length ? 7.2 : 3,
+      status: priceSources.length ? (storage.ok ? (hasRunnableLocalOcr ? "ready_for_ocr" : "monitor") : "blocked_low_disk") : "monitor",
+      priority: priceSources.length && hasRunnableLocalOcr ? 7.2 : 3,
       impact: {
         missingPriceMenus: priceSources.reduce((sum, gap) => sum + gap.missingPriceMenus, 0),
         currentPriceMenus: menuGaps.reduce((sum, gap) => sum + Math.max(0, gap.rowCount - gap.missingPriceMenus), 0),
       },
-      reason: "Price coverage is the main blocker for robust temporal price analytics and date estimation signals.",
-      commands: localBatches.map((batch) => batch.command).slice(0, 4),
+      reason: hasRunnableLocalOcr
+        ? "Price coverage is the main blocker for robust temporal price analytics and date estimation signals."
+        : "Price coverage is still a major gap, but the current local OCR queue has no runnable images.",
+      commands: hasRunnableLocalOcr ? localBatches.map((batch) => batch.command).slice(0, 4) : [],
       sourceIds: priceSources.map((gap) => gap.sourceId),
     },
     {

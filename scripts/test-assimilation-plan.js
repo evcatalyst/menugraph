@@ -142,6 +142,57 @@ assert(payload.phases.some((phase) => phase.id === "now_low_storage" && phase.co
 assert(payload.phases.some((phase) => phase.id === "after_disk_free" && phase.commands[0].includes("--candidate-ids=ocrtriage:1")));
 assert(!JSON.stringify(payload).includes("data:image/"), "assimilation plan must not contain image blobs");
 
+const exhaustedLocalPayload = buildAssimilationPlanPayload(
+  {
+    coverageReport: {
+      records: [
+        {
+          sourceId: "cia_menu_collection",
+          sourceKey: "cia",
+          label: "CIA",
+          sourceType: "menu",
+          rowCount: 100,
+          dishMenus: 90,
+          priceMenus: 20,
+          ingredientMenus: 80,
+          imageMenus: 90,
+          ocrCandidates: 100,
+          ocrFailures: 0,
+          dishCoverage: 0.9,
+          priceCoverage: 0.2,
+          ingredientCoverage: 0.8,
+          imageCoverage: 0.9,
+          primaryNextAction: "source_image_route_review",
+        },
+      ],
+      prioritizedActions: [{ id: "source_image_route_review" }],
+    },
+    runPlan: {
+      summary: {
+        storageOk: true,
+        pendingImages: 0,
+        localRunnableImages: 0,
+        estimatedLocalRuntimeMinutes: 0,
+        metadataOnlyCandidates: 4,
+      },
+      metadataOnlyQueue: {
+        candidates: 4,
+        pendingImages: 0,
+        bySource: { cornell_nestle_menu_collection: 4 },
+        sourceCommands: [{ command: "npm run enrich:cornell -- --limit=2500" }],
+      },
+      localBatches: [],
+      graphGapQueue: { summary: { actionableLocalOcrGaps: 0 } },
+    },
+    recipeBridge: { summary: { clusters: 10, totalCandidateClusters: 10 } },
+    storagePreflight: { ok: true, availableFormatted: "3.5 GB", minFreeFormatted: "1.0 GB" },
+  },
+  { generatedAt: "2026-06-03T00:00:00.000Z" }
+);
+
+assert.strictEqual(exhaustedLocalPayload.summary.recommendedNext, "run_metadata_refresh");
+assert(exhaustedLocalPayload.workstreams.some((stream) => stream.id === "price_gap_pass" && stream.status === "monitor"));
+
 const args = optionsFromArgs(["--dry-run", "--gap-limit=12", "--output=/tmp/assimilation.json"]);
 assert.strictEqual(args.dryRun, true);
 assert.strictEqual(args.gapLimit, 12);
