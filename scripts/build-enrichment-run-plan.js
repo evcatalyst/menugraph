@@ -163,6 +163,36 @@ function localBatch(id, label, candidates, options = {}) {
   return batch;
 }
 
+function sourceTargetBatchesFromQueue(ocrQueue = {}, queueRecords = [], options = {}) {
+  const runs = ocrQueue.summary?.progressiveRunPlan?.runs || ocrQueue.progressiveRunPlan?.runs || [];
+  const byId = new Map(queueRecords.map((candidate) => [cleanValue(candidate.id), candidate]));
+  return runs
+    .filter((run) => /^source_price_gap_/.test(cleanValue(run.label)))
+    .map((run) => {
+      const topIds = (run.topCandidateIds || []).map(cleanValue).filter(Boolean);
+      return {
+        id: cleanValue(run.label),
+        label: cleanValue(run.label).replace(/_/g, " "),
+        route: "local_ocr",
+        mode: "source_targeted_price_gap",
+        sourceKey: cleanValue(run.sourceKey || ""),
+        sourceId: cleanValue(run.sourceId || run.sourceKey || ""),
+        candidateCount: number(run.candidates, 0),
+        imageCount: number(run.estimatedImages, 0),
+        estimatedRuntimeMinutes: round(number(run.estimatedImages, 0) * Number(options.localMinutesPerImage || DEFAULT_LOCAL_MINUTES_PER_IMAGE), 1),
+        runnable: Boolean(options.storageOk && number(run.candidates, 0)),
+        blockedReason: options.storageOk ? "" : "low_disk_preflight",
+        command: cleanValue(run.command),
+        priorityBasis: run.priorityBasis || {},
+        sampleCandidates: topIds
+          .map((id) => byId.get(id))
+          .filter(Boolean)
+          .slice(0, options.sampleLimit || DEFAULT_SAMPLE_LIMIT)
+          .map(compactCandidate),
+      };
+    });
+}
+
 function sourceRefreshRows(coverageRows = []) {
   const interestingActions = new Set([
     "expand_source_limit",
@@ -291,6 +321,11 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
   const retryableCandidates = queueRecords.filter((candidate) => retryableIds.has(cleanValue(candidate.id)));
 
   const batchOptions = { batchSize, sampleLimit, localMinutesPerImage, storageOk: storage.ok };
+  const sourceTargetBatches = sourceTargetBatchesFromQueue(inputs.ocrQueue || {}, queueRecords, {
+    sampleLimit,
+    localMinutesPerImage,
+    storageOk: storage.ok,
+  });
   const localBatches = [
     localBatch("local_easy_backlog_50", "Next 50 easy local OCR candidates", pendingEasy, {
       ...batchOptions,
@@ -345,8 +380,20 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     storageAvailableFormatted: storage.availableFormatted,
     storageRequiredFormatted: storage.minFreeFormatted,
     nextAction: storage.ok
-      ? pendingLocal.length ? "run_local_ocr_batch" : sourceRefresh.length ? "run_metadata_refresh" : "monitor"
+      ? sourceTargetBatches.length ? "run_source_targeted_ocr_batch" : pendingLocal.length ? "run_local_ocr_batch" : sourceRefresh.length ? "run_metadata_refresh" : "monitor"
       : "free_disk_before_ocr",
+    sourceTargetBatches: sourceTargetBatches.slice(0, 6).map((batch) => ({
+      id: batch.id,
+      sourceKey: batch.sourceKey,
+      sourceId: batch.sourceId,
+      candidateCount: batch.candidateCount,
+      imageCount: batch.imageCount,
+      runnable: batch.runnable,
+      observedProcessed: number(batch.priorityBasis?.observedProcessed, 0),
+      observedDishMentions: number(batch.priorityBasis?.observedDishMentions, 0),
+      observedPriceObservations: number(batch.priorityBasis?.observedPriceObservations, 0),
+      observedYieldMultiplier: number(batch.priorityBasis?.observedYieldMultiplier, 0),
+    })),
     byStatus: countBy(queueRecords, candidateStatus),
     byTier: countBy(queueRecords, (candidate) => candidate.localTier),
     byRoute: countBy(queueRecords, (candidate) => candidate.route),
@@ -373,6 +420,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     },
     storagePreflight: storage,
     summary,
+    sourceTargetBatches,
     localBatches,
     sourceRefresh: {
       summary: {

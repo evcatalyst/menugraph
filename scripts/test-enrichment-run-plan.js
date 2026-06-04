@@ -45,6 +45,27 @@ assert(refreshRows[0].command.includes("enrich:denver"));
 const payload = buildRunPlanPayload(
   {
     ocrQueue: {
+      summary: {
+        progressiveRunPlan: {
+          runs: [
+            {
+              label: "source_price_gap_cia",
+              candidates: 1,
+              estimatedImages: 2,
+              topCandidateIds: ["ocrtriage:1"],
+              command: "npm run enrich:ocr:local -- --limit=25 --batch=all --source=cia --tier=easy --pages-per-menu=1",
+              sourceKey: "cia",
+              sourceId: "cia_menu_collection",
+              priorityBasis: {
+                observedProcessed: 20,
+                observedDishMentions: 60,
+                observedPriceObservations: 20,
+                observedYieldMultiplier: 1.25,
+              },
+            },
+          ],
+        },
+      },
       records: [
         {
           id: "ocrtriage:1",
@@ -118,6 +139,11 @@ assert.strictEqual(payload.summary.pendingImages, 3);
 assert.strictEqual(payload.summary.storageOk, false);
 assert.strictEqual(payload.summary.nextAction, "free_disk_before_ocr");
 assert.strictEqual(payload.localBatches[0].blockedReason, "low_disk_preflight");
+assert.strictEqual(payload.sourceTargetBatches.length, 1);
+assert.strictEqual(payload.sourceTargetBatches[0].sourceKey, "cia");
+assert.strictEqual(payload.sourceTargetBatches[0].sampleCandidates[0].id, "ocrtriage:1");
+assert.strictEqual(payload.sourceTargetBatches[0].blockedReason, "low_disk_preflight");
+assert.strictEqual(payload.summary.sourceTargetBatches[0].observedPriceObservations, 20);
 assert.strictEqual(payload.externalReview.allowedCandidates, 1);
 assert.strictEqual(payload.externalReview.estimatedPilotCost.estimatedCostUsd, 0.02);
 assert.strictEqual(payload.recipeBridge.targetClusterLimit, 100);
