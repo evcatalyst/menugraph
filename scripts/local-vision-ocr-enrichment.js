@@ -41,6 +41,13 @@ function hasFlag(args, name) {
   return args.includes(`--${name}`);
 }
 
+function splitList(value = "") {
+  return cleanValue(value)
+    .split(",")
+    .map(cleanValue)
+    .filter(Boolean);
+}
+
 function stableId(prefix, parts) {
   return `${prefix}:${crypto.createHash("sha1").update(parts.map((part) => cleanValue(part)).join("|")).digest("hex").slice(0, 16)}`;
 }
@@ -479,6 +486,7 @@ function selectOcrCandidates(queueRecords, previousRecords, options = {}) {
       .filter(Boolean)
   );
   const retryCandidateIds = options.retryCandidateIds instanceof Set ? options.retryCandidateIds : new Set();
+  const candidateIds = options.candidateIds instanceof Set ? options.candidateIds : new Set();
   const sourceFilter = cleanValue(options.source || "all");
   const tierFilter = cleanValue(options.tier || "all");
   const batch = cleanValue(options.batch || "phase1");
@@ -493,6 +501,7 @@ function selectOcrCandidates(queueRecords, previousRecords, options = {}) {
             ? candidate.processing?.status === "partial" && Number(candidate.processing?.pendingImages || 0) > 0 && hasActionablePendingPage(candidate, options)
             : !attempted.has(candidate.id) || options.refresh
     )
+    .filter((candidate) => !candidateIds.size || candidateIds.has(cleanValue(candidate.id)))
     .filter((candidate) => sourceFilter === "all" || candidate.sourceKey === sourceFilter || candidate.sourceId === sourceFilter)
     .filter((candidate) => tierFilter === "all" || candidate.localTier === tierFilter)
     .filter((candidate) => batch === "all" || candidate.priorityBatch === batch)
@@ -889,6 +898,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     retryErrors: hasFlag(args, "retry-errors"),
     retryRetryable: hasFlag(args, "retry-retryable"),
     continuePartial: hasFlag(args, "continue-partial"),
+    candidateIds: new Set(splitList(argValue(args, "candidate-ids", ""))),
     refreshImages: hasFlag(args, "refresh-images"),
     keepImages: hasFlag(args, "keep-images"),
     dryRun: hasFlag(args, "dry-run"),

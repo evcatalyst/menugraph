@@ -163,6 +163,23 @@ assert.strictEqual(options.imageWidth, 1200);
 assert.strictEqual(options.dryRun, true);
 assert.strictEqual(options.storagePreflight.minFreeMb, 1024);
 
+const candidateIdOptions = optionsFromArgs(["--limit=10", "--batch=all", "--candidate-ids=ocrtriage:b,ocrtriage:c"]);
+assert(candidateIdOptions.candidateIds.has("ocrtriage:b"));
+assert(candidateIdOptions.candidateIds.has("ocrtriage:c"));
+assert.deepStrictEqual(
+  selectOcrCandidates(
+    [
+      { id: "ocrtriage:a", priorityRank: 1, priorityBatch: "backlog", sourceKey: "cia", sourceId: "cia_menu_collection", localTier: "easy" },
+      { id: "ocrtriage:b", priorityRank: 3, priorityBatch: "backlog", sourceKey: "cia", sourceId: "cia_menu_collection", localTier: "easy" },
+      { id: "ocrtriage:c", priorityRank: 2, priorityBatch: "backlog", sourceKey: "lapl", sourceId: "lapl_menu_collection", localTier: "medium" },
+    ],
+    [],
+    candidateIdOptions
+  ).map((candidate) => candidate.id),
+  ["ocrtriage:c", "ocrtriage:b"],
+  "candidate-ids should execute an exact graph-selected subset in priority order"
+);
+
 const storageOptions = optionsFromArgs(["--limit=1", "--min-free-mb=256", "--skip-storage-preflight"]);
 assert.strictEqual(storageOptions.storagePreflight.minFreeMb, 256);
 assert.strictEqual(storageOptions.storagePreflight.enabled, false);

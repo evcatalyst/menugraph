@@ -71,6 +71,24 @@ const payload = buildAssimilationPlanPayload(
         sources: [{ sourceId: "cia_menu_collection", command: "npm run enrich:local" }],
       },
       localBatches: [{ command: "npm run enrich:ocr:local -- --limit=50", runnable: false }],
+      graphGapQueue: {
+        summary: {
+          menuGaps: 2,
+          localOcrGaps: 1,
+          metadataGaps: 1,
+          estimatedImages: 2,
+          topMissing: { price: 1, dish: 1 },
+          topSources: { cia_menu_collection: 1 },
+          blockedReason: "low_disk_preflight",
+        },
+        localBatches: [
+          {
+            id: "graph_gap_top_priority",
+            command: "npm run enrich:ocr:local -- --limit=1 --batch=all --tier=all --candidate-ids=ocrtriage:1",
+            runnable: false,
+          },
+        ],
+      },
       recipeBridge: {
         targetClusterLimit: 40000,
         command: "npm run enrich:recipe-bridge -- --cluster-limit=40000 --dish-link-limit=40000",
@@ -100,10 +118,14 @@ const payload = buildAssimilationPlanPayload(
 
 assert.strictEqual(payload.summary.recommendedNext, "storage_light_metadata_and_recipe_assimilation");
 assert.strictEqual(payload.summary.storageOk, false);
+assert.strictEqual(payload.summary.graphGapQueue.localOcrGaps, 1);
 assert(payload.workstreams.some((stream) => stream.id === "metadata_source_refresh" && stream.status === "ready"));
 assert(payload.workstreams.some((stream) => stream.id === "price_gap_pass" && stream.status === "blocked_low_disk"));
+assert(payload.workstreams.some((stream) => stream.id === "graph_gap_queue_ocr" && stream.status === "blocked_low_disk"));
+assert(payload.workstreams.some((stream) => stream.id === "graph_gap_queue_ocr" && stream.commands[0].includes("--candidate-ids=ocrtriage:1")));
 assert(payload.workstreams.some((stream) => stream.id === "recipe_bridge_expansion" && stream.impact.targetClusters === 40000));
 assert(payload.phases.some((phase) => phase.id === "now_low_storage" && phase.commands.includes("npm run enrich:retag")));
+assert(payload.phases.some((phase) => phase.id === "after_disk_free" && phase.commands[0].includes("--candidate-ids=ocrtriage:1")));
 assert(!JSON.stringify(payload).includes("data:image/"), "assimilation plan must not contain image blobs");
 
 const args = optionsFromArgs(["--dry-run", "--gap-limit=12", "--output=/tmp/assimilation.json"]);

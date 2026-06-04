@@ -144,6 +144,8 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
   const menuGaps = gaps.filter((gap) => gap.sourceType === "menu");
   const sourceRefresh = runPlan.sourceRefresh?.sources || [];
   const localBatches = runPlan.localBatches || [];
+  const graphGapQueue = runPlan.graphGapQueue || {};
+  const graphGapBatches = graphGapQueue.localBatches || [];
   const recipeSummary = recipeBridge.summary || {};
   const currentClusters = number(recipeSummary.clusters, 0);
   const totalCandidateClusters = number(recipeSummary.totalCandidateClusters, 0);
@@ -178,6 +180,22 @@ function workstreams({ gaps, coverageReport, runPlan, recipeBridge, storage }) {
         : `${storage.availableFormatted || runPlan.summary?.storageAvailableFormatted || "unknown"} available; ${storage.minFreeFormatted || runPlan.summary?.storageRequiredFormatted || "1.0 GB"} required before OCR.`,
       commands: ["npm run enrich:cache:prune", ...(localBatches.filter((batch) => batch.runnable).map((batch) => batch.command).slice(0, 3))],
       sourceIds: imageSources.map((gap) => gap.sourceId),
+    },
+    {
+      id: "graph_gap_queue_ocr",
+      label: "Run graph-prioritized OCR gap queue",
+      status: number(graphGapQueue.summary?.localOcrGaps, 0) ? (storage.ok ? "ready_for_ocr" : "blocked_low_disk") : "monitor",
+      priority: number(graphGapQueue.summary?.localOcrGaps, 0) ? 8.2 : 3,
+      impact: {
+        menuGaps: number(graphGapQueue.summary?.menuGaps, 0),
+        localOcrGaps: number(graphGapQueue.summary?.localOcrGaps, 0),
+        estimatedImages: number(graphGapQueue.summary?.estimatedImages, 0),
+        metadataGaps: number(graphGapQueue.summary?.metadataGaps, 0),
+        topMissing: graphGapQueue.summary?.topMissing || {},
+      },
+      reason: "Use the static graph overlay to pick exact high-value menus, then run the existing local OCR pipeline with candidate IDs.",
+      commands: graphGapBatches.map((batch) => batch.command).filter(Boolean).slice(0, 6),
+      sourceIds: Object.keys(graphGapQueue.summary?.topSources || {}).slice(0, 12),
     },
     {
       id: "metadata_source_refresh",
@@ -274,8 +292,11 @@ function phases(streams, runPlan) {
       id: "after_disk_free",
       label: "After disk free: local OCR/image assessment",
       status: runPlan.summary?.storageOk ? "ready" : "blocked_low_disk",
-      workstreamIds: ["free_disk_for_local_ocr", "price_gap_pass"],
-      commands: (runPlan.localBatches || []).map((batch) => batch.command).slice(0, 4),
+      workstreamIds: ["free_disk_for_local_ocr", "graph_gap_queue_ocr", "price_gap_pass"],
+      commands: [...(runPlan.graphGapQueue?.localBatches || []), ...(runPlan.localBatches || [])]
+        .map((batch) => batch.command)
+        .filter(Boolean)
+        .slice(0, 6),
     },
     {
       id: "after_rights_review",
@@ -303,7 +324,9 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
   const streamById = Object.fromEntries(streams.map((stream) => [stream.id, stream]));
   const planPhases = phases(streams, runPlan);
   const recommendedNext = storage.ok
-    ? streamById.price_gap_pass?.status === "ready_for_ocr"
+    ? streamById.graph_gap_queue_ocr?.status === "ready_for_ocr"
+      ? "run_graph_gap_queue_batch"
+      : streamById.price_gap_pass?.status === "ready_for_ocr"
       ? "run_local_ocr_price_batch"
       : "run_metadata_refresh"
     : "storage_light_metadata_and_recipe_assimilation";
@@ -340,6 +363,13 @@ function buildAssimilationPlanPayload(inputs = {}, options = {}) {
         localRunnableImages: number(runPlan.summary?.localRunnableImages, 0),
         estimatedLocalRuntimeMinutes: number(runPlan.summary?.estimatedLocalRuntimeMinutes, 0),
         estimatedFullExternalCost: runPlan.summary?.estimatedFullExternalCost || {},
+      },
+      graphGapQueue: {
+        menuGaps: number(runPlan.graphGapQueue?.summary?.menuGaps || runPlan.summary?.graphGapQueue?.menuGaps, 0),
+        localOcrGaps: number(runPlan.graphGapQueue?.summary?.localOcrGaps || runPlan.summary?.graphGapQueue?.localOcrGaps, 0),
+        metadataGaps: number(runPlan.graphGapQueue?.summary?.metadataGaps || runPlan.summary?.graphGapQueue?.metadataGaps, 0),
+        estimatedImages: number(runPlan.graphGapQueue?.summary?.estimatedImages || runPlan.summary?.graphGapQueue?.estimatedImages, 0),
+        blockedReason: cleanValue(runPlan.graphGapQueue?.summary?.blockedReason || runPlan.summary?.graphGapQueue?.blockedReason),
       },
     },
     gaps: gaps

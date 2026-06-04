@@ -3,6 +3,7 @@ const {
   buildRunPlanPayload,
   candidateStatus,
   costEstimate,
+  graphGapQueuePlan,
   optionsFromArgs,
   pendingImages,
   sourceRefreshRows,
@@ -131,6 +132,55 @@ const payload = buildRunPlanPayload(
       summary: { clusters: 5, totalCandidateClusters: 100, sourceCandidates: { the_sifter: 5 } },
       clusters: [],
     },
+    graphEnrichmentGaps: {
+      records: {
+        "gap:source:cia": {
+          id: "gap:source:cia",
+          type: "source_enrichment_gap_summary",
+          sourceId: "cia_menu_collection",
+          sourceKey: "cia",
+          menuCount: 100,
+          missingDishMenus: 60,
+          missingPriceMenus: 80,
+          missingIngredientMenus: 70,
+          ocrCandidateMenus: 1,
+          priorityScore: 600,
+          topActions: { free_disk_then_local_ocr: 1 },
+        },
+        "gap:menu:cia-1": {
+          id: "gap:menu:cia-1",
+          type: "menu_enrichment_gap",
+          menuId: "cia:1",
+          sourceId: "cia_menu_collection",
+          sourceKey: "cia",
+          title: "Sample menu",
+          missing: ["dish", "price", "ingredient"],
+          priorityScore: 92,
+          priorityBand: "critical",
+          recommendedAction: "free_disk_then_local_ocr",
+          route: "local_ocr",
+          localTier: "easy",
+          estimatedImages: 2,
+          candidateId: "ocrtriage:1",
+          confidence: 0.82,
+          provenance: { sourceFile: "graph/menu-overlays", method: "test_gap_rollup" },
+        },
+        "gap:menu:lapl-1": {
+          id: "gap:menu:lapl-1",
+          type: "menu_enrichment_gap",
+          menuId: "lapl:1",
+          sourceId: "lapl_menu_collection",
+          sourceKey: "lapl",
+          title: "Metadata menu",
+          missing: ["ingredient"],
+          priorityScore: 35,
+          priorityBand: "medium",
+          recommendedAction: "metadata_dish_hint_pass",
+          route: "metadata_only",
+          estimatedImages: 1,
+        },
+      },
+    },
     storagePreflight: {
       ok: false,
       skipped: false,
@@ -161,8 +211,42 @@ assert.strictEqual(payload.externalReview.allowedCandidates, 1);
 assert.strictEqual(payload.externalReview.estimatedPilotCost.estimatedCostUsd, 0.02);
 assert.strictEqual(payload.recipeBridge.targetClusterLimit, 100);
 assert(payload.recipeBridge.command.includes("--cluster-limit=100"));
+assert.strictEqual(payload.summary.graphGapQueue.menuGaps, 2);
+assert.strictEqual(payload.summary.graphGapQueue.localOcrGaps, 1);
+assert.strictEqual(payload.summary.graphGapQueue.blockedReason, "low_disk_preflight");
+assert.strictEqual(payload.summary.graphGapQueue.topMissing.price, 1);
+assert.strictEqual(payload.graphGapQueue.localBatches[0].runnable, false);
+assert(payload.graphGapQueue.localBatches[0].command.includes("--candidate-ids=ocrtriage:1"));
+assert.strictEqual(payload.graphGapQueue.summary.sampleGaps[0].provenance.method, "test_gap_rollup");
+assert(payload.recommendedSequence.some((step) => step.step === "graph_gap_queue" && step.status === "blocked_low_disk"));
 assert.strictEqual(payload.recommendedSequence[0].status, "required");
 assert(!JSON.stringify(payload).includes("data:image/"), "run plan must not contain image blobs");
+
+const graphQueue = graphGapQueuePlan(
+  {
+    records: [
+      {
+        id: "gap:menu:cia-2",
+        type: "menu_enrichment_gap",
+        menuId: "cia:2",
+        sourceId: "cia_menu_collection",
+        sourceKey: "cia",
+        title: "Runnable graph gap",
+        missing: ["price"],
+        priorityScore: 100,
+        priorityBand: "critical",
+        recommendedAction: "run_local_ocr",
+        route: "local_ocr",
+        estimatedImages: 1,
+        candidateId: "ocrtriage:2",
+      },
+    ],
+  },
+  { storageOk: true, batchSize: 10, sampleLimit: 4 }
+);
+assert.strictEqual(graphQueue.summary.runnable, true);
+assert.strictEqual(graphQueue.localBatches[0].runnable, true);
+assert(graphQueue.localBatches[0].command.includes("--candidate-ids=ocrtriage:2"));
 
 const args = optionsFromArgs(["--dry-run", "--batch-size=25", "--external-cost-per-image=0.03", "--output=/tmp/run-plan.json"]);
 assert.strictEqual(args.dryRun, true);

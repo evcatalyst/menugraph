@@ -10,6 +10,7 @@ const { readRecipeBridgePayload } = require("./enrichment-shards");
 const ROOT_DIR = path.join(__dirname, "..");
 const DATA_DIR = path.join(ROOT_DIR, "docs", "data");
 const ENRICHMENT_DIR = path.join(DATA_DIR, "enrichment");
+const GRAPH_GAPS_PATH = path.join(DATA_DIR, "graph", "evidence", "by-type", "enrichmentgaps.json");
 const OUTPUT_PATH = path.join(ENRICHMENT_DIR, "run-plan.json");
 const VERSION = 1;
 
@@ -109,6 +110,18 @@ function countBy(records, getter) {
   return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
 }
 
+function countMany(records, getter) {
+  const counts = new Map();
+  for (const record of records || []) {
+    const values = Array.isArray(getter(record)) ? getter(record) : [getter(record)];
+    for (const value of values) {
+      const key = cleanValue(value || "unknown") || "unknown";
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+  }
+  return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
+}
+
 function sumImages(records) {
   return (records || []).reduce((sum, record) => sum + pendingImages(record), 0);
 }
@@ -120,6 +133,157 @@ function costEstimate(images, costPerImageUsd) {
     images: imageCount,
     costPerImageUsd: unit,
     estimatedCostUsd: round(imageCount * unit, 4),
+  };
+}
+
+function recordList(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.records)) return payload.records;
+  if (payload?.records && typeof payload.records === "object") return Object.values(payload.records);
+  return [];
+}
+
+function graphGapImages(gap) {
+  return Math.max(1, Number(gap.estimatedImages || 1) || 1);
+}
+
+function graphGapSort(a, b) {
+  const bandRank = { critical: 5, high: 4, medium: 3, low: 2, monitor: 1 };
+  return (
+    number(bandRank[cleanValue(b.priorityBand)], 0) - number(bandRank[cleanValue(a.priorityBand)], 0) ||
+    number(b.priorityScore, 0) - number(a.priorityScore, 0) ||
+    graphGapImages(b) - graphGapImages(a) ||
+    cleanValue(a.id).localeCompare(cleanValue(b.id))
+  );
+}
+
+function compactGraphGap(gap) {
+  return {
+    id: cleanValue(gap.id),
+    menuId: cleanValue(gap.menuId),
+    sourceId: cleanValue(gap.sourceId),
+    sourceKey: cleanValue(gap.sourceKey),
+    title: cleanValue(gap.title).slice(0, 140),
+    year: Number.isFinite(Number(gap.year)) ? Number(gap.year) : null,
+    decade: cleanValue(gap.decade),
+    missing: Array.isArray(gap.missing) ? gap.missing.map(cleanValue).filter(Boolean).slice(0, 8) : [],
+    priorityScore: round(gap.priorityScore, 2),
+    priorityBand: cleanValue(gap.priorityBand),
+    recommendedAction: cleanValue(gap.recommendedAction),
+    route: cleanValue(gap.route),
+    localTier: cleanValue(gap.localTier),
+    estimatedImages: graphGapImages(gap),
+    candidateId: cleanValue(gap.candidateId),
+    confidence: round(gap.confidence, 3),
+    provenance: {
+      sourceFile: cleanValue(gap.provenance?.sourceFile || "graph/evidence/by-type/enrichmentgaps.json"),
+      method: cleanValue(gap.provenance?.method || "graph_gap_queue"),
+    },
+  };
+}
+
+function graphGapCommand(batch) {
+  if (!batch.candidateIds.length) return "";
+  return [
+    "npm run enrich:ocr:local --",
+    `--limit=${batch.candidateIds.length}`,
+    "--batch=all",
+    "--tier=all",
+    `--source=${batch.sourceKey || "all"}`,
+    "--pages-per-menu=1",
+    `--candidate-ids=${batch.candidateIds.join(",")}`,
+  ].join(" ");
+}
+
+function graphGapBatch(id, label, gaps, options = {}) {
+  const batchSize = Math.max(1, Number(options.batchSize || DEFAULT_BATCH_SIZE) || DEFAULT_BATCH_SIZE);
+  const selected = [...(gaps || [])].sort(graphGapSort).slice(0, batchSize);
+  const candidateIds = selected.map((gap) => cleanValue(gap.candidateId)).filter(Boolean);
+  const imageCount = selected.reduce((sum, gap) => sum + graphGapImages(gap), 0);
+  const batch = {
+    id,
+    label,
+    route: "local_ocr",
+    mode: "graph_gap_queue",
+    sourceKey: cleanValue(options.sourceKey || "all"),
+    candidateCount: selected.length,
+    poolGaps: (gaps || []).length,
+    linkedCandidateIds: candidateIds.length,
+    imageCount,
+    estimatedRuntimeMinutes: round(imageCount * Number(options.localMinutesPerImage || DEFAULT_LOCAL_MINUTES_PER_IMAGE), 1),
+    runnable: Boolean(options.storageOk && selected.length && candidateIds.length),
+    blockedReason: !options.storageOk ? "low_disk_preflight" : candidateIds.length ? "" : "missing_candidate_ids",
+    candidateIds,
+    sampleGaps: selected.slice(0, options.sampleLimit || DEFAULT_SAMPLE_LIMIT).map(compactGraphGap),
+  };
+  batch.command = graphGapCommand(batch);
+  return batch;
+}
+
+function graphGapQueuePlan(graphEnrichmentGaps = {}, options = {}) {
+  const records = recordList(graphEnrichmentGaps);
+  const menuGaps = records.filter((record) => cleanValue(record.type) === "menu_enrichment_gap");
+  const sourceSummaries = records.filter((record) => cleanValue(record.type) === "source_enrichment_gap_summary");
+  const localOcrGaps = menuGaps
+    .filter((gap) => cleanValue(gap.route || "") === "local_ocr")
+    .filter((gap) => cleanValue(gap.candidateId));
+  const metadataGaps = menuGaps.filter((gap) => cleanValue(gap.recommendedAction) === "metadata_dish_hint_pass");
+  const sourceImageRouteReviewGaps = menuGaps.filter((gap) => cleanValue(gap.recommendedAction) === "source_image_route_review");
+  const sourceGroups = new Map();
+  for (const gap of localOcrGaps) {
+    const key = cleanValue(gap.sourceKey || gap.sourceId || "unknown");
+    if (!sourceGroups.has(key)) sourceGroups.set(key, []);
+    sourceGroups.get(key).push(gap);
+  }
+  const sourceBatches = [...sourceGroups.entries()]
+    .map(([sourceKey, gaps]) => ({
+      sourceKey,
+      priorityScore: gaps.reduce((sum, gap) => sum + number(gap.priorityScore, 0), 0),
+      gaps,
+    }))
+    .sort((a, b) => b.priorityScore - a.priorityScore || a.sourceKey.localeCompare(b.sourceKey))
+    .slice(0, 5)
+    .map((group) => graphGapBatch(
+      `graph_gap_${group.sourceKey.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`,
+      `Graph-prioritized OCR gaps for ${group.sourceKey}`,
+      group.gaps,
+      { ...options, sourceKey: group.sourceKey }
+    ));
+  const topBatch = graphGapBatch("graph_gap_top_priority", "Top graph-prioritized OCR gaps", localOcrGaps, options);
+  const localBatches = [topBatch, ...sourceBatches].filter((batch) => batch.candidateCount || batch.poolGaps);
+  return {
+    summary: {
+      records: records.length,
+      menuGaps: menuGaps.length,
+      sourceSummaries: sourceSummaries.length,
+      localOcrGaps: localOcrGaps.length,
+      metadataGaps: metadataGaps.length,
+      sourceImageRouteReviewGaps: sourceImageRouteReviewGaps.length,
+      estimatedImages: localOcrGaps.reduce((sum, gap) => sum + graphGapImages(gap), 0),
+      runnable: Boolean(options.storageOk && localOcrGaps.length),
+      blockedReason: options.storageOk ? "" : "low_disk_preflight",
+      topMissing: countMany(menuGaps, (gap) => gap.missing || []),
+      topActions: countBy(menuGaps, (gap) => gap.recommendedAction),
+      topSources: countBy(menuGaps, (gap) => gap.sourceId || gap.sourceKey),
+      sampleGaps: [...menuGaps].sort(graphGapSort).slice(0, options.sampleLimit || DEFAULT_SAMPLE_LIMIT).map(compactGraphGap),
+      sourceSummaries: sourceSummaries
+        .slice()
+        .sort((a, b) => number(b.priorityScore, 0) - number(a.priorityScore, 0))
+        .slice(0, options.sampleLimit || DEFAULT_SAMPLE_LIMIT)
+        .map((row) => ({
+          id: cleanValue(row.id),
+          sourceId: cleanValue(row.sourceId),
+          sourceKey: cleanValue(row.sourceKey),
+          menuCount: number(row.menuCount, 0),
+          missingDishMenus: number(row.missingDishMenus, 0),
+          missingPriceMenus: number(row.missingPriceMenus, 0),
+          missingIngredientMenus: number(row.missingIngredientMenus, 0),
+          ocrCandidateMenus: number(row.ocrCandidateMenus, 0),
+          priorityScore: round(row.priorityScore, 2),
+          topActions: row.topActions || {},
+        })),
+    },
+    localBatches,
   };
 }
 
@@ -327,6 +491,12 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     localMinutesPerImage,
     storageOk: storage.ok,
   });
+  const graphGapQueue = graphGapQueuePlan(inputs.graphEnrichmentGaps || {}, {
+    batchSize,
+    sampleLimit,
+    localMinutesPerImage,
+    storageOk: storage.ok,
+  });
   const localBatches = [
     localBatch("local_easy_backlog_50", "Next 50 easy local OCR candidates", pendingEasy, {
       ...batchOptions,
@@ -364,6 +534,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
 
   const pendingImagesTotal = sumImages(pending);
   const localImagesTotal = sumImages(pendingLocal);
+  const graphGapBatchReady = graphGapQueue.localBatches.some((batch) => batch.candidateCount);
   const summary = {
     totalCandidates: queueRecords.length,
     processedCandidates: queueRecords.filter((candidate) => candidateStatus(candidate) === "processed").length,
@@ -381,8 +552,21 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     storageAvailableFormatted: storage.availableFormatted,
     storageRequiredFormatted: storage.minFreeFormatted,
     nextAction: storage.ok
-      ? sourceTargetBatches.length ? "run_source_targeted_ocr_batch" : pendingLocal.length ? "run_local_ocr_batch" : sourceRefresh.length ? "run_metadata_refresh" : "monitor"
+      ? graphGapBatchReady ? "run_graph_gap_queue_batch" : sourceTargetBatches.length ? "run_source_targeted_ocr_batch" : pendingLocal.length ? "run_local_ocr_batch" : sourceRefresh.length ? "run_metadata_refresh" : "monitor"
       : "free_disk_before_ocr",
+    graphGapQueue: {
+      records: graphGapQueue.summary.records,
+      menuGaps: graphGapQueue.summary.menuGaps,
+      localOcrGaps: graphGapQueue.summary.localOcrGaps,
+      metadataGaps: graphGapQueue.summary.metadataGaps,
+      sourceImageRouteReviewGaps: graphGapQueue.summary.sourceImageRouteReviewGaps,
+      estimatedImages: graphGapQueue.summary.estimatedImages,
+      runnable: graphGapQueue.summary.runnable,
+      blockedReason: graphGapQueue.summary.blockedReason,
+      topMissing: graphGapQueue.summary.topMissing,
+      topActions: graphGapQueue.summary.topActions,
+      topSources: graphGapQueue.summary.topSources,
+    },
     sourceTargetBatches: sourceTargetBatches.slice(0, 6).map((batch) => ({
       id: batch.id,
       sourceKey: batch.sourceKey,
@@ -422,6 +606,7 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
     storagePreflight: storage,
     summary,
     sourceTargetBatches,
+    graphGapQueue,
     localBatches,
     sourceRefresh: {
       summary: {
@@ -443,6 +628,11 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
         step: "metadata_refresh",
         status: sourceRefresh.length ? "ready" : "monitor",
         detail: "Run metadata-only source connectors first; this adds dish/date/venue/image-route hints with low storage impact.",
+      },
+      {
+        step: "graph_gap_queue",
+        status: storage.ok && graphGapQueue.summary.localOcrGaps ? "ready" : storage.ok ? "empty" : "blocked_low_disk",
+        detail: `${graphGapQueue.summary.localOcrGaps.toLocaleString()} graph-prioritized OCR gap(s), ${graphGapQueue.summary.estimatedImages.toLocaleString()} estimated image(s).`,
       },
       {
         step: "local_ocr",
@@ -471,13 +661,14 @@ function buildRunPlanPayload(inputs = {}, options = {}) {
 }
 
 async function buildEnrichmentRunPlan(options = {}) {
-  const [ocrQueue, ocrFailures, coverageReport, recipeBridge] = await Promise.all([
+  const [ocrQueue, ocrFailures, coverageReport, recipeBridge, graphEnrichmentGaps] = await Promise.all([
     readJson(path.join(ENRICHMENT_DIR, "ocr-triage-queue.json"), { records: [] }),
     readJson(path.join(ENRICHMENT_DIR, "ocr-failures.json"), { records: [] }),
     readJson(path.join(ENRICHMENT_DIR, "coverage-report.json"), { records: [], summary: {} }),
     readRecipeBridgePayload(path.join(ENRICHMENT_DIR, "recipe-bridge.json"), { clusters: [], dishLinks: [], summary: {} }),
+    readJson(GRAPH_GAPS_PATH, { records: [] }),
   ]);
-  const payload = buildRunPlanPayload({ ocrQueue, ocrFailures, coverageReport, recipeBridge }, options);
+  const payload = buildRunPlanPayload({ ocrQueue, ocrFailures, coverageReport, recipeBridge, graphEnrichmentGaps }, options);
   if (!options.dryRun) await writeJson(options.outputPath || OUTPUT_PATH, payload);
   return payload;
 }
@@ -519,7 +710,9 @@ module.exports = {
   buildRunPlanPayload,
   candidateStatus,
   compactCandidate,
+  compactGraphGap,
   costEstimate,
+  graphGapQueuePlan,
   optionsFromArgs,
   pendingImages,
   sourceRefreshRows,
