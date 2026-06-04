@@ -22,7 +22,7 @@
     ["beet", "vegetable", ["beet", "beets", "beetroot"]],
     ["berries", "fruit", ["berries", "berry", "blackberries", "blackberry"]],
     ["blueberry", "fruit", ["blueberry", "blueberries"]],
-    ["bread", "grain", ["bread", "toast", "roll", "rolls", "biscuit", "biscuits"]],
+    ["bread", "grain", ["bread", "toast", "roll", "rolls", "biscuit", "biscuits", "bagel", "bagels"]],
     ["butter", "dairy", ["butter", "buttered", "butterscotch"]],
     ["cabbage", "vegetable", ["cabbage", "sauerkraut"]],
     ["caper", "condiment", ["caper", "capers"]],
@@ -138,7 +138,7 @@
     ["egg", /\b(egg|eggs|omelet|omelette|shirred eggs|scrambled)\b/],
     ["salad", /\b(salad|slaw|lettuce|celery|tomato aspic)\b/],
     ["vegetable", /\b(asparagus|potato|spinach|pea|beans|corn|carrot|beet|cabbage|mushroom|onion|vegetable|vegetarian|vegan)\b/],
-    ["bread", /\b(bread|roll|toast|muffin|biscuit|waffle|pancake|popover)\b/],
+    ["bread", /\b(bread|roll|toast|muffin|biscuit|waffle|pancake|popover|bagel)\b/],
     ["sauce", /\b(sauce|gravy|relish|chutney|mayonnaise|hollandaise|bearnaise)\b/],
     ["cheese", /\b(cheese|rarebit|welsh rabbit|welsh rarebit)\b/],
   ];

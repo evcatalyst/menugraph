@@ -40,6 +40,42 @@ const samePassIngredientCandidates = metadataDishCandidates(
 assert(samePassIngredientCandidates.some((candidate) => candidate.rawName === "coffee service"));
 assert(samePassIngredientCandidates.some((candidate) => candidate.rawName === "apple dishes"));
 
+const cuisineCandidates = metadataDishCandidates(
+  {
+    id: "sample:3",
+    menuId: "sample:3",
+    sourceId: "sample_source",
+    sourceKey: "sample",
+    title: "Auberge Du Coucou",
+    descriptionSummary: "Assorted International Menus",
+    cuisineTags: ["french", "belgian"],
+    dishMentions: [],
+    priceObservations: [],
+    ingredientTags: [],
+  },
+  { ingredientLimit: 2 }
+);
+assert(cuisineCandidates.some((candidate) => candidate.rawName === "french dishes"));
+assert(cuisineCandidates.some((candidate) => candidate.rawName === "belgian dishes"));
+
+const foodSignalCandidates = metadataDishCandidates(
+  {
+    id: "sample:4",
+    menuId: "sample:4",
+    sourceId: "sample_source",
+    sourceKey: "sample",
+    title: "Bagel Express children's menu",
+    descriptionSummary: "Bagels--Washington (State)--Seattle",
+    subjectTerms: ["Bagels--Washington (State)--Seattle"],
+    dishMentions: [],
+    priceObservations: [],
+    ingredientTags: [],
+  },
+  { ingredientLimit: 2 }
+);
+assert(foodSignalCandidates.some((candidate) => candidate.rawName === "bagel dishes"));
+assert(foodSignalCandidates.some((candidate) => candidate.rawName === "children's meals"));
+
 const prices = metadataPriceObservations(record, { cpiUs: {} }, [], "sample.json");
 assert.strictEqual(prices.length, 1);
 assert.strictEqual(prices[0].rawPrice, "$1.25");

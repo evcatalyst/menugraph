@@ -37,6 +37,40 @@ const INGREDIENT_LABEL_OVERRIDES = {
   beer: "beer list",
 };
 
+const CUISINE_DISH_LABELS = {
+  "asian": "asian dishes",
+  "asian american": "asian american dishes",
+  "barbecue": "barbecue dishes",
+  "belgian": "belgian dishes",
+  "british": "british dishes",
+  "chinese": "chinese dishes",
+  "continental": "continental dishes",
+  "creole": "creole dishes",
+  "ethiopian": "ethiopian dishes",
+  "french": "french dishes",
+  "german": "german dishes",
+  "greek": "greek dishes",
+  "italian": "italian dishes",
+  "japanese": "japanese dishes",
+  "latin": "latin american dishes",
+  "mexican": "mexican dishes",
+  "norwegian": "norwegian dishes",
+  "seafood": "seafood options",
+  "vegetarian": "vegetarian dishes",
+};
+
+const METADATA_FOOD_SIGNALS = [
+  { pattern: /\bbagels?\b/i, label: "bagel dishes", confidence: 0.44 },
+  { pattern: /\bbar-?b-?q\b|\bbbq\b|\bbarbecue\b/i, label: "barbecue dishes", confidence: 0.44 },
+  { pattern: /\bbrunch\b/i, label: "brunch dishes", confidence: 0.36 },
+  { pattern: /\bchildren'?s menu\b|\btiny tots?\b|\blittle folks\b/i, label: "children's meals", confidence: 0.34 },
+  { pattern: /\bvegan\b/i, label: "vegan dishes", confidence: 0.38 },
+  { pattern: /\bvegetarian\b|\bnatural food restaurants?\b/i, label: "vegetarian dishes", confidence: 0.38 },
+  { pattern: /\bsoda fountain\b|\bsodas?\b/i, label: "soda fountain drinks", confidence: 0.36 },
+  { pattern: /\bnorthwest fare\b|\bnorthwestern fare\b|\bpacific northwest fare\b/i, label: "pacific northwest dishes", confidence: 0.34 },
+  { pattern: /\blibations?\b/i, label: "cocktails and beverages", confidence: 0.36 },
+];
+
 function hasFlag(args, name) {
   return args.includes(`--${name}`);
 }
@@ -140,6 +174,14 @@ function metadataDishCandidates(record, options = {}) {
   const candidates = [];
   for (const signal of TOPIC_SIGNALS) {
     if (signal.pattern.test(text)) candidates.push({ rawName: signal.label, confidence: signal.confidence });
+  }
+  for (const signal of METADATA_FOOD_SIGNALS) {
+    if (signal.pattern.test(text)) candidates.push({ rawName: signal.label, confidence: signal.confidence });
+  }
+  for (const tag of record.cuisineTags || []) {
+    const normalizedTag = cleanValue(tag).toLowerCase();
+    const label = CUISINE_DISH_LABELS[normalizedTag];
+    if (label) candidates.push({ rawName: label, confidence: normalizedTag === "seafood" ? 0.46 : 0.35 });
   }
   const ingredientLimit = Math.max(0, Number(options.ingredientLimit || 2) || 0);
   const metadataIngredientTags = [
