@@ -26,6 +26,7 @@ const MAX_RECIPE_CLUSTER_INDEX = 240;
 const MAX_DISH_RECIPE_LINK_INDEX = 1600;
 const MAX_RECIPE_CLUSTER_NODES = 90;
 const MAX_RECIPE_INGREDIENT_EDGES = 4;
+const MAX_RECIPE_SOURCE_EDGES = 120;
 const OVERLAY_SOURCE_SPLIT_THRESHOLD_BYTES = Math.floor(SIZE_BUDGET_BYTES * 0.65);
 const OVERLAY_SUBSHARD_TARGET_BYTES = Math.floor(SIZE_BUDGET_BYTES * 0.35);
 
@@ -1070,6 +1071,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
   const dishIds = new Set(dishCounts.map((dish) => dish.id));
   const enrichmentDishMap = enrichmentDishesByMenu(enrichment);
   const recipeClusters = (enrichment?.recipeBridge?.clusters || []).slice(0, MAX_RECIPE_CLUSTER_NODES);
+  let recipeSourceEdges = 0;
 
   addSourceNodes(coreNodes, evaluations);
 
@@ -1441,6 +1443,26 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
         seenEdges
       );
     }
+    for (const [candidateRank, candidate] of [...(cluster.sourceCandidates || [])]
+      .filter((item) => cleanValue(item.sourceId))
+      .sort((a, b) => Number(b.confidence || 0) - Number(a.confidence || 0))
+      .entries()) {
+      if (recipeSourceEdges >= MAX_RECIPE_SOURCE_EDGES) break;
+      const sourceId = cleanValue(candidate.sourceId);
+      const sourceNode = sourceNodeId(sourceId);
+      if (!coreNodes.has(sourceNode)) continue;
+      recipeSourceEdges += 1;
+      addEdge(
+        edges,
+        edge("CANDIDATE_RECIPE_SOURCE", clusterId, sourceNode, Number(candidate.confidence || 0.5), Number(candidate.confidence || 0.5), {
+          sourceFile: "enrichment/recipe-bridge.json",
+          sourceRecordId: `${cluster.id}:${sourceId}`,
+          role: cleanValue(candidate.role),
+          candidateRank,
+        }),
+        seenEdges
+      );
+    }
   }
 
   return {
@@ -1460,6 +1482,7 @@ function buildCoreGraph({ menus, evaluations, matches, prices, dateEstimates, on
       dishNodes: dishCounts.length,
       ingredientTerms: ingredientTermCounts(enrichment).length,
       recipeClusters: recipeClusters.length,
+      recipeSourceEdges,
     },
     nodes: [...coreNodes.values()],
     edges,

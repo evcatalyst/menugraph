@@ -103,6 +103,8 @@ assert(
 assert(core.nodes.some((node) => node.type === "RecipeCluster"), "core graph should include recipe bridge cluster nodes");
 assert(core.edges.some((edge) => edge.type === "BRIDGES_RECIPE_CLUSTER"), "core graph should link dish nodes to recipe clusters");
 assert(core.edges.some((edge) => edge.type === "USES_INGREDIENT"), "core graph should link recipe clusters to ingredient terms");
+assert(core.edges.some((edge) => edge.type === "CANDIDATE_RECIPE_SOURCE"), "core graph should link recipe clusters to candidate recipe sources");
+assert(manifest.summary.core.recipeSourceEdges >= 20, "core graph should summarize recipe source candidate edges");
 assert(!hasRawBlob(core), "core graph must not contain raw OCR or image blobs");
 assert(!hasRawBlob(menuOverlays), "menu overlays must not contain raw OCR or image blobs");
 assert(!hasRawBlob(evidenceIndexArtifact), "evidence index must not contain raw OCR or image blobs");
