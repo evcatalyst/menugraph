@@ -7,12 +7,17 @@ function run() {
   assert.deepStrictEqual(ingredientTagsFor("Prawns with ginger and spring onions").sort(), ["ginger", "onion", "scallion", "shrimp"]);
   assert.deepStrictEqual(ingredientTagsFor("Pommes frites with mayonnaise").sort(), ["egg", "mayonnaise", "potato"]);
   assert(ingredientTagsFor("Bagel with cream cheese").includes("bread"));
+  assert.deepStrictEqual(ingredientTagsFor("Milk, buttermilk, ginger ale, lager beer").sort(), ["beer", "ginger", "milk", "soda"]);
+  assert.deepStrictEqual(ingredientTagsFor("Rum punch with gin, vermouth, and sake").sort(), ["punch", "spirits"]);
+  assert(ingredientTagsFor("Mineral water and seltzer").includes("water"));
+  assert(!ingredientTagsFor("Water chestnuts").includes("water"));
   assert.deepStrictEqual(ingredientTagsFor("Peach Melba").sort(), ["peach"]);
   assert(!ingredientTagsFor("Peach Melba").includes("pea"), "pea should not match inside peach");
   assert(ingredientTagsFor("Foie gras with truffles").includes("foie gras"));
   assert(ingredientTagsFor("Foie gras with truffles").includes("truffle"));
 
   assert.strictEqual(dishTypeFor("Martini cocktail"), "beverage");
+  assert.strictEqual(dishTypeFor("Sake and lager"), "beverage");
   assert.strictEqual(dishTypeFor("Spaghetti marinara"), "pasta");
   assert.strictEqual(dishTypeFor("Club sandwich"), "sandwich");
   assert.strictEqual(dishTypeFor("Toasted bagel"), "bread");
