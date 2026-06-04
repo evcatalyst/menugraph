@@ -76,6 +76,25 @@ const foodSignalCandidates = metadataDishCandidates(
 assert(foodSignalCandidates.some((candidate) => candidate.rawName === "bagel dishes"));
 assert(foodSignalCandidates.some((candidate) => candidate.rawName === "children's meals"));
 
+const cuisineSubjectCandidates = metadataDishCandidates(
+  {
+    id: "sample:4b",
+    menuId: "sample:4b",
+    sourceId: "sample_source",
+    sourceKey: "sample",
+    title: "Kokeb Restaurant and India House menus",
+    descriptionSummary: "Opened as one of Seattle's first Ethiopian restaurants. Restaurants; East Indian restaurants; Cooking Greek",
+    subjectTerms: ["East Indian restaurants", "Cooking Greek"],
+    dishMentions: [],
+    priceObservations: [],
+    ingredientTags: [],
+  },
+  { ingredientLimit: 2 }
+);
+assert(cuisineSubjectCandidates.some((candidate) => candidate.rawName === "ethiopian dishes"));
+assert(cuisineSubjectCandidates.some((candidate) => candidate.rawName === "indian dishes"));
+assert(cuisineSubjectCandidates.some((candidate) => candidate.rawName === "greek dishes"));
+
 const prices = metadataPriceObservations(record, { cpiUs: {} }, [], "sample.json");
 assert.strictEqual(prices.length, 1);
 assert.strictEqual(prices[0].rawPrice, "$1.25");
