@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Product Evidence | MenuGraph</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="evidence-shell">
+      <header class="evidence-topbar">
+        <div>
+          <p class="eyebrow">MenuGraph Product Evidence</p>
+          <h1>Packaged Food Evidence Collection</h1>
+          <p class="summary">Source-attributable package photos, label review slots, current-web harvests, and Common Crawl sweeps for the 100-product ingredient-history board.</p>
+        </div>
+        <nav class="topnav" aria-label="MenuGraph navigation">
+          <a href="../">MenuGraph</a>
+          <a href="#acquisition">Acquisition Queue</a>
+          <a href="#products">Products</a>
+          <a href="#common-crawl">Common Crawl</a>
+        </nav>
+      </header>
+
+      <section id="status" class="status-panel" aria-live="polite">
+        <strong>Loading product evidence snapshot</strong>
+        <span>Preparing collection queue, product coverage, and source-review views.</span>
+      </section>
+
+      <section id="metrics" class="metrics-grid" aria-label="Collection metrics"></section>
+
+      <section class="control-row" aria-label="Evidence filters">
+        <label>
+          <span>Search</span>
+          <input id="search" type="search" placeholder="Oreo, Cheerios, Flickr, Common Crawl, ketchup..." />
+        </label>
+        <label>
+          <span>Category</span>
+          <select id="category-filter"><option value="">All categories</option></select>
+        </label>
+        <label>
+          <span>Surface</span>
+          <select id="surface-filter"><option value="">All surfaces</option></select>
+        </label>
+        <label>
+          <span>Status</span>
+          <select id="status-filter"><option value="">All statuses</option></select>
+        </label>
+      </section>
+
+      <section class="workspace-grid">
+        <section class="panel product-map" id="products">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Product Coverage</p>
+              <h2>100-Product Vintage Evidence Map</h2>
+            </div>
+            <span id="product-count" class="count-pill">0 products</span>
+          </div>
+          <div id="vintage-legend" class="legend"></div>
+          <div id="product-rows" class="product-rows"></div>
+        </section>
+
+        <aside class="panel source-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Source Work</p>
+              <h2>Collection Sources</h2>
+            </div>
+          </div>
+          <div id="source-bars" class="source-bars"></div>
+        </aside>
+      </section>
+
+      <section class="panel" id="acquisition">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Acquisition Queue</p>
+            <h2>Operator-Ready Collection Batches</h2>
+          </div>
+          <span id="queue-count" class="count-pill">0 rows</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Surface</th>
+                <th>Source</th>
+                <th>Category</th>
+                <th>Products</th>
+                <th>Primary</th>
+                <th>Gate</th>
+              </tr>
+            </thead>
+            <tbody id="queue-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="workspace-grid lower-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Photo Evidence</p>
+              <h2>Top Source-Attributable Leads</h2>
+            </div>
+            <span id="photo-count" class="count-pill">0 leads</span>
+          </div>
+          <div id="photo-rows" class="lead-list"></div>
+        </section>
+
+        <section class="panel" id="common-crawl">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Archive Search</p>
+              <h2>Common Crawl Sweeps</h2>
+            </div>
+            <span id="sweep-count" class="count-pill">0 sweeps</span>
+          </div>
+          <div id="sweep-rows" class="lead-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
