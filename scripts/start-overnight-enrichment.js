@@ -11,12 +11,18 @@ const {
 const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
 const STORAGE_LABEL = "overnight enrichment launcher";
+const STORAGE_LIGHT_MIN_FREE_MB = 128;
 
 function stamp() {
   return new Date().toISOString().replace(/[:.]/g, "-");
 }
 
+function hasFlag(args, name) {
+  return args.includes(`--${name}`);
+}
+
 function main() {
+  const argsIn = process.argv.slice(2);
   fs.mkdirSync(CACHE_DIR, { recursive: true });
   let cachePrune = null;
   try {
@@ -31,9 +37,9 @@ function main() {
     console.warn(`Cache prune failed; continuing overnight launch: ${error.message}`);
   }
   const storagePreflight = assertStoragePreflight(
-    storagePreflightOptionsFromArgs(process.argv.slice(2), {
+    storagePreflightOptionsFromArgs(argsIn, {
       targetDir: ROOT_DIR,
-      minFreeMb: DEFAULT_MIN_FREE_MB,
+      minFreeMb: hasFlag(argsIn, "storage-light") || hasFlag(argsIn, "metadata-only") ? STORAGE_LIGHT_MIN_FREE_MB : DEFAULT_MIN_FREE_MB,
       label: STORAGE_LABEL,
     })
   );
@@ -41,7 +47,7 @@ function main() {
   const statusPath = path.join(CACHE_DIR, "overnight-status.json");
   const currentPath = path.join(CACHE_DIR, "overnight-current.json");
   const logFd = fs.openSync(logPath, "a");
-  const args = [path.join(__dirname, "overnight-enrichment-job.js"), ...process.argv.slice(2)];
+  const args = [path.join(__dirname, "overnight-enrichment-job.js"), ...argsIn];
   const child = spawn(process.execPath, args, {
     cwd: ROOT_DIR,
     detached: true,
@@ -55,7 +61,7 @@ function main() {
     statusPath,
     cachePrune,
     storagePreflight,
-    args: process.argv.slice(2),
+    args: argsIn,
   };
   fs.writeFileSync(currentPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   console.log(JSON.stringify(payload, null, 2));

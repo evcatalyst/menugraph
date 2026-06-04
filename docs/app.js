@@ -69,7 +69,7 @@ const ASK_SECRET_STORAGE_KEY = "menugraph:ask-secret-hash:v1";
 const ASK_ENTRY_SESSION_STORAGE_KEY = "menugraph:ask-entry-sessions:v1";
 const ASK_ENTRY_ACTIVE_SESSION_KEY = "menugraph:ask-entry-active:v1";
 const ASK_ENTRY_MAX_SESSIONS = 8;
-const VALID_LENSES = new Set(["time", "place", "type", "lineage", "graph", "ontology", "prices", "chat"]);
+const VALID_LENSES = new Set(["time", "place", "type", "lineage", "graph", "architecture", "ontology", "prices", "chat"]);
 const MOBILE_LAB_VARIANTS = new Set(["cards", "journey", "chat", "recipe", "hybrid"]);
 const MOBILE_LAB_MODE_BY_VARIANT = {
   cards: "menus",
@@ -498,7 +498,7 @@ async function loadGraphOverlay(refresh = false) {
   if (Object.keys(records).length) {
     state.graphOverlayLoadedShards.add("legacy");
   }
-  if (state.activeLens === "graph") {
+  if (state.activeLens === "graph" || state.activeLens === "architecture") {
     describeGraphOverlay();
     renderViz();
     renderResults();
@@ -2008,6 +2008,7 @@ function renderViz() {
     type: renderTypeLens,
     lineage: renderLineageLens,
     graph: renderGraphLens,
+    architecture: renderArchitectureLens,
     ontology: renderOntologyLens,
     prices: renderPriceLens,
   };
@@ -2020,7 +2021,8 @@ function lensCopy() {
     place: ["Place Lens", "Where Dining Records Cluster"],
     type: ["Type Lens", "Formats, Courses, and Occasions"],
     lineage: ["Lineage Lens", "Collectors and Collection Memory"],
-    graph: ["Graph Lens", "Application Structure And Data Flow"],
+    graph: ["Graph Lens", "Static Graph Overlay Coverage"],
+    architecture: ["Flow Lens", "Application Structure And Data Flow"],
     ontology: ["Food Lens", `${categoryLabels[state.ontologyCategory]} Across Time`],
     prices: ["Price Lens", priceLensTitle()],
     chat: ["Ask Lens", "Ask Across The MenuGraph"],
@@ -2367,6 +2369,10 @@ function renderPriceLens(svg, width, height) {
   const note = svgEl("text", { x: width - pad.right, y: pad.top - 16, "text-anchor": "end", class: "price-note" });
   note.textContent = `${records.length.toLocaleString()} observations; low confidence hidden until selected`;
   svg.appendChild(note);
+}
+
+function renderArchitectureLens(svg, width, height) {
+  renderGraphLens(svg, width, height);
 }
 
 function renderGraphLens(svg, width, height) {
@@ -2908,7 +2914,7 @@ function scrollDetailIntoViewOnMobile() {
 }
 
 function renderResults() {
-  if (state.activeLens === "graph") {
+  if (state.activeLens === "graph" || state.activeLens === "architecture") {
     renderGraphSourceResults();
     return;
   }
@@ -4579,13 +4585,13 @@ function bindEvents() {
   els.lensButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.activeLens = button.dataset.lens;
-      if (state.activeLens !== "graph") state.selectedGraphSourceId = null;
+      if (state.activeLens !== "graph" && state.activeLens !== "architecture") state.selectedGraphSourceId = null;
       activateLensButton(state.activeLens);
       renderViz();
       renderResults();
       if (state.activeLens === "prices") describePricesLoaded();
       if (state.activeLens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
-      if (state.activeLens === "graph") describeGraphOverlay();
+      if (state.activeLens === "graph" || state.activeLens === "architecture") describeGraphOverlay();
       if (state.activeLens === "chat") {
         setActivity({
           label: "Ask Lens",

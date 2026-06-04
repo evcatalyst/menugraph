@@ -31,6 +31,10 @@ const ROOT_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(ROOT_DIR, ".cache", "enrichment");
 const STATUS_PATH = path.join(CACHE_DIR, "overnight-status.json");
 const STORAGE_LABEL = "overnight enrichment";
+const STORAGE_LIGHT_MIN_FREE_MB = 128;
+const STORAGE_LIGHT_EXTERNAL_IMAGE_LIMIT = 1200;
+const STORAGE_LIGHT_EXTERNAL_IMAGE_CONCURRENCY = 6;
+const STORAGE_LIGHT_EXTERNAL_IMAGE_TIMEOUT_MS = 8000;
 const DEFAULT_ARGS = [
   "--fetch-cia-text",
   "--skip-transcript-cache",
@@ -87,8 +91,34 @@ function hasFlag(args, name) {
   return args.includes(`--${name}`);
 }
 
+function isStorageLight(args) {
+  return hasFlag(args, "storage-light") || hasFlag(args, "metadata-only");
+}
+
+function storagePreflightForArgs(args, label = STORAGE_LABEL) {
+  return storagePreflightOptionsFromArgs(args, {
+    targetDir: ROOT_DIR,
+    minFreeMb: isStorageLight(args) ? STORAGE_LIGHT_MIN_FREE_MB : DEFAULT_MIN_FREE_MB,
+    label,
+  });
+}
+
 function sourceLimit(args, name, fallback) {
   return Math.max(0, Number(argValue(args, name, String(fallback))) || 0);
+}
+
+async function readJson(filePath, fallback) {
+  try {
+    return JSON.parse(await fs.readFile(filePath, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") return fallback;
+    throw error;
+  }
+}
+
+async function currentEnrichmentSummary() {
+  const status = await readJson(path.join(ROOT_DIR, "docs", "data", "enrichment-status.json"), { summary: {} });
+  return status.summary || {};
 }
 
 async function runExternalSources(args) {
@@ -186,11 +216,26 @@ async function runExternalImageAssessment(args) {
   if (hasFlag(args, "skip-external-image-assessment")) {
     return { skipped: true };
   }
-  const timeoutMs = Math.max(3000, Number(argValue(args, "external-image-timeout-ms", argValue(args, "external-timeout-ms", "15000"))) || 15000);
+  const storageLight = isStorageLight(args);
+  const defaultTimeout = storageLight ? String(STORAGE_LIGHT_EXTERNAL_IMAGE_TIMEOUT_MS) : argValue(args, "external-timeout-ms", "15000");
+  const timeoutMs = Math.max(3000, Number(argValue(args, "external-image-timeout-ms", defaultTimeout)) || 15000);
   const dryRun = hasFlag(args, "dry-run");
-  const limit = Math.max(0, Number(argValue(args, "external-image-limit", "0")) || 0);
-  console.log(`[${timestamp()}] Assessing external IIIF image metadata${limit ? ` with limit=${limit}` : ""}`);
-  return assessExternalImages({ timeoutMs, dryRun, limit, sources: [], refresh: hasFlag(args, "refresh-external-images") });
+  const defaultLimit = storageLight ? String(STORAGE_LIGHT_EXTERNAL_IMAGE_LIMIT) : "0";
+  const defaultConcurrency = storageLight ? String(STORAGE_LIGHT_EXTERNAL_IMAGE_CONCURRENCY) : "6";
+  const limit = Math.max(0, Number(argValue(args, "external-image-limit", defaultLimit)) || 0);
+  const concurrency = Math.max(1, Math.min(16, Number(argValue(args, "external-image-concurrency", defaultConcurrency)) || 1));
+  console.log(
+    `[${timestamp()}] Assessing external IIIF image metadata${limit ? ` with limit=${limit}` : ""} concurrency=${concurrency} timeout=${timeoutMs}ms`
+  );
+  return assessExternalImages({
+    timeoutMs,
+    dryRun,
+    limit,
+    concurrency,
+    sources: [],
+    refresh: hasFlag(args, "refresh-external-images"),
+    onProgress: (message) => console.log(`[${timestamp()}] ${message}`),
+  });
 }
 
 async function runLocalOcrEnrichment(args) {
@@ -229,15 +274,142 @@ async function runLocalOcrEnrichment(args) {
   return buildLocalVisionOcrEnrichment(options);
 }
 
+function recipeLimitForStorageMode(args, existingRecipeBridge, key, fallback) {
+  const current = currentRecipeBridgeLimit(existingRecipeBridge, key, fallback);
+  if (!isStorageLight(args) || hasFlag(args, "allow-recipe-growth")) {
+    const argName = key === "clusters" ? "recipe-cluster-limit" : "recipe-dish-link-limit";
+    return Math.max(current, Number(argValue(args, argName, "0")) || 0);
+  }
+  return current;
+}
+
+async function runStorageLightPipeline(args, storageCheck) {
+  console.log(
+    `[${timestamp()}] Storage-light preflight ok: ${storageCheck.availableFormatted} available; ${storageCheck.minFreeFormatted} required`
+  );
+  const enrichmentSummary = await currentEnrichmentSummary();
+  await writeStatus({
+    status: "running",
+    phase: "storage-light-start",
+    pid: process.pid,
+    args,
+    storagePreflight: storageCheck,
+    enrichmentSummary,
+    notes: "Storage-light mode skips local transcript fetching, OCR, and image-byte downloads.",
+  });
+
+  const externalSources = await runExternalSources(args);
+
+  await writeStatus({
+    status: "running",
+    phase: "external-image-assessment",
+    pid: process.pid,
+    args,
+    storagePreflight: storageCheck,
+    enrichmentSummary,
+    externalSources,
+  });
+
+  const externalImageAssessment = await runExternalImageAssessment(args);
+
+  await writeStatus({
+    status: "running",
+    phase: "external-metadata-enrichment",
+    pid: process.pid,
+    args,
+    storagePreflight: storageCheck,
+    enrichmentSummary,
+    externalSources,
+    externalImageAssessment,
+  });
+
+  const externalMetadata = await enrichExternalMetadata({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] External metadata enrichment complete: ${JSON.stringify(externalMetadata.summary)}`);
+
+  const retagged = await retagEnrichment({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Retag enrichment complete: ${JSON.stringify({ taxonomyVersion: retagged.taxonomyVersion, externalSources: retagged.externalSources.length })}`);
+
+  await writeStatus({
+    status: "running",
+    phase: "ocr-triage",
+    pid: process.pid,
+    args,
+    storagePreflight: storageCheck,
+    enrichmentSummary,
+    externalSources,
+    externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
+    retagged,
+  });
+
+  const ocrTriage = await buildOcrTriageQueue({
+    dryRun: hasFlag(args, "dry-run"),
+    recordLimit: Number(argValue(args, "ocr-triage-limit", "7000")) || 7000,
+    earlyLimit: Number(argValue(args, "ocr-triage-early-limit", "200")) || 200,
+    pagesPerMenu: Number(argValue(args, "ocr-triage-pages-per-menu", "2")) || 2,
+    externalCostPerImageUsd: Number(argValue(args, "external-cost-per-image", "0")) || null,
+  });
+  console.log(`[${timestamp()}] OCR triage complete: ${JSON.stringify(ocrTriage.summary)}`);
+
+  const localOcr = {
+    skipped: true,
+    reason: "Storage-light mode skips local OCR and image-byte downloads.",
+  };
+
+  const existingRecipeBridge = await readRecipeBridgePayload(path.join(ROOT_DIR, "docs", "data", "enrichment", "recipe-bridge.json"), { summary: {} });
+  const recipeClusterLimit = recipeLimitForStorageMode(args, existingRecipeBridge, "clusters", 500);
+  const recipeDishLinkLimit = recipeLimitForStorageMode(args, existingRecipeBridge, "dishLinks", 1600);
+  const recipeBridge = await buildRecipeBridge({
+    dryRun: hasFlag(args, "dry-run"),
+    clusterLimit: recipeClusterLimit,
+    dishLinkLimit: recipeDishLinkLimit,
+  });
+  console.log(`[${timestamp()}] Recipe bridge complete: ${JSON.stringify(recipeBridge.summary)}`);
+
+  const coverageReport = await buildEnrichmentCoverageReport({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Coverage report complete: ${JSON.stringify(coverageReport.summary)}`);
+
+  const runPlan = await buildEnrichmentRunPlan({
+    dryRun: hasFlag(args, "dry-run"),
+    externalCostPerImageUsd: Number(argValue(args, "external-cost-per-image", "0.01")) || 0.01,
+  });
+  console.log(`[${timestamp()}] Run plan complete: ${JSON.stringify(runPlan.summary)}`);
+
+  const assimilationPlan = await buildAssimilationPlan({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Assimilation plan complete: ${JSON.stringify(assimilationPlan.summary)}`);
+
+  const graph = await buildGraphOverlay();
+  console.log(`[${timestamp()}] Graph rebuild complete: ${JSON.stringify(graph.manifest.summary)}`);
+
+  await writeStatus({
+    status: "complete",
+    phase: "storage-light-complete",
+    pid: process.pid,
+    args,
+    finishedAt: timestamp(),
+    storagePreflight: storageCheck,
+    enrichmentSummary,
+    externalSources,
+    externalImageAssessment,
+    externalMetadata: externalMetadata.summary,
+    retagged,
+    ocrTriage: ocrTriage.summary,
+    localOcr,
+    recipeBridge: recipeBridge.summary,
+    coverageReport: coverageReport.summary,
+    runPlan: runPlan.summary,
+    assimilationPlan: assimilationPlan.summary,
+    graphSummary: graph.manifest.summary,
+  });
+}
+
 async function main() {
   const args = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ARGS;
-  const storageCheck = assertStoragePreflight(
-    storagePreflightOptionsFromArgs(args, {
-      targetDir: ROOT_DIR,
-      minFreeMb: DEFAULT_MIN_FREE_MB,
-      label: STORAGE_LABEL,
-    })
-  );
+  const storageCheck = assertStoragePreflight(storagePreflightForArgs(args));
+  if (isStorageLight(args)) {
+    await runStorageLightPipeline(args, storageCheck);
+    return;
+  }
   const options = optionsFromArgs(args);
   options.onProgress = (message) => {
     console.log(`[${timestamp()}] ${message}`);
@@ -477,15 +649,28 @@ async function main() {
   });
 }
 
-main().catch(async (error) => {
-  console.error(`[${timestamp()}] Overnight enrichment failed: ${error.stack || error.message}`);
-  await writeStatus({
-    status: "error",
-    phase: "failed",
-    pid: process.pid,
-    error: error.message,
-    storagePreflight: error.storagePreflight || null,
-    stack: error.stack,
-  }).catch(() => {});
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch(async (error) => {
+    console.error(`[${timestamp()}] Overnight enrichment failed: ${error.stack || error.message}`);
+    await writeStatus({
+      status: "error",
+      phase: "failed",
+      pid: process.pid,
+      error: error.message,
+      storagePreflight: error.storagePreflight || null,
+      stack: error.stack,
+    }).catch(() => {});
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  STORAGE_LIGHT_MIN_FREE_MB,
+  STORAGE_LIGHT_EXTERNAL_IMAGE_LIMIT,
+  STORAGE_LIGHT_EXTERNAL_IMAGE_CONCURRENCY,
+  STORAGE_LIGHT_EXTERNAL_IMAGE_TIMEOUT_MS,
+  isStorageLight,
+  recipeLimitForStorageMode,
+  runStorageLightPipeline,
+  storagePreflightForArgs,
+};

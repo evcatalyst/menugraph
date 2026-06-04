@@ -453,11 +453,11 @@ test("NYPL detail uses NYPL source links, larger images, and item transcriptions
   await expect(page.locator("#detail-text")).toContainText("Sample item rows");
 });
 
-test("graph lens exposes source status and application data flow", async ({ page }) => {
+test("Flow lens exposes source status and application data flow", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await openApp(page, "/?lens=graph");
+  await openApp(page, "/?lens=architecture");
 
-  await expect(page.locator("body")).toHaveAttribute("data-active-lens", "graph");
+  await expect(page.locator("body")).toHaveAttribute("data-active-lens", "architecture");
   await expect(page.locator("#result-title")).toContainText("Application Structure");
   await expect(page.locator("#results-label")).toHaveText("Source Status");
   const graphManifest = await page.evaluate(() => fetch("./data/graph/manifest.json").then((response) => response.json()));
