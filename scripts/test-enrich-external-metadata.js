@@ -23,6 +23,23 @@ const candidates = metadataDishCandidates(record, { ingredientLimit: 2 });
 assert(candidates.some((candidate) => candidate.rawName === "seafood options"));
 assert(candidates.some((candidate) => candidate.rawName === "wine list"));
 
+const samePassIngredientCandidates = metadataDishCandidates(
+  {
+    id: "sample:2",
+    menuId: "sample:2",
+    sourceId: "sample_source",
+    sourceKey: "sample",
+    title: "Café Centro",
+    descriptionSummary: "Apple orchard cafe menu",
+    dishMentions: [],
+    priceObservations: [],
+    ingredientTags: [],
+  },
+  { ingredientLimit: 2 }
+);
+assert(samePassIngredientCandidates.some((candidate) => candidate.rawName === "coffee service"));
+assert(samePassIngredientCandidates.some((candidate) => candidate.rawName === "apple dishes"));
+
 const prices = metadataPriceObservations(record, { cpiUs: {} }, [], "sample.json");
 assert.strictEqual(prices.length, 1);
 assert.strictEqual(prices[0].rawPrice, "$1.25");

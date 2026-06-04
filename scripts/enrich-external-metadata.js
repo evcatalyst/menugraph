@@ -16,10 +16,14 @@ const TOPIC_SIGNALS = [
   { pattern: /\bseafood\b|\bfish\b|\boysters?\b|\bclams?\b|\bcrab\b|\blobster\b|\bshrimp\b/i, label: "seafood options", confidence: 0.46 },
   { pattern: /\bsteakhouse\b|\bsteak\b|\bbeef\b/i, label: "steak dishes", confidence: 0.44 },
   { pattern: /\bcocktails?\b|\bbar\b|\bbeverages?\b|\bdrinks?\b/i, label: "cocktails and beverages", confidence: 0.42 },
+  { pattern: /\bairlines?\b|\bflight\b|\bjet clipper\b|\bpan america(?:n)?\b|\btwa\b/i, label: "airline meal service", confidence: 0.42 },
   { pattern: /\bwine\b|\bchampagne\b/i, label: "wine list", confidence: 0.44 },
-  { pattern: /\bcoffee\b|\bcafe\b/i, label: "coffee service", confidence: 0.42 },
+  { pattern: /\bcoffee\b|\bcaf(?:e|a)?\b|\bespresso\b/i, label: "coffee service", confidence: 0.42 },
   { pattern: /\btea\b/i, label: "tea service", confidence: 0.4 },
+  { pattern: /\bliquor\b|\bbeer\b|\bale\b|\btavern\b|\bcabaret\b/i, label: "beer and spirits", confidence: 0.4 },
   { pattern: /\bdelicatessen\b|\bdeli\b|\bsandwich(?:es)?\b/i, label: "sandwiches", confidence: 0.42 },
+  { pattern: /\bburgers?\b/i, label: "burger dishes", confidence: 0.42 },
+  { pattern: /\bpastr(?:y|ies)\b|\bbakery\b|\bpatisserie\b|\bpasticceria\b/i, label: "bakery and pastry", confidence: 0.4 },
   { pattern: /\bcreole\b|\bcajun\b/i, label: "creole dishes", confidence: 0.4 },
   { pattern: /\bbreakfasts?\b|\bbreakfast menu\b/i, label: "breakfast dishes", confidence: 0.34 },
   { pattern: /\blunch(?:es)?\b|\bluncheon\b/i, label: "lunch dishes", confidence: 0.32 },
@@ -138,7 +142,10 @@ function metadataDishCandidates(record, options = {}) {
     if (signal.pattern.test(text)) candidates.push({ rawName: signal.label, confidence: signal.confidence });
   }
   const ingredientLimit = Math.max(0, Number(options.ingredientLimit || 2) || 0);
-  for (const tag of (record.ingredientTags || []).slice(0, ingredientLimit)) {
+  const metadataIngredientTags = [
+    ...new Set([...(record.ingredientTags || []), ...ingredientTagsFor(text)].map(cleanValue).filter(Boolean)),
+  ].sort();
+  for (const tag of metadataIngredientTags.slice(0, ingredientLimit)) {
     const rawName = INGREDIENT_LABEL_OVERRIDES[tag] || `${tag} dishes`;
     candidates.push({ rawName, confidence: 0.34 });
   }

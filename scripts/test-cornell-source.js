@@ -88,6 +88,12 @@ function run() {
 
   assert(titleFoodLabels("Ruby Foo's Wine List").some((item) => item.label === "wine list"));
   assert(titleFoodLabels("The Crazy Crab").some((item) => item.label === "crab restaurant"));
+  assert(titleFoodLabels("Café Centro").some((item) => item.label === "coffee service"));
+  assert(titleFoodLabels("Promenade CafÃ©").some((item) => item.label === "coffee service"));
+  assert(titleFoodLabels("The President: Blue Ribbon Transatlantic Flight, Pan America Menu").some((item) => item.label === "airline meal service"));
+  assert(titleFoodLabels("Hearns Liquor Christmas Sale Advertisement").some((item) => item.label === "beer and spirits"));
+  assert(titleFoodLabels("Piazza Repubblica Ristorante").some((item) => item.label === "italian dining"));
+  assert(titleFoodLabels("Brasserie 812").some((item) => item.label === "brasserie dishes"));
   assert.strictEqual(
     priceObservationsFor(
       {

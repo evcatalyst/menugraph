@@ -22,6 +22,7 @@ assert.strictEqual(statusFor({ externalSummary: { rows: 2 }, sourceType: "menu" 
 assert.strictEqual(statusFor({ recipeBridgeClusters: 5, sourceType: "recipe_or_food_history" }), "recipe_bridge_targets");
 assert.strictEqual(statusFor({ priorProbe: { status: "error" }, sourceType: "menu" }), "probe_error");
 assert.strictEqual(statusFor({ sourceType: "commercial_modern_menu" }), "license_required");
+assert.strictEqual(statusFor({ priorProbe: { status: "license_required" }, sourceType: "commercial_modern_menu" }), "license_required");
 
 const sample = compactSample({
   title: "Dinner Menu",

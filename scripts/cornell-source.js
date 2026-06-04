@@ -29,22 +29,28 @@ const DISH_HINT_PATTERNS = [
 
 const TITLE_FOOD_PATTERNS = [
   ["wine list", /\b(?:carte des vins|wine list|wine menu|wine selection|wine vaults?)\b/i, ["wine"]],
+  ["beer and spirits", /\b(?:liquor|beer|ale|tavern|cabaret|cocktail|bar)\b/i, ["beer"]],
+  ["airline meal service", /\b(?:airline|flight|jet clipper|pan america(?:n)?|twa|sabena)\b/i, []],
   ["plats du jour", /\bplats du jour\b/i, []],
-  ["coffee service", /\b(?:cafe|café|coffee shop|coffee house)\b/i, ["coffee"]],
+  ["coffee service", /\b(?:caf(?:e|a)?|coffee shop|coffee house|espresso)\b/i, ["coffee"]],
   ["tea service", /\b(?:tea room|afternoon tea)\b/i, ["tea"]],
   ["brunch menu", /\bbrunch\b/i, []],
   ["supper menu", /\bsupper\b/i, []],
   ["dessert menu", /\b(?:dessert|ice cream|pasticceria)\b/i, ["cream"]],
+  ["bakery and pastry", /\b(?:pastr(?:y|ies)|bakery|patisserie|pasticceria)\b/i, ["bread"]],
+  ["burger dishes", /\bburgers?\b/i, ["beef", "bread"]],
   ["tempura", /\btempura\b/i, []],
   ["sukiyaki", /\bsukiyaki\b/i, ["beef"]],
   ["oyster bar", /\boyster\b/i, ["oyster"]],
   ["lobster house", /\blobster\b/i, ["lobster"]],
   ["steak house", /\bsteak\b/i, ["beef"]],
   ["roast beef", /\broast beef\b/i, ["beef"]],
-  ["fish and chips", /\bfish\s*(?:&|and)\s*chips\b/i, ["fish", "potato"]],
+  ["fish and chips", /\bfish\s*(?:and)\s*chips\b/i, ["fish", "potato"]],
   ["crab restaurant", /\bcrab\b/i, ["crab"]],
-  ["apple pie bakery", /\bapple pie\b/i, ["apple"]],
+  ["apple dishes", /\bapple\b/i, ["apple"]],
   ["bagel deli", /\bbagel\b/i, ["bread"]],
+  ["italian dining", /\b(?:ristorante|trattoria|hostaria|taverna|pizzeria)\b/i, []],
+  ["brasserie dishes", /\bbrasserie\b/i, []],
   ["kosher breakfast", /\bkosher\b.*\bbreakfast\b|\bbreakfast\b.*\bkosher\b/i, []],
 ];
 
@@ -191,7 +197,8 @@ function mergeUnique(values) {
 }
 
 function titleFoodLabels(title) {
-  return TITLE_FOOD_PATTERNS.filter(([, pattern]) => pattern.test(title)).map(([label, , ingredientTags]) => ({ label, ingredientTags }));
+  const normalizedTitle = normalizeText(title);
+  return TITLE_FOOD_PATTERNS.filter(([, pattern]) => pattern.test(normalizedTitle)).map(([label, , ingredientTags]) => ({ label, ingredientTags }));
 }
 
 function dishMentionFor(record, rawName, contextText, options = {}) {

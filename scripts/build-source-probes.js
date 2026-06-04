@@ -265,8 +265,8 @@ function statusFor({ staticSummary, externalSummary, recipeBridgeClusters, prior
   if (externalSummary?.rows) return "external_rows";
   if (recipeBridgeClusters) return "recipe_bridge_targets";
   if (priorProbe?.status === "error") return "probe_error";
-  if (priorProbe) return "metadata_probe";
   if (sourceType === "commercial_modern_menu") return "license_required";
+  if (priorProbe) return "metadata_probe";
   return "modeled_only";
 }
 
