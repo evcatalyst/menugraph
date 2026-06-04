@@ -135,6 +135,8 @@ for (const shard of evidenceIndexArtifact.shards || []) {
 const sourceNodeIds = new Set(sourceCapabilities.nodes.filter((node) => node.type === "Source").map((node) => node.id));
 assert(sourceNodeIds.has("source:the_sifter"), "recipe/history sources should be represented in source graph");
 assert(sourceNodeIds.has("source:recipe1m_plus"), "recipe enrichment source should be represented in source graph");
+assert(sourceNodeIds.has("source:tulane_louisiana_menu_collection"), "Tulane menu source should be represented in source graph");
+assert(sourceNodeIds.has("source:unlv_menus_art_of_dining"), "UNLV menu source should be represented in source graph");
 for (const sourceId of Object.keys(evidenceIndex.sourceProbes || {})) {
   assert(sourceNodeIds.has(`source:${sourceId}`), `source probe ${sourceId} should resolve to a source node`);
 }
@@ -142,6 +144,8 @@ assert.strictEqual(Object.keys(evidenceIndex.sourceProbes || {}).length, sourceN
 assert(evidenceIndex.sourceProbes.the_sifter?.recipeBridgeClusters > 0, "recipe/history source probes should expose bridge target counts");
 assert(evidenceIndex.sourceProbes.nypl_wotm?.ingestedRows > 0, "static source probes should expose represented row counts");
 assert(evidenceIndex.sourceProbes.dotlas_structured_menus?.status === "license_required", "commercial source probes should preserve license status");
+assert(evidenceIndex.sourceProbes.tulane_louisiana_menu_collection?.status === "modeled_only", "Tulane should remain modeled only until row ingestion exists");
+assert(evidenceIndex.sourceProbes.unlv_menus_art_of_dining?.status === "modeled_only", "UNLV should remain modeled only until row ingestion exists");
 if (manifest.summary.externalMenus?.records) {
   assert(manifest.summary.externalMenus.bySource.northwestern_transport_menus > 0, "external Northwestern rows should be summarized by source");
   assert(manifest.summary.externalMenus.bySource.uh_1850s_1860s_menus > 0, "external UH rows should be summarized by source");

@@ -12,6 +12,8 @@ const {
 } = require("./build-source-probes");
 
 assert.strictEqual(sourceKeyForSource({ id: "lapl_menu_collection" }), "lapl");
+assert.strictEqual(sourceKeyForSource({ id: "tulane_louisiana_menu_collection" }), "tulane");
+assert.strictEqual(sourceKeyForSource({ id: "unlv_menus_art_of_dining" }), "unlv");
 assert.strictEqual(sourceKeyForSource({ id: "recipe1m_plus" }), "");
 assert.strictEqual(sourceTypeFor("the_sifter"), "recipe_or_food_history");
 assert.strictEqual(sourceTypeFor("dotlas_structured_menus"), "commercial_modern_menu");
@@ -76,6 +78,20 @@ assert.strictEqual(probe.status, "recipe_bridge_targets");
 assert.strictEqual(probe.recipeBridgeClusters, 123);
 assert.strictEqual(probe.sourceType, "recipe_or_food_history");
 assert(/no full recipe text/i.test(probe.notes));
+
+const tulaneProbe = probeForSource(
+  { id: "tulane_louisiana_menu_collection", label: "Tulane Louisiana Menu and Restaurant Collection", sourceKey: "tulane" },
+  {
+    generatedAt: "2026-01-01T00:00:00.000Z",
+    staticBySource: new Map(),
+    externalBySource: new Map(),
+    priorProbeBySource: new Map(),
+    recipeSourceCandidates: {},
+  }
+);
+assert.strictEqual(tulaneProbe.status, "modeled_only");
+assert.strictEqual(tulaneProbe.sourceKey, "tulane");
+assert(/Louisiana Menu and Restaurant Collection/i.test(tulaneProbe.estimatedPublicScale));
 
 const summary = summarize([
   { status: "static_rows", sourceType: "menu", ingestedRows: 2, staticRows: 2, externalRows: 0, recipeBridgeClusters: 0 },

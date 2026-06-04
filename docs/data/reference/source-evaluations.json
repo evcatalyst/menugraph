@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-03",
+  "updatedAt": "2026-06-04",
   "scoreScale": "1-10; risk means lower operational/legal risk",
   "capabilities": [
     { "id": "date_estimation", "label": "Date estimation" },
@@ -57,6 +57,20 @@
       "label": "Regional menu collections",
       "scores": { "dq": 6, "access": 4, "coverage": 6, "uniqueValue": 8, "integrationFit": 6, "mlReady": 5, "risk": 5 },
       "capabilityWeights": { "regional_evidence": 10, "date_estimation": 6, "dish_entity_resolution": 5, "visual_style_cv": 5 }
+    },
+    {
+      "id": "tulane_louisiana_menu_collection",
+      "label": "Tulane Louisiana Menu and Restaurant Collection",
+      "sourceKey": "tulane",
+      "scores": { "dq": 7, "access": 6, "coverage": 4, "uniqueValue": 9, "integrationFit": 8, "mlReady": 6, "risk": 6 },
+      "capabilityWeights": { "regional_evidence": 10, "date_estimation": 8, "dish_entity_resolution": 7, "visual_style_cv": 6, "price_trends": 5, "recipe_enrichment": 4 }
+    },
+    {
+      "id": "unlv_menus_art_of_dining",
+      "label": "UNLV Menus: The Art of Dining",
+      "sourceKey": "unlv",
+      "scores": { "dq": 7, "access": 5, "coverage": 4, "uniqueValue": 8, "integrationFit": 7, "mlReady": 6, "risk": 5 },
+      "capabilityWeights": { "regional_evidence": 9, "date_estimation": 7, "visual_style_cv": 8, "dish_entity_resolution": 5, "price_trends": 4 }
     },
     {
       "id": "milwaukee_historic_menus",

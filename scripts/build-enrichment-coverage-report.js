@@ -41,6 +41,8 @@ function sourceIdForKey(sourceKey) {
   if (key === "cornell") return "cornell_nestle_menu_collection";
   if (key === "uh") return "uh_1850s_1860s_menus";
   if (key === "northwestern") return "northwestern_transport_menus";
+  if (key === "tulane") return "tulane_louisiana_menu_collection";
+  if (key === "unlv") return "unlv_menus_art_of_dining";
   if (key === "milwaukee") return "milwaukee_historic_menus";
   if (key === "uw") return "uw_menus_collection";
   if (key === "nola") return "nola_menu_collection";

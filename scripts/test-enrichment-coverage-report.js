@@ -12,6 +12,8 @@ assert.strictEqual(sourceIdForKey("cia"), "cia_menu_collection");
 assert.strictEqual(sourceIdForKey("nypl"), "nypl_wotm");
 assert.strictEqual(sourceIdForKey("lapl"), "lapl_menu_collection");
 assert.strictEqual(sourceIdForKey("northwestern"), "northwestern_transport_menus");
+assert.strictEqual(sourceIdForKey("tulane"), "tulane_louisiana_menu_collection");
+assert.strictEqual(sourceIdForKey("unlv"), "unlv_menus_art_of_dining");
 assert.strictEqual(numberRatio(3, 10), 0.3);
 assert.strictEqual(numberRatio(99, 10), 1);
 assert.strictEqual(numberRatio(1, 0), 0);

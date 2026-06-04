@@ -47,6 +47,16 @@ const SOURCE_HINTS = {
     accessMethod: "federated source family tracked through individual regional connectors",
     estimatedPublicScale: "modeled umbrella for Milwaukee, Denver, Tulane, UNLV, UW, Seattle, and New Orleans style sources",
   },
+  tulane_louisiana_menu_collection: {
+    sourceUrl: "https://library.tulane.edu/index.php/Collections/Tulane-University-Digital-Collections",
+    accessMethod: "Tulane Library Search public digital collection pages; metadata-first probe until a stable bulk/export route is confirmed",
+    estimatedPublicScale: "Louisiana Menu and Restaurant Collection of digitized menus, restaurant brochures, bar flyers, and related Louisiana food-industry ephemera",
+  },
+  unlv_menus_art_of_dining: {
+    sourceUrl: "https://special.library.unlv.edu/collections/menus/digitizing-menus",
+    accessMethod: "UNLV public collection/exhibit pages; metadata-first probe until API/export terms are explicit",
+    estimatedPublicScale: "Las Vegas and regional restaurant, hotel, casino, resort, and event menus; public documentation cites roughly 1,500 digitized menus at launch",
+  },
   milwaukee_historic_menus: {
     sourceUrl: "https://content.mpl.org/digital/collection/histmenu",
     accessMethod: "CONTENTdm public metadata routes",
@@ -144,6 +154,8 @@ function sourceKeyForSource(source = {}) {
     lapl_menu_collection: "lapl",
     uh_1850s_1860s_menus: "uh",
     northwestern_transport_menus: "northwestern",
+    tulane_louisiana_menu_collection: "tulane",
+    unlv_menus_art_of_dining: "unlv",
     milwaukee_historic_menus: "milwaukee",
     uw_menus_collection: "uw",
     nola_menu_collection: "nola",

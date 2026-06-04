@@ -67,6 +67,8 @@ function sourceIdForKey(sourceKey) {
   const key = cleanValue(sourceKey).toLowerCase();
   if (key === "cia") return "cia_menu_collection";
   if (key === "nypl") return "nypl_wotm";
+  if (key === "tulane") return "tulane_louisiana_menu_collection";
+  if (key === "unlv") return "unlv_menus_art_of_dining";
   return key ? `${slug(key)}_source` : "unknown_source";
 }
 
