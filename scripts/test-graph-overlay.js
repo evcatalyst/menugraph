@@ -78,6 +78,7 @@ assert(manifest.summary.overlays.withRecipeClusters >= 100, "recipe bridge clust
 assert(manifest.summary.evidence.ingredientAnalytics >= 500, "ingredient analytics should be indexed as compact evidence");
 assert(manifest.summary.evidence.priceAnalytics >= 500, "price analytics should be indexed as compact evidence");
 assert(manifest.summary.evidence.dishAnalytics >= 1000, "dish analytics should be indexed as compact evidence");
+assert(manifest.summary.evidence.enrichmentGaps >= 1000, "enrichment gaps should be indexed as compact evidence");
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");
 assert(manifest.summary.overlays.withOcrCandidates >= 1000, "OCR triage should appear as menu overlay evidence");
 assert(Object.keys(evidenceIndex.ocrCandidates || {}).length >= 1000, "OCR triage evidence should be indexed compactly");
@@ -159,6 +160,29 @@ assert(
 assert(
   Object.values(evidenceIndex.dishAnalytics || {}).some((record) => record.type === "recipe_linked_dish" && record.recipeClusterCount > 0),
   "dish analytics should include recipe-linked dish summaries"
+);
+assert.strictEqual(
+  Object.keys(evidenceIndex.enrichmentGaps || {}).length,
+  manifest.summary.evidence.enrichmentGaps,
+  "enrichment gaps shard count should match manifest summary"
+);
+assert(
+  Object.values(evidenceIndex.enrichmentGaps || {}).some(
+    (record) => record.type === "source_enrichment_gap_summary" && record.sourceId === "cia_menu_collection" && record.missingPriceMenus > 0
+  ),
+  "enrichment gaps should include CIA source-level gap summaries"
+);
+assert(
+  Object.values(evidenceIndex.enrichmentGaps || {}).some(
+    (record) => record.type === "menu_enrichment_gap" && record.missing?.includes("price") && record.priorityScore > 0 && record.recommendedAction
+  ),
+  "enrichment gaps should include prioritized menu-level price gaps"
+);
+assert(
+  Object.values(evidenceIndex.enrichmentGaps || {}).some(
+    (record) => record.type === "menu_enrichment_gap" && record.missing?.includes("ingredient") && record.counts && Number.isFinite(Number(record.counts.ingredientTags))
+  ),
+  "enrichment gaps should include menu-level ingredient gaps with compact counts"
 );
 if (coverageReport.summary?.sources) {
   assert.strictEqual(manifest.summary.enrichment.sourceCoverage, coverageReport.summary.sources, "source coverage count should be summarized in the enrichment graph");

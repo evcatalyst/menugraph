@@ -2525,9 +2525,10 @@ function renderGraphLens(svg, width, height) {
           (evidence.matches || 0) +
           (evidence.recipeClusters || 0) +
           (evidence.ingredientAnalytics || 0) +
-          (evidence.dishAnalytics || 0)
+          (evidence.dishAnalytics || 0) +
+          (evidence.enrichmentGaps || 0)
       ),
-      detail: "date / dish / price",
+      detail: "date / dish / gap",
     },
     {
       label: "Assimilation",
@@ -2742,6 +2743,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
     { label: "Date evidence", value: overlays.withDateEvidence || evidence.dateEvidence || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Price overlays", value: overlays.withPrices || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Price analytics", value: evidence.priceAnalytics || 0, total: Math.max(evidence.priceAnalytics || 0, 1) },
+    { label: "Gap queue", value: evidence.enrichmentGaps || 0, total: Math.max(evidence.enrichmentGaps || 0, 1) },
     { label: "Cross-source matches", value: overlays.withMatches || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Recipe bridges", value: overlays.withRecipeClusters || evidence.recipeClusters || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Ingredient analytics", value: evidence.ingredientAnalytics || 0, total: Math.max(evidence.ingredientAnalytics || 0, 1) },
@@ -2948,7 +2950,7 @@ function describeGraphOverlay() {
   setActivity({
     label: "Graph Lens",
     title: "Static graph overlay loaded",
-    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.dishAnalytics || 0)} dish analytics, ${formatNumber(evidence.priceAnalytics || 0)} price analytics, ${formatNumber(evidence.ingredientAnalytics || 0)} ingredient analytics, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
+    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.dishAnalytics || 0)} dish analytics, ${formatNumber(evidence.priceAnalytics || 0)} price analytics, ${formatNumber(evidence.ingredientAnalytics || 0)} ingredient analytics, ${formatNumber(evidence.enrichmentGaps || 0)} enrichment gaps, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
     progress: 1,
   });
 }

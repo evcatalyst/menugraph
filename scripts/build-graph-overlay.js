@@ -43,6 +43,8 @@ const MAX_DISH_DECADE_ANALYTICS = 220;
 const MAX_DISH_TYPE_SOURCE_ANALYTICS = 160;
 const MAX_DISH_PRICE_LINK_ANALYTICS = 220;
 const MAX_DISH_RECIPE_LINK_ANALYTICS = 180;
+const MAX_ENRICHMENT_GAP_MENU_INDEX = 1600;
+const MAX_ENRICHMENT_GAP_SOURCE_INDEX = 80;
 const OVERLAY_SOURCE_SPLIT_THRESHOLD_BYTES = Math.floor(SIZE_BUDGET_BYTES * 0.65);
 const OVERLAY_SUBSHARD_TARGET_BYTES = Math.floor(SIZE_BUDGET_BYTES * 0.35);
 
@@ -1466,6 +1468,228 @@ function buildDishAnalytics({ menus, enrichment, recipeBridge }) {
   return records;
 }
 
+function enrichmentGapId(kind, parts) {
+  return `gap:${kind}:${parts.map((part) => slug(part)).join(":")}`;
+}
+
+function gapPriorityBand(score) {
+  if (score >= 34) return "critical";
+  if (score >= 22) return "high";
+  if (score >= 12) return "medium";
+  return "low";
+}
+
+function bestOcrCandidateByMenu(enrichment) {
+  const byMenu = new Map();
+  for (const record of enrichmentRecords(enrichment, "ocrTriage")) {
+    const uid = cleanValue(record.menuId);
+    if (!uid) continue;
+    const current = byMenu.get(uid);
+    if (!current || Number(record.priorityScore || 0) > Number(current.priorityScore || 0)) byMenu.set(uid, record);
+  }
+  return byMenu;
+}
+
+function ocrFailureCountByMenu(enrichment) {
+  const counts = new Map();
+  for (const record of enrichmentRecords(enrichment, "ocrFailures")) {
+    const uid = cleanValue(record.menuId);
+    if (!uid) continue;
+    counts.set(uid, (counts.get(uid) || 0) + 1);
+  }
+  return counts;
+}
+
+function menuGapMetadata(menus, externalMenus) {
+  const rows = [];
+  for (const menu of menus || []) {
+    const uid = recordUid(menu);
+    const sourceKey = cleanValue(menu.sourceKey || "cia");
+    rows.push({
+      menuId: uid,
+      sourceKey,
+      sourceId: sourceIdForKey(sourceKey),
+      title: cleanValue(menu.title || menu.restaurant || uid),
+      year: menu.year || null,
+      decade: evidenceDecade(menu.decade, menu.year),
+      placeText: cleanValue([menu.city, menu.state, menu.country].filter(Boolean).join(", ")),
+      external: false,
+      sourceFile: "menus.json",
+    });
+  }
+  for (const record of externalMenus || []) {
+    const uid = cleanValue(record.menuId || record.id);
+    if (!uid) continue;
+    const sourceKey = cleanValue(record.sourceKey || "external");
+    const sourceId = cleanValue(record.sourceId) || sourceIdForKey(sourceKey);
+    const year = record.year || record.pointYear || record.lowerYear || null;
+    rows.push({
+      menuId: uid,
+      sourceKey,
+      sourceId,
+      title: cleanValue(record.title || record.venueText || uid),
+      year,
+      decade: evidenceDecade(record.decade, year),
+      placeText: cleanValue(record.placeText),
+      external: true,
+      sourceFile: externalSourceFile(record),
+    });
+  }
+  return rows;
+}
+
+function recommendedGapAction(missing, candidate, storageOk, counts) {
+  if (candidate?.id) return storageOk ? "run_local_ocr" : "free_disk_then_local_ocr";
+  if (missing.includes("price") && Number(counts.imageFeatures || 0) > 0) return "price_ocr_pass";
+  if (missing.includes("dish") || missing.includes("ingredient")) return "metadata_dish_hint_pass";
+  if (missing.includes("image")) return "source_image_route_review";
+  return "monitor";
+}
+
+function gapPriorityScore({ missing, meta, counts, candidate, failureCount }) {
+  let score = 0;
+  if (missing.includes("price")) score += 12;
+  if (missing.includes("dish")) score += 8;
+  if (missing.includes("ingredient")) score += 6;
+  if (missing.includes("image")) score += 3;
+  if (meta.sourceId === "cia_menu_collection" && (!meta.year || meta.decade === "unknown")) score += 8;
+  if (meta.sourceId === "nypl_wotm" && missing.includes("price")) score += 7;
+  if (meta.external && (missing.includes("price") || missing.includes("dish"))) score += 5;
+  if (Number(counts.dateEvidence || 0) > 0) score += 2;
+  if (Number(counts.matches || 0) > 0) score += 2;
+  if (candidate) score += Math.min(12, Number(candidate.priorityScore || 0) / 8) + Math.min(6, Number(candidate.valueScore || 0) / 10);
+  if (failureCount) score -= Math.min(6, failureCount * 2);
+  return roundedNumber(Math.max(1, score));
+}
+
+function buildEnrichmentGaps({ menus, enrichment, overlays }) {
+  const externalMenus = enrichmentRecords(enrichment, "externalMenuRecords");
+  const candidatesByMenu = bestOcrCandidateByMenu(enrichment);
+  const failuresByMenu = ocrFailureCountByMenu(enrichment);
+  const storageOk = Boolean(enrichment.runPlan?.summary?.storageOk);
+  const records = {};
+  const sourceStats = new Map();
+  const menuRows = [];
+
+  for (const meta of menuGapMetadata(menus, externalMenus)) {
+    const overlay = overlays[meta.menuId];
+    if (!overlay) continue;
+    const counts = overlay.counts || {};
+    const missing = [];
+    if (!Number(counts.dishMentions || 0)) missing.push("dish");
+    if (!Number(counts.priceObservations || 0)) missing.push("price");
+    if (!Number(counts.ingredientTags || 0)) missing.push("ingredient");
+    if (!Number(counts.imageFeatures || 0)) missing.push("image");
+    if (!missing.length) continue;
+
+    const candidate = candidatesByMenu.get(meta.menuId);
+    const failureCount = failuresByMenu.get(meta.menuId) || 0;
+    const priorityScore = gapPriorityScore({ missing, meta, counts, candidate, failureCount });
+    const recommendedAction = recommendedGapAction(missing, candidate, storageOk, counts);
+    const row = {
+      id: enrichmentGapId("menu", [meta.menuId]),
+      type: "menu_enrichment_gap",
+      menuId: meta.menuId,
+      sourceId: meta.sourceId,
+      sourceKey: meta.sourceKey,
+      title: compactEvidenceText(meta.title, 120),
+      year: meta.year || null,
+      decade: meta.decade || "unknown",
+      placeText: compactEvidenceText(meta.placeText, 120),
+      external: Boolean(meta.external),
+      missing,
+      counts: {
+        dishMentions: Number(counts.dishMentions || 0),
+        priceObservations: Number(counts.priceObservations || 0),
+        ingredientTags: Number(counts.ingredientTags || 0),
+        imageFeatures: Number(counts.imageFeatures || 0),
+        dateEvidence: Number(counts.dateEvidence || 0),
+        matches: Number(counts.matches || 0),
+        ocrCandidates: Number(counts.ocrCandidates || 0),
+        ocrFailures: Number(counts.ocrFailures || failureCount || 0),
+        recipeClusters: Number(counts.recipeClusters || 0),
+      },
+      priorityScore,
+      priorityBand: gapPriorityBand(priorityScore),
+      recommendedAction,
+      route: candidate?.route ? cleanValue(candidate.route) : recommendedAction,
+      localTier: cleanValue(candidate?.localTier),
+      estimatedImages: candidate?.estimatedImages ?? null,
+      candidateId: cleanValue(candidate?.id),
+      storageOk,
+      confidence: candidate ? 0.78 : 0.66,
+      provenance: {
+        sourceFile: `${meta.sourceFile} + graph/menu-overlays`,
+        method: "storage_light_enrichment_gap_rollup",
+      },
+    };
+    menuRows.push(row);
+
+    const sourceRow =
+      sourceStats.get(meta.sourceId) ||
+      {
+        sourceId: meta.sourceId,
+        sourceKey: meta.sourceKey,
+        menuCount: 0,
+        missingDishMenus: 0,
+        missingPriceMenus: 0,
+        missingIngredientMenus: 0,
+        missingImageMenus: 0,
+        ocrCandidateMenus: 0,
+        ocrFailureMenus: 0,
+        externalMenus: 0,
+        priorityScoreTotal: 0,
+        topActions: new Map(),
+      };
+    sourceRow.menuCount += 1;
+    if (meta.external) sourceRow.externalMenus += 1;
+    if (missing.includes("dish")) sourceRow.missingDishMenus += 1;
+    if (missing.includes("price")) sourceRow.missingPriceMenus += 1;
+    if (missing.includes("ingredient")) sourceRow.missingIngredientMenus += 1;
+    if (missing.includes("image")) sourceRow.missingImageMenus += 1;
+    if (candidate) sourceRow.ocrCandidateMenus += 1;
+    if (failureCount) sourceRow.ocrFailureMenus += 1;
+    sourceRow.priorityScoreTotal += priorityScore;
+    incrementMap(sourceRow.topActions, recommendedAction);
+    sourceStats.set(meta.sourceId, sourceRow);
+  }
+
+  for (const row of [...sourceStats.values()]
+    .sort((a, b) => b.priorityScoreTotal - a.priorityScoreTotal || a.sourceId.localeCompare(b.sourceId))
+    .slice(0, MAX_ENRICHMENT_GAP_SOURCE_INDEX)) {
+    records[enrichmentGapId("source", [row.sourceId])] = {
+      id: enrichmentGapId("source", [row.sourceId]),
+      type: "source_enrichment_gap_summary",
+      sourceId: row.sourceId,
+      sourceKey: row.sourceKey,
+      menuCount: row.menuCount,
+      missingDishMenus: row.missingDishMenus,
+      missingPriceMenus: row.missingPriceMenus,
+      missingIngredientMenus: row.missingIngredientMenus,
+      missingImageMenus: row.missingImageMenus,
+      ocrCandidateMenus: row.ocrCandidateMenus,
+      ocrFailureMenus: row.ocrFailureMenus,
+      externalMenus: row.externalMenus,
+      priorityScore: roundedNumber(row.priorityScoreTotal),
+      priorityBand: gapPriorityBand(row.priorityScoreTotal / Math.max(1, row.menuCount)),
+      topActions: topObjectEntries(row.topActions, 6),
+      confidence: 0.74,
+      provenance: {
+        sourceFile: "graph/menu-overlays + enrichment/run-plan.json",
+        method: "storage_light_source_gap_rollup",
+      },
+    };
+  }
+
+  for (const row of menuRows
+    .sort((a, b) => b.priorityScore - a.priorityScore || a.sourceId.localeCompare(b.sourceId) || a.title.localeCompare(b.title))
+    .slice(0, MAX_ENRICHMENT_GAP_MENU_INDEX)) {
+    records[row.id] = row;
+  }
+
+  return records;
+}
+
 function buildDishCounts({ menus, analytics, ontology, prices, enrichment }) {
   const counts = new Map();
   const add = (name, amount, source) => {
@@ -1525,6 +1749,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     ingredientAnalytics: {},
     priceAnalytics: {},
     dishAnalytics: {},
+    enrichmentGaps: {},
   };
   const dishNamesByMenu = new Map();
   const ingredientTagsByMenu = new Map();
@@ -2727,6 +2952,7 @@ function buildEvidenceIndexArtifacts(evidenceIndex, generatedAt) {
     "ingredientAnalytics",
     "priceAnalytics",
     "dishAnalytics",
+    "enrichmentGaps",
   ];
   const artifacts = {};
   const shards = [];
@@ -2834,6 +3060,7 @@ async function buildGraphOverlay(options = {}) {
   evidenceIndex.ingredientAnalytics = buildIngredientAnalytics({ menus, enrichment, recipeBridge });
   evidenceIndex.priceAnalytics = buildPriceAnalytics({ menus, enrichment });
   evidenceIndex.dishAnalytics = buildDishAnalytics({ menus, enrichment, recipeBridge });
+  evidenceIndex.enrichmentGaps = buildEnrichmentGaps({ menus, enrichment, overlays });
   const core = buildCoreGraph({
     menus,
     evaluations,
@@ -2870,6 +3097,7 @@ async function buildGraphOverlay(options = {}) {
     ingredientAnalytics: Object.keys(evidenceIndex.ingredientAnalytics).length,
     priceAnalytics: Object.keys(evidenceIndex.priceAnalytics).length,
     dishAnalytics: Object.keys(evidenceIndex.dishAnalytics).length,
+    enrichmentGaps: Object.keys(evidenceIndex.enrichmentGaps).length,
   };
   const evidenceIndexArtifacts = buildEvidenceIndexArtifacts(evidenceIndex, generatedAt);
   const publicEvidenceIndex = evidenceIndexArtifacts.index;
