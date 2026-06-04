@@ -182,6 +182,28 @@ assert(pendingPlan.runs.find((run) => run.label === "continue_partial_second_pag
 assert.strictEqual(pendingPlan.runs.find((run) => run.label === "retryable_local_failures").estimatedImages, 1);
 assert(pendingPlan.runs.find((run) => run.label === "retryable_local_failures").command.includes("--pages-per-menu=2"));
 
+const targetedPlan = progressiveRunPlan([
+  ...Array.from({ length: 20 }, (_, index) => ({
+    ...easyUnknown,
+    id: `ocrtriage:processed-${index}`,
+    priorityBatch: "backlog",
+    priorityRank: index + 1,
+    processing: { status: "processed", dishMentions: 3, priceObservations: 1 },
+  })),
+  {
+    ...easyUnknown,
+    id: "ocrtriage:cia-backlog",
+    priorityBatch: "backlog",
+    priorityRank: 25,
+    processing: { status: "pending" },
+  },
+]);
+const targetedCiaRun = targetedPlan.runs.find((run) => run.label === "source_price_gap_cia");
+assert(targetedCiaRun, "yield-aware source-targeted runs should be included for pending local OCR price gaps");
+assert(targetedCiaRun.command.includes("--source=cia"));
+assert.strictEqual(targetedCiaRun.priorityBasis.observedProcessed, 20);
+assert(targetedCiaRun.priorityBasis.observedYieldMultiplier > 0.25);
+
 const options = optionsFromArgs([
   "--source=milwaukee_historic_menus,uw_menus_collection",
   "--record-limit=250",

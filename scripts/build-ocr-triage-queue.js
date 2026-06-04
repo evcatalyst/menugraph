@@ -349,6 +349,90 @@ function runSlice(rows, label, args, limit = 25) {
   };
 }
 
+function sourceYieldStats(candidates) {
+  const stats = new Map();
+  for (const record of candidates) {
+    const sourceKey = cleanValue(record.sourceKey || record.sourceId || "unknown");
+    if (!stats.has(sourceKey)) {
+      stats.set(sourceKey, {
+        sourceKey,
+        sourceId: cleanValue(record.sourceId || sourceKey),
+        processed: 0,
+        dishMentions: 0,
+        priceObservations: 0,
+      });
+    }
+    const row = stats.get(sourceKey);
+    if (record.processing?.status === "processed") row.processed += 1;
+    row.dishMentions += Number(record.processing?.dishMentions || 0);
+    row.priceObservations += Number(record.processing?.priceObservations || 0);
+  }
+  return stats;
+}
+
+function observedYieldMultiplier(stat = {}) {
+  const processed = Number(stat.processed || 0);
+  if (processed < 20) return 0.75;
+  const evidencePerProcessed =
+    (Number(stat.dishMentions || 0) * 0.7 + Number(stat.priceObservations || 0) * 1.2) / Math.max(processed, 1);
+  return Number(Math.max(0.25, Math.min(1.25, 0.25 + evidencePerProcessed / 2)).toFixed(2));
+}
+
+function sourceTargetRuns(candidates, allCandidates, limit = 4) {
+  const stats = sourceYieldStats(allCandidates);
+  const groups = new Map();
+  for (const record of candidates) {
+    if (record.route !== "local_ocr" || record.localTier !== "easy") continue;
+    if (!record.missingEvidence?.price && !record.missingEvidence?.dish) continue;
+    const sourceKey = cleanValue(record.sourceKey || record.sourceId || "unknown");
+    if (!groups.has(sourceKey)) groups.set(sourceKey, []);
+    groups.get(sourceKey).push(record);
+  }
+
+  return [...groups.entries()]
+    .map(([sourceKey, rows]) => {
+      const stat = stats.get(sourceKey) || {};
+      const multiplier = observedYieldMultiplier(stat);
+      const value = rows.reduce((sum, record) => {
+        const evidenceValue =
+          (record.missingEvidence?.price ? 30 : 0) +
+          (record.missingEvidence?.dish ? 18 : 0) +
+          (record.missingEvidence?.date ? 14 : 0) +
+          (record.missingEvidence?.ingredient ? 6 : 0);
+        return sum + Number(record.priorityScore || 0) + evidenceValue;
+      }, 0);
+      return {
+        sourceKey,
+        rows,
+        stat,
+        score: value * multiplier,
+        multiplier,
+      };
+    })
+    .sort((a, b) => b.score - a.score || a.sourceKey.localeCompare(b.sourceKey))
+    .slice(0, limit)
+    .map((group) => {
+      const run = runSlice(
+        group.rows,
+        `source_price_gap_${group.sourceKey.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`,
+        ["--limit=25", "--batch=all", `--source=${group.sourceKey}`, "--tier=easy", "--pages-per-menu=1"],
+        25
+      );
+      return {
+        ...run,
+        sourceKey: group.sourceKey,
+        sourceId: cleanValue(group.stat.sourceId || group.sourceKey),
+        priorityBasis: {
+          observedProcessed: Number(group.stat.processed || 0),
+          observedDishMentions: Number(group.stat.dishMentions || 0),
+          observedPriceObservations: Number(group.stat.priceObservations || 0),
+          observedYieldMultiplier: group.multiplier,
+          note: "Sources with prior local OCR dish/price yield are ranked ahead of low-yield first-page queues.",
+        },
+      };
+    });
+}
+
 function countRows(rows, getter) {
   return Object.fromEntries(
     [...rows.reduce((counts, record) => {
@@ -390,6 +474,7 @@ function progressiveRunPlan(candidates, options = {}) {
       runSlice(phase1Easy, "phase1_easy_local", ["--limit=25", "--batch=phase1", "--tier=easy", "--pages-per-menu=1"], 25),
       runSlice(phase1Medium, "phase1_medium_local", ["--limit=25", "--batch=phase1", "--tier=medium", "--pages-per-menu=1"], 25),
       runSlice(partialLocal, "continue_partial_second_pages", ["--limit=25", "--batch=all", "--continue-partial", "--pages-per-menu=2"], 25),
+      ...sourceTargetRuns(backlogLocal, candidates),
       runSlice(backlogLocal, "backlog_local", ["--limit=50", "--batch=all", "--tier=all", "--pages-per-menu=1"], 50),
       retryableRun,
     ],
