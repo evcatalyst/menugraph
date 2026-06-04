@@ -71,6 +71,15 @@ const METADATA_FOOD_SIGNALS = [
   { pattern: /\blibations?\b/i, label: "cocktails and beverages", confidence: 0.36 },
 ];
 
+const EXPLICIT_METADATA_PRICE_TOKEN =
+  /(?:US\$|\$|€|£)\s*\d|\b\d+(?:[.,]\d+)?\s*(?:¢|cents?|cts?\.?)\b|\b(?:frs?\.?|francs?|marks?|mk\.?)\s*\d|\b\d+(?:[.,]\d{1,2})?\s+dollars?\b/i;
+
+const METADATA_PRICE_DENY =
+  /\b(?:broken into|cash register|police|real estate|robbery|sold the property|taken|theft)\b|\b\d+(?:[.,]\d+)?\s+million\s+dollars?\b/i;
+
+const METADATA_PRICE_ALLOW =
+  /\b(?:breakfast|brunch|coupon|delivery|dinner|discount|drink|food|hamburgers?|ice cream|lunch|main order|menu|minimum order|per person|price|sundae|supper|table d'?hote|wine)\b/i;
+
 function hasFlag(args, name) {
   return args.includes(`--${name}`);
 }
@@ -214,18 +223,60 @@ function mergeDishMentions(record, additions) {
 }
 
 function mergePriceObservations(record, additions) {
-  const existing = record.priceObservations || [];
-  const seen = new Set(
-    existing.map((price) => [normalizedDishName(price.normalizedName || price.rawName || price.item), cleanValue(price.rawPrice || price.rawPriceText)].join("|"))
-  );
-  const merged = [...existing];
-  for (const addition of additions) {
+  const seen = new Set();
+  const merged = [];
+  for (const addition of [...(record.priceObservations || []), ...additions]) {
     const key = [normalizedDishName(addition.normalizedName || addition.rawName || addition.item), cleanValue(addition.rawPrice || addition.rawPriceText)].join("|");
     if (!key.trim() || seen.has(key)) continue;
     seen.add(key);
     merged.push(addition);
   }
-  return merged;
+  return collapseMetadataPriceDuplicates(merged);
+}
+
+function metadataPriceDuplicateKey(price) {
+  if (price?.extractionMethod !== "external_metadata_price_regex") return "";
+  const rawPrice = cleanValue(price.rawPrice || price.rawPriceText);
+  if (!rawPrice) return "";
+  const amount = Number(price.amount);
+  return `${Number.isFinite(amount) ? amount : rawPrice}|${rawPrice.replace(/\s+/g, "").toLowerCase()}`;
+}
+
+function lowQualityMetadataPriceLabel(price) {
+  const label = cleanValue(price.rawName || price.item || price.normalizedName);
+  return /Restaurants--|Menu contains$|pre-payment|required to attend|listed prices fr|free delivery w\/|^\W*$/.test(label) || label.length > 72;
+}
+
+function metadataPriceLabelScore(price) {
+  const label = cleanValue(price.rawName || price.item || price.normalizedName);
+  let score = 100 - Math.min(80, label.length);
+  if (/\b(?:coupon|delivery|dinner|drink|hamburgers?|martinis?|minimum order|sundae|supper|table d'?hote|wine)\b/i.test(label)) score += 35;
+  if (lowQualityMetadataPriceLabel(price)) score -= 80;
+  return score;
+}
+
+function collapseMetadataPriceDuplicates(prices) {
+  const groups = new Map();
+  const passthrough = [];
+  for (const price of prices) {
+    const key = metadataPriceDuplicateKey(price);
+    if (!key) {
+      passthrough.push(price);
+      continue;
+    }
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(price);
+  }
+
+  const collapsed = [...passthrough];
+  for (const group of groups.values()) {
+    if (group.length === 1 || !group.some(lowQualityMetadataPriceLabel)) {
+      collapsed.push(...group);
+      continue;
+    }
+    collapsed.push([...group].sort((a, b) => metadataPriceLabelScore(b) - metadataPriceLabelScore(a))[0]);
+  }
+  return collapsed;
 }
 
 function mergeIngredientTags(record, dishMentions, priceObservations) {
@@ -244,14 +295,117 @@ function mergeIngredientTags(record, dishMentions, priceObservations) {
 }
 
 function metadataPriceText(record) {
-  return [record.descriptionSummary, record.notes, ...(record.dishHints || []).map((dish) => dish.rawName), ...(record.dishMentions || []).map((dish) => dish.rawName)]
-    .map(cleanValue)
-    .filter(Boolean)
-    .join("\n");
+  return metadataPriceLines(record).join("\n");
 }
 
 function explicitPriceOnly(record) {
-  return /\$|US\$|€|£|¢|\b(?:cents?|cts?\.?|francs?|frs?\.?|marks?|mk\.?)\b/i.test(metadataPriceText(record));
+  return EXPLICIT_METADATA_PRICE_TOKEN.test(metadataPriceText(record));
+}
+
+function addUniqueLine(lines, value) {
+  const line = cleanValue(value);
+  if (!line || lines.includes(line)) return;
+  lines.push(line);
+}
+
+function priceTokenForLine(value) {
+  const raw = cleanValue(value);
+  const dollars = raw.match(/^(\d+(?:[.,]\d{1,2})?)\s+dollars?$/i);
+  if (dollars) return `$${dollars[1].replace(",", ".")}`;
+  return raw;
+}
+
+function priceTokensInLine(value) {
+  const text = cleanValue(value);
+  return [
+    ...text.matchAll(/(?:US\$|\$|€|£)\s*\d+(?:[.,]\d{1,2})?|\b\d+(?:[.,]\d+)?\s*(?:¢|cents?|cts?\.?)\b|\b\d+(?:[.,]\d{1,2})?\s+dollars?\b/gi),
+  ].map((match) => priceTokenForLine(match[0]).replace(/\s+/g, "").toLowerCase());
+}
+
+function sharesPriceToken(line, existingLines) {
+  const tokens = priceTokensInLine(line);
+  if (!tokens.length) return false;
+  const existing = new Set(existingLines.flatMap(priceTokensInLine));
+  return tokens.some((token) => existing.has(token));
+}
+
+function cleanSyntheticItemLabel(value) {
+  return cleanValue(value)
+    .replace(/^.*?\bnewspaper-style menu\s*(?:,|with)?\s*/i, "")
+    .replace(/^.*?\billustrated menu\s*(?:,|with)?\s*/i, "")
+    .replace(/^.*?\bmenu\s+with\s+/i, "")
+    .replace(/^(?:with|and)\s+/i, "")
+    .trim();
+}
+
+function syntheticMetadataPriceLines(text) {
+  const source = cleanValue(text);
+  const lines = [];
+
+  const freeDelivery = source.match(/\bfree delivery\s+(\$\s*\d+(?:\.\d{1,2})?)\s*min(?:imum)?\.?/i);
+  if (freeDelivery) addUniqueLine(lines, `minimum order for free delivery ${freeDelivery[1]}`);
+
+  const couponDiscount = source.match(/\bmenu contains\s+(\$\s*\d+(?:\.\d{1,2})?)\s+discount coupon\b/i);
+  if (couponDiscount) addUniqueLine(lines, `coupon discount ${couponDiscount[1]}`);
+
+  const couponSpecial = source.match(/\b(\$\s*\d+(?:\.\d{1,2})?)\s+coupon special with main order\b/i);
+  if (couponSpecial) addUniqueLine(lines, `main order coupon special ${couponSpecial[1]}`);
+
+  const perPersonDinner = source.match(/\b(Special\s+Wine\s+and\s+Cigar\s+Dinner)\b[\s\S]{0,180}?(\$\s*\d+(?:\.\d{1,2})?)\s+per person\b/i);
+  if (perPersonDinner) addUniqueLine(lines, `${perPersonDinner[1]} ${perPersonDinner[2]} per person`);
+
+  const supperDance = source.match(/\b(Supper Dance)\b[\s\S]{0,160}?(\$\s*\d+(?:\.\d{1,2})?)\s+each[\s\S]{0,80}?\bincluding Supper\b/i);
+  if (supperDance) addUniqueLine(lines, `${supperDance[1]} including supper ${supperDance[2]}`);
+
+  const sundae = source.match(/\b([^.;|]{0,80}?\bsundae)\s*,?\s*(\$\s*\d+(?:\.\d{1,2})?)\b/i);
+  if (sundae) addUniqueLine(lines, `${cleanSyntheticItemLabel(sundae[1])} ${sundae[2]}`);
+
+  const tableDhote = source.match(/\b(Special\s+Table\s+D['’]?Hote dinners?)\s+for\s+(\$\s*\d+(?:\.\d{1,2})?)\b/i);
+  if (tableDhote) addUniqueLine(lines, `${tableDhote[1]} ${tableDhote[2]}`);
+
+  const roomDelivery = source.match(/\b(Delivery of food offered to room)\s+for\s+(\d+(?:[.,]\d+)?\s*cents?)\b/i);
+  if (roomDelivery) addUniqueLine(lines, `${roomDelivery[1]} ${roomDelivery[2]}`);
+
+  const range = source.match(
+    /\b(hamburgers?)\b[\s\S]{0,120}?\branging in price from\s+(\d+(?:[.,]\d+)?\s*cents?|\$\s*\d+(?:\.\d{1,2})?|\d+(?:[.,]\d{1,2})?\s+dollars?)\s+to\s+(\d+(?:[.,]\d+)?\s*cents?|\$\s*\d+(?:\.\d{1,2})?|\d+(?:[.,]\d{1,2})?\s+dollars?)\b/i
+  );
+  if (range) {
+    addUniqueLine(lines, `${range[1]} price range minimum ${priceTokenForLine(range[2])}`);
+    addUniqueLine(lines, `${range[1]} price range maximum ${priceTokenForLine(range[3])}`);
+  }
+
+  return lines;
+}
+
+function splitMetadataPriceSegments(text) {
+  return cleanValue(text)
+    .split(/\s+\|\s+|\n+|;\s+|(?<=[.!?])\s+(?=["A-Z])/g)
+    .map((segment) => cleanValue(segment.replace(/^["']+|["']+$/g, "")))
+    .filter(Boolean);
+}
+
+function normalizedMetadataPriceLine(segment) {
+  const line = cleanValue(segment);
+  if (!EXPLICIT_METADATA_PRICE_TOKEN.test(line) || METADATA_PRICE_DENY.test(line)) return "";
+
+  const synthetic = syntheticMetadataPriceLines(line);
+  if (synthetic.length) return "";
+  if (!METADATA_PRICE_ALLOW.test(line) || line.length > 160) return "";
+  return line;
+}
+
+function metadataPriceLines(record) {
+  const sourceText = [record.descriptionSummary, record.notes].map(cleanValue).filter(Boolean).join(" | ");
+  const lines = [];
+  if (!sourceText || METADATA_PRICE_DENY.test(sourceText)) {
+    return lines;
+  }
+  for (const line of syntheticMetadataPriceLines(sourceText)) addUniqueLine(lines, line);
+  for (const segment of splitMetadataPriceSegments(sourceText)) {
+    const normalized = normalizedMetadataPriceLine(segment);
+    if (normalized && !sharesPriceToken(normalized, lines)) addUniqueLine(lines, normalized);
+  }
+  return lines;
 }
 
 function makePriceObservation(record, extracted, references, contextEvents, fileName) {
@@ -473,6 +627,7 @@ if (require.main === module) {
 module.exports = {
   enrichExternalMetadata,
   enrichExternalRecord,
+  metadataPriceLines,
   metadataDishCandidates,
   metadataPriceObservations,
   optionsFromArgs,
