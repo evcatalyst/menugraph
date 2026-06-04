@@ -138,7 +138,7 @@ a:hover {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(126px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -430,6 +430,121 @@ td {
   margin-top: 8px;
 }
 
+.registry-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.registry-stat {
+  min-height: 66px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper-warm);
+  padding: 9px;
+}
+
+.registry-stat strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.registry-stat span {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.registry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 620px;
+  overflow: auto;
+}
+
+.registry-item {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.registry-main strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.registry-main span,
+.registry-provenance,
+.registry-item p,
+.gap-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.registry-item p {
+  margin: 7px 0 0;
+}
+
+.registry-provenance {
+  display: grid;
+  gap: 3px;
+  margin-top: 8px;
+}
+
+.registry-provenance span:empty {
+  display: none;
+}
+
+.gap-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.status-discovered,
+.evidence-discovered {
+  background: #eee5e2;
+  border-color: #d2b9b0;
+}
+
+.status-source_review,
+.evidence-source_review,
+.status-usable_photo,
+.evidence-usable_photo {
+  background: #f4e7c7;
+  border-color: #d2aa4f;
+}
+
+.status-label_visible,
+.evidence-label_visible,
+.status-ocr_extracted,
+.evidence-ocr_extracted {
+  background: #dde8ef;
+  border-color: #8fa9be;
+}
+
+.status-manual_verified,
+.evidence-manual_verified {
+  background: #dce9dd;
+  border-color: #9ab59a;
+}
+
+.status-rejected,
+.evidence-rejected {
+  background: #ead9d8;
+  border-color: #c7938d;
+}
+
 @media (max-width: 1180px) {
   .metrics-grid {
     grid-template-columns: repeat(4, minmax(126px, 1fr));
@@ -440,7 +555,8 @@ td {
     grid-template-columns: 1fr;
   }
 
-  .product-row {
+  .product-row,
+  .registry-grid {
     grid-template-columns: 1fr;
   }
 }

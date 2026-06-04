@@ -17,6 +17,9 @@ const els = {
   productRows: document.querySelector("#product-rows"),
   productCount: document.querySelector("#product-count"),
   sourceBars: document.querySelector("#source-bars"),
+  registrySummary: document.querySelector("#registry-summary"),
+  registryRows: document.querySelector("#registry-rows"),
+  registryCount: document.querySelector("#registry-count"),
   queueRows: document.querySelector("#queue-rows"),
   queueCount: document.querySelector("#queue-count"),
   photoRows: document.querySelector("#photo-rows"),
@@ -43,6 +46,13 @@ const statusLabels = {
   candidate_needs_archive: "Archive",
   no_source: "Open",
   unknown: "Unknown",
+  discovered: "Discovered",
+  source_review: "Source Review",
+  usable_photo: "Usable Photo",
+  label_visible: "Label Visible",
+  ocr_extracted: "OCR",
+  manual_verified: "Verified",
+  rejected: "Rejected",
 };
 
 function escapeHtml(value) {
@@ -132,12 +142,29 @@ function passesPhoto(row) {
   return true;
 }
 
+function passesRegistry(row) {
+  const query = state.search.trim().toLowerCase();
+  if (state.category && row.category !== state.category) return false;
+  if (
+    state.status &&
+    row.evidence_status !== state.status &&
+    row.registry_record_type !== state.status &&
+    row.claim_link_status !== state.status
+  ) {
+    return false;
+  }
+  if (query && !textBlob(row).includes(query)) return false;
+  return true;
+}
+
 function renderMetrics() {
   const metrics = state.data.metrics;
   const cards = [
     ["Products", metrics.targets],
     ["Candidates", metrics.candidates],
     ["Photo Evidence", metrics.photo_evidence_rows],
+    ["Registry Records", metrics.evidence_registry_rows || state.data.evidence_registry?.length || 0],
+    ["Unsupported Gaps", metrics.unsupported_gap_records || 0],
     ["Acquisition Rows", metrics.acquisition_rows],
     ["Source Review", metrics.source_review_ready],
     ["Current-Web Search", metrics.current_web_search_ready],
@@ -152,7 +179,12 @@ function renderMetrics() {
 function renderFilters() {
   const categories = [...new Set(state.data.products.map((row) => row.category).filter(Boolean))].sort();
   const surfaces = [...new Set(state.data.acquisition_queue.map((row) => row.acquisition_surface).filter(Boolean))].sort();
-  const statuses = [...new Set(state.data.acquisition_queue.map((row) => row.acquisition_status).filter(Boolean))].sort();
+  const statuses = [
+    ...new Set([
+      ...state.data.acquisition_queue.map((row) => row.acquisition_status).filter(Boolean),
+      ...(state.data.evidence_registry || []).map((row) => row.evidence_status).filter(Boolean),
+    ]),
+  ].sort();
   els.category.innerHTML = `<option value="">All categories</option>${categories
     .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
     .join("")}`;
@@ -218,6 +250,64 @@ function renderSourceBars() {
           </header>
           <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
           <span class="small">${escapeHtml(row.category)} · ${escapeHtml(labelFor(row.surface))}</span>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderRegistrySummary() {
+  const rows = state.data.evidence_registry || [];
+  const workflow = state.data.evidence_registry_status_workflow || [
+    "discovered",
+    "source_review",
+    "usable_photo",
+    "label_visible",
+    "ocr_extracted",
+    "manual_verified",
+    "rejected",
+  ];
+  const counts = rows.reduce((acc, row) => {
+    const status = row.evidence_status || "unknown";
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {});
+  els.registrySummary.innerHTML = workflow
+    .map((status) => `
+      <article class="registry-stat status-${escapeHtml(status)}">
+        <strong>${formatNumber(counts[status] || 0)}</strong>
+        <span>${escapeHtml(statusLabels[status] || labelFor(status))}</span>
+      </article>
+    `)
+    .join("");
+}
+
+function renderRegistry() {
+  const rows = (state.data.evidence_registry || []).filter(passesRegistry).slice(0, 140);
+  els.registryCount.textContent = `${formatNumber(rows.length)} records`;
+  els.registryRows.innerHTML = rows
+    .map((row) => {
+      const source = row.source_url ? linkOrText(row.source_url, row.source_domain || "Source") : `<span class="gap-label">Unsupported gap</span>`;
+      const note = row.unsupported_gap_note || row.reviewer_notes || row.promotion_blocker || "";
+      return `
+        <article class="registry-item">
+          <div class="registry-main">
+            <strong>${escapeHtml(row.display_name || row.canonical_name)}</strong>
+            <span>${escapeHtml(row.vintage_label || "")} · ${escapeHtml(row.evidence_kind || "")} · ${escapeHtml(row.claimed_product_date_text || "")}</span>
+          </div>
+          <p>${escapeHtml(note)}</p>
+          <div class="lead-meta">
+            ${statusTag(row.evidence_status, `evidence-${row.evidence_status}`)}
+            ${statusTag(row.claim_link_status)}
+            ${statusTag(row.source_attribution_status || row.source_surface)}
+            ${source}
+          </div>
+          <div class="registry-provenance">
+            <span>${escapeHtml(row.source_title || "")}</span>
+            <span>${escapeHtml(row.source_publisher_owner || "")}</span>
+            <span>${escapeHtml(row.license_rights_note || "")}</span>
+            <span>${escapeHtml(row.archive_id || row.capture_date_text || "")}</span>
+          </div>
         </article>
       `;
     })
@@ -303,7 +393,7 @@ function renderStatus() {
   const generated = state.data.generated_at_utc ? new Date(state.data.generated_at_utc).toLocaleString() : "unknown";
   els.status.innerHTML = `
     <strong>Snapshot loaded</strong>
-    <span>${formatNumber(state.data.metrics.acquisition_rows)} acquisition rows from ${escapeHtml(state.data.source_run)} · generated ${escapeHtml(generated)}</span>
+    <span>${formatNumber(state.data.metrics.evidence_registry_rows || state.data.evidence_registry?.length || 0)} registry records and ${formatNumber(state.data.metrics.acquisition_rows)} acquisition rows from ${escapeHtml(state.data.source_run)} · generated ${escapeHtml(generated)}</span>
   `;
 }
 
@@ -312,6 +402,8 @@ function render() {
   renderLegend();
   renderProducts();
   renderSourceBars();
+  renderRegistrySummary();
+  renderRegistry();
   renderQueue();
   renderPhotos();
   renderSweeps();
