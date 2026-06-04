@@ -75,9 +75,35 @@ assert(Number.isFinite(Number(manifest.summary.assimilationPlan?.workstreams)), 
 assert(manifest.summary.assimilationPlan?.recipeBridge?.targetClusterLimit >= manifest.summary.recipeBridge?.clusters, "assimilation plan should not recommend shrinking recipe clusters");
 assert(manifest.summary.evidence.recipeClusters >= 100, "recipe clusters should be indexed as compact evidence");
 assert(manifest.summary.overlays.withRecipeClusters >= 100, "recipe bridge clusters should appear in menu overlays");
+assert(manifest.summary.evidence.ingredientAnalytics >= 500, "ingredient analytics should be indexed as compact evidence");
 assert(manifest.summary.enrichment.ocrCandidates >= 1000, "OCR triage candidates should be summarized in the enrichment graph");
 assert(manifest.summary.overlays.withOcrCandidates >= 1000, "OCR triage should appear as menu overlay evidence");
 assert(Object.keys(evidenceIndex.ocrCandidates || {}).length >= 1000, "OCR triage evidence should be indexed compactly");
+assert.strictEqual(
+  Object.keys(evidenceIndex.ingredientAnalytics || {}).length,
+  manifest.summary.evidence.ingredientAnalytics,
+  "ingredient analytics shard count should match manifest summary"
+);
+assert(
+  Object.values(evidenceIndex.ingredientAnalytics || {}).some((record) => record.type === "ingredient_term_summary" && record.ingredient === "fish"),
+  "ingredient analytics should expose high-signal ingredient term summaries"
+);
+assert(
+  Object.values(evidenceIndex.ingredientAnalytics || {}).some((record) => record.type === "ingredient_by_source" && record.sourceId === "cia_menu_collection"),
+  "ingredient analytics should include source-level rollups"
+);
+assert(
+  Object.values(evidenceIndex.ingredientAnalytics || {}).some((record) => record.type === "ingredient_by_decade" && record.decade && record.decade !== "unknown"),
+  "ingredient analytics should include decade rollups"
+);
+assert(
+  Object.values(evidenceIndex.ingredientAnalytics || {}).some((record) => record.type === "ingredient_by_dish_type" && record.dishType === "seafood"),
+  "ingredient analytics should include dish-type rollups"
+);
+assert(
+  Object.values(evidenceIndex.ingredientAnalytics || {}).some((record) => record.type === "ingredient_pair" && record.ingredients?.length === 2),
+  "ingredient analytics should include ingredient-pair rollups"
+);
 if (coverageReport.summary?.sources) {
   assert.strictEqual(manifest.summary.enrichment.sourceCoverage, coverageReport.summary.sources, "source coverage count should be summarized in the enrichment graph");
   assert.strictEqual(manifest.summary.coverage.sources, coverageReport.summary.sources, "coverage report summary should be included in the graph manifest");

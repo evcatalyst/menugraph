@@ -2412,8 +2412,8 @@ function renderGraphLens(svg, width, height) {
     { label: "Graph Nodes", value: formatNumber(core.nodes || 0), detail: `${formatNumber(core.edges || 0)} edges` },
     {
       label: "Evidence",
-      value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0) + (evidence.recipeClusters || 0)),
-      detail: "date / price / recipe",
+      value: formatNumber((evidence.dateEvidence || 0) + (evidence.priceObservations || 0) + (evidence.matches || 0) + (evidence.recipeClusters || 0) + (evidence.ingredientAnalytics || 0)),
+      detail: "date / price / ingredient",
     },
     {
       label: "Assimilation",
@@ -2628,6 +2628,7 @@ function drawEvidenceStack(svg, x, y, width, height, summary) {
     { label: "Price overlays", value: overlays.withPrices || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Cross-source matches", value: overlays.withMatches || 0, total: overlays.menus || summary.menus || 1 },
     { label: "Recipe bridges", value: overlays.withRecipeClusters || evidence.recipeClusters || 0, total: overlays.menus || summary.menus || 1 },
+    { label: "Ingredient analytics", value: evidence.ingredientAnalytics || 0, total: Math.max(evidence.ingredientAnalytics || 0, 1) },
     { label: runPlan.storageOk ? "Runnable OCR queue" : "OCR queue blocked", value: runPlan.pendingImages || 0, total: Math.max(runPlan.pendingImages || 0, coverageSafeTotal(summary)) },
   ];
   svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
@@ -2815,7 +2816,7 @@ function describeGraphOverlay() {
   setActivity({
     label: "Graph Lens",
     title: "Static graph overlay loaded",
-    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.priceObservations || 0)} price items, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
+    detail: `${formatNumber(sources)} evaluated sources, ${formatNumber(nodes)} compact nodes, ${formatNumber(evidence.dateEvidence || 0)} date items, ${formatNumber(evidence.priceObservations || 0)} price items, ${formatNumber(evidence.ingredientAnalytics || 0)} ingredient analytics, and ${formatNumber(evidence.matches || 0)} match links.${assimilationDetail}`,
     progress: 1,
   });
 }

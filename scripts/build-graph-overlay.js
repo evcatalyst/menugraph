@@ -27,6 +27,11 @@ const MAX_DISH_RECIPE_LINK_INDEX = 1600;
 const MAX_RECIPE_CLUSTER_NODES = 90;
 const MAX_RECIPE_INGREDIENT_EDGES = 4;
 const MAX_RECIPE_SOURCE_EDGES = 120;
+const MAX_INGREDIENT_TERM_ANALYTICS = 160;
+const MAX_INGREDIENT_SOURCE_ANALYTICS = 240;
+const MAX_INGREDIENT_DECADE_ANALYTICS = 180;
+const MAX_INGREDIENT_DISH_TYPE_ANALYTICS = 140;
+const MAX_INGREDIENT_PAIR_ANALYTICS = 220;
 const OVERLAY_SOURCE_SPLIT_THRESHOLD_BYTES = Math.floor(SIZE_BUDGET_BYTES * 0.65);
 const OVERLAY_SUBSHARD_TARGET_BYTES = Math.floor(SIZE_BUDGET_BYTES * 0.35);
 
@@ -103,6 +108,10 @@ function priceNodeId(record, index) {
 
 function dateEvidenceNodeId(record) {
   return `date:${cleanValue(record.menuId || record.menu_id || "unknown")}`;
+}
+
+function ingredientAnalyticsId(kind, parts) {
+  return `ingredient:${kind}:${parts.map((part) => slug(part)).join(":")}`;
 }
 
 function edgeId(type, parts) {
@@ -388,6 +397,31 @@ function compactDishEvidence(fields) {
   };
 }
 
+function topObjectEntries(map, limit = 8) {
+  return Object.fromEntries(
+    [...(map || new Map()).entries()]
+      .sort((a, b) => Number(b[1] || 0) - Number(a[1] || 0) || String(a[0]).localeCompare(String(b[0])))
+      .slice(0, limit)
+  );
+}
+
+function incrementMap(map, key, amount = 1) {
+  const cleanKey = cleanValue(key);
+  if (!cleanKey) return;
+  map.set(cleanKey, Number(map.get(cleanKey) || 0) + Number(amount || 1));
+}
+
+function decadeFromYear(year) {
+  const value = Number(year);
+  return Number.isFinite(value) && value > 0 ? `${Math.floor(value / 10) * 10}s` : "";
+}
+
+function evidenceDecade(value, year = null) {
+  const text = cleanValue(value);
+  if (text && text.toLowerCase() !== "unknown") return text;
+  return decadeFromYear(year) || "unknown";
+}
+
 function compactRecipeClusterEvidence(cluster) {
   return {
     id: cleanValue(cluster.id),
@@ -408,6 +442,360 @@ function compactRecipeClusterEvidence(cluster) {
     })),
     confidence: Number(cluster.confidence || 0),
   };
+}
+
+function menuMetadataIndex(menus, externalMenus) {
+  const index = new Map();
+  const set = (key, meta) => {
+    const cleanKey = cleanValue(key);
+    if (!cleanKey || index.has(cleanKey)) return;
+    index.set(cleanKey, meta);
+  };
+
+  for (const menu of menus || []) {
+    const uid = recordUid(menu);
+    const sourceKey = cleanValue(menu.sourceKey || "cia");
+    const meta = {
+      menuId: uid,
+      sourceKey,
+      sourceId: sourceIdForKey(sourceKey),
+      year: menu.year || null,
+      decade: evidenceDecade(menu.decade, menu.year),
+    };
+    set(uid, meta);
+    set(menu.uid, meta);
+    set(menu.id, meta);
+    set(menu.sourceRecordId, meta);
+    set(menu.pointer, meta);
+    if (sourceKey === "cia") set(`cia:${menu.id || menu.pointer || menu.sourceRecordId}`, meta);
+  }
+
+  for (const record of externalMenus || []) {
+    const uid = cleanValue(record.menuId || record.id);
+    const sourceKey = cleanValue(record.sourceKey || "external");
+    const sourceId = cleanValue(record.sourceId) || sourceIdForKey(sourceKey);
+    const year = record.year || record.pointYear || record.lowerYear || null;
+    const meta = {
+      menuId: uid,
+      sourceKey,
+      sourceId,
+      year,
+      decade: evidenceDecade(record.decade, year),
+    };
+    set(uid, meta);
+    set(record.id, meta);
+    set(record.sourceRecordId, meta);
+  }
+
+  return index;
+}
+
+function sortedIngredientTags(tags) {
+  return [...new Set((tags || []).map(cleanValue).filter(Boolean))].sort();
+}
+
+function defaultIngredientStats(term) {
+  return {
+    ingredient: term,
+    occurrenceCount: 0,
+    dishMentionCount: 0,
+    priceObservationCount: 0,
+    recipeClusterCount: 0,
+    menuIds: new Set(),
+    sources: new Map(),
+    decades: new Map(),
+    dishTypes: new Map(),
+  };
+}
+
+function defaultGroupedIngredientStats(parts) {
+  return {
+    ...parts,
+    count: 0,
+    menuIds: new Set(),
+    dishMentionCount: 0,
+    priceObservationCount: 0,
+  };
+}
+
+function countIngredientObservation(context) {
+  const { analytics, tags, menuId, sourceId, decade, dishType, evidenceKind } = context;
+  if (!tags.length) return;
+
+  for (const ingredient of tags) {
+    const term = analytics.terms.get(ingredient) || defaultIngredientStats(ingredient);
+    term.occurrenceCount += 1;
+    if (evidenceKind === "dish") term.dishMentionCount += 1;
+    if (evidenceKind === "price") term.priceObservationCount += 1;
+    if (evidenceKind === "recipe") term.recipeClusterCount += 1;
+    if (menuId) term.menuIds.add(menuId);
+    incrementMap(term.sources, sourceId || "unknown_source");
+    incrementMap(term.decades, decade || "unknown");
+    incrementMap(term.dishTypes, dishType || "dish");
+    analytics.terms.set(ingredient, term);
+
+    const sourceKey = `${sourceId || "unknown_source"}|${ingredient}`;
+    const sourceRow =
+      analytics.bySource.get(sourceKey) ||
+      defaultGroupedIngredientStats({
+        sourceId: sourceId || "unknown_source",
+        ingredient,
+      });
+    sourceRow.count += 1;
+    if (menuId) sourceRow.menuIds.add(menuId);
+    if (evidenceKind === "dish") sourceRow.dishMentionCount += 1;
+    if (evidenceKind === "price") sourceRow.priceObservationCount += 1;
+    analytics.bySource.set(sourceKey, sourceRow);
+
+    const decadeKey = `${decade || "unknown"}|${ingredient}`;
+    const decadeRow =
+      analytics.byDecade.get(decadeKey) ||
+      defaultGroupedIngredientStats({
+        decade: decade || "unknown",
+        ingredient,
+      });
+    decadeRow.count += 1;
+    if (menuId) decadeRow.menuIds.add(menuId);
+    if (evidenceKind === "dish") decadeRow.dishMentionCount += 1;
+    if (evidenceKind === "price") decadeRow.priceObservationCount += 1;
+    analytics.byDecade.set(decadeKey, decadeRow);
+
+    const dishTypeKey = `${dishType || "dish"}|${ingredient}`;
+    const dishTypeRow =
+      analytics.byDishType.get(dishTypeKey) ||
+      defaultGroupedIngredientStats({
+        dishType: dishType || "dish",
+        ingredient,
+      });
+    dishTypeRow.count += 1;
+    if (menuId) dishTypeRow.menuIds.add(menuId);
+    if (evidenceKind === "dish") dishTypeRow.dishMentionCount += 1;
+    if (evidenceKind === "price") dishTypeRow.priceObservationCount += 1;
+    analytics.byDishType.set(dishTypeKey, dishTypeRow);
+  }
+
+  for (let left = 0; left < tags.length; left += 1) {
+    for (let right = left + 1; right < tags.length; right += 1) {
+      const pair = [tags[left], tags[right]].sort();
+      const pairKey = pair.join("|");
+      const pairRow =
+        analytics.pairs.get(pairKey) ||
+        defaultGroupedIngredientStats({
+          ingredients: pair,
+        });
+      pairRow.count += 1;
+      if (menuId) pairRow.menuIds.add(menuId);
+      if (evidenceKind === "dish") pairRow.dishMentionCount += 1;
+      if (evidenceKind === "price") pairRow.priceObservationCount += 1;
+      analytics.pairs.set(pairKey, pairRow);
+    }
+  }
+}
+
+function rankedRows(map, limit, score = (row) => row.count) {
+  return [...map.values()]
+    .sort((a, b) => Number(score(b)) - Number(score(a)) || cleanValue(a.ingredient || a.ingredients?.join(" ") || "").localeCompare(cleanValue(b.ingredient || b.ingredients?.join(" ") || "")))
+    .slice(0, limit);
+}
+
+function buildIngredientAnalytics({ menus, enrichment, recipeBridge }) {
+  const externalMenus = enrichmentRecords(enrichment, "externalMenuRecords");
+  const menuMeta = menuMetadataIndex(menus, externalMenus);
+  const analytics = {
+    terms: new Map(),
+    bySource: new Map(),
+    byDecade: new Map(),
+    byDishType: new Map(),
+    pairs: new Map(),
+  };
+
+  const metaFor = (record) => {
+    const uid = cleanValue(record.menuId || record.menuUid || record.id);
+    const meta = menuMeta.get(uid) || {};
+    const sourceKey = cleanValue(record.sourceKey || meta.sourceKey || "unknown");
+    return {
+      menuId: uid || cleanValue(meta.menuId),
+      sourceKey,
+      sourceId: cleanValue(record.sourceId || meta.sourceId || sourceIdForKey(sourceKey)),
+      decade: evidenceDecade(record.decade || meta.decade, record.year || meta.year),
+    };
+  };
+
+  for (const record of enrichmentRecords(enrichment, "dishMentions")) {
+    const meta = metaFor(record);
+    countIngredientObservation({
+      analytics,
+      tags: sortedIngredientTags(record.ingredientTags),
+      menuId: meta.menuId,
+      sourceId: meta.sourceId,
+      decade: meta.decade,
+      dishType: cleanValue(record.dishType || "dish"),
+      evidenceKind: "dish",
+    });
+  }
+
+  for (const record of enrichmentRecords(enrichment, "priceObservations")) {
+    const meta = metaFor(record);
+    countIngredientObservation({
+      analytics,
+      tags: sortedIngredientTags(record.ingredientTags),
+      menuId: meta.menuId,
+      sourceId: meta.sourceId,
+      decade: meta.decade,
+      dishType: cleanValue(record.dishType || "dish"),
+      evidenceKind: "price",
+    });
+  }
+
+  for (const record of externalMenus) {
+    const meta = metaFor(record);
+    const baseTags = sortedIngredientTags(record.ingredientTags);
+    if (baseTags.length) {
+      countIngredientObservation({
+        analytics,
+        tags: baseTags,
+        menuId: meta.menuId,
+        sourceId: meta.sourceId,
+        decade: meta.decade,
+        dishType: "menu",
+        evidenceKind: "dish",
+      });
+    }
+    for (const dish of record.dishMentions || record.dishHints || []) {
+      countIngredientObservation({
+        analytics,
+        tags: sortedIngredientTags(dish.ingredientTags),
+        menuId: meta.menuId,
+        sourceId: meta.sourceId,
+        decade: meta.decade,
+        dishType: cleanValue(dish.dishType || "dish"),
+        evidenceKind: "dish",
+      });
+    }
+    for (const price of record.priceObservations || []) {
+      countIngredientObservation({
+        analytics,
+        tags: sortedIngredientTags(price.ingredientTags),
+        menuId: meta.menuId,
+        sourceId: meta.sourceId,
+        decade: meta.decade,
+        dishType: cleanValue(price.dishType || "dish"),
+        evidenceKind: "price",
+      });
+    }
+  }
+
+  for (const cluster of recipeBridge?.clusters || []) {
+    countIngredientObservation({
+      analytics,
+      tags: sortedIngredientTags(cluster.ingredientTags),
+      menuId: "",
+      sourceId: "recipe_bridge",
+      decade: evidenceDecade("", cluster.firstSeenYear),
+      dishType: cleanValue(cluster.dishType || "recipe_cluster"),
+      evidenceKind: "recipe",
+    });
+  }
+
+  const records = {};
+  const addRecord = (record) => {
+    if (!record?.id || records[record.id]) return;
+    records[record.id] = record;
+  };
+
+  for (const term of rankedRows(analytics.terms, MAX_INGREDIENT_TERM_ANALYTICS, (row) => row.occurrenceCount + row.menuIds.size * 2 + row.priceObservationCount * 2)) {
+    addRecord({
+      id: ingredientAnalyticsId("term", [term.ingredient]),
+      type: "ingredient_term_summary",
+      ingredient: term.ingredient,
+      occurrenceCount: term.occurrenceCount,
+      menuCount: term.menuIds.size,
+      dishMentionCount: term.dishMentionCount,
+      priceObservationCount: term.priceObservationCount,
+      recipeClusterCount: term.recipeClusterCount,
+      topSources: topObjectEntries(term.sources, 8),
+      topDecades: topObjectEntries(term.decades, 8),
+      topDishTypes: topObjectEntries(term.dishTypes, 8),
+      confidence: 0.72,
+      provenance: {
+        sourceFile: "enrichment/dish-mentions.json + enrichment/price-observations.json + enrichment/recipe-bridge.json",
+        method: "storage_light_ingredient_rollup",
+      },
+    });
+  }
+
+  for (const row of rankedRows(analytics.bySource, MAX_INGREDIENT_SOURCE_ANALYTICS, (item) => item.count + item.menuIds.size * 2 + item.priceObservationCount * 2)) {
+    addRecord({
+      id: ingredientAnalyticsId("source", [row.sourceId, row.ingredient]),
+      type: "ingredient_by_source",
+      ingredient: row.ingredient,
+      sourceId: row.sourceId,
+      count: row.count,
+      menuCount: row.menuIds.size,
+      dishMentionCount: row.dishMentionCount,
+      priceObservationCount: row.priceObservationCount,
+      confidence: 0.68,
+      provenance: {
+        sourceFile: "enrichment/dish-mentions.json + enrichment/price-observations.json",
+        method: "storage_light_source_ingredient_rollup",
+      },
+    });
+  }
+
+  for (const row of rankedRows(analytics.byDecade, MAX_INGREDIENT_DECADE_ANALYTICS, (item) => item.count + item.menuIds.size * 2 + item.priceObservationCount * 2)) {
+    addRecord({
+      id: ingredientAnalyticsId("decade", [row.decade, row.ingredient]),
+      type: "ingredient_by_decade",
+      ingredient: row.ingredient,
+      decade: row.decade,
+      count: row.count,
+      menuCount: row.menuIds.size,
+      dishMentionCount: row.dishMentionCount,
+      priceObservationCount: row.priceObservationCount,
+      confidence: 0.64,
+      provenance: {
+        sourceFile: "enrichment/dish-mentions.json + enrichment/price-observations.json",
+        method: "storage_light_decade_ingredient_rollup",
+      },
+    });
+  }
+
+  for (const row of rankedRows(analytics.byDishType, MAX_INGREDIENT_DISH_TYPE_ANALYTICS, (item) => item.count + item.menuIds.size + item.priceObservationCount * 2)) {
+    addRecord({
+      id: ingredientAnalyticsId("dish-type", [row.dishType, row.ingredient]),
+      type: "ingredient_by_dish_type",
+      ingredient: row.ingredient,
+      dishType: row.dishType,
+      count: row.count,
+      menuCount: row.menuIds.size,
+      dishMentionCount: row.dishMentionCount,
+      priceObservationCount: row.priceObservationCount,
+      confidence: 0.66,
+      provenance: {
+        sourceFile: "enrichment/dish-mentions.json + enrichment/price-observations.json",
+        method: "storage_light_dish_type_ingredient_rollup",
+      },
+    });
+  }
+
+  for (const row of rankedRows(analytics.pairs, MAX_INGREDIENT_PAIR_ANALYTICS, (item) => item.count + item.menuIds.size * 2 + item.priceObservationCount * 2)) {
+    addRecord({
+      id: ingredientAnalyticsId("pair", row.ingredients),
+      type: "ingredient_pair",
+      ingredients: row.ingredients,
+      count: row.count,
+      menuCount: row.menuIds.size,
+      dishMentionCount: row.dishMentionCount,
+      priceObservationCount: row.priceObservationCount,
+      confidence: 0.6,
+      provenance: {
+        sourceFile: "enrichment/dish-mentions.json + enrichment/price-observations.json",
+        method: "storage_light_ingredient_pair_rollup",
+      },
+    });
+  }
+
+  return records;
 }
 
 function buildDishCounts({ menus, analytics, ontology, prices, enrichment }) {
@@ -466,6 +854,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
     externalMenus: {},
     recipeClusters: {},
     dishRecipeLinks: {},
+    ingredientAnalytics: {},
   };
   const dishNamesByMenu = new Map();
   const ingredientTagsByMenu = new Map();
@@ -1665,6 +2054,7 @@ function buildEvidenceIndexArtifacts(evidenceIndex, generatedAt) {
     "externalMenus",
     "recipeClusters",
     "dishRecipeLinks",
+    "ingredientAnalytics",
   ];
   const artifacts = {};
   const shards = [];
@@ -1769,6 +2159,7 @@ async function buildGraphOverlay(options = {}) {
   if (sourceErrors.length) throw new Error(`Invalid source-capabilities graph:\n${sourceErrors.join("\n")}`);
 
   const { overlays, evidenceIndex } = buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichment });
+  evidenceIndex.ingredientAnalytics = buildIngredientAnalytics({ menus, enrichment, recipeBridge });
   const core = buildCoreGraph({
     menus,
     evaluations,
@@ -1802,6 +2193,7 @@ async function buildGraphOverlay(options = {}) {
     externalMenus: Object.keys(evidenceIndex.externalMenus).length,
     recipeClusters: Object.keys(evidenceIndex.recipeClusters).length,
     dishRecipeLinks: Object.keys(evidenceIndex.dishRecipeLinks).length,
+    ingredientAnalytics: Object.keys(evidenceIndex.ingredientAnalytics).length,
   };
   const evidenceIndexArtifacts = buildEvidenceIndexArtifacts(evidenceIndex, generatedAt);
   const publicEvidenceIndex = evidenceIndexArtifacts.index;
