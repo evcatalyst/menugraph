@@ -2712,11 +2712,12 @@ function graphSourceRows(graph) {
       const probe = probes[sourceId] || null;
       const coverageRow = coverage[sourceId] || null;
       const ingestedCount = source.sourceKey ? sourceCounts.get(source.sourceKey) || 0 : 0;
-      const externalCount = Number(externalCounts[sourceId] || 0);
-      const recipeBridgeCount = Number(coverageRow?.recipeBridgeClusters || 0);
+      const externalCount = Number(externalCounts[sourceId] || probe?.externalRows || 0);
+      const recipeBridgeCount = Math.max(Number(coverageRow?.recipeBridgeClusters || 0), Number(probe?.recipeBridgeClusters || 0));
       const sampleItems = Array.isArray(probe?.sampleItems) ? probe.sampleItems : [];
-      const statusKind = ingestedCount ? "ingested" : externalCount ? "external" : recipeBridgeCount ? "bridged" : probe ? "probed" : "evaluated";
-      const statusLabel = ingestedCount ? "Ingested" : externalCount ? "Graph Rows" : recipeBridgeCount ? "Bridge Targets" : probe ? "Probed" : "Evaluated";
+      const licenseRequired = probe?.status === "license_required" || coverageRow?.primaryNextAction === "license_diligence";
+      const statusKind = ingestedCount ? "ingested" : externalCount ? "external" : recipeBridgeCount ? "bridged" : licenseRequired ? "license" : probe ? "probed" : "evaluated";
+      const statusLabel = ingestedCount ? "Ingested" : externalCount ? "Graph Rows" : recipeBridgeCount ? "Bridge Targets" : licenseRequired ? "License Req" : probe ? "Probed" : "Evaluated";
       const coverageDetail = coverageRow
         ? recipeBridgeCount
           ? `${formatNumber(recipeBridgeCount)} bridge clusters / ${titleCase(coverageRow.primaryNextAction || "monitor")}`
@@ -2737,6 +2738,10 @@ function graphSourceRows(graph) {
         .slice(0, 2)
         .map((item) => [item.title, item.date].filter(Boolean).join(" / "))
         .join("; ");
+      const scaleText = [probe?.estimatedPublicScale, probe?.accessMethod].filter(Boolean).join(" / ");
+      const evidenceText = probe?.externalDishMentions || probe?.externalPriceObservations
+        ? `${formatNumber(probe.externalDishMentions || 0)} dish hints / ${formatNumber(probe.externalPriceObservations || 0)} prices`
+        : "";
       return {
         id: sourceId,
         label: source.label || source.id,
@@ -2751,16 +2756,20 @@ function graphSourceRows(graph) {
         statusDetail,
         sourceUrl: probe?.sourceUrl || "",
         publicItemCount: probe?.publicItemCount || null,
+        estimatedPublicScale: probe?.estimatedPublicScale || "",
+        accessMethod: probe?.accessMethod || "",
         coverageScore: Number(coverageRow?.coverageScore || 0),
         primaryNextAction: coverageRow?.primaryNextAction || "",
         sampleText,
+        scaleText,
+        evidenceText,
         notes: ingestedCount
           ? "Row-level menu metadata is in the static app; graph overlays add dish, price, date, and match evidence where available."
           : externalCount
-            ? "Derived external metadata is in the static graph overlay; raw images, OCR, and vectors remain out of public artifacts."
+            ? `Derived external metadata is in the static graph overlay; raw images, OCR, and vectors remain out of public artifacts.${evidenceText ? ` ${evidenceText}.` : ""}`
           : recipeBridgeCount
-            ? "Derived menu dish and ingredient clusters target this recipe source; no full recipe text or recipe rows are stored yet."
-          : probe?.notes || "",
+            ? `Derived menu dish and ingredient clusters target this recipe source; no full recipe text or recipe rows are stored yet.${scaleText ? ` ${scaleText}.` : ""}`
+            : probe?.notes || "",
       };
     })
     .sort((a, b) => {
@@ -2985,7 +2994,7 @@ function renderGraphSourceResults() {
 
       const note = document.createElement("p");
       note.className = "source-result-card__note";
-      note.textContent = row.sampleText || row.notes || "Evaluation-only source; row-level ingestion is planned after rights and export review.";
+      note.textContent = row.sampleText || row.scaleText || row.notes || "Evaluation-only source; row-level ingestion is planned after rights and export review.";
 
       card.append(top, title, meta, note);
       if (row.externalCount) {

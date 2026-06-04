@@ -1991,6 +1991,11 @@ body[data-active-lens="architecture"] .canvas-toolbar h2 {
   color: var(--muted);
 }
 
+.source-result-card--license .source-status-pill {
+  background: rgba(112, 69, 49, 0.12);
+  color: #704531;
+}
+
 .source-result-card small {
   flex: 0 0 auto;
   color: var(--muted);

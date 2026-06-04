@@ -136,7 +136,10 @@ assert(sourceNodeIds.has("source:recipe1m_plus"), "recipe enrichment source shou
 for (const sourceId of Object.keys(evidenceIndex.sourceProbes || {})) {
   assert(sourceNodeIds.has(`source:${sourceId}`), `source probe ${sourceId} should resolve to a source node`);
 }
-assert(Object.keys(evidenceIndex.sourceProbes || {}).length >= 4, "expected probed external sources in evidence index");
+assert.strictEqual(Object.keys(evidenceIndex.sourceProbes || {}).length, sourceNodeIds.size, "every modeled source should have a compact source probe");
+assert(evidenceIndex.sourceProbes.the_sifter?.recipeBridgeClusters > 0, "recipe/history source probes should expose bridge target counts");
+assert(evidenceIndex.sourceProbes.nypl_wotm?.ingestedRows > 0, "static source probes should expose represented row counts");
+assert(evidenceIndex.sourceProbes.dotlas_structured_menus?.status === "license_required", "commercial source probes should preserve license status");
 if (manifest.summary.externalMenus?.records) {
   assert(manifest.summary.externalMenus.bySource.northwestern_transport_menus > 0, "external Northwestern rows should be summarized by source");
   assert(manifest.summary.externalMenus.bySource.uh_1850s_1860s_menus > 0, "external UH rows should be summarized by source");

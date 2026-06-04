@@ -20,6 +20,7 @@ const { buildEnrichmentCoverageReport } = require("./build-enrichment-coverage-r
 const { buildRecipeBridge } = require("./build-recipe-bridge");
 const { buildEnrichmentRunPlan } = require("./build-enrichment-run-plan");
 const { buildAssimilationPlan } = require("./build-assimilation-plan");
+const { buildSourceProbes } = require("./build-source-probes");
 const { readRecipeBridgePayload } = require("./enrichment-shards");
 const {
   DEFAULT_MIN_FREE_MB,
@@ -366,6 +367,9 @@ async function runStorageLightPipeline(args, storageCheck) {
   });
   console.log(`[${timestamp()}] Recipe bridge complete: ${JSON.stringify(recipeBridge.summary)}`);
 
+  const sourceProbes = await buildSourceProbes({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Source probes complete: ${JSON.stringify(sourceProbes.summary)}`);
+
   const coverageReport = await buildEnrichmentCoverageReport({ dryRun: hasFlag(args, "dry-run") });
   console.log(`[${timestamp()}] Coverage report complete: ${JSON.stringify(coverageReport.summary)}`);
 
@@ -396,6 +400,7 @@ async function runStorageLightPipeline(args, storageCheck) {
     ocrTriage: ocrTriage.summary,
     localOcr,
     recipeBridge: recipeBridge.summary,
+    sourceProbes: sourceProbes.summary,
     coverageReport: coverageReport.summary,
     runPlan: runPlan.summary,
     assimilationPlan: assimilationPlan.summary,
@@ -564,6 +569,9 @@ async function main() {
   });
   console.log(`[${timestamp()}] Recipe bridge complete: ${JSON.stringify(recipeBridge.summary)}`);
 
+  const sourceProbes = await buildSourceProbes({ dryRun: hasFlag(args, "dry-run") });
+  console.log(`[${timestamp()}] Source probes complete: ${JSON.stringify(sourceProbes.summary)}`);
+
   await writeStatus({
     status: "running",
     phase: "coverage-report",
@@ -577,6 +585,7 @@ async function main() {
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
     recipeBridge: recipeBridge.summary,
+    sourceProbes: sourceProbes.summary,
   });
 
   const coverageReport = await buildEnrichmentCoverageReport({ dryRun: hasFlag(args, "dry-run") });
@@ -595,6 +604,7 @@ async function main() {
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
     recipeBridge: recipeBridge.summary,
+    sourceProbes: sourceProbes.summary,
     coverageReport: coverageReport.summary,
   });
 
@@ -620,6 +630,7 @@ async function main() {
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
     recipeBridge: recipeBridge.summary,
+    sourceProbes: sourceProbes.summary,
     coverageReport: coverageReport.summary,
     runPlan: runPlan.summary,
     assimilationPlan: assimilationPlan.summary,
@@ -642,6 +653,7 @@ async function main() {
     ocrTriage: ocrTriage.summary,
     localOcr: localOcr.summary || localOcr,
     recipeBridge: recipeBridge.summary,
+    sourceProbes: sourceProbes.summary,
     coverageReport: coverageReport.summary,
     runPlan: runPlan.summary,
     assimilationPlan: assimilationPlan.summary,
