@@ -197,6 +197,7 @@ function sourceRefreshRows(coverageRows = []) {
   const interestingActions = new Set([
     "expand_source_limit",
     "metadata_dish_hint_pass",
+    "source_route_review",
     "source_probe_or_ingest",
     "iiif_image_assessment",
   ]);
@@ -214,10 +215,10 @@ function sourceRefreshRows(coverageRows = []) {
         primaryNextAction: cleanValue(row.primaryNextAction || actionIds[0] || "monitor"),
         nextActions: actionIds,
         priority: round(
-          (1 - number(row.priceCoverage, 0)) * 3 +
+            (1 - number(row.priceCoverage, 0)) * 3 +
             (1 - number(row.dishCoverage, 0)) * 2 +
             (1 - number(row.imageCoverage, 0)) +
-            (row.primaryNextAction === "source_probe_or_ingest" ? 2 : 0),
+            (row.primaryNextAction === "source_probe_or_ingest" || row.primaryNextAction === "source_route_review" ? 2 : 0),
           2
         ),
         command: SOURCE_COMMANDS[row.sourceId] || "",

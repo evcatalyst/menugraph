@@ -91,6 +91,8 @@ const tulaneProbe = probeForSource(
 );
 assert.strictEqual(tulaneProbe.status, "modeled_only");
 assert.strictEqual(tulaneProbe.sourceKey, "tulane");
+assert.strictEqual(tulaneProbe.recommendedNextAction, "source_route_review");
+assert.strictEqual(tulaneProbe.routeStatus, "needs_metadata_route_review");
 assert(/Louisiana Menu and Restaurant Collection/i.test(tulaneProbe.estimatedPublicScale));
 
 const summary = summarize([

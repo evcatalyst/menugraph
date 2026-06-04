@@ -59,6 +59,24 @@ const bridgedRecipeActions = actionsForSource({
 });
 assert.strictEqual(bridgedRecipeActions[0].id, "recipe_bridge_expansion");
 
+const routeReviewActions = actionsForSource(
+  {
+    sourceId: "tulane_louisiana_menu_collection",
+    sourceType: "menu",
+    rowCount: 0,
+    priceCoverage: 0,
+    dishCoverage: 0,
+    imageCoverage: 0,
+    ocrFailures: 0,
+  },
+  {
+    recommendedNextAction: "source_route_review",
+    routeBlocker: "Stable bulk route is not verified.",
+  }
+);
+assert.strictEqual(routeReviewActions[0].id, "source_route_review");
+assert(routeReviewActions.some((item) => item.id === "source_probe_or_ingest"));
+
 const rows = sourceRows(
   new Map([
     [

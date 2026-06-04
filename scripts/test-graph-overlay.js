@@ -144,8 +144,18 @@ assert.strictEqual(Object.keys(evidenceIndex.sourceProbes || {}).length, sourceN
 assert(evidenceIndex.sourceProbes.the_sifter?.recipeBridgeClusters > 0, "recipe/history source probes should expose bridge target counts");
 assert(evidenceIndex.sourceProbes.nypl_wotm?.ingestedRows > 0, "static source probes should expose represented row counts");
 assert(evidenceIndex.sourceProbes.dotlas_structured_menus?.status === "license_required", "commercial source probes should preserve license status");
-assert(evidenceIndex.sourceProbes.tulane_louisiana_menu_collection?.status === "modeled_only", "Tulane should remain modeled only until row ingestion exists");
-assert(evidenceIndex.sourceProbes.unlv_menus_art_of_dining?.status === "modeled_only", "UNLV should remain modeled only until row ingestion exists");
+assert(evidenceIndex.sourceProbes.tulane_louisiana_menu_collection?.status === "metadata_probe", "Tulane should be tracked as a route-reviewed metadata probe");
+assert(evidenceIndex.sourceProbes.unlv_menus_art_of_dining?.status === "metadata_probe", "UNLV should be tracked as a route-reviewed metadata probe");
+assert.strictEqual(evidenceIndex.sourceProbes.tulane_louisiana_menu_collection?.ingestedRows, 0, "Tulane should not expose row ingestion until a stable route exists");
+assert.strictEqual(evidenceIndex.sourceProbes.unlv_menus_art_of_dining?.ingestedRows, 0, "UNLV should not expose row ingestion until a stable route exists");
+assert(
+  evidenceIndex.sourceProbes.tulane_louisiana_menu_collection?.recommendedNextAction === "source_route_review",
+  "Tulane source probe should expose route-review next action"
+);
+assert(
+  evidenceIndex.sourceCoverage.unlv_menus_art_of_dining?.primaryNextAction === "source_route_review",
+  "UNLV coverage row should prioritize source route review"
+);
 if (manifest.summary.externalMenus?.records) {
   assert(manifest.summary.externalMenus.bySource.northwestern_transport_menus > 0, "external Northwestern rows should be summarized by source");
   assert(manifest.summary.externalMenus.bySource.uh_1850s_1860s_menus > 0, "external UH rows should be summarized by source");

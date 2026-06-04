@@ -37,10 +37,23 @@ const refreshRows = sourceRefreshRows([
     primaryNextAction: "monitor",
     nextActions: [],
   },
+  {
+    sourceId: "tulane_louisiana_menu_collection",
+    label: "Tulane",
+    sourceType: "menu",
+    rowCount: 0,
+    dishCoverage: 0,
+    priceCoverage: 0,
+    imageCoverage: 0,
+    primaryNextAction: "source_route_review",
+    nextActions: [{ id: "source_route_review" }],
+  },
 ]);
-assert.strictEqual(refreshRows.length, 1);
-assert.strictEqual(refreshRows[0].sourceId, "denver_menu_collection");
-assert(refreshRows[0].command.includes("enrich:denver"));
+assert.strictEqual(refreshRows.length, 2);
+assert.strictEqual(refreshRows[0].sourceId, "tulane_louisiana_menu_collection");
+assert.strictEqual(refreshRows[0].command, "");
+assert.strictEqual(refreshRows[1].sourceId, "denver_menu_collection");
+assert(refreshRows[1].command.includes("enrich:denver"));
 
 const payload = buildRunPlanPayload(
   {

@@ -323,6 +323,16 @@ function actionsForSource(row, probe = null) {
   if (probe?.publicItemCount && probe.publicItemCount > row.rowCount * 1.5) {
     actions.push(action("expand_source_limit", "Increase source scrape limit", 5.5, `${probe.publicItemCount} public item(s) observed versus ${row.rowCount} row(s) currently represented.`));
   }
+  if (!row.rowCount && probe?.recommendedNextAction === "source_route_review") {
+    actions.push(
+      action(
+        "source_route_review",
+        "Review source metadata route before ingestion",
+        6.8,
+        probe.routeBlocker || "Source is modeled, but the metadata/API/export route must be confirmed before row-level ingestion."
+      )
+    );
+  }
   if (!row.rowCount && row.sourceType === "menu") {
     actions.push(action("source_probe_or_ingest", "Probe or ingest source rows", 4.8, "Source is modeled in capabilities but has no row-level menu evidence yet."));
   }
