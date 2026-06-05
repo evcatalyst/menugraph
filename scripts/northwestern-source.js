@@ -265,6 +265,115 @@ function normalizeHit(hit, references = {}) {
   };
 }
 
+function recordKey(record) {
+  return cleanValue(record?.sourceRecordId || record?.id || record?.menuId);
+}
+
+function dishKey(dish) {
+  return normalizedDishName(dish?.normalizedName || dish?.rawName || dish?.canonicalDishId || dish?.id);
+}
+
+function priceKey(price) {
+  return [
+    normalizedDishName(price?.normalizedName || price?.rawName || price?.item),
+    cleanValue(price?.rawPrice || price?.rawPriceText),
+    cleanValue(price?.currencyCode || price?.currency),
+  ].join("|");
+}
+
+function mergeUniqueEvidence(existing = [], incoming = [], keyFor) {
+  const seen = new Set();
+  const merged = [];
+  for (const item of [...existing, ...incoming]) {
+    const key = keyFor(item);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    merged.push(item);
+  }
+  return merged;
+}
+
+function evidenceScore(record) {
+  return (
+    (record?.dishMentions || []).length * 2 +
+    (record?.priceObservations || []).length * 4 +
+    (record?.ingredientTags || []).length +
+    (record?.metadataEnrichment ? 6 : 0)
+  );
+}
+
+function dishHintsFromMentions(dishMentions) {
+  return (dishMentions || []).map((dish) => ({
+    rawName: dish.rawName,
+    normalizedName: dish.normalizedName,
+    dishType: dish.dishType,
+    ingredientTags: dish.ingredientTags || [],
+    confidence: dish.confidence,
+  }));
+}
+
+function mergeNorthwesternRecord(existing, incoming) {
+  if (!existing) return incoming;
+  if (!incoming) return existing;
+  const existingScore = evidenceScore(existing);
+  const incomingScore = evidenceScore(incoming);
+  const base = existingScore > incomingScore ? { ...incoming, ...existing } : { ...existing, ...incoming };
+  const dishMentions = mergeUniqueEvidence(existing.dishMentions, incoming.dishMentions, dishKey);
+  const priceObservations = mergeUniqueEvidence(existing.priceObservations, incoming.priceObservations, priceKey);
+  const imageFeatures = mergeUniqueEvidence(existing.imageFeatures, incoming.imageFeatures, (feature) =>
+    cleanValue(feature?.id || feature?.iiifInfoUri || feature?.sourceImageUrl)
+  );
+  const ingredientTags = [
+    ...new Set(
+      [
+        ...(existing.ingredientTags || []),
+        ...(incoming.ingredientTags || []),
+        ...dishMentions.flatMap((dish) => dish.ingredientTags || []),
+        ...priceObservations.flatMap((price) => price.ingredientTags || []),
+      ]
+        .map(cleanValue)
+        .filter(Boolean)
+    ),
+  ].sort();
+
+  return {
+    ...base,
+    dishMentions,
+    dishHints: dishHintsFromMentions(dishMentions),
+    priceObservations,
+    imageFeatures,
+    ingredientTags,
+    metadataMerge: {
+      version: VERSION,
+      mergedAt: new Date().toISOString(),
+      existingEvidenceScore: existingScore,
+      incomingEvidenceScore: incomingScore,
+    },
+  };
+}
+
+function mergeNorthwesternRecords(existingRecords = [], incomingRecords = []) {
+  const byKey = new Map();
+  const order = [];
+  for (const record of incomingRecords) {
+    const key = recordKey(record);
+    if (!key) continue;
+    byKey.set(key, record);
+    order.push(key);
+  }
+  for (const existing of existingRecords) {
+    const key = recordKey(existing);
+    if (!key) continue;
+    if (byKey.has(key)) {
+      byKey.set(key, mergeNorthwesternRecord(existing, byKey.get(key)));
+    } else {
+      byKey.set(key, existing);
+      order.push(key);
+    }
+  }
+  return order.map((key) => byKey.get(key)).filter(Boolean);
+}
+
 async function readJson(relativePath, fallback) {
   try {
     return JSON.parse(await fs.readFile(path.join(DATA_DIR, relativePath), "utf8"));
@@ -315,7 +424,15 @@ async function buildNorthwesternSource(options = {}) {
   const references = { cpiUs, cpiCountry };
   const payload = options.payload || (await fetchNorthwesternRecords(options));
   const hits = payload.data || payload.hits?.hits || [];
-  const records = hits.map((hit) => normalizeHit(hit, references)).filter(Boolean);
+  const fetchedRecords = hits.map((hit) => normalizeHit(hit, references)).filter(Boolean);
+  const existingPayload =
+    options.mergeExisting === false
+      ? { records: [] }
+      : options.existingPayload || (await fs.readFile(OUTPUT_PATH, "utf8").then((text) => JSON.parse(text)).catch(() => ({ records: [] })));
+  const existingRecords = existingPayload.records || [];
+  const existingKeys = new Set(existingRecords.map(recordKey).filter(Boolean));
+  const fetchedKeys = new Set(fetchedRecords.map(recordKey).filter(Boolean));
+  const records = options.mergeExisting === false ? fetchedRecords : mergeNorthwesternRecords(existingRecords, fetchedRecords);
   const generatedAt = new Date().toISOString();
   const dishMentions = records.flatMap((record) => record.dishMentions || []);
   const priceObservations = records.flatMap((record) => record.priceObservations || []);
@@ -331,6 +448,10 @@ async function buildNorthwesternSource(options = {}) {
       totalHits: totalHits(payload),
       dishMentions: dishMentions.length,
       priceObservations: priceObservations.length,
+      fetchedRecords: fetchedRecords.length,
+      existingRecords: options.mergeExisting === false ? 0 : existingRecords.length,
+      duplicateMergedRecords: options.mergeExisting === false ? 0 : [...fetchedKeys].filter((key) => existingKeys.has(key)).length,
+      appendedFetchedRecords: options.mergeExisting === false ? fetchedRecords.length : [...fetchedKeys].filter((key) => !existingKeys.has(key)).length,
       withDates: records.filter((record) => record.lowerYear).length,
       withIiif: records.filter((record) => record.iiifManifestUrl).length,
       withDishHints: records.filter((record) => record.dishHints.length).length,
@@ -359,6 +480,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
     limit: Math.min(MAX_LIMIT, Math.max(1, Number(argValue(args, "limit", String(DEFAULT_LIMIT))) || DEFAULT_LIMIT)),
     query: cleanValue(argValue(args, "query", "menu transportation dining")),
     timeoutMs: Math.max(5000, Number(argValue(args, "timeout-ms", "30000")) || 30000),
+    mergeExisting: !hasFlag(args, "replace"),
     dryRun: hasFlag(args, "dry-run"),
   };
 }
@@ -383,6 +505,8 @@ if (require.main === module) {
 
 module.exports = {
   buildNorthwesternSource,
+  mergeNorthwesternRecord,
+  mergeNorthwesternRecords,
   MAX_LIMIT,
   normalizeHit,
   optionsFromArgs,

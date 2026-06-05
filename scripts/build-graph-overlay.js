@@ -18,6 +18,7 @@ const MAX_CORE_MENU_NODES = 1500;
 const MAX_EXTERNAL_MENU_NODES = 500;
 const MAX_INGREDIENT_TERMS = 120;
 const MAX_DISH_EVIDENCE_INDEX = 7000;
+const LOCAL_OCR_DISH_EVIDENCE_RESERVE = 250;
 const MAX_IMAGE_EVIDENCE_INDEX = 3000;
 const MAX_OCR_CANDIDATE_INDEX = 1000;
 const MAX_OCR_FAILURE_INDEX = 500;
@@ -1755,10 +1756,17 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
   const dishNamesByMenu = new Map();
   const ingredientTagsByMenu = new Map();
   const priceEnhancements = new Map();
+  const localOcrDishByMenu = new Map();
   let dishEvidenceIndexed = 0;
   let imageEvidenceIndexed = 0;
   for (const record of enrichmentRecords(enrichment, "priceObservations")) {
     priceEnhancements.set(priceEnhancementKey(record), record);
+  }
+  for (const record of enrichmentRecords(enrichment, "dishMentions")) {
+    if (record.extractionMethod !== "local_vision_ocr_dish") continue;
+    const uid = cleanValue(record.menuId);
+    if (!uid || localOcrDishByMenu.has(uid)) continue;
+    localOcrDishByMenu.set(uid, record);
   }
 
   for (const menu of menus) {
@@ -1864,7 +1872,7 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
       overlays[uid].dateEvidenceIds.push(id);
     }
     for (const dish of dishMentions) {
-      if (overlays[uid].dishMentionIds.length < 3 && dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX) {
+      if (overlays[uid].dishMentionIds.length < 3 && dishEvidenceIndexed < MAX_DISH_EVIDENCE_INDEX - LOCAL_OCR_DISH_EVIDENCE_RESERVE) {
         overlays[uid].dishMentionIds.push(dish.id);
         dishEvidenceIndexed += 1;
         evidenceIndex.dishMentions[dish.id] = compactDishEvidence({
@@ -1977,6 +1985,21 @@ function buildEvidenceIndexes({ menus, matches, prices, dateEstimates, enrichmen
         year: record.year || null,
         confidence: record.confidence || "unknown",
         method: record.extractionMethod,
+      });
+    }
+    const pairedDish = localOcrDishByMenu.get(uid);
+    const hasLocalDish = (overlay.dishMentionIds || []).some((id) => evidenceIndex.dishMentions[id]?.method === "local_vision_ocr_dish");
+    if (pairedDish && !hasLocalDish) {
+      if (overlay.dishMentionIds.length >= 2) overlay.dishMentionIds.pop();
+      overlay.dishMentionIds.push(pairedDish.id);
+      evidenceIndex.dishMentions[pairedDish.id] = compactDishEvidence({
+        id: pairedDish.id,
+        menuId: uid,
+        sourceId: pairedDish.sourceId,
+        rawName: pairedDish.rawName,
+        normalizedName: pairedDish.normalizedName,
+        dishType: pairedDish.dishType,
+        method: pairedDish.extractionMethod,
       });
     }
   }

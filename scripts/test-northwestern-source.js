@@ -1,6 +1,7 @@
 const assert = require("assert");
 const {
   MAX_LIMIT,
+  mergeNorthwesternRecords,
   normalizeHit,
   optionsFromArgs,
   parseDateRange,
@@ -63,14 +64,45 @@ function run() {
   assert.strictEqual(record.priceObservations[0].amount, 2);
   assert.strictEqual(record.priceObservations[0].currency, "USD");
 
+  const thinnerRecord = {
+    ...record,
+    title: "Updated API title",
+    dishMentions: [],
+    dishHints: [],
+    priceObservations: [],
+    ingredientTags: [],
+  };
+  const newRecord = {
+    ...record,
+    id: "northwestern:new-record",
+    menuId: "northwestern:new-record",
+    sourceRecordId: "new-record",
+    title: "New transportation menu",
+    dishMentions: [],
+    dishHints: [],
+    priceObservations: [],
+    ingredientTags: [],
+  };
+  const merged = mergeNorthwesternRecords([record], [thinnerRecord, newRecord]);
+  const mergedExisting = merged.find((item) => item.sourceRecordId === record.sourceRecordId);
+  assert.strictEqual(merged.length, 2);
+  assert.strictEqual(mergedExisting.dishMentions.length, 1);
+  assert.strictEqual(mergedExisting.priceObservations.length, 1);
+  assert(mergedExisting.ingredientTags.includes("bacon"));
+  assert(mergedExisting.metadataMerge);
+
   const expandedOptions = optionsFromArgs(["--limit=1000", "--query=railroad menu", "--timeout-ms=12000", "--dry-run"]);
   assert.strictEqual(expandedOptions.limit, 1000);
   assert.strictEqual(expandedOptions.query, "railroad menu");
   assert.strictEqual(expandedOptions.timeoutMs, 12000);
+  assert.strictEqual(expandedOptions.mergeExisting, true);
   assert.strictEqual(expandedOptions.dryRun, true);
 
   const cappedOptions = optionsFromArgs(["--limit=9999"]);
   assert.strictEqual(cappedOptions.limit, MAX_LIMIT);
+
+  const replaceOptions = optionsFromArgs(["--replace"]);
+  assert.strictEqual(replaceOptions.mergeExisting, false);
 
   console.log("northwestern source tests passed");
 }
