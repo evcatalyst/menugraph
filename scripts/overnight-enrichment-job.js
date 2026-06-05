@@ -97,6 +97,10 @@ function isStorageLight(args) {
   return hasFlag(args, "storage-light") || hasFlag(args, "metadata-only");
 }
 
+function isMetadataOnly(args) {
+  return hasFlag(args, "metadata-only");
+}
+
 function storagePreflightForArgs(args, label = STORAGE_LABEL) {
   return storagePreflightOptionsFromArgs(args, {
     targetDir: ROOT_DIR,
@@ -217,6 +221,12 @@ async function runExternalSources(args) {
 async function runExternalImageAssessment(args) {
   if (hasFlag(args, "skip-external-image-assessment")) {
     return { skipped: true };
+  }
+  if (isMetadataOnly(args)) {
+    return {
+      skipped: true,
+      reason: "Metadata-only mode skips external image assessment and image-route probing.",
+    };
   }
   const storageLight = isStorageLight(args);
   const defaultTimeout = storageLight ? String(STORAGE_LIGHT_EXTERNAL_IMAGE_TIMEOUT_MS) : argValue(args, "external-timeout-ms", "15000");
@@ -692,7 +702,9 @@ module.exports = {
   STORAGE_LIGHT_EXTERNAL_IMAGE_CONCURRENCY,
   STORAGE_LIGHT_EXTERNAL_IMAGE_TIMEOUT_MS,
   isStorageLight,
+  isMetadataOnly,
   recipeLimitForStorageMode,
+  runExternalImageAssessment,
   runStorageLightPipeline,
   storagePreflightForArgs,
 };

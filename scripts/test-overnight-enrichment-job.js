@@ -4,14 +4,19 @@ const {
   STORAGE_LIGHT_EXTERNAL_IMAGE_LIMIT,
   STORAGE_LIGHT_EXTERNAL_IMAGE_TIMEOUT_MS,
   STORAGE_LIGHT_MIN_FREE_MB,
+  isMetadataOnly,
   isStorageLight,
   recipeLimitForStorageMode,
+  runExternalImageAssessment,
   storagePreflightForArgs,
 } = require("./overnight-enrichment-job");
 
 assert.strictEqual(isStorageLight(["--storage-light"]), true);
 assert.strictEqual(isStorageLight(["--metadata-only"]), true);
 assert.strictEqual(isStorageLight(["--run-local-ocr"]), false);
+assert.strictEqual(isMetadataOnly(["--metadata-only"]), true);
+assert.strictEqual(isMetadataOnly(["--storage-light"]), false);
+assert.strictEqual(isMetadataOnly(["--run-local-ocr"]), false);
 
 const storageLightPreflight = storagePreflightForArgs(["--storage-light"], "test overnight");
 assert.strictEqual(storageLightPreflight.minFreeMb, STORAGE_LIGHT_MIN_FREE_MB);
@@ -37,4 +42,11 @@ assert.strictEqual(
 );
 assert.strictEqual(recipeLimitForStorageMode(["--recipe-dish-link-limit=50000"], existingRecipeBridge, "dishLinks", 1600), 50000);
 
-console.log("overnight enrichment job tests passed");
+runExternalImageAssessment(["--metadata-only"]).then((result) => {
+  assert.strictEqual(result.skipped, true);
+  assert.match(result.reason, /Metadata-only mode skips external image assessment/);
+  console.log("overnight enrichment job tests passed");
+}).catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
