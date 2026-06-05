@@ -2142,8 +2142,8 @@ function renderRunLogs() {
 function renderStatus() {
   const generated = state.data.generated_at_utc ? new Date(state.data.generated_at_utc).toLocaleString() : "unknown";
   els.status.innerHTML = `
-    <strong>Story mode loaded</strong>
-    <span>Data collection paused. Showing ${formatNumber(state.data.metrics.evidence_registry_rows || state.data.evidence_registry?.length || 0)} registry records from ${escapeHtml(state.data.source_run)} as a reader-facing proof snapshot · generated ${escapeHtml(generated)}</span>
+    <strong>Collection story snapshot loaded</strong>
+    <span>Showing ${formatNumber(state.data.metrics.evidence_registry_rows || state.data.evidence_registry?.length || 0)} registry records from ${escapeHtml(state.data.source_run)} as a reader-facing proof and collection snapshot · generated ${escapeHtml(generated)}</span>
   `;
 }
 
