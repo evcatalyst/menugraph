@@ -442,6 +442,104 @@ a:hover {
   font-weight: 750;
 }
 
+.scale-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.subsection-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.subsection-title strong {
+  font-size: 14px;
+}
+
+.subsection-title span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.scale-stack {
+  display: grid;
+  gap: 8px;
+  max-height: 520px;
+  overflow: auto;
+  padding-right: 3px;
+}
+
+.scale-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.scale-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.scale-title strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.scale-title span,
+.scale-card p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.scale-card p {
+  margin: 7px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.scale-meter {
+  height: 9px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: #e0d8cb;
+  overflow: hidden;
+}
+
+.scale-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--clay), var(--gold), var(--moss));
+}
+
+.scale-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.scale-stat-grid span {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  padding: 6px 7px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.scale-stat-grid strong {
+  color: var(--ink);
+}
+
 .campaign-card details {
   margin-top: 8px;
 }
@@ -764,7 +862,8 @@ td {
   }
 
   .workspace-grid,
-  .lower-grid {
+  .lower-grid,
+  .scale-grid {
     grid-template-columns: 1fr;
   }
 
@@ -794,6 +893,16 @@ td {
   .control-row,
   .legend {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .scale-title,
+  .subsection-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .scale-stat-grid {
+    grid-template-columns: 1fr;
   }
 
   .status-panel {

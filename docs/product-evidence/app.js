@@ -13,6 +13,10 @@ const els = {
   category: document.querySelector("#category-filter"),
   surface: document.querySelector("#surface-filter"),
   statusFilter: document.querySelector("#status-filter"),
+  scaleProducts: document.querySelector("#scale-product-rows"),
+  scaleCategories: document.querySelector("#scale-category-rows"),
+  scaleDomains: document.querySelector("#scale-domain-rows"),
+  scaleCount: document.querySelector("#scale-count"),
   vintageLegend: document.querySelector("#vintage-legend"),
   productRows: document.querySelector("#product-rows"),
   productCount: document.querySelector("#product-count"),
@@ -84,6 +88,11 @@ function escapeHtml(value) {
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString();
+}
+
+function numeric(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function firstPart(value) {
@@ -175,6 +184,19 @@ function passesProduct(row) {
   return true;
 }
 
+function weakCoverageProducts() {
+  return state.data.products
+    .filter(passesProduct)
+    .filter((row) => numeric(row.slot_coverage_pct) < 70 || numeric(row.slots_without_sources) > 0)
+    .sort((a, b) => {
+      const coverageDelta = numeric(a.slot_coverage_pct) - numeric(b.slot_coverage_pct);
+      if (coverageDelta) return coverageDelta;
+      const priorityDelta = numeric(b.target_priority) - numeric(a.target_priority);
+      if (priorityDelta) return priorityDelta;
+      return numeric(b.collection_opportunity_score) - numeric(a.collection_opportunity_score);
+    });
+}
+
 function passesCampaign(row) {
   const query = state.search.trim().toLowerCase();
   if (state.category && !String(row.categories || "").split(";").includes(state.category)) return false;
@@ -182,6 +204,100 @@ function passesCampaign(row) {
   if (state.status && row.packet_status !== state.status && row.campaign_status !== state.status) return false;
   if (query && !textBlob(row).includes(query)) return false;
   return true;
+}
+
+function categoryPriorityRows(products) {
+  const groups = new Map();
+  products.forEach((row) => {
+    const category = row.category || "uncategorized";
+    const group = groups.get(category) || {
+      category,
+      products: 0,
+      weakProducts: 0,
+      missingSlots: 0,
+      candidates: 0,
+      coverageTotal: 0,
+      topProducts: [],
+    };
+    const coverage = numeric(row.slot_coverage_pct);
+    group.products += 1;
+    group.coverageTotal += coverage;
+    group.candidates += numeric(row.product_candidate_count);
+    group.missingSlots += numeric(row.slots_without_sources);
+    if (coverage < 50) group.weakProducts += 1;
+    if (coverage < 70 || numeric(row.slots_without_sources) > 0) {
+      group.topProducts.push(row.display_name || row.canonical_name);
+    }
+    groups.set(category, group);
+  });
+  return [...groups.values()]
+    .map((row) => ({
+      ...row,
+      avgCoverage: row.products ? row.coverageTotal / row.products : 0,
+      topProducts: row.topProducts.slice(0, 5),
+    }))
+    .sort((a, b) => {
+      const weakDelta = b.weakProducts - a.weakProducts;
+      if (weakDelta) return weakDelta;
+      const missingDelta = b.missingSlots - a.missingSlots;
+      if (missingDelta) return missingDelta;
+      return a.avgCoverage - b.avgCoverage;
+    })
+    .slice(0, 10);
+}
+
+function domainPriorityRows() {
+  const query = state.search.trim().toLowerCase();
+  const groups = new Map();
+  (state.data.evidence_registry || []).forEach((row) => {
+    if (state.category && row.category !== state.category) return;
+    if (
+      state.status &&
+      row.evidence_status !== state.status &&
+      row.registry_record_type !== state.status &&
+      row.claim_link_status !== state.status
+    ) {
+      return;
+    }
+    if (query && !textBlob(row).includes(query)) return;
+    const domain = row.source_domain || "";
+    if (!domain) return;
+    const group = groups.get(domain) || {
+      domain,
+      products: new Set(),
+      categories: new Set(),
+      rows: 0,
+      labelVisible: 0,
+      sourceReview: 0,
+      usablePhoto: 0,
+      discovered: 0,
+      maxPriority: 0,
+    };
+    group.rows += 1;
+    group.products.add(row.canonical_name || row.display_name || "");
+    group.categories.add(row.category || "");
+    group.maxPriority = Math.max(group.maxPriority, numeric(row.registry_priority));
+    if (row.evidence_status === "label_visible") group.labelVisible += 1;
+    if (row.evidence_status === "source_review") group.sourceReview += 1;
+    if (row.evidence_status === "usable_photo") group.usablePhoto += 1;
+    if (row.evidence_status === "discovered") group.discovered += 1;
+    groups.set(domain, group);
+  });
+  return [...groups.values()]
+    .map((row) => ({
+      ...row,
+      productCount: [...row.products].filter(Boolean).length,
+      categoryCount: [...row.categories].filter(Boolean).length,
+    }))
+    .filter((row) => row.productCount > 1 || row.rows > 4)
+    .sort((a, b) => {
+      const productDelta = b.productCount - a.productCount;
+      if (productDelta) return productDelta;
+      const labelDelta = b.labelVisible - a.labelVisible;
+      if (labelDelta) return labelDelta;
+      return b.maxPriority - a.maxPriority;
+    })
+    .slice(0, 14);
 }
 
 function passesSearchTask(row) {
@@ -361,6 +477,74 @@ function renderCoverageSummary() {
       <article class="coverage-stat">
         <strong>${escapeHtml(row.value)}</strong>
         <span>${escapeHtml(labelFor(row.metric))}</span>
+      </article>
+    `)
+    .join("");
+}
+
+function renderScalePriorities() {
+  const weakProducts = weakCoverageProducts().slice(0, 12);
+  const categories = categoryPriorityRows(state.data.products.filter(passesProduct));
+  const domains = domainPriorityRows();
+  els.scaleCount.textContent = `${formatNumber(weakProducts.length + categories.length + domains.length)} lanes`;
+
+  els.scaleProducts.innerHTML = weakProducts
+    .map((row) => {
+      const bestUrl = firstPart(row.best_source_urls || row.starter_search_urls || row.starter_image_urls);
+      return `
+        <article class="scale-card">
+          <div class="scale-title">
+            <strong>${escapeHtml(row.display_name || row.canonical_name)}</strong>
+            <span>${escapeHtml(row.category || "")} · ${escapeHtml(row.slot_coverage_pct)}% coverage</span>
+          </div>
+          <div class="scale-meter" aria-hidden="true">
+            <span style="width:${Math.max(3, Math.min(100, numeric(row.slot_coverage_pct)))}%"></span>
+          </div>
+          <p>${escapeHtml(row.recommended_next_action || "Collect attributable source pages and classify visible panels.")}</p>
+          <div class="lead-meta">
+            ${statusTag(row.collection_track)}
+            ${statusTag(row.missing_vintages ? "missing_vintage_slot" : "candidate_found")}
+            ${linkOrText(bestUrl, "Source")}
+          </div>
+          <div class="small">${escapeHtml(row.missing_vintages ? `Missing: ${row.missing_vintages}` : `Needs panels: ${row.panel_needed_vintages || "review"}`)}</div>
+        </article>
+      `;
+    })
+    .join("");
+
+  els.scaleCategories.innerHTML = categories
+    .map((row) => `
+      <article class="scale-card">
+        <div class="scale-title">
+          <strong>${escapeHtml(labelFor(row.category))}</strong>
+          <span>${formatNumber(row.products)} products · ${row.avgCoverage.toFixed(1)}% avg coverage</span>
+        </div>
+        <div class="scale-stat-grid">
+          <span><strong>${formatNumber(row.weakProducts)}</strong> weak</span>
+          <span><strong>${formatNumber(row.missingSlots)}</strong> open slots</span>
+          <span><strong>${formatNumber(row.candidates)}</strong> candidates</span>
+        </div>
+        <p>${escapeHtml(row.topProducts.join("; "))}</p>
+      </article>
+    `)
+    .join("");
+
+  els.scaleDomains.innerHTML = domains
+    .map((row) => `
+      <article class="scale-card">
+        <div class="scale-title">
+          <strong>${escapeHtml(row.domain)}</strong>
+          <span>${formatNumber(row.productCount)} products · ${formatNumber(row.rows)} records</span>
+        </div>
+        <div class="scale-stat-grid">
+          <span><strong>${formatNumber(row.labelVisible)}</strong> labels</span>
+          <span><strong>${formatNumber(row.usablePhoto)}</strong> photos</span>
+          <span><strong>${formatNumber(row.sourceReview)}</strong> review</span>
+        </div>
+        <div class="lead-meta">
+          ${statusTag(row.discovered ? "discovered" : "source_review")}
+          <span class="status-tag">${formatNumber(row.categoryCount)} categories</span>
+        </div>
       </article>
     `)
     .join("");
@@ -654,6 +838,7 @@ function renderStatus() {
 
 function render() {
   renderMetrics();
+  renderScalePriorities();
   renderLegend();
   renderProducts();
   renderSourceBars();
