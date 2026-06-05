@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-05T05:42:39.838Z",
+  "generated_at_utc": "2026-06-05T05:47:29.841Z",
   "source_run": "runs/product-discovery-v3/product_discovery",
   "vintages": [
     "current_2020s",
@@ -18,7 +18,7 @@
     "collection_opportunities": 120,
     "current_web_manifests": 748,
     "common_crawl_sweeps": 324,
-    "common_crawl_run_logs": 49,
+    "common_crawl_run_logs": 51,
     "acquisition_rows": 1072,
     "source_review_ready": 503,
     "current_web_search_ready": 245,
@@ -52410,6 +52410,34 @@
   ],
   "common_crawl_run_logs": [
     {
+      "recorded_at_utc": "2026-06-05T05:47:19+00:00",
+      "command": "common_crawl_cdx",
+      "query_contains": "upcitemdb.com;cooklist.com;panerabread.com;dunkindonuts.com;subway.com;docslib.org;global.kfc.com;target.com",
+      "targets_considered": 100,
+      "queries_run": 10,
+      "query_errors": 10,
+      "records_seen": 0,
+      "records_rejected": 0,
+      "candidates_inserted": 0,
+      "error_sample": "Gateway Time-out",
+      "log_path": "runs/product-discovery-v3/product_discovery/common_crawl_cdx_last_run.json",
+      "query_errors_path": "runs/product-discovery-v3/product_discovery/common_crawl_cdx_query_errors.csv"
+    },
+    {
+      "recorded_at_utc": "2026-06-05T05:45:58+00:00",
+      "command": "common_crawl_cdx",
+      "query_contains": "upcitemdb.com;cooklist.com;panerabread.com;dunkindonuts.com;subway.com;docslib.org;global.kfc.com;target.com",
+      "targets_considered": 100,
+      "queries_run": 10,
+      "query_errors": 10,
+      "records_seen": 0,
+      "records_rejected": 0,
+      "candidates_inserted": 0,
+      "error_sample": "[Errno 8] nodename nor servname provided, or not known",
+      "log_path": "runs/product-discovery-v3/product_discovery/common_crawl_cdx_last_run.json",
+      "query_errors_path": "runs/product-discovery-v3/product_discovery/common_crawl_cdx_query_errors.csv"
+    },
+    {
       "recorded_at_utc": "2026-06-05T03:18:03+00:00",
       "command": "common_crawl_cdx",
       "query_contains": "upcfoodsearch.com;bcscan.com;go-upc.com;nutritiondatalist.com;pepsicoschoolsource.com;healthscienceinsights.com",
@@ -64520,7 +64548,7 @@
       "last_run_no_records": 1
     },
     "crawl_run_commands": {
-      "common_crawl_cdx": 41,
+      "common_crawl_cdx": 43,
       "common_crawl_archive": 8
     },
     "crawl_run_queries": {
@@ -64536,6 +64564,7 @@
       "plk-use1-prod.sites.rbictg.com;chipotle.com;panerabread.com;subway.com;about.starbucks.com;global.kfc.com;wendys.com": 2,
       "target.com": 2,
       "upcfoodsearch.com;bcscan.com;go-upc.com;nutritiondatalist.com;pepsicoschoolsource.com;healthscienceinsights.com": 2,
+      "upcitemdb.com;cooklist.com;panerabread.com;dunkindonuts.com;subway.com;docslib.org;global.kfc.com;target.com": 2,
       "walmart.com": 2,
       "popeyes;subway": 1,
       "smartlabel;openfoodfacts;walmart.com;kroger.com;directionsforme": 1
