@@ -17,6 +17,9 @@ const els = {
   productRows: document.querySelector("#product-rows"),
   productCount: document.querySelector("#product-count"),
   sourceBars: document.querySelector("#source-bars"),
+  gapRows: document.querySelector("#gap-rows"),
+  gapCount: document.querySelector("#gap-count"),
+  coverageSummary: document.querySelector("#coverage-summary"),
   registrySummary: document.querySelector("#registry-summary"),
   registryRows: document.querySelector("#registry-rows"),
   registryCount: document.querySelector("#registry-count"),
@@ -63,6 +66,10 @@ const statusLabels = {
   query_errors: "Query Errors",
   records_seen: "Records Seen",
   empty_result: "Empty Result",
+  search_backlog: "Search Backlog",
+  missing_vintage_slot: "Missing Vintage",
+  needs_source_discovery: "Needs Source Discovery",
+  no_candidate: "No Candidate",
 };
 
 function escapeHtml(value) {
@@ -186,6 +193,22 @@ function passesSearchTask(row) {
   return true;
 }
 
+function passesGap(row) {
+  const query = state.search.trim().toLowerCase();
+  if (state.category && row.category !== state.category) return false;
+  if (state.surface && row.search_surface !== state.surface) return false;
+  if (
+    state.status &&
+    row.review_stage !== state.status &&
+    row.summary_type !== state.status &&
+    row.next_verification_gap !== state.status
+  ) {
+    return false;
+  }
+  if (query && !textBlob(row).includes(query)) return false;
+  return true;
+}
+
 function passesPhoto(row) {
   const query = state.search.trim().toLowerCase();
   if (state.category && row.category !== state.category) return false;
@@ -239,7 +262,14 @@ function renderMetrics() {
 
 function renderFilters() {
   const categories = [...new Set(state.data.products.map((row) => row.category).filter(Boolean))].sort();
-  const surfaces = [...new Set(state.data.acquisition_queue.map((row) => row.acquisition_surface).filter(Boolean))].sort();
+  const surfaces = [
+    ...new Set([
+      ...state.data.acquisition_queue.map((row) => row.acquisition_surface).filter(Boolean),
+      ...(state.data.gap_summary || []).map((row) => row.search_surface).filter(Boolean),
+      ...(state.data.collection_campaign_packets || []).map((row) => row.search_surface).filter(Boolean),
+      ...(state.data.mass_search_tasks || []).map((row) => row.search_surface).filter(Boolean),
+    ]),
+  ].sort();
   const statuses = [
     ...new Set([
       ...state.data.acquisition_queue.map((row) => row.acquisition_status).filter(Boolean),
@@ -247,6 +277,9 @@ function renderFilters() {
       ...(state.data.collection_campaign_packets || []).map((row) => row.packet_status).filter(Boolean),
       ...(state.data.collection_campaigns || []).map((row) => row.campaign_status).filter(Boolean),
       ...(state.data.mass_search_tasks || []).map((row) => row.review_stage).filter(Boolean),
+      ...(state.data.gap_summary || []).map((row) => row.review_stage).filter(Boolean),
+      ...(state.data.gap_summary || []).map((row) => row.summary_type).filter(Boolean),
+      ...(state.data.gap_summary || []).map((row) => row.next_verification_gap).filter(Boolean),
       ...(state.data.common_crawl_run_logs || []).map(runLogStatus).filter(Boolean),
     ]),
   ].sort();
@@ -315,6 +348,55 @@ function renderSourceBars() {
           </header>
           <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
           <span class="small">${escapeHtml(row.category)} · ${escapeHtml(labelFor(row.surface))}</span>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderCoverageSummary() {
+  const rows = state.data.coverage_summary || [];
+  els.coverageSummary.innerHTML = rows
+    .map((row) => `
+      <article class="coverage-stat">
+        <strong>${escapeHtml(row.value)}</strong>
+        <span>${escapeHtml(labelFor(row.metric))}</span>
+      </article>
+    `)
+    .join("");
+}
+
+function renderGaps() {
+  const rows = (state.data.gap_summary || [])
+    .filter(passesGap)
+    .sort((a, b) => Number(b.max_priority || 0) - Number(a.max_priority || 0))
+    .slice(0, 80);
+  els.gapCount.textContent = `${formatNumber(rows.length)} gaps`;
+  els.gapRows.innerHTML = rows
+    .map((row) => {
+      const gapText = row.next_verification_gap || row.review_stage || row.summary_type || "";
+      return `
+        <article class="gap-card">
+          <div class="campaign-head">
+            <div>
+              <strong>${escapeHtml(row.source_name || row.source_key || "Evidence source")}</strong>
+              <span>${escapeHtml(row.category || "")} · ${escapeHtml(row.vintage_label || "")}</span>
+            </div>
+            <span class="priority-badge">${formatNumber(row.max_priority)}</span>
+          </div>
+          <p>${escapeHtml(gapText ? labelFor(gapText) : "Source discovery backlog")}</p>
+          <div class="campaign-stats">
+            <span>${formatNumber(row.product_count)} products</span>
+            <span>${formatNumber(row.search_task_count)} searches</span>
+            <span>${formatNumber(row.slot_count)} slots</span>
+          </div>
+          <div class="campaign-products">${escapeHtml(row.top_products || "")}</div>
+          <div class="lead-meta">
+            ${statusTag(row.summary_type)}
+            ${statusTag(row.review_stage)}
+            ${statusTag(row.search_surface)}
+            ${statusTag(row.source_kind)}
+          </div>
         </article>
       `;
     })
@@ -575,6 +657,8 @@ function render() {
   renderLegend();
   renderProducts();
   renderSourceBars();
+  renderCoverageSummary();
+  renderGaps();
   renderCampaigns();
   renderSearchTasks();
   renderRegistrySummary();

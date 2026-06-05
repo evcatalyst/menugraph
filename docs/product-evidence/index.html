@@ -17,6 +17,7 @@
         <nav class="topnav" aria-label="MenuGraph navigation">
           <a href="../">MenuGraph</a>
           <a href="#evidence-registry">Evidence Registry</a>
+          <a href="#gaps">Collection Gaps</a>
           <a href="#campaigns">Campaigns</a>
           <a href="#acquisition">Acquisition Queue</a>
           <a href="#products">Products</a>
@@ -71,6 +72,29 @@
             </div>
           </div>
           <div id="source-bars" class="source-bars"></div>
+        </aside>
+      </section>
+
+      <section class="workspace-grid" id="gaps">
+        <section class="panel gap-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Collection Gaps</p>
+              <h2>Next Evidence Targets</h2>
+            </div>
+            <span id="gap-count" class="count-pill">0 gaps</span>
+          </div>
+          <div id="gap-rows" class="gap-grid"></div>
+        </section>
+
+        <aside class="panel coverage-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Coverage</p>
+              <h2>Board Snapshot</h2>
+            </div>
+          </div>
+          <div id="coverage-summary" class="coverage-summary"></div>
         </aside>
       </section>
 
