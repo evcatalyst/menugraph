@@ -10,6 +10,7 @@ const state = {
 const els = {
   status: document.querySelector("#status"),
   metrics: document.querySelector("#metrics"),
+  crawlHealth: document.querySelector("#crawl-health"),
   storySelector: document.querySelector("#story-selector"),
   storyFocus: document.querySelector("#story-focus"),
   storySummary: document.querySelector("#story-summary"),
@@ -475,6 +476,69 @@ function runLogStatus(row) {
   return "empty_result";
 }
 
+function runLogSummary(rows) {
+  const logs = rows || [];
+  const latest = logs[0] || {};
+  const totals = logs.reduce(
+    (memo, row) => ({
+      queries: memo.queries + numeric(row.queries_run),
+      errors: memo.errors + numeric(row.query_errors),
+      seen: memo.seen + numeric(row.records_seen),
+      rejected: memo.rejected + numeric(row.records_rejected),
+      inserted: memo.inserted + numeric(row.candidates_inserted),
+      failedRuns:
+        memo.failedRuns +
+        (numeric(row.query_errors) > 0 && numeric(row.records_seen) === 0 && numeric(row.candidates_inserted) === 0 ? 1 : 0),
+    }),
+    { queries: 0, errors: 0, seen: 0, rejected: 0, inserted: 0, failedRuns: 0 },
+  );
+  const queryErrorRate = totals.queries ? Math.round((totals.errors / totals.queries) * 100) : 0;
+  const errorRow = logs.find((row) => row.error_sample);
+  return {
+    latest,
+    totals,
+    latestStatus: latest ? runLogStatus(latest) : "",
+    queryErrorRate,
+    errorSample: errorRow?.error_sample || "",
+  };
+}
+
+function crawlHealthNarrative(summary) {
+  if (!summary.totals.queries) {
+    return {
+      title: "No crawl runs match this view",
+      meaning: "The current filters do not expose Common Crawl attempts, so the product story should lean on source-review and current-web queues.",
+      next: "Clear filters or open the Common Crawl table to inspect all archive sweeps.",
+    };
+  }
+  if (summary.totals.inserted > 0) {
+    return {
+      title: "Archive captures produced candidate leads",
+      meaning: "Inserted candidates remain evidence leads until the capture, product identity, date basis, and readable label are reviewed together.",
+      next: "Review the inserted capture rows, dedupe URLs, and promote only source-attributable records with visible package or disclosure text.",
+    };
+  }
+  if (summary.totals.errors > 0 && summary.totals.seen === 0) {
+    return {
+      title: "Recent CDX attempts are blocked before evidence review",
+      meaning: "The run log records query errors without returned captures, so these archive sweeps explain a gap rather than supporting a product claim.",
+      next: "Retry the lane later, shift to curated archive pages or current-web source owners, and keep affected product vintages marked unsupported.",
+    };
+  }
+  if (summary.totals.seen > 0) {
+    return {
+      title: "Captures were found but not promoted",
+      meaning: "Common Crawl saw records, but rejection or dedupe rules prevented them from becoming product evidence candidates.",
+      next: "Inspect rejection reasons and tune source/product/date hints before moving any capture into source review.",
+    };
+  }
+  return {
+    title: "Archive sweeps are currently empty",
+    meaning: "The crawl lane has no candidates for this filtered story, so Common Crawl should not be used as claim evidence here.",
+    next: "Use product-specific source discovery, museum/archive pages, retailer photos, or manual vintage research for the next evidence step.",
+  };
+}
+
 function productBlob(row) {
   return [
     row.display_name,
@@ -696,6 +760,54 @@ function renderMetrics() {
   els.metrics.innerHTML = cards
     .map(([label, value]) => `<article class="metric"><strong>${formatNumber(value)}</strong><span>${escapeHtml(label)}</span></article>`)
     .join("");
+}
+
+function renderCrawlHealth() {
+  if (!els.crawlHealth) return;
+  const rows = (state.data.common_crawl_run_logs || []).filter(passesRunLog);
+  const recentRows = rows.slice(0, 8);
+  const summary = runLogSummary(recentRows);
+  const narrative = crawlHealthNarrative(summary);
+  const latest = recentRows[0] || {};
+  const latestRecorded = latest.recorded_at_utc ? new Date(latest.recorded_at_utc).toLocaleString() : "No matching run";
+  const latestLabel = latest.query_contains || latest.command || "No matching Common Crawl run";
+  const errorSample = summary.errorSample ? clipped(summary.errorSample, 220) : "No error sample recorded for the matching runs.";
+  const latestLinks = linkOrText(latest.log_path, "Log") + linkOrText(latest.query_errors_path, "Errors");
+  els.crawlHealth.innerHTML = `
+    <article class="crawl-health-card crawl-health-lede">
+      <p class="eyebrow">Crawl Health</p>
+      <h2>${escapeHtml(narrative.title)}</h2>
+      <p>${escapeHtml(narrative.meaning)}</p>
+      <div class="lead-meta">
+        ${statusTag("common_crawl")}
+        ${statusTag(summary.totals.inserted ? "candidates_inserted" : summary.totals.errors ? "query_errors" : "empty_result")}
+      </div>
+    </article>
+    <article class="crawl-health-card">
+      <span>Latest Matching Run</span>
+      <strong>${escapeHtml(latestLabel)}</strong>
+      <p>${escapeHtml(latestRecorded)}</p>
+      <div class="lead-meta">
+        ${latest.command ? statusTag(latest.command) : ""}
+        ${latestLinks}
+      </div>
+    </article>
+    <article class="crawl-health-card crawl-health-metrics">
+      <span>Recent Throughput</span>
+      <div>
+        <strong>${formatNumber(summary.totals.queries)}</strong><small>queries</small>
+        <strong>${formatNumber(summary.totals.errors)}</strong><small>errors</small>
+        <strong>${formatNumber(summary.totals.seen)}</strong><small>seen</small>
+        <strong>${formatNumber(summary.totals.inserted)}</strong><small>inserted</small>
+      </div>
+      <p>${formatNumber(summary.totals.failedRuns)} blocked runs · ${formatNumber(summary.queryErrorRate)}% query error rate</p>
+    </article>
+    <article class="crawl-health-card">
+      <span>Next Evidence Move</span>
+      <strong>${escapeHtml(narrative.next)}</strong>
+      <p>${escapeHtml(errorSample)}</p>
+    </article>
+  `;
 }
 
 function boardStoryCards(registryRows, productRows) {
@@ -1664,6 +1776,7 @@ function renderStatus() {
 
 function render() {
   renderMetrics();
+  renderCrawlHealth();
   renderStorylines();
   renderScalePriorities();
   renderLegend();
