@@ -11,8 +11,8 @@
       <header class="evidence-topbar">
         <div>
           <p class="eyebrow">MenuGraph Product Evidence</p>
-          <h1>Packaged Food Evidence Collection</h1>
-          <p class="summary">Source-attributable package photos, label review slots, current-web harvests, and Common Crawl sweeps for the 100-product ingredient-history board.</p>
+          <h1>Product Evidence Stories</h1>
+          <p class="summary">Evidence-backed product histories for ingredient, package, manufacturer, and price/weight changes, with every claim tied to source provenance or marked as a gap.</p>
         </div>
         <nav class="topnav" aria-label="MenuGraph navigation">
           <a href="../">MenuGraph</a>
@@ -32,8 +32,6 @@
         <span>Preparing collection queue, product coverage, and source-review views.</span>
       </section>
 
-      <section id="metrics" class="metrics-grid" aria-label="Collection metrics"></section>
-
       <section class="panel story-panel" id="stories">
         <div class="panel-heading">
           <div>
@@ -42,9 +40,16 @@
           </div>
           <span id="story-count" class="count-pill">0 stories</span>
         </div>
+        <div class="story-toolbar">
+          <div id="story-selector" class="story-selector" aria-label="Story selector"></div>
+          <p>Claims only move from leads to product history when source attribution, date basis, readable label evidence, and review state line up.</p>
+        </div>
+        <article id="story-focus" class="story-focus" aria-live="polite"></article>
         <div id="story-summary" class="story-summary"></div>
         <div id="story-rows" class="story-grid"></div>
       </section>
+
+      <section id="metrics" class="metrics-grid" aria-label="Collection metrics"></section>
 
       <section class="control-row" aria-label="Evidence filters">
         <label>
