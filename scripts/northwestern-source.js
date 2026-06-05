@@ -14,6 +14,7 @@ const API_URL = "https://api.dc.library.northwestern.edu/api/v2/search";
 const VERSION = 1;
 const DEFAULT_LIMIT = 120;
 const MAX_LIMIT = 2000;
+const DEFAULT_PAGE_SIZE = 1000;
 
 const SOURCE_FIELDS = [
   "id",
@@ -52,6 +53,11 @@ function values(value) {
   if (Array.isArray(value)) return value.map(cleanValue).filter(Boolean);
   const single = cleanValue(value);
   return single ? [single] : [];
+}
+
+function hitRecordId(hit) {
+  const source = hit?._source || hit || {};
+  return cleanValue(source.id || hit?._id);
 }
 
 function subjectLabels(subjects = []) {
@@ -387,11 +393,54 @@ async function writeJson(filePath, payload) {
   await fs.writeFile(filePath, `${JSON.stringify(payload)}\n`, "utf8");
 }
 
-async function fetchNorthwesternRecords(options) {
+function pagePlanForLimit(limit, pageSize = DEFAULT_PAGE_SIZE) {
+  const safeLimit = Math.min(MAX_LIMIT, Math.max(1, Number(limit) || DEFAULT_LIMIT));
+  const safePageSize = Math.min(safeLimit, Math.max(1, Number(pageSize) || DEFAULT_PAGE_SIZE));
+  const pages = [];
+  for (let offset = 0; offset < safeLimit; offset += safePageSize) {
+    pages.push({ offset, size: Math.min(safePageSize, safeLimit - offset) });
+  }
+  return pages;
+}
+
+function hitsForPayload(payload) {
+  return payload?.data || payload?.hits?.hits || [];
+}
+
+function mergePagedPayloads(payloads, options = {}) {
+  const records = [];
+  const seen = new Set();
+  for (const payload of payloads || []) {
+    for (const hit of hitsForPayload(payload)) {
+      const id = hitRecordId(hit);
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      records.push(hit);
+      if (options.limit && records.length >= options.limit) break;
+    }
+    if (options.limit && records.length >= options.limit) break;
+  }
+  const first = payloads?.[0] || {};
+  return {
+    ...first,
+    data: records,
+    pagination: {
+      ...(first.pagination || {}),
+      total_hits: Math.max(...(payloads || []).map((payload) => Number(totalHits(payload) || 0)), 0) || totalHits(first),
+      page_size: records.length,
+      offset: 0,
+    },
+    paged: Boolean((payloads || []).length > 1),
+    pageCount: (payloads || []).length,
+  };
+}
+
+async function fetchNorthwesternPage(options, page) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
+  const fetchImpl = options.fetch || fetch;
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetchImpl(API_URL, {
       method: "POST",
       signal: controller.signal,
       headers: {
@@ -400,7 +449,8 @@ async function fetchNorthwesternRecords(options) {
       },
       body: JSON.stringify({
         _source: SOURCE_FIELDS,
-        size: options.limit,
+        size: page.size,
+        from: page.offset,
         query: { match: { all_text: options.query } },
       }),
     });
@@ -409,6 +459,29 @@ async function fetchNorthwesternRecords(options) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function fetchNorthwesternRecords(options) {
+  const pageSize = Math.min(
+    Math.max(1, Number(options.pageSize || DEFAULT_PAGE_SIZE) || DEFAULT_PAGE_SIZE),
+    Math.max(1, Number(options.limit || DEFAULT_LIMIT) || DEFAULT_LIMIT)
+  );
+  const pages = pagePlanForLimit(options.limit, pageSize);
+  if (pages.length === 1) return fetchNorthwesternPage(options, pages[0]);
+
+  const payloads = [];
+  let previousUniqueCount = 0;
+  for (const page of pages) {
+    const payload = await fetchNorthwesternPage(options, page);
+    payloads.push(payload);
+    const merged = mergePagedPayloads(payloads, { limit: options.limit });
+    const uniqueCount = hitsForPayload(merged).length;
+    if (!hitsForPayload(payload).length || uniqueCount === previousUniqueCount) break;
+    previousUniqueCount = uniqueCount;
+    const total = Number(totalHits(payload) || 0);
+    if (total && uniqueCount >= Math.min(total, options.limit)) break;
+  }
+  return mergePagedPayloads(payloads, { limit: options.limit });
 }
 
 function totalHits(payload) {
@@ -479,6 +552,7 @@ function optionsFromArgs(args = process.argv.slice(2)) {
   return {
     limit: Math.min(MAX_LIMIT, Math.max(1, Number(argValue(args, "limit", String(DEFAULT_LIMIT))) || DEFAULT_LIMIT)),
     query: cleanValue(argValue(args, "query", "menu transportation dining")),
+    pageSize: Math.max(1, Number(argValue(args, "page-size", String(DEFAULT_PAGE_SIZE))) || DEFAULT_PAGE_SIZE),
     timeoutMs: Math.max(5000, Number(argValue(args, "timeout-ms", "30000")) || 30000),
     mergeExisting: !hasFlag(args, "replace"),
     dryRun: hasFlag(args, "dry-run"),
@@ -505,11 +579,15 @@ if (require.main === module) {
 
 module.exports = {
   buildNorthwesternSource,
+  DEFAULT_PAGE_SIZE,
+  fetchNorthwesternRecords,
+  mergePagedPayloads,
   mergeNorthwesternRecord,
   mergeNorthwesternRecords,
   MAX_LIMIT,
   normalizeHit,
   optionsFromArgs,
+  pagePlanForLimit,
   parseDateRange,
   representativeDishSegments,
   transportModeFor,

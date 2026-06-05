@@ -1,9 +1,13 @@
 const assert = require("assert");
 const {
+  DEFAULT_PAGE_SIZE,
+  fetchNorthwesternRecords,
   MAX_LIMIT,
+  mergePagedPayloads,
   mergeNorthwesternRecords,
   normalizeHit,
   optionsFromArgs,
+  pagePlanForLimit,
   parseDateRange,
   representativeDishSegments,
   transportModeFor,
@@ -32,7 +36,7 @@ const sampleHit = {
   },
 };
 
-function run() {
+async function run() {
   const exact = parseDateRange("1970");
   assert.strictEqual(exact.year, 1970);
   assert.strictEqual(exact.confidence, "A");
@@ -91,12 +95,64 @@ function run() {
   assert(mergedExisting.ingredientTags.includes("bacon"));
   assert(mergedExisting.metadataMerge);
 
+  assert.strictEqual(DEFAULT_PAGE_SIZE, 1000);
+  assert.deepStrictEqual(pagePlanForLimit(1500, 1000), [
+    { offset: 0, size: 1000 },
+    { offset: 1000, size: 500 },
+  ]);
+  assert.deepStrictEqual(pagePlanForLimit(3, 2), [
+    { offset: 0, size: 2 },
+    { offset: 2, size: 1 },
+  ]);
+
+  const mergedPayload = mergePagedPayloads(
+    [
+      { pagination: { total_hits: 3 }, data: [{ id: "a" }, { id: "b" }] },
+      { pagination: { total_hits: 3 }, data: [{ id: "b" }, { id: "c" }] },
+    ],
+    { limit: 10 }
+  );
+  assert.strictEqual(mergedPayload.data.length, 3);
+  assert.strictEqual(mergedPayload.paged, true);
+  assert.strictEqual(mergedPayload.pageCount, 2);
+
+  const requestBodies = [];
+  const pagedPayload = await fetchNorthwesternRecords({
+    limit: 3,
+    pageSize: 2,
+    query: "menu transportation dining",
+    timeoutMs: 5000,
+    fetch: async (_url, options) => {
+      const body = JSON.parse(options.body);
+      requestBodies.push(body);
+      return {
+        ok: true,
+        json: async () => ({
+          pagination: { total_hits: 3 },
+          data: body.from === 0 ? [{ id: "a" }, { id: "b" }] : [{ id: "c" }],
+        }),
+      };
+    },
+  });
+  assert.strictEqual(pagedPayload.data.length, 3);
+  assert.deepStrictEqual(
+    requestBodies.map((body) => ({ from: body.from, size: body.size })),
+    [
+      { from: 0, size: 2 },
+      { from: 2, size: 1 },
+    ]
+  );
+
   const expandedOptions = optionsFromArgs(["--limit=1000", "--query=railroad menu", "--timeout-ms=12000", "--dry-run"]);
   assert.strictEqual(expandedOptions.limit, 1000);
   assert.strictEqual(expandedOptions.query, "railroad menu");
+  assert.strictEqual(expandedOptions.pageSize, 1000);
   assert.strictEqual(expandedOptions.timeoutMs, 12000);
   assert.strictEqual(expandedOptions.mergeExisting, true);
   assert.strictEqual(expandedOptions.dryRun, true);
+
+  const pagedOptions = optionsFromArgs(["--limit=1500", "--page-size=500"]);
+  assert.strictEqual(pagedOptions.pageSize, 500);
 
   const cappedOptions = optionsFromArgs(["--limit=9999"]);
   assert.strictEqual(cappedOptions.limit, MAX_LIMIT);
@@ -107,4 +163,7 @@ function run() {
   console.log("northwestern source tests passed");
 }
 
-run();
+run().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
