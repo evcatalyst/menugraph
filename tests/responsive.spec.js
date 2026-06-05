@@ -14,12 +14,19 @@ async function openMobileLab(page, variant = "hybrid") {
   await expect(page.locator(".mobile-lab-loading")).toHaveCount(0, { timeout: 15000 });
 }
 
+async function openAskEntry(page) {
+  await page.goto("/chat/");
+  await expect(page.locator("#ask-entry-root")).toBeVisible();
+  await expect(page.locator(".ask-entry-root .ask-gate")).toBeVisible();
+}
+
 async function unlockAsk(page) {
   const secret = Buffer.from("bWFjZGFkZHk=", "base64").toString("utf8");
-  await page.locator(".ask-gate input").fill(secret);
-  await page.locator(".ask-gate button").click();
-  await expect(page.locator(".ask-gate")).toHaveCount(0);
-  await expect(page.locator(".chat-form")).toBeVisible();
+  const gate = page.locator(".ask-gate:visible");
+  await gate.locator("input").fill(secret);
+  await gate.locator("button").click();
+  await expect(page.locator(".ask-gate:visible")).toHaveCount(0);
+  await expect(page.locator(".chat-form:visible, .ask-entry-composer:visible")).toBeVisible();
 }
 
 async function layoutMetrics(page) {
@@ -244,6 +251,33 @@ test("mobile Ask unlock state keeps prompt suggestions inside the panel", async 
   expect(askBounds.results.top).toBeGreaterThanOrEqual(askBounds.canvas.bottom - 2);
 });
 
+test("Ask MenuGraph dedicated entry renders deterministic charts with provenance and local sessions", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openAskEntry(page);
+  await unlockAsk(page);
+  await expect(page.locator(".ask-entry-composer")).toBeVisible();
+  await page.locator(".ask-entry-composer input").fill("compare dinner menus by source over time");
+  await page.locator(".ask-entry-composer").evaluate((form) => form.requestSubmit());
+
+  await expect(page.locator(".ask-entry-chart-card")).toBeVisible({ timeout: 15000 });
+  await expect(page.locator(".ask-chart-provenance")).toContainText("Data & provenance");
+  await expect(page.locator(".ask-chart-provenance")).toContainText("Committed MenuGraph snapshots");
+  await expect(page.locator(".ask-entry-evidence-card").first()).toBeVisible();
+  await expect(page.locator(".ask-entry-session-rail")).toContainText("This browser only");
+
+  let metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+
+  await page.reload();
+  await expect(page.locator("#ask-entry-root")).toBeVisible();
+  await expect(page.locator(".ask-entry-message--user")).toContainText("compare dinner menus by source over time");
+  await expect(page.locator(".ask-entry-chart-card")).toBeVisible();
+  await page.locator(".ask-entry-actions button").filter({ hasText: "New" }).click();
+  await expect(page.locator(".ask-entry-empty")).toBeVisible();
+  metrics = await layoutMetrics(page);
+  expectNoHorizontalOverflow(metrics);
+});
+
 test("Ask API rejects requests without the shared secret", async ({ request }) => {
   const locked = await request.post("/api/chat", { data: { question: "lobster prices in Boston" } });
   expect(locked.status()).toBe(401);
@@ -257,6 +291,51 @@ test("Ask API rejects requests without the shared secret", async ({ request }) =
   const payload = await unlocked.json();
   expect(Array.isArray(payload.matches)).toBeTruthy();
   expect(payload.analysis?.summary?.length).toBeGreaterThan(0);
+});
+
+test("Ask uses a configured remote Grok endpoint before same-origin fallback", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const chatRequests = [];
+  await page.addInitScript(() => {
+    window.MenuGraphConfig = { chatApiBase: "https://remote-chat.test" };
+  });
+  await page.route("**/api/chat", async (route) => {
+    const url = route.request().url();
+    chatRequests.push(url);
+    if (url === "https://remote-chat.test/api/chat") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json; charset=utf-8",
+        body: JSON.stringify({
+          engine: "grok",
+          model: "grok-test",
+          answer: "Remote Grok answer",
+          matches: [],
+          facets: {},
+          analysis: null,
+          chartRecommendation: null,
+          caveats: [],
+          parsed: null,
+          searched: { documents: 0 },
+        }),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 500,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({ error: "same-origin chat should not be called before the configured remote endpoint" }),
+    });
+  });
+
+  await openApp(page);
+  await unlockAsk(page);
+  await page.locator(".chat-form input").fill("compare lobster prices in Boston and New York");
+  await page.locator(".chat-form button").click();
+  await expect(page.locator(".chat-engine")).toContainText("Grok grok-test", { timeout: 15000 });
+  await expect(page.locator(".chat-message--assistant .chat-message__body")).toContainText("Remote Grok answer");
+  expect(chatRequests[0]).toBe("https://remote-chat.test/api/chat");
+  expect(chatRequests).not.toContain("http://127.0.0.1:4173/api/chat");
 });
 
 test("Ask recommends toggleable charts for general comparisons", async ({ page }) => {

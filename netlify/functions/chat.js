@@ -96,6 +96,48 @@ function compactChatMatches(matches) {
   }));
 }
 
+function chartMetricLabel(key) {
+  if (key === "medianTodayUsd") return "median today-indexed USD";
+  if (key === "medianRaw") return "median raw price";
+  if (key === "medianRelative") return "median relative index";
+  return "result count";
+}
+
+function chartDataQuality(option, rows) {
+  if (!option || rows.length < 2) return "thin";
+  if (option.chartType === "table") return rows.length < 6 ? "thin" : "usable";
+  return rows.length < 4 ? "thin" : "usable";
+}
+
+function chartRenderManifest(answer) {
+  const recommendation = answer.chartRecommendation;
+  const options = recommendation?.options || [];
+  const option = options.find((item) => item.id === recommendation?.defaultOptionId) || options[0] || null;
+  const rows = option?.rows || [];
+  const yKey = option?.spec?.y || "count";
+  const quality = chartDataQuality(option, rows);
+  return {
+    available: Boolean(option),
+    chartType: option?.chartType || "none",
+    title: option?.label || "No chart rendered",
+    metric: yKey,
+    metricLabel: chartMetricLabel(yKey),
+    rowsRendered: rows.length,
+    labels: rows.slice(0, 8).map((row) => row.label).filter(Boolean),
+    dataQuality: quality,
+    omissions: [
+      quality === "thin" ? "The retrieved evidence is too sparse for a strong visual claim." : "",
+      Number(answer.searched?.duplicateCandidates || 0) ? `${Number(answer.searched.duplicateCandidates).toLocaleString()} near-duplicate candidates were collapsed before rendering.` : "",
+    ].filter(Boolean),
+    provenance: {
+      source: "Committed MenuGraph snapshots, NYPL structured dish rows, extracted price rows, and date-estimate metadata where available.",
+      candidates: Number(answer.matches?.length || 0),
+      searchedDocuments: Number(answer.searched?.documents || 0),
+      returnedMatches: Number(answer.searched?.returnedMatches || answer.matches?.length || 0),
+    },
+  };
+}
+
 async function grokSynthesis(question, localAnswer) {
   const apiKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
   if (!apiKey) return null;
@@ -109,6 +151,7 @@ async function grokSynthesis(question, localAnswer) {
     searched: localAnswer.searched,
     facets: localAnswer.facets,
     caveats: localAnswer.caveats,
+    chartRenderManifest: chartRenderManifest(localAnswer),
     matches: compactChatMatches(localAnswer.matches),
   };
 
@@ -163,22 +206,25 @@ async function answerQuestion(question) {
     dateEstimates,
     analytics,
   });
+  const manifest = chartRenderManifest(localAnswer);
 
   try {
     const grok = await grokSynthesis(question, localAnswer);
-    if (!grok) return localAnswer;
+    if (!grok) return { ...localAnswer, chartRenderManifest: manifest };
     return {
       ...localAnswer,
       engine: "grok",
       model: grok.model,
       answer: grok.answer,
       localAnswer: localAnswer.answer,
+      chartRenderManifest: manifest,
     };
   } catch (error) {
     return {
       ...localAnswer,
       engine: "local-retrieval",
       llmError: error.message,
+      chartRenderManifest: manifest,
     };
   }
 }

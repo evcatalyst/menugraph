@@ -11,6 +11,7 @@ const {
   combineSources,
   loadNyplExport,
 } = require("./nypl-source");
+const { buildGraphOverlay } = require("./build-graph-overlay");
 
 const CONTENTDM_HOST = "ciadigitalcollections.culinary.edu";
 const COLLECTION = "p16940coll1";
@@ -499,6 +500,9 @@ async function main() {
   console.log(
     `Wrote ${dateSnapshot.records.length.toLocaleString()} date estimates; ${dateSnapshot.summary.plottableEstimated.toLocaleString()} estimated unknowns are plottable by default.`
   );
+
+  const graph = await buildGraphOverlay();
+  console.log(`Wrote graph overlay with ${graph.manifest.summary.core.nodes.toLocaleString()} core nodes and ${graph.manifest.summary.core.edges.toLocaleString()} core edges.`);
 }
 
 main().catch((error) => {

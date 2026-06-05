@@ -25,7 +25,7 @@ Open `http://127.0.0.1:4173`.
 
 The Node server is optional local tooling. The deployable app is the static site in `docs/`, which can be hosted by GitHub Pages.
 
-The Ask lens works on GitHub Pages with deterministic static retrieval. To add local Grok synthesis without exposing a secret in the browser, start the server with an xAI key:
+The Ask lens works on GitHub Pages by calling the private Netlify chat function for Grok synthesis, then falling back to deterministic static retrieval if that function is unavailable. To add local Grok synthesis without exposing a secret in the browser, start the server with an xAI key:
 
 ```bash
 XAI_API_KEY=... npm run dev
@@ -49,6 +49,14 @@ The published URL is:
 ```text
 https://evcatalyst.github.io/menugraph/
 ```
+
+The dedicated Ask MenuGraph experiment has its own static entry point:
+
+```text
+https://evcatalyst.github.io/menugraph/chat/
+```
+
+The reversible query route remains available at `?askMenuGraph=1`.
 
 Regenerate the committed Pages snapshot with:
 

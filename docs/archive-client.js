@@ -18,6 +18,7 @@
   let dateEstimatesCache = null;
   let matchesCache = null;
   let analyticsCache = null;
+  let graphOverlayCache = null;
 
   function multiSource() {
     return window.MenuGraphMultiSource || null;
@@ -660,6 +661,23 @@
     return analyticsCache;
   }
 
+  async function getGraphOverlay({ refresh = false } = {}) {
+    if (!refresh && graphOverlayCache) return graphOverlayCache;
+    const [manifest, sourceCapabilities, menuOverlays, evidenceIndex] = await Promise.all([
+      requestStaticJson("graph/manifest.json", refresh),
+      requestStaticJson("graph/source-capabilities.json", refresh),
+      requestStaticJson("graph/menu-overlays.json", refresh),
+      requestStaticJson("graph/evidence-index.json", refresh),
+    ]);
+    graphOverlayCache = {
+      manifest,
+      sourceCapabilities,
+      menuOverlays,
+      evidenceIndex,
+    };
+    return graphOverlayCache;
+  }
+
   function requestBody(options) {
     if (!options?.body) return {};
     if (typeof options.body === "string") {
@@ -677,12 +695,13 @@
     const question = cleanValue(body.question || body.q);
     if (!question) throw new Error("Chat question is required");
     if (cleanValue(body.askSecretHash) !== ASK_SECRET_HASH) throw new Error("Ask secret required");
-    const [menus, ontology, prices, dateEstimates, analytics] = await Promise.all([
+    const [menus, ontology, prices, dateEstimates, analytics, graphOverlay] = await Promise.all([
       getMenus({ refresh: false }),
       getOntology({ refresh: false }).catch(() => null),
       getPrices({ refresh: false }).catch(() => ({ records: [] })),
       getDateEstimates({ refresh: false }).catch(() => ({ records: [] })),
       getAnalytics({ refresh: false }).catch(() => null),
+      getGraphOverlay({ refresh: false }).catch(() => null),
     ]);
     return chatApi().answerQuestion({
       question,
@@ -691,6 +710,7 @@
       prices,
       dateEstimates,
       analytics,
+      graphOverlay,
     });
   }
 
@@ -834,6 +854,9 @@
     if (url.pathname === "/api/analytics/dishes") {
       return getAnalytics({ refresh: url.searchParams.get("refresh") === "1" });
     }
+    if (url.pathname === "/api/graph") {
+      return getGraphOverlay({ refresh: url.searchParams.get("refresh") === "1" });
+    }
     if (url.pathname === "/api/chat") {
       return getChatAnswer({
         ...options,
@@ -873,6 +896,7 @@
     getOntology,
     getPrices,
     getDateEstimates,
+    getGraphOverlay,
     getChatAnswer,
     handle,
     imageUrl,
