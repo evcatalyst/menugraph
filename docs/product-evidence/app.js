@@ -9,6 +9,9 @@ const state = {
 const els = {
   status: document.querySelector("#status"),
   metrics: document.querySelector("#metrics"),
+  storySummary: document.querySelector("#story-summary"),
+  storyRows: document.querySelector("#story-rows"),
+  storyCount: document.querySelector("#story-count"),
   search: document.querySelector("#search"),
   category: document.querySelector("#category-filter"),
   surface: document.querySelector("#surface-filter"),
@@ -140,6 +143,116 @@ function formatJsonBlock(value) {
 
 function statusTag(value, extraClass = "") {
   return `<span class="status-tag ${escapeHtml(extraClass)}">${escapeHtml(labelFor(value))}</span>`;
+}
+
+function pluralize(value, noun) {
+  const count = Number(value || 0);
+  return `${formatNumber(count)} ${noun}${count === 1 ? "" : "s"}`;
+}
+
+function clipped(value, limit = 180) {
+  const text = String(value || "").trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit - 1).trim()}...`;
+}
+
+function uniqueValues(values, limit = 5) {
+  const seen = new Set();
+  const output = [];
+  values.forEach((value) => {
+    const text = String(value || "").trim();
+    if (!text || seen.has(text)) return;
+    seen.add(text);
+    output.push(text);
+  });
+  return output.slice(0, limit);
+}
+
+function filtersActive() {
+  return Boolean(state.search.trim() || state.category || state.surface || state.status);
+}
+
+function productEvidenceRows(product) {
+  const canonical = product?.canonical_name || "";
+  const display = product?.display_name || "";
+  return (state.data.evidence_registry || []).filter((row) => (
+    row.canonical_name === canonical || row.display_name === display
+  ));
+}
+
+function productMatchesStoryFilters(product) {
+  if (!passesProduct(product)) return false;
+  if (!state.status) return true;
+  const statuses = Object.values(product.vintage_statuses || {}).map((row) => row.status);
+  if (statuses.includes(state.status) || product.collection_track === state.status) return true;
+  return productEvidenceRows(product).some((row) => (
+    row.evidence_status === state.status ||
+    row.claim_link_status === state.status ||
+    row.registry_record_type === state.status ||
+    row.source_attribution_status === state.status
+  ));
+}
+
+function registryCount(rows, status, metricKey = "") {
+  if (!filtersActive() && metricKey && state.data.metrics[metricKey] !== undefined) {
+    return numeric(state.data.metrics[metricKey]);
+  }
+  return rows.filter((row) => row.evidence_status === status).length;
+}
+
+function storyLinks(values, label = "Source", limit = 3) {
+  return uniqueValues(values.flatMap((value) => splitParts(value, limit * 2)), limit)
+    .map((value, index) => linkOrText(value, `${label}${limit > 1 ? ` ${index + 1}` : ""}`))
+    .join("");
+}
+
+function storySourcePath(product, evidenceRows) {
+  return uniqueValues([
+    ...splitParts(product.top_source_domains, 8),
+    ...evidenceRows.map((row) => row.source_domain),
+  ], 5);
+}
+
+function productVintageCells(product) {
+  return state.data.vintages
+    .map((vintage) => {
+      const info = product.vintage_statuses[vintage] || { status: "unknown", source_count: 0 };
+      const status = info.status || "unknown";
+      return `<span class="story-vintage status-${escapeHtml(status)}" title="${escapeHtml(vintage)}: ${escapeHtml(status)}">${escapeHtml(vintageLabels[vintage] || vintage)}</span>`;
+    })
+    .join("");
+}
+
+function storyEvidencePreview(rows) {
+  const previewRows = rows
+    .filter((row) => row.source_url || row.unsupported_gap_note || row.reviewer_notes)
+    .slice(0, 2);
+  if (!previewRows.length) return "";
+  return `
+    <div class="story-evidence-list">
+      ${previewRows
+        .map((row) => `
+          <div>
+            <strong>${escapeHtml(row.vintage_label || row.evidence_kind || "Evidence")}</strong>
+            <span>${escapeHtml(clipped(row.reviewer_notes || row.unsupported_gap_note || row.promotion_blocker, 120))}</span>
+          </div>
+        `)
+        .join("")}
+    </div>
+  `;
+}
+
+function productStoryScore(row) {
+  const name = `${row.display_name || ""} ${row.canonical_name || ""}`.toLowerCase();
+  return (
+    (name.includes("oreo") ? 5000 : 0) +
+    numeric(row.collection_opportunity_score) +
+    numeric(row.target_priority) +
+    numeric(row.product_candidate_count) * 4 +
+    (row.missing_vintages ? 180 : 0) +
+    (row.panel_needed_vintages ? 120 : 0) -
+    numeric(row.ground_truth_slots) * 40
+  );
 }
 
 function textBlob(row) {
@@ -373,6 +486,214 @@ function renderMetrics() {
   ];
   els.metrics.innerHTML = cards
     .map(([label, value]) => `<article class="metric"><strong>${formatNumber(value)}</strong><span>${escapeHtml(label)}</span></article>`)
+    .join("");
+}
+
+function boardStoryCards(registryRows, productRows) {
+  const metrics = state.data.metrics;
+  const unsupportedCount = !filtersActive()
+    ? numeric(metrics.unsupported_gap_records)
+    : registryRows.filter((row) => row.registry_record_type === "unsupported_gap").length;
+  const sourceReviewCount = registryCount(registryRows, "source_review", "source_review_records");
+  const usablePhotoCount = registryCount(registryRows, "usable_photo", "usable_photo_records");
+  const labelVisibleCount = registryCount(registryRows, "label_visible", "label_visible_records");
+  const manualVerifiedCount = registryCount(registryRows, "manual_verified", "manual_verified_records");
+  const cards = [
+    {
+      kicker: "Evidence Gate",
+      title: "Formulation claims are still gated by visible labels",
+      body: `${pluralize(unsupportedCount, "claim")} remain explicit gaps, while ${pluralize(sourceReviewCount + usablePhotoCount + labelVisibleCount, "record")} are parked at source review, usable-photo, or label-visible states. Candidate photos help the story only after a readable ingredient panel or reviewed transcription is attached.`,
+      stats: [
+        ["Unsupported", unsupportedCount],
+        ["Review/photo", sourceReviewCount + usablePhotoCount],
+        ["Manual verified", manualVerifiedCount],
+      ],
+      chips: ["discovered", "source_review", "usable_photo", "manual_verified"],
+      action: "Promote only source-attributable photos with visible ingredient panels into OCR or manual transcription.",
+    },
+  ];
+
+  const oreo = state.data.products.find((row) => /oreo/i.test(`${row.display_name || ""} ${row.canonical_name || ""}`));
+  if (oreo && productMatchesStoryFilters(oreo)) {
+    const evidenceRows = productEvidenceRows(oreo).filter((row) => !state.status || passesRegistry(row));
+    const sourcePath = storySourcePath(oreo, evidenceRows);
+    cards.push({
+      kicker: "Oreo Thread",
+      title: "Oreo has package leads, but the ingredient-change story is not verified yet",
+      body: `${oreo.display_name} has source leads across ${pluralize(oreo.slots_with_sources, "vintage slot")} and ${pluralize(oreo.product_candidate_count, "candidate")}. The current snapshot still blocks the original-to-current ingredient narrative because readable panels or transcriptions are needed for ${oreo.panel_needed_vintages || "the vintage slots"}.`,
+      stats: [
+        ["Coverage", `${oreo.slot_coverage_pct || 0}%`],
+        ["Candidates", oreo.product_candidate_count],
+        ["Ground truth", oreo.ground_truth_slots],
+      ],
+      chips: [oreo.collection_track, oreo.missing_vintages ? "missing_vintage_slot" : "candidate_found", "candidate_needs_transcription"],
+      action: oreo.recommended_next_action || "Review source pages, classify panel roles, then attach label text only when readable.",
+      links: storyLinks([oreo.best_source_urls, ...evidenceRows.map((row) => row.source_url)], "Source", 3),
+      sourcePath,
+      product: oreo,
+      evidenceRows,
+      featured: true,
+      productCanonical: oreo.canonical_name,
+    });
+  }
+
+  const fastFoodProducts = productRows.filter((row) => row.category === "fast food");
+  const fastFoodManifests = (state.data.current_web_harvest_manifest || [])
+    .filter((row) => row.category === "fast food")
+    .filter((row) => !state.surface || row.search_surface === state.surface)
+    .filter((row) => !state.status || row.manifest_status === state.status)
+    .filter((row) => !state.search.trim() || textBlob(row).includes(state.search.trim().toLowerCase()));
+  if (fastFoodProducts.length || fastFoodManifests.length) {
+    cards.push({
+      kicker: "Fast Food",
+      title: "Restaurant products need document provenance as much as package provenance",
+      body: `Fast-food histories route through menu pages, nutrition PDFs, allergen PDFs, archived pages, and packaging where available. The view keeps those document trails separate from package-photo evidence so a Big Mac or McNuggets timeline is not collapsed into an unverified package-label claim.`,
+      stats: [
+        ["Products", fastFoodProducts.length],
+        ["Manifests", fastFoodManifests.length],
+        ["Search starts", fastFoodManifests.reduce((sum, row) => sum + splitParts(row.browser_batch_urls, 200).length, 0)],
+      ],
+      chips: ["current_web_search", "source_review", "missing_vintage_slot"],
+      action: "Verify product identity, source owner, date basis, and ingredient/allergen disclosure before turning menu evidence into a formulation version.",
+      links: storyLinks(fastFoodManifests.map((row) => row.browser_batch_urls), "Start", 3),
+    });
+  }
+
+  const photoRows = state.data.photo_evidence.filter(passesPhoto);
+  const weightReady = photoRows.filter((row) => numeric(row.net_weight_visible) || row.net_weight_text || row.serving_size_text);
+  const weightMissing = photoRows.filter((row) => String(row.ground_truth_fields_missing || "").includes("package_weight"));
+  if (photoRows.length) {
+    cards.push({
+      kicker: "Price + Size",
+      title: "Economic overlays need the same ground-truth package fields",
+      body: `Price normalization cannot rely on a product name alone. The board tracks package weight, serving size, manufacturer/distributor text, and source coordinates beside the ingredient evidence so later price-per-ounce and price-per-serving views can be compared against formulation changes.`,
+      stats: [
+        ["Photo leads", photoRows.length],
+        ["Weight ready", weightReady.length],
+        ["Weight gaps", weightMissing.length],
+      ],
+      chips: ["usable_photo", "candidate_needs_panel", "candidate_needs_transcription"],
+      action: "Capture net weight and serving-size text whenever a package panel is readable; keep SKU/package-format differences separate.",
+    });
+  }
+
+  const runRows = (state.data.common_crawl_run_logs || []).filter(passesRunLog);
+  if (runRows.length) {
+    const queryErrors = runRows.reduce((sum, row) => sum + numeric(row.query_errors), 0);
+    const candidates = runRows.reduce((sum, row) => sum + numeric(row.candidates_inserted), 0);
+    const latest = runRows[0] || {};
+    cards.push({
+      kicker: "Archive Discovery",
+      title: "Common Crawl is discovery signal, not ground truth",
+      body: `Recent crawl attempts record ${pluralize(queryErrors, "query error")} and ${pluralize(candidates, "inserted candidate")}. That telemetry explains search friction and source opportunity, but it does not assert ingredient facts until a capture is tied to product identity, date, and visible label evidence.`,
+      stats: [
+        ["Runs", runRows.length],
+        ["Records seen", runRows.reduce((sum, row) => sum + numeric(row.records_seen), 0)],
+        ["Inserted", candidates],
+      ],
+      chips: [runLogStatus(latest), latest.command || "common_crawl"],
+      action: latest.error_sample || "Inspect returned captures, dedupe URLs, and promote only product-relevant WARC-coordinate candidates.",
+      links: storyLinks([latest.log_path, latest.query_errors_path], "File", 2),
+    });
+  }
+
+  return cards;
+}
+
+function productStoryCards(skipCanonicals = new Set()) {
+  return state.data.products
+    .filter(productMatchesStoryFilters)
+    .filter((row) => !skipCanonicals.has(row.canonical_name))
+    .sort((a, b) => productStoryScore(b) - productStoryScore(a))
+    .slice(0, 6)
+    .map((product) => {
+      const evidenceRows = productEvidenceRows(product).filter((row) => !state.status || passesRegistry(row));
+      const sourcePath = storySourcePath(product, evidenceRows);
+      const blocker = product.missing_vintages
+        ? `Missing source slots: ${product.missing_vintages}.`
+        : `Panel or transcription needed: ${product.panel_needed_vintages || "review current evidence"}.`;
+      return {
+        kicker: labelFor(product.category || "Product"),
+        title: product.display_name || product.canonical_name,
+        body: `${blocker} ${numeric(product.ground_truth_slots) ? "Some ground-truth slots exist in the product map." : "No verified ingredient statement is shown for this product in this snapshot."}`,
+        stats: [
+          ["Coverage", `${product.slot_coverage_pct || 0}%`],
+          ["Sources", product.scout_source_count],
+          ["Candidates", product.product_candidate_count],
+        ],
+        chips: [product.collection_track, product.missing_vintages ? "missing_vintage_slot" : "candidate_found"],
+        action: product.recommended_next_action || "Classify visible panels, archive source URLs, and attach verified label text where readable.",
+        links: storyLinks([product.best_source_urls, ...evidenceRows.map((row) => row.source_url)], "Source", 2),
+        sourcePath,
+        product,
+        evidenceRows,
+      };
+    });
+}
+
+function renderStorylines() {
+  const registryRows = (state.data.evidence_registry || []).filter(passesRegistry);
+  const productRows = state.data.products.filter(productMatchesStoryFilters);
+  const unsupportedCount = !filtersActive()
+    ? numeric(state.data.metrics.unsupported_gap_records)
+    : registryRows.filter((row) => row.registry_record_type === "unsupported_gap").length;
+  const reviewCount =
+    registryCount(registryRows, "source_review", "source_review_records") +
+    registryCount(registryRows, "usable_photo", "usable_photo_records") +
+    registryCount(registryRows, "label_visible", "label_visible_records");
+  const manualVerified = registryCount(registryRows, "manual_verified", "manual_verified_records");
+  const cdxRuns = state.data.common_crawl_run_logs.filter(passesRunLog).length;
+  const boardCards = boardStoryCards(registryRows, productRows);
+  const skipCanonicals = new Set(boardCards.map((card) => card.productCanonical).filter(Boolean));
+  const productCards = productStoryCards(skipCanonicals);
+  const cards = [...boardCards, ...productCards];
+
+  els.storyCount.textContent = `${formatNumber(cards.length)} stories`;
+  els.storySummary.innerHTML = [
+    ["Open gaps", unsupportedCount],
+    ["Review/photo leads", reviewCount],
+    ["Verified labels", manualVerified],
+    ["CDX runs", cdxRuns],
+  ]
+    .map(([label, value]) => `
+      <article class="story-stat">
+        <strong>${escapeHtml(value)}</strong>
+        <span>${escapeHtml(label)}</span>
+      </article>
+    `)
+    .join("");
+
+  els.storyRows.innerHTML = cards
+    .map((card) => `
+      <article class="story-card ${card.featured ? "story-featured" : ""}">
+        <div class="story-card-head">
+          <div>
+            <p class="eyebrow">${escapeHtml(card.kicker)}</p>
+            <h3>${escapeHtml(card.title)}</h3>
+          </div>
+        </div>
+        <p>${escapeHtml(card.body)}</p>
+        <div class="story-stat-grid">
+          ${card.stats
+            .map(([label, value]) => `
+              <span><strong>${escapeHtml(value)}</strong>${escapeHtml(label)}</span>
+            `)
+            .join("")}
+        </div>
+        ${card.product ? `<div class="story-vintage-grid">${productVintageCells(card.product)}</div>` : ""}
+        ${card.sourcePath?.length ? `
+          <div class="story-source-path">
+            ${card.sourcePath.map((source) => `<span>${escapeHtml(source)}</span>`).join("")}
+          </div>
+        ` : ""}
+        ${storyEvidencePreview(card.evidenceRows || [])}
+        <div class="lead-meta">
+          ${(card.chips || []).filter(Boolean).map((chip) => statusTag(chip)).join("")}
+          ${card.links || ""}
+        </div>
+        <div class="story-action"><strong>Next</strong><span>${escapeHtml(card.action)}</span></div>
+      </article>
+    `)
     .join("");
 }
 
@@ -838,6 +1159,7 @@ function renderStatus() {
 
 function render() {
   renderMetrics();
+  renderStorylines();
   renderScalePriorities();
   renderLegend();
   renderProducts();

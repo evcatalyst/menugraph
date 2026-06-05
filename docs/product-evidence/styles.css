@@ -24,6 +24,7 @@
 html,
 body {
   min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -51,6 +52,13 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+code {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .evidence-shell {
@@ -159,6 +167,190 @@ a:hover {
   margin-top: 7px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.story-panel {
+  background:
+    linear-gradient(135deg, rgba(49, 111, 115, 0.09), transparent 42%),
+    rgba(255, 253, 248, 0.96);
+}
+
+.story-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.story-stat {
+  min-height: 72px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.story-stat strong {
+  display: block;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.story-stat span {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.story-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 12px;
+}
+
+.story-featured {
+  grid-column: span 2;
+  border-color: rgba(49, 111, 115, 0.55);
+  background:
+    linear-gradient(135deg, rgba(49, 111, 115, 0.1), transparent 48%),
+    var(--paper-warm);
+}
+
+.story-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.story-card h3,
+.story-card p {
+  margin: 0;
+}
+
+.story-card h3 {
+  font-size: 18px;
+  line-height: 1.16;
+  overflow-wrap: anywhere;
+}
+
+.story-card p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.story-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.story-stat-grid span {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 253, 248, 0.8);
+  padding: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.story-stat-grid strong {
+  display: block;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.story-vintage-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.story-vintage {
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ede6da;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.story-source-path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.story-source-path span {
+  min-height: 24px;
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.82);
+  padding: 3px 8px;
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.story-evidence-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.story-evidence-list div {
+  border-left: 3px solid var(--teal);
+  padding-left: 8px;
+}
+
+.story-evidence-list strong,
+.story-evidence-list span {
+  display: block;
+  font-size: 11px;
+}
+
+.story-evidence-list span {
+  margin-top: 2px;
+  color: var(--muted);
+}
+
+.story-action {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.story-action strong {
+  color: var(--ink);
 }
 
 .control-row {
@@ -863,8 +1055,13 @@ td {
 
   .workspace-grid,
   .lower-grid,
-  .scale-grid {
+  .scale-grid,
+  .story-grid {
     grid-template-columns: 1fr;
+  }
+
+  .story-featured {
+    grid-column: auto;
   }
 
   .product-row,
@@ -891,7 +1088,8 @@ td {
 
   .metrics-grid,
   .control-row,
-  .legend {
+  .legend,
+  .story-summary {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -903,6 +1101,11 @@ td {
 
   .scale-stat-grid {
     grid-template-columns: 1fr;
+  }
+
+  .story-stat-grid,
+  .story-vintage-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .status-panel {
