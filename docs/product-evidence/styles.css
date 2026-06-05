@@ -376,6 +376,94 @@ code {
   overflow-wrap: anywhere;
 }
 
+.story-reader {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1.22fr);
+  gap: 10px;
+  margin-top: 10px;
+  border: 1px solid rgba(49, 111, 115, 0.32);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(49, 111, 115, 0.09), transparent 48%),
+    rgba(255, 253, 248, 0.82);
+  padding: 10px;
+}
+
+.story-reader-copy {
+  min-width: 0;
+  border-right: 1px solid var(--line);
+  padding-right: 10px;
+}
+
+.story-reader-copy h4,
+.story-reader-copy p {
+  margin: 0;
+}
+
+.story-reader-copy h4 {
+  margin-top: 3px;
+  font-size: clamp(19px, 2vw, 28px);
+  line-height: 1.08;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.story-reader-copy > p:not(.eyebrow) {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.48;
+}
+
+.story-reader-note {
+  border-left: 3px solid var(--gold);
+  padding-left: 9px;
+}
+
+.story-beats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.story-beat {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 9px;
+}
+
+.story-beat > span,
+.story-beat > strong,
+.story-beat > p {
+  display: block;
+}
+
+.story-beat > span {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.story-beat > strong {
+  margin-top: 5px;
+  font-size: 14px;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.story-beat > p {
+  min-height: 82px;
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.38;
+  overflow-wrap: anywhere;
+}
+
 .story-brief {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
@@ -404,6 +492,8 @@ code {
   color: var(--ink);
   font-size: 13px;
   line-height: 1.42;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .story-proof-grid,
@@ -1359,8 +1449,11 @@ td {
 
 .status-tag {
   min-height: 24px;
+  max-width: 100%;
   padding: 2px 7px;
   font-size: 11px;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .surface-current_web {
@@ -1417,7 +1510,15 @@ td {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
   margin-top: 8px;
+}
+
+.lead-meta a,
+.lead-meta code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .run-log-list {
@@ -1590,8 +1691,20 @@ td {
   .scale-grid,
   .story-grid,
   .story-focus,
+  .story-reader,
   .story-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .story-reader-copy {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding-right: 0;
+    padding-bottom: 10px;
+  }
+
+  .story-beats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .story-featured {
@@ -1638,6 +1751,7 @@ td {
   .control-row,
   .legend,
   .story-summary,
+  .story-beats,
   .story-brief,
   .story-proof-grid,
   .story-lenses,
@@ -1678,5 +1792,22 @@ td {
 
   .status-panel {
     display: grid;
+  }
+}
+
+@media (max-width: 520px) {
+  .story-beats,
+  .story-brief,
+  .story-proof-grid,
+  .story-lenses,
+  .story-timeline,
+  .story-chapters {
+    grid-template-columns: 1fr;
+  }
+
+  .story-beat > p,
+  .story-chapter p,
+  .story-timeline-row p {
+    min-height: 0;
   }
 }

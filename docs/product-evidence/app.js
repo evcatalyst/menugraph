@@ -378,6 +378,209 @@ function storyLensRows(card, evidenceRows) {
   ];
 }
 
+function storyPublicationState(card, evidenceRows) {
+  const manualLabels = evidenceRows.filter((row) => rowEvidenceStatus(row) === "manual_verified" || row.manual_transcription_available).length;
+  const visibleLabels = evidenceRows.filter((row) => rowEvidenceStatus(row) === "label_visible" || row.ingredient_panel_visible).length;
+  const usablePhotos = evidenceRows.filter((row) => rowEvidenceStatus(row) === "usable_photo").length;
+  if (manualLabels) {
+    return {
+      label: "partial publication possible",
+      detail: `${pluralize(manualLabels, "verified label")} can anchor claims, with unverified eras still shown as gaps.`,
+      status: "manual_verified",
+    };
+  }
+  if (visibleLabels) {
+    return {
+      label: "transcription-ready story",
+      detail: `${pluralize(visibleLabels, "label-visible record")} can move into OCR/manual review before ingredient diffs are published.`,
+      status: "label_visible",
+    };
+  }
+  if (usablePhotos) {
+    return {
+      label: "photo-led research story",
+      detail: `${pluralize(usablePhotos, "usable photo")} can show package history, but ingredient claims still need readable panels.`,
+      status: "usable_photo",
+    };
+  }
+  if (card.product) {
+    return {
+      label: "source-discovery story",
+      detail: "This is not yet a formulation story; it is a map of source leads, gaps, and review work.",
+      status: "source_review",
+    };
+  }
+  return {
+    label: "workflow story",
+    detail: "This view explains how evidence moves from a lead to a claim.",
+    status: "discovered",
+  };
+}
+
+function vintageStatusSummary(product, vintage, evidenceRows) {
+  const info = product.vintage_statuses[vintage] || { status: "unknown", source_count: 0 };
+  const rows = vintageEvidenceRows(product, evidenceRows, vintage);
+  const best = bestEvidenceRows(rows, 1)[0] || {};
+  return {
+    vintage,
+    status: info.status || "unknown",
+    sourceCount: numeric(info.source_count || rows.length),
+    best,
+  };
+}
+
+function storyReaderHeadline(card, evidenceRows) {
+  const product = card.product;
+  const stateLabel = storyPublicationState(card, evidenceRows).label;
+  if (!product) {
+    return {
+      title: "A Claim Starts As A Lead, Then Earns Its Place In The Timeline",
+      dek: "The page should read like a public research notebook: evidence first, unsupported eras visible, and no ingredient-change claim promoted without source, date, and label review.",
+    };
+  }
+  const name = product.display_name || product.canonical_name || "This product";
+  if (/oreo/i.test(`${product.display_name || ""} ${product.canonical_name || ""}`)) {
+    return {
+      title: "Oreo's Ingredient History Is Still A Proof Chase",
+      dek: `${name} has package and source leads across the vintage map, but the story cannot claim original-to-current ingredient changes until readable panels are transcribed. The 1912 original ingredient label remains explicitly unverified.`,
+      stateLabel,
+    };
+  }
+  if (product.category === "fast food") {
+    return {
+      title: `${name} Needs A Document Timeline Before It Becomes A Formulation Timeline`,
+      dek: "Fast-food products move through menu pages, nutrition PDFs, allergen disclosures, archived pages, and package evidence. The story keeps those evidence types separate until a reviewer ties each claim to a date and source owner.",
+      stateLabel,
+    };
+  }
+  return {
+    title: `${name} Has A Research Arc, But Not Yet A Finished Ingredient Arc`,
+    dek: `The strongest story today is where evidence exists, where labels are still unreadable, and which package or source chapter would unlock ingredient, weight, maker, and price overlays.`,
+    stateLabel,
+  };
+}
+
+function storyProofBeatRows(card, evidenceRows) {
+  const product = card.product;
+  if (!product) {
+    const counts = evidenceRows.reduce((acc, row) => {
+      const status = rowEvidenceStatus(row);
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+    return [
+      {
+        label: "Lead",
+        title: "Discovery is not proof",
+        body: `${pluralize(counts.discovered || 0, "record")} sit at discovery and need attribution review before carrying public story weight.`,
+        status: "discovered",
+      },
+      {
+        label: "Photo",
+        title: "Photos need panel roles",
+        body: `${pluralize((counts.source_review || 0) + (counts.usable_photo || 0), "record")} are in review or usable-photo states; they still need label visibility checks.`,
+        status: "usable_photo",
+      },
+      {
+        label: "Text",
+        title: "Labels become text",
+        body: `${pluralize((counts.label_visible || 0) + (counts.ocr_extracted || 0), "record")} are label-visible or OCR-ready before manual verification.`,
+        status: "label_visible",
+      },
+      {
+        label: "Claim",
+        title: "Verified labels carry the story",
+        body: `${pluralize(counts.manual_verified || 0, "record")} are manual-verified in this filtered view.`,
+        status: "manual_verified",
+      },
+    ];
+  }
+
+  const current = vintageStatusSummary(product, "current_2020s", evidenceRows);
+  const earliest = vintageStatusSummary(product, "earliest_verified_label", evidenceRows);
+  const intermediate = state.data.vintages
+    .filter((vintage) => vintage !== "current_2020s" && vintage !== "earliest_verified_label")
+    .map((vintage) => vintageStatusSummary(product, vintage, evidenceRows));
+  const intermediateWithSources = intermediate.filter((row) => row.sourceCount > 0);
+  const visibleLabels = evidenceRows.filter((row) => rowEvidenceStatus(row) === "label_visible" || row.ingredient_panel_visible).length;
+  const manualLabels = evidenceRows.filter((row) => rowEvidenceStatus(row) === "manual_verified" || row.manual_transcription_available).length;
+  const currentSource = current.best.source_domain || current.best.source_title || "current source lead";
+  const earliestLabel = /oreo/i.test(`${product.display_name || ""} ${product.canonical_name || ""}`)
+    ? "1912 original label gap"
+    : "earliest chapter";
+  const earliestBody = /oreo/i.test(`${product.display_name || ""} ${product.canonical_name || ""}`)
+    ? "The board can show candidate package history, but it must not imply a verified 1912 ingredient statement without a readable source-attributable label."
+    : `${statusNarrative(earliest.status)} ${pluralize(earliest.sourceCount, "source lead")} are attached to the earliest chapter.`;
+
+  return [
+    {
+      label: "Anchor",
+      title: "Start with the current SKU",
+      body: `${pluralize(current.sourceCount, "source lead")} are attached to the present-day slot. Treat ${currentSource} as a SKU-specific anchor only after source/date review.`,
+      status: current.status,
+      source: current.best.source_url || "",
+      sourceLabel: current.best.source_domain || "Source",
+    },
+    {
+      label: "Bridge",
+      title: "Use decade chapters to avoid a false jump cut",
+      body: `${pluralize(intermediateWithSources.length, "intermediate vintage")} have source leads. Each one needs label visibility, package weight, and manufacturer/distributor checks before it can explain a formulation change.`,
+      status: intermediateWithSources.length ? "candidate_found" : "no_source",
+    },
+    {
+      label: "Origin",
+      title: earliestLabel,
+      body: earliestBody,
+      status: earliest.status,
+      source: earliest.best.source_url || "",
+      sourceLabel: earliest.best.source_domain || "Source",
+    },
+    {
+      label: "Publish",
+      title: manualLabels ? "Ingredient diffs can be partial" : "Ingredient diffs stay locked",
+      body: manualLabels
+        ? `${pluralize(manualLabels, "manual label")} can support scoped claims; the remaining vintages still need explicit gap labels.`
+        : `${pluralize(visibleLabels, "label-visible lead")} and zero manual-verified labels mean this story should publish as evidence status, not as an ingredient-change claim.`,
+      status: manualLabels ? "manual_verified" : visibleLabels ? "label_visible" : "source_review",
+    },
+  ];
+}
+
+function renderStoryReader(card, evidenceRows) {
+  const headline = storyReaderHeadline(card, evidenceRows);
+  const publicationState = storyPublicationState(card, evidenceRows);
+  const beats = storyProofBeatRows(card, evidenceRows);
+  return `
+    <section class="story-reader" aria-label="Story reader">
+      <div class="story-reader-copy">
+        <p class="eyebrow">Story Reader</p>
+        <h4>${escapeHtml(headline.title)}</h4>
+        <p>${escapeHtml(headline.dek)}</p>
+        <div class="lead-meta">
+          ${statusTag(publicationState.status)}
+          <span class="status-tag">${escapeHtml(publicationState.label)}</span>
+        </div>
+        <p class="story-reader-note">${escapeHtml(publicationState.detail)}</p>
+      </div>
+      <div class="story-beats" aria-label="Proof beats">
+        ${beats
+          .map((beat) => `
+            <article class="story-beat status-${escapeHtml(beat.status || "unknown")}">
+              <span>${escapeHtml(beat.label)}</span>
+              <strong>${escapeHtml(beat.title)}</strong>
+              <p>${escapeHtml(beat.body)}</p>
+              <div class="lead-meta">
+                ${statusTag(beat.status || "unknown")}
+                ${beat.source ? linkOrText(beat.source, beat.sourceLabel || "Source") : ""}
+              </div>
+            </article>
+          `)
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function filtersActive() {
   return Boolean(state.search.trim() || state.category || state.surface || state.status);
 }
@@ -1221,9 +1424,11 @@ function renderStoryFocus(card, registryRows) {
           ${card.links || ""}
         </div>
       </div>
+      ${renderStoryReader(card, evidenceRows)}
       ${renderStoryBrief(card, evidenceRows)}
       <div class="story-proof-grid">${renderStoryClaimCards(card)}</div>
       ${renderStoryLenses(card, evidenceRows)}
+      ${card.product ? renderStoryTimeline(card, evidenceRows) : ""}
       ${renderStoryArc(card, evidenceRows)}
     </div>
     <aside class="story-focus-sidebar">
