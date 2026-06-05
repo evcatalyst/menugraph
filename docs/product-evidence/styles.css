@@ -535,6 +535,7 @@ code {
 .story-workflow-step {
   display: grid;
   place-items: center;
+  min-width: 0;
   min-height: 48px;
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -542,6 +543,7 @@ code {
   color: var(--muted);
   font-size: 10px;
   font-weight: 800;
+  overflow-wrap: anywhere;
   text-align: center;
 }
 
