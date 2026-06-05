@@ -5,6 +5,7 @@ const {
   chooseOcrRun,
   ocrArgsForRun,
   optionsFromArgs,
+  runLocalOcrCycle,
 } = require("./run-local-ocr-cycle");
 
 const queue = {
@@ -64,5 +65,47 @@ assert(plan.steps.some((step) => step.step === "build_ocr_triage_before"));
 assert(plan.steps.some((step) => step.step === "build_ocr_triage_after"));
 assert(plan.steps.some((step) => step.step === "build_graph_overlay"));
 assert(plan.steps.find((step) => step.step.startsWith("local_ocr_")).args.includes("--source=northwestern"));
+
+const refreshedQueue = {
+  summary: {
+    progressiveRunPlan: {
+      runs: [
+        {
+          label: "phase1_easy_local",
+          candidates: 2,
+          estimatedImages: 2,
+          command: "npm run enrich:ocr:local -- --limit=25 --batch=phase1 --tier=easy --pages-per-menu=1",
+        },
+        {
+          label: "continue_partial_second_pages",
+          candidates: 0,
+          estimatedImages: 0,
+          command: "npm run enrich:ocr:local -- --limit=25 --batch=all --continue-partial --pages-per-menu=2",
+        },
+      ],
+    },
+  },
+};
+const executedSteps = [];
+const livePlan = runLocalOcrCycle(
+  {
+    ...options,
+    dryRun: false,
+    queue,
+    recordLimit: 100,
+    earlyLimit: 10,
+    externalCostPerImageUsd: 0.01,
+    refreshRecipeBridge: false,
+  },
+  {
+    runStep: (step) => executedSteps.push(step),
+    readQueue: () => refreshedQueue,
+  }
+);
+assert.strictEqual(executedSteps[0].step, "storage_preflight");
+assert.strictEqual(executedSteps[1].step, "build_ocr_triage_before");
+assert.strictEqual(livePlan.selectedRun.label, "phase1_easy_local");
+assert(executedSteps.some((step) => step.step === "local_ocr_phase1_easy_local"));
+assert(!executedSteps.some((step) => step.step === "local_ocr_continue_partial_second_pages"));
 
 console.log("local OCR cycle tests passed");

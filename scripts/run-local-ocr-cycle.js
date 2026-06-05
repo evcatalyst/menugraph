@@ -161,14 +161,23 @@ function optionsFromArgs(args = process.argv.slice(2)) {
   };
 }
 
-function runLocalOcrCycle(options = optionsFromArgs()) {
+function runLocalOcrCycle(options = optionsFromArgs(), deps = {}) {
+  const executeStep = deps.runStep || runStep;
+  const readQueue = deps.readQueue || (() => readJson(QUEUE_PATH, { summary: {} }));
   const plan = buildCyclePlan(options);
   if (options.dryRun) {
     console.log(JSON.stringify({ dryRun: true, ...plan }, null, 2));
     return plan;
   }
-  for (const step of plan.steps) runStep(step);
-  return plan;
+  const preflightSteps = plan.steps.slice(0, 2);
+  for (const step of preflightSteps) executeStep(step);
+  const refreshedPlan = buildCyclePlan({ ...options, queue: readQueue() });
+  const refreshedSteps = refreshedPlan.steps.slice(2);
+  for (const step of refreshedSteps) executeStep(step);
+  return {
+    ...refreshedPlan,
+    steps: [...preflightSteps, ...refreshedSteps],
+  };
 }
 
 if (require.main === module) {
