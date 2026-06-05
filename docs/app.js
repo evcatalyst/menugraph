@@ -26,6 +26,8 @@ const state = {
   graphOverlayByMenu: new Map(),
   graphOverlayShardPromises: new Map(),
   graphOverlayLoadedShards: new Set(),
+  airspaceBreaches: null,
+  selectedBreachId: "",
   selectedGraphSourceId: null,
   selectedGraphGapQueue: false,
   ontologyCategory: "ingredients",
@@ -70,7 +72,7 @@ const ASK_SECRET_STORAGE_KEY = "menugraph:ask-secret-hash:v1";
 const ASK_ENTRY_SESSION_STORAGE_KEY = "menugraph:ask-entry-sessions:v1";
 const ASK_ENTRY_ACTIVE_SESSION_KEY = "menugraph:ask-entry-active:v1";
 const ASK_ENTRY_MAX_SESSIONS = 8;
-const VALID_LENSES = new Set(["time", "place", "type", "lineage", "graph", "architecture", "ontology", "prices", "chat"]);
+const VALID_LENSES = new Set(["time", "place", "type", "lineage", "graph", "architecture", "breaches", "ontology", "prices", "chat"]);
 const MOBILE_LAB_VARIANTS = new Set(["cards", "journey", "chat", "recipe", "hybrid"]);
 const MOBILE_LAB_MODE_BY_VARIANT = {
   cards: "menus",
@@ -471,6 +473,13 @@ async function loadMenus(refresh = false) {
   });
   loadMatches().catch(() => {});
   loadGraphOverlay().catch(() => {});
+  loadAirspaceBreaches().catch(() => {
+    state.airspaceBreaches = null;
+    if (state.activeLens === "breaches") {
+      renderViz();
+      renderResults();
+    }
+  });
 }
 
 async function loadOntology(refresh = false) {
@@ -550,6 +559,128 @@ async function loadGraphOverlay(refresh = false) {
     renderViz();
     renderResults();
   }
+}
+
+async function loadAirspaceBreaches(refresh = false) {
+  const response = await fetch(staticDataHref(`airspace-breaches.json${refresh ? `?v=${Date.now()}` : ""}`));
+  if (!response.ok) throw new Error("Airspace breach report is unavailable");
+  state.airspaceBreaches = await response.json();
+  if (!state.selectedBreachId) {
+    const firstKnown = airspaceBreachRecords().find((record) => record.status === "known") || airspaceBreachRecords()[0];
+    state.selectedBreachId = firstKnown?.id || "";
+  }
+  if (state.activeLens === "breaches") {
+    describeAirspaceBreaches();
+    renderViz();
+    renderResults();
+  }
+}
+
+function airspaceBreachRecords() {
+  return state.airspaceBreaches?.breaches || [];
+}
+
+function airspaceParcelRecords() {
+  return state.airspaceBreaches?.parcels || [];
+}
+
+function airspaceParcelMap() {
+  return new Map(airspaceParcelRecords().map((parcel) => [parcel.id, parcel]));
+}
+
+function selectedAirspaceBreach() {
+  const records = airspaceBreachRecords();
+  return records.find((record) => record.id === state.selectedBreachId) || records.find((record) => record.status === "known") || records[0] || null;
+}
+
+function breachHitCounts(record) {
+  return {
+    hard: (record?.hardHits || []).length,
+    soft: (record?.softHits || []).length,
+  };
+}
+
+function breachStatusLabel(record) {
+  const status = compact(record?.status, "review");
+  if (status === "known") return "Known breach";
+  if (status === "probable") return "Probable breach";
+  return "Needs review";
+}
+
+function breachSeverityLabel(record) {
+  const severity = compact(record?.severity, "soft");
+  return severity === "hard" ? "Hard hit" : "Soft corridor";
+}
+
+function formatBreachTime(value) {
+  if (!value) return "Unknown time";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return compact(value);
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function formatAltitude(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? `${formatNumber(number)} ft` : "Unknown altitude";
+}
+
+function formatSpeed(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? `${formatNumber(number)} kt` : "Unknown speed";
+}
+
+function formatConfidence(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? `${Math.round(number * 100)}%` : "unscored";
+}
+
+function parcelLabel(parcelId, parcels = airspaceParcelMap()) {
+  return parcels.get(parcelId)?.label || parcelId || "Unknown parcel";
+}
+
+function impactedParcelIds(record) {
+  return [...new Set([...(record?.hardHits || []), ...(record?.softHits || [])].map((hit) => hit.parcelId).filter(Boolean))];
+}
+
+function describeAirspaceBreaches() {
+  const summary = state.airspaceBreaches?.summary || {};
+  const policy = state.airspaceBreaches?.sourcePolicy || {};
+  const records = airspaceBreachRecords();
+  const known = Number(summary.knownBreaches || records.filter((record) => record.status === "known").length);
+  const hard = Number(summary.hardHits || records.reduce((sum, record) => sum + breachHitCounts(record).hard, 0));
+  const soft = Number(summary.softHits || records.reduce((sum, record) => sum + breachHitCounts(record).soft, 0));
+  setActivity({
+    label: "Breach Report",
+    title: `${known.toLocaleString()} known breach${known === 1 ? "" : "es"} / ${hard.toLocaleString()} hard / ${soft.toLocaleString()} soft parcel hits`,
+    detail:
+      policy.status === "provisional_seed"
+        ? "Showing provisional seed rows for UI validation; replace with verified ADS-B and parcel-intersection output before evidentiary use."
+        : "Showing parcel impacts from the committed breach-report artifact.",
+    progress: 1,
+  });
+}
+
+function selectAirspaceBreach(id) {
+  const record = airspaceBreachRecords().find((item) => item.id === id);
+  if (!record) return;
+  state.selectedBreachId = record.id;
+  state.activeLens = "breaches";
+  activateLensButton("breaches");
+  renderViz();
+  renderResults();
+  renderBreachDetail(record);
+  const counts = breachHitCounts(record);
+  setActivity({
+    label: breachStatusLabel(record),
+    title: `${record.flight?.callsign || "Flight"} / ${formatBreachTime(record.observedAt)} / ${formatAltitude(record.flight?.altitudeFt)}`,
+    detail: `${formatSpeed(record.flight?.speedKts)} / ${counts.hard} hard parcel hit${counts.hard === 1 ? "" : "s"} / ${counts.soft} soft corridor hit${counts.soft === 1 ? "" : "s"}.`,
+    progress: 1,
+  });
 }
 
 function registerGraphOverlayRecords(records = {}) {
@@ -2065,6 +2196,13 @@ function renderViz() {
     els.viz.replaceChildren(renderChatPanel());
     return;
   }
+  if (state.activeLens === "breaches") {
+    removeTooltip();
+    lensCopy();
+    els.viz.replaceChildren(renderBreachReportPanel());
+    renderBreachDetail(selectedAirspaceBreach());
+    return;
+  }
   const rect = els.viz.getBoundingClientRect();
   const width = Math.max(rect.width, 320);
   const height = Math.max(rect.height, 360);
@@ -2079,6 +2217,7 @@ function renderViz() {
     lineage: renderLineageLens,
     graph: renderGraphLens,
     architecture: renderArchitectureLens,
+    breaches: renderTimeLens,
     ontology: renderOntologyLens,
     prices: renderPriceLens,
   };
@@ -2093,6 +2232,7 @@ function lensCopy() {
     lineage: ["Source Lens", "External Sources And Evidence Coverage"],
     graph: ["Graph Lens", "Static Graph Overlay Coverage"],
     architecture: ["Flow Lens", "Application Structure And Data Flow"],
+    breaches: ["Breach Report", "Niskayuna Airspace Parcel Impacts"],
     ontology: ["Food Lens", `${categoryLabels[state.ontologyCategory]} Across Time`],
     prices: ["Price Lens", priceLensTitle()],
     chat: ["Ask Lens", "Ask Across The MenuGraph"],
@@ -2100,6 +2240,224 @@ function lensCopy() {
   const [label, title] = copies[state.activeLens];
   els.lensLabel.textContent = label;
   els.resultTitle.textContent = title;
+}
+
+function breachEl(tag, className = "", text = "") {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function renderBreachReportPanel() {
+  const payload = state.airspaceBreaches;
+  if (!payload) {
+    const loading = breachEl("div", "loading", "Airspace breach report loading...");
+    return loading;
+  }
+  const record = selectedAirspaceBreach();
+  const panel = breachEl("section", "breach-panel");
+  panel.setAttribute("aria-label", "Niskayuna airspace breach report");
+  panel.append(renderBreachSummary(payload), renderBreachMap(record, payload), renderBreachSelectedSummary(record, payload));
+  return panel;
+}
+
+function renderBreachSummary(payload) {
+  const summary = payload.summary || {};
+  const policy = payload.sourcePolicy || {};
+  const metrics = [
+    ["Known", summary.knownBreaches || 0, "confirmed centerline rows"],
+    ["Hard Hits", summary.hardHits || 0, "parcel intersections"],
+    ["Soft Hits", summary.softHits || 0, "vector corridor parcels"],
+    ["Parcels", summary.distinctParcelsImpacted || 0, "distinct impacted"],
+  ];
+  const wrap = breachEl("div", "breach-summary");
+  const copy = breachEl("div", "breach-summary__copy");
+  copy.append(breachEl("strong", "", payload.region?.label || "Airspace breach report"));
+  copy.append(
+    breachEl(
+      "span",
+      "",
+      policy.status === "provisional_seed"
+        ? "Provisional seed rows. Replace with verified ADS-B tracks and parcel intersections before evidentiary use."
+        : "Committed parcel-impact report."
+    )
+  );
+  const grid = breachEl("div", "breach-summary__metrics");
+  metrics.forEach(([label, value, detail]) => {
+    const card = breachEl("div", "breach-metric");
+    card.append(breachEl("span", "", label), breachEl("strong", "", formatNumber(value)), breachEl("small", "", detail));
+    grid.appendChild(card);
+  });
+  wrap.append(copy, grid);
+  return wrap;
+}
+
+function renderBreachMap(record, payload) {
+  const card = breachEl("div", "breach-map-card");
+  const header = breachEl("div", "breach-map-card__header");
+  const title = breachEl("strong", "", record ? `${record.flight?.callsign || "Flight"} path` : "No breach selected");
+  const meta = breachEl(
+    "span",
+    "",
+    record
+      ? `${formatBreachTime(record.observedAt)} / ${formatSpeed(record.flight?.speedKts)} / ${formatAltitude(record.flight?.altitudeFt)}`
+      : "Select a breach row below"
+  );
+  header.append(title, meta);
+  const map = breachEl("div", "breach-map");
+  map.appendChild(renderBreachSvg(record, payload));
+  const legend = breachEl("div", "breach-legend");
+  [
+    ["Hard hit", "breach-legend__hard"],
+    ["Soft hit", "breach-legend__soft"],
+    ["Vector corridor", "breach-legend__corridor"],
+    ["Flight path", "breach-legend__path"],
+  ].forEach(([label, className]) => {
+    const item = breachEl("span", "");
+    item.append(breachEl("i", className), document.createTextNode(label));
+    legend.appendChild(item);
+  });
+  card.append(header, map, legend);
+  return card;
+}
+
+function renderBreachSelectedSummary(record, payload) {
+  const card = breachEl("div", "breach-selected");
+  if (!record) {
+    card.appendChild(breachEl("p", "", "No breach rows are available."));
+    return card;
+  }
+  const counts = breachHitCounts(record);
+  const parcels = airspaceParcelMap();
+  const top = breachEl("div", "breach-selected__top");
+  const title = breachEl("div", "");
+  title.append(breachEl("span", "source-status-pill", breachStatusLabel(record)));
+  title.append(breachEl("strong", "", `${record.flight?.callsign || "Flight"} / ${breachSeverityLabel(record)}`));
+  const facts = breachEl("div", "breach-selected__facts");
+  [
+    ["Speed", formatSpeed(record.flight?.speedKts)],
+    ["Altitude", formatAltitude(record.flight?.altitudeFt)],
+    ["Heading", `${formatNumber(record.flight?.headingDeg || 0)} deg`],
+    ["Corridor", `${formatNumber(record.vectorCorridorMeters || 0)} m`],
+  ].forEach(([label, value]) => {
+    const item = breachEl("span", "");
+    item.append(breachEl("small", "", label), breachEl("b", "", value));
+    facts.appendChild(item);
+  });
+  top.append(title, facts);
+  const columns = breachEl("div", "breach-hit-columns");
+  columns.append(
+    renderBreachHitList("Hard parcel hits", record.hardHits || [], parcels, "hard"),
+    renderBreachHitList("Soft vector hits", record.softHits || [], parcels, "soft")
+  );
+  const note = breachEl("p", "breach-policy-note", record.evidence?.notes || payload.sourcePolicy?.privacyPolicy || "");
+  card.append(top, columns, note);
+  if (!counts.hard && !counts.soft) card.appendChild(breachEl("p", "breach-policy-note", "No parcel impacts are attached to this row."));
+  return card;
+}
+
+function renderBreachHitList(title, hits, parcels, kind) {
+  const section = breachEl("section", `breach-hit-list breach-hit-list--${kind}`);
+  section.appendChild(breachEl("h3", "", `${title} (${hits.length})`));
+  if (!hits.length) {
+    section.appendChild(breachEl("p", "", kind === "hard" ? "No centerline parcel intersections." : "No vector-corridor parcels."));
+    return section;
+  }
+  hits.slice(0, 8).forEach((hit) => {
+    const row = breachEl("div", "breach-hit-row");
+    const name = breachEl("strong", "", parcelLabel(hit.parcelId, parcels));
+    const detail = [
+      hit.time ? formatBreachTime(hit.time) : "",
+      Number.isFinite(Number(hit.minDistanceMeters)) ? `${formatNumber(hit.minDistanceMeters)} m` : "",
+      `confidence ${formatConfidence(hit.confidence)}`,
+    ]
+      .filter(Boolean)
+      .join(" / ");
+    row.append(name, breachEl("span", "", detail));
+    section.appendChild(row);
+  });
+  return section;
+}
+
+function airspaceBounds(payload = state.airspaceBreaches) {
+  const bounds = payload?.region?.bounds;
+  if (bounds?.west && bounds?.east && bounds?.south && bounds?.north) return bounds;
+  const points = [
+    ...airspaceParcelRecords().flatMap((parcel) => parcel.polygon || []),
+    ...airspaceBreachRecords().flatMap((record) => record.path || []),
+  ];
+  const lons = points.map((point) => Number(point[0])).filter(Number.isFinite);
+  const lats = points.map((point) => Number(point[1])).filter(Number.isFinite);
+  if (!lons.length || !lats.length) return { west: -1, east: 1, south: -1, north: 1 };
+  return {
+    west: Math.min(...lons),
+    east: Math.max(...lons),
+    south: Math.min(...lats),
+    north: Math.max(...lats),
+  };
+}
+
+function projectAirspacePoint(point, bounds, width, height, pad = 34) {
+  const lon = Number(point?.[0]);
+  const lat = Number(point?.[1]);
+  const rangeX = Math.max(Number(bounds.east) - Number(bounds.west), 0.000001);
+  const rangeY = Math.max(Number(bounds.north) - Number(bounds.south), 0.000001);
+  return {
+    x: pad + ((lon - Number(bounds.west)) / rangeX) * Math.max(width - pad * 2, 1),
+    y: pad + ((Number(bounds.north) - lat) / rangeY) * Math.max(height - pad * 2, 1),
+  };
+}
+
+function renderBreachSvg(record, payload = state.airspaceBreaches) {
+  const width = 820;
+  const height = 360;
+  const bounds = airspaceBounds(payload);
+  const parcels = payload?.parcels || [];
+  const hardIds = new Set((record?.hardHits || []).map((hit) => hit.parcelId));
+  const softIds = new Set((record?.softHits || []).map((hit) => hit.parcelId));
+  const svg = svgEl("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": "Flight path over Niskayuna parcel sketch" });
+  svg.appendChild(svgEl("rect", { x: 0, y: 0, width, height, rx: 8, class: "breach-svg-bg" }));
+  svg.appendChild(svgEl("text", { x: 20, y: 28, class: "flow-box-title" })).textContent = "Parcel coordinate sketch";
+  svg.appendChild(svgEl("text", { x: 20, y: 46, class: "flow-muted" })).textContent = "Not a survey map. Shows relative parcel/path evidence from the breach artifact.";
+
+  parcels.forEach((parcel) => {
+    const points = (parcel.polygon || []).map((point) => projectAirspacePoint(point, bounds, width, height));
+    if (!points.length) return;
+    const polygon = svgEl("polygon", {
+      points: points.map((point) => `${point.x},${point.y}`).join(" "),
+      class: hardIds.has(parcel.id) ? "breach-parcel breach-parcel--hard" : softIds.has(parcel.id) ? "breach-parcel breach-parcel--soft" : "breach-parcel",
+    });
+    svg.appendChild(polygon);
+  });
+
+  const pathPoints = (record?.path || []).map((point) => projectAirspacePoint(point, bounds, width, height));
+  if (pathPoints.length > 1) {
+    const pointString = pathPoints.map((point) => `${point.x},${point.y}`).join(" ");
+    svg.appendChild(
+      svgEl("polyline", {
+        points: pointString,
+        class: "breach-corridor",
+        "stroke-width": Math.max(18, Math.min(44, Number(record.vectorCorridorMeters || 120) / 4)),
+      })
+    );
+    svg.appendChild(svgEl("polyline", { points: pointString, class: "breach-flight-path" }));
+    svg.appendChild(svgEl("circle", { cx: pathPoints[0].x, cy: pathPoints[0].y, r: 5, class: "breach-path-start" }));
+    const last = pathPoints[pathPoints.length - 1];
+    svg.appendChild(svgEl("circle", { cx: last.x, cy: last.y, r: 5, class: "breach-path-end" }));
+  }
+
+  const labelIds = impactedParcelIds(record).slice(0, 7);
+  const parcelById = new Map(parcels.map((parcel) => [parcel.id, parcel]));
+  labelIds.forEach((parcelId, index) => {
+    const parcel = parcelById.get(parcelId);
+    if (!parcel?.centroid) return;
+    const point = projectAirspacePoint(parcel.centroid, bounds, width, height);
+    const text = svgEl("text", { x: point.x + 6, y: point.y - 5 - (index % 2) * 10, class: "breach-parcel-label" });
+    text.textContent = (hardIds.has(parcelId) ? "H " : "S ") + parcel.label.replace(/\s+parcel\s+/i, " ");
+    svg.appendChild(text);
+  });
+  return svg;
 }
 
 function priceLensTitle() {
@@ -3496,11 +3854,17 @@ function scrollDetailIntoViewOnMobile() {
 }
 
 function renderResults() {
+  if (state.activeLens === "breaches") {
+    renderBreachResults();
+    return;
+  }
+  delete els.resultList.dataset.breachMode;
   if (usesGraphSourceResults()) {
     renderGraphSourceResults();
     return;
   }
 
+  els.resultList.dataset.graphMode = "";
   const menus = state.visibleMenus.slice(0, 80);
   els.resultsCount.textContent = state.visibleMenus.length.toLocaleString();
   els.resultsLabel.textContent = state.selectedOntologyTerm
@@ -3522,6 +3886,46 @@ function renderResults() {
       `;
       setImageSource(button.querySelector("img"), menu.imageUrl, menu.title);
       button.addEventListener("click", () => selectMenu(menuKey(menu)));
+      return button;
+    })
+  );
+}
+
+function renderBreachResults() {
+  const records = airspaceBreachRecords();
+  els.resultsCount.textContent = records.length.toLocaleString();
+  els.resultsLabel.textContent = "Breach Log";
+  els.resultList.dataset.graphMode = "";
+  els.resultList.dataset.breachMode = "breaches";
+  if (!state.airspaceBreaches) {
+    const loading = document.createElement("div");
+    loading.className = "loading";
+    loading.textContent = "Breach report is loading.";
+    els.resultList.replaceChildren(loading);
+    return;
+  }
+  if (!records.length) {
+    const empty = document.createElement("div");
+    empty.className = "loading";
+    empty.textContent = "No breach rows are available.";
+    els.resultList.replaceChildren(empty);
+    return;
+  }
+  const parcels = airspaceParcelMap();
+  els.resultList.replaceChildren(
+    ...records.map((record) => {
+      const counts = breachHitCounts(record);
+      const button = document.createElement("button");
+      button.className = `breach-record-card breach-record-card--${record.status || "review"}`;
+      button.type = "button";
+      button.dataset.selected = record.id === state.selectedBreachId ? "true" : "false";
+      const top = breachEl("div", "breach-record-card__top");
+      top.append(breachEl("span", "source-status-pill", breachStatusLabel(record)), breachEl("small", "", breachSeverityLabel(record)));
+      const title = breachEl("strong", "", `${record.flight?.callsign || "Flight"} / ${formatBreachTime(record.observedAt)}`);
+      const meta = breachEl("span", "", `${formatSpeed(record.flight?.speedKts)} / ${formatAltitude(record.flight?.altitudeFt)} / heading ${formatNumber(record.flight?.headingDeg || 0)} deg`);
+      const impacts = breachEl("small", "", `${counts.hard} hard / ${counts.soft} soft / ${impactedParcelIds(record).map((id) => parcelLabel(id, parcels)).slice(0, 2).join(", ")}`);
+      button.append(top, title, meta, impacts);
+      button.addEventListener("click", () => selectAirspaceBreach(record.id));
       return button;
     })
   );
@@ -3847,6 +4251,114 @@ function renderExternalMenuDetail(record) {
   }
 }
 
+function breachPreviewImage(record) {
+  const label = `${record?.flight?.callsign || "Flight"} ${breachSeverityLabel(record)}`;
+  const path = record?.path || [];
+  const previewPoints = path.length
+    ? path.map((_, index) => ({
+        x: 36 + (index / Math.max(path.length - 1, 1)) * 248,
+        y: 160 - ((index % 3) - 1) * 26 - index * 7,
+      }))
+    : [
+        { x: 36, y: 150 },
+        { x: 284, y: 120 },
+      ];
+  const points = previewPoints.map((point) => `${point.x},${point.y}`).join(" ");
+  const start = previewPoints[0];
+  const end = previewPoints[previewPoints.length - 1];
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220">
+      <rect width="320" height="220" fill="#edf5f2"/>
+      <path d="M34 52h252M34 96h252M34 140h252M76 30v160M150 30v160M224 30v160" stroke="#d8d0c2" stroke-width="2"/>
+      <polyline points="${points}" fill="none" stroke="#a24f39" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" opacity=".18"/>
+      <polyline points="${points}" fill="none" stroke="#316f73" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${start.x}" cy="${start.y}" r="7" fill="#5f714d"/>
+      <circle cx="${end.x}" cy="${end.y}" r="7" fill="#a24f39"/>
+      <text x="24" y="202" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800" fill="#20201c">${escapeXml(label).slice(0, 34)}</text>
+    </svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function escapeXml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderBreachDetail(record) {
+  if (!record || state.activeLens !== "breaches") return;
+  els.detailEmpty.classList.add("hidden");
+  els.detailCard.classList.remove("hidden");
+  els.detailCard.dataset.detailMode = "breach";
+  els.detailImage.alt = `${record.flight?.callsign || "Flight"} path preview`;
+  setImageSource(els.detailImage, breachPreviewImage(record), record.flight?.callsign || "Airspace breach");
+  configureDetailImageZoom("", record.flight?.callsign || "Airspace breach", "breach");
+  els.detailKicker.textContent = [breachStatusLabel(record), formatBreachTime(record.observedAt)].join(" / ");
+  els.detailTitle.textContent = `${record.flight?.callsign || "Flight"} parcel-impact report`;
+  els.detailLink.href = staticDataHref("airspace-breaches.json");
+  els.detailLink.textContent = "Open breach report JSON";
+  els.pageStrip.replaceChildren();
+
+  const counts = breachHitCounts(record);
+  const rows = [
+    ["Status", breachStatusLabel(record)],
+    ["Severity", breachSeverityLabel(record)],
+    ["Time", formatBreachTime(record.observedAt)],
+    ["Aircraft", record.flight?.aircraftType],
+    ["Speed", formatSpeed(record.flight?.speedKts)],
+    ["Altitude", formatAltitude(record.flight?.altitudeFt)],
+    ["Vertical Rate", Number.isFinite(Number(record.flight?.verticalRateFpm)) ? `${formatNumber(record.flight.verticalRateFpm)} fpm` : ""],
+    ["Heading", Number.isFinite(Number(record.flight?.headingDeg)) ? `${formatNumber(record.flight.headingDeg)} deg` : ""],
+    ["Vector Corridor", Number.isFinite(Number(record.vectorCorridorMeters)) ? `${formatNumber(record.vectorCorridorMeters)} m` : ""],
+    ["Track Confidence", formatConfidence(record.flight?.trackConfidence)],
+    ["Hard / Soft", `${counts.hard} / ${counts.soft}`],
+  ].filter(([, value]) => compact(value, ""));
+
+  els.detailMeta.replaceChildren(
+    ...rows.flatMap(([label, value]) => {
+      const dt = document.createElement("dt");
+      dt.textContent = label;
+      const dd = document.createElement("dd");
+      dd.textContent = value;
+      return [dt, dd];
+    })
+  );
+
+  const parcels = airspaceParcelMap();
+  const lines = [
+    "Parcel impact log",
+    "",
+    "Hard hits",
+    ...(record.hardHits || []).map(
+      (hit) => `- ${parcelLabel(hit.parcelId, parcels)} / ${hit.time ? formatBreachTime(hit.time) : "time unscored"} / ${formatConfidence(hit.confidence)}`
+    ),
+    ...(record.hardHits || []).length ? [] : ["- None"],
+    "",
+    "Soft vector hits",
+    ...(record.softHits || []).map(
+      (hit) => `- ${parcelLabel(hit.parcelId, parcels)} / ${Number.isFinite(Number(hit.minDistanceMeters)) ? `${formatNumber(hit.minDistanceMeters)} m from path` : "distance unscored"} / ${formatConfidence(hit.confidence)}`
+    ),
+    ...(record.softHits || []).length ? [] : ["- None"],
+    "",
+    record.evidence?.notes || state.airspaceBreaches?.sourcePolicy?.privacyPolicy || "",
+  ];
+  els.detailText.textContent = lines.join("\n");
+
+  els.detailEvidence.replaceChildren();
+  els.detailEvidence.classList.remove("hidden");
+  const title = document.createElement("strong");
+  title.textContent = "Breach Evidence";
+  const evidence = breachEl("div", "evidence-item");
+  evidence.append(
+    breachEl("span", "", record.evidence?.method || "Vector intersection model"),
+    breachEl("small", "", record.evidence?.source || "Static breach artifact"),
+    breachEl("small", "", state.airspaceBreaches?.sourcePolicy?.hardHitDefinition || "")
+  );
+  els.detailEvidence.append(title, evidence);
+}
+
 function externalDateInterval(record) {
   if (record.lowerYear && record.upperYear && record.lowerYear !== record.upperYear) return `${record.lowerYear}-${record.upperYear}`;
   return record.year || record.pointYear || record.lowerYear || "";
@@ -3877,6 +4389,7 @@ async function selectMenu(id) {
 function renderDetailSkeleton(menu) {
   els.detailEmpty.classList.add("hidden");
   els.detailCard.classList.remove("hidden");
+  els.detailCard.dataset.detailMode = "menu";
   els.detailImage.alt = menu?.title || "Selected menu";
   setImageSource(els.detailImage, detailImageSource(menu?.imageUrl, menu?.sourceKey || "cia"), menu?.title);
   configureDetailImageZoom(detailImageSource(menu?.imageUrl, menu?.sourceKey || "cia"), menu?.title, menu?.sourceKey || "cia");
@@ -3894,6 +4407,7 @@ function renderDetailSkeleton(menu) {
 }
 
 function renderDetail(detail, menu) {
+  els.detailCard.dataset.detailMode = "menu";
   els.detailImage.alt = detail.title;
   setImageSource(els.detailImage, detailImageSource(detail.imageUrl, detail.sourceKey || menu?.sourceKey || "cia"), detail.title || menu?.title);
   configureDetailImageZoom(zoomableImageSource(detail.imageUrl, detail.sourceKey || menu?.sourceKey || "cia"), detail.title || menu?.title, detail.sourceKey || menu?.sourceKey || "cia");
@@ -5305,6 +5819,7 @@ function bindEvents() {
       if (state.activeLens === "prices") describePricesLoaded();
       if (state.activeLens === "ontology" && state.ontology) describeOntologyLoaded(state.ontology);
       if (state.activeLens === "graph" || state.activeLens === "architecture") describeGraphOverlay();
+      if (state.activeLens === "breaches") describeAirspaceBreaches();
       if (state.activeLens === "chat") {
         setActivity({
           label: "Ask Lens",

@@ -1,0 +1,216 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-05T12:00:00Z",
+  "region": {
+    "label": "Niskayuna parcel airspace review",
+    "jurisdiction": "Niskayuna, New York",
+    "center": [-73.8954, 42.8197],
+    "bounds": {
+      "west": -73.909,
+      "south": 42.811,
+      "east": -73.879,
+      "north": 42.829
+    },
+    "crs": "EPSG:4326",
+    "notes": "Seed data for the static breach-report view. Replace with verified ADS-B tracks, parcel polygons, and locally computed vector intersections before treating any row as evidentiary."
+  },
+  "sourcePolicy": {
+    "status": "provisional_seed",
+    "publicSafe": true,
+    "privacyPolicy": "Parcel labels are generalized and owner names are not published. Verified deployments should keep parcel ownership and raw feeds in controlled storage.",
+    "hardHitDefinition": "Flight centerline intersects a parcel polygon or confirmed parcel airspace volume.",
+    "softHitDefinition": "Parcel falls inside the projected vector corridor or uncertainty buffer without centerline intersection."
+  },
+  "summary": {
+    "breaches": 4,
+    "knownBreaches": 2,
+    "probableBreaches": 1,
+    "reviewBreaches": 1,
+    "hardHits": 3,
+    "softHits": 11,
+    "distinctParcelsImpacted": 9
+  },
+  "parcels": [
+    {
+      "id": "nisk-parcel-river-014",
+      "label": "River corridor parcel 014",
+      "classification": "residential",
+      "centroid": [-73.9032, 42.8181],
+      "polygon": [[-73.9052, 42.8168], [-73.9014, 42.8171], [-73.9018, 42.8194], [-73.9056, 42.8191]]
+    },
+    {
+      "id": "nisk-parcel-river-021",
+      "label": "River corridor parcel 021",
+      "classification": "residential",
+      "centroid": [-73.8984, 42.8192],
+      "polygon": [[-73.9001, 42.8177], [-73.8964, 42.818], [-73.8967, 42.8205], [-73.9004, 42.8202]]
+    },
+    {
+      "id": "nisk-parcel-hillside-088",
+      "label": "Hillside parcel 088",
+      "classification": "residential",
+      "centroid": [-73.8931, 42.8208],
+      "polygon": [[-73.8951, 42.8196], [-73.8914, 42.8197], [-73.8916, 42.822], [-73.8953, 42.8219]]
+    },
+    {
+      "id": "nisk-parcel-hillside-091",
+      "label": "Hillside parcel 091",
+      "classification": "residential",
+      "centroid": [-73.8895, 42.8216],
+      "polygon": [[-73.8912, 42.8205], [-73.8878, 42.8206], [-73.888, 42.8228], [-73.8914, 42.8227]]
+    },
+    {
+      "id": "nisk-parcel-school-004",
+      "label": "Civic parcel 004",
+      "classification": "civic",
+      "centroid": [-73.8962, 42.8147],
+      "polygon": [[-73.899, 42.8129], [-73.8938, 42.813], [-73.8939, 42.8164], [-73.8992, 42.8162]]
+    },
+    {
+      "id": "nisk-parcel-wood-033",
+      "label": "Woodland edge parcel 033",
+      "classification": "open-space",
+      "centroid": [-73.8849, 42.8173],
+      "polygon": [[-73.8871, 42.8159], [-73.8827, 42.8161], [-73.8829, 42.8187], [-73.8872, 42.8186]]
+    },
+    {
+      "id": "nisk-parcel-wood-037",
+      "label": "Woodland edge parcel 037",
+      "classification": "open-space",
+      "centroid": [-73.8822, 42.8195],
+      "polygon": [[-73.8842, 42.818], [-73.8802, 42.8182], [-73.8804, 42.821], [-73.8845, 42.8209]]
+    },
+    {
+      "id": "nisk-parcel-north-112",
+      "label": "North ridge parcel 112",
+      "classification": "residential",
+      "centroid": [-73.8947, 42.8251],
+      "polygon": [[-73.897, 42.8238], [-73.8926, 42.8239], [-73.8928, 42.8266], [-73.8972, 42.8264]]
+    },
+    {
+      "id": "nisk-parcel-north-118",
+      "label": "North ridge parcel 118",
+      "classification": "residential",
+      "centroid": [-73.8894, 42.8254],
+      "polygon": [[-73.8916, 42.824], [-73.8873, 42.8241], [-73.8876, 42.8268], [-73.8918, 42.8267]]
+    }
+  ],
+  "breaches": [
+    {
+      "id": "breach-nisk-demo-001",
+      "status": "known",
+      "severity": "hard",
+      "observedAt": "2026-06-03T14:18:42-04:00",
+      "flight": {
+        "callsign": "DEMO-NISK-14",
+        "aircraftType": "single-engine",
+        "speedKts": 128,
+        "altitudeFt": 850,
+        "verticalRateFpm": -64,
+        "headingDeg": 76,
+        "trackConfidence": 0.82
+      },
+      "vectorCorridorMeters": 120,
+      "path": [[-73.9066, 42.8174], [-73.9029, 42.8183], [-73.8987, 42.8192], [-73.8945, 42.8204], [-73.8894, 42.8215]],
+      "hardHits": [
+        { "parcelId": "nisk-parcel-river-014", "time": "2026-06-03T14:18:49-04:00", "minDistanceMeters": 0, "confidence": 0.86 },
+        { "parcelId": "nisk-parcel-river-021", "time": "2026-06-03T14:18:55-04:00", "minDistanceMeters": 0, "confidence": 0.84 }
+      ],
+      "softHits": [
+        { "parcelId": "nisk-parcel-hillside-088", "minDistanceMeters": 42, "confidence": 0.67 },
+        { "parcelId": "nisk-parcel-hillside-091", "minDistanceMeters": 78, "confidence": 0.56 },
+        { "parcelId": "nisk-parcel-school-004", "minDistanceMeters": 96, "confidence": 0.52 }
+      ],
+      "evidence": {
+        "source": "provisional seed row",
+        "method": "centerline and buffered-vector intersection model",
+        "notes": "Synthetic row for UI validation; not an official flight or parcel record."
+      }
+    },
+    {
+      "id": "breach-nisk-demo-002",
+      "status": "known",
+      "severity": "hard",
+      "observedAt": "2026-06-04T09:42:17-04:00",
+      "flight": {
+        "callsign": "DEMO-NISK-22",
+        "aircraftType": "rotorcraft",
+        "speedKts": 92,
+        "altitudeFt": 610,
+        "verticalRateFpm": 120,
+        "headingDeg": 58,
+        "trackConfidence": 0.79
+      },
+      "vectorCorridorMeters": 160,
+      "path": [[-73.9008, 42.8128], [-73.8982, 42.8151], [-73.8954, 42.8178], [-73.892, 42.8202], [-73.8881, 42.8233]],
+      "hardHits": [
+        { "parcelId": "nisk-parcel-school-004", "time": "2026-06-04T09:42:28-04:00", "minDistanceMeters": 0, "confidence": 0.81 }
+      ],
+      "softHits": [
+        { "parcelId": "nisk-parcel-river-021", "minDistanceMeters": 61, "confidence": 0.62 },
+        { "parcelId": "nisk-parcel-hillside-088", "minDistanceMeters": 84, "confidence": 0.58 },
+        { "parcelId": "nisk-parcel-hillside-091", "minDistanceMeters": 101, "confidence": 0.53 }
+      ],
+      "evidence": {
+        "source": "provisional seed row",
+        "method": "centerline and buffered-vector intersection model",
+        "notes": "Synthetic row for UI validation; not an official flight or parcel record."
+      }
+    },
+    {
+      "id": "breach-nisk-demo-003",
+      "status": "probable",
+      "severity": "soft",
+      "observedAt": "2026-06-04T18:07:03-04:00",
+      "flight": {
+        "callsign": "DEMO-NISK-33",
+        "aircraftType": "unknown",
+        "speedKts": 142,
+        "altitudeFt": 1240,
+        "verticalRateFpm": -210,
+        "headingDeg": 91,
+        "trackConfidence": 0.64
+      },
+      "vectorCorridorMeters": 210,
+      "path": [[-73.8959, 42.8244], [-73.8912, 42.8248], [-73.8862, 42.8249], [-73.8817, 42.825]],
+      "hardHits": [],
+      "softHits": [
+        { "parcelId": "nisk-parcel-north-112", "minDistanceMeters": 37, "confidence": 0.7 },
+        { "parcelId": "nisk-parcel-north-118", "minDistanceMeters": 44, "confidence": 0.66 },
+        { "parcelId": "nisk-parcel-hillside-091", "minDistanceMeters": 136, "confidence": 0.48 }
+      ],
+      "evidence": {
+        "source": "provisional seed row",
+        "method": "buffered-vector intersection model",
+        "notes": "Synthetic row for UI validation; not an official flight or parcel record."
+      }
+    },
+    {
+      "id": "breach-nisk-demo-004",
+      "status": "review",
+      "severity": "soft",
+      "observedAt": "2026-06-05T07:31:26-04:00",
+      "flight": {
+        "callsign": "DEMO-NISK-41",
+        "aircraftType": "turboprop",
+        "speedKts": 176,
+        "altitudeFt": 1980,
+        "verticalRateFpm": 48,
+        "headingDeg": 102,
+        "trackConfidence": 0.57
+      },
+      "vectorCorridorMeters": 180,
+      "path": [[-73.8892, 42.8157], [-73.8866, 42.8168], [-73.8832, 42.818], [-73.8798, 42.8192]],
+      "hardHits": [],
+      "softHits": [
+        { "parcelId": "nisk-parcel-wood-033", "minDistanceMeters": 29, "confidence": 0.69 },
+        { "parcelId": "nisk-parcel-wood-037", "minDistanceMeters": 93, "confidence": 0.5 }
+      ],
+      "evidence": {
+        "source": "provisional seed row",
+        "method": "buffered-vector intersection model",
+        "notes": "Synthetic row for UI validation; not an official flight or parcel record."
+      }
+    }
+  ]
+}
