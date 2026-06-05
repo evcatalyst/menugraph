@@ -200,4 +200,44 @@ assert(
   "sparse comparisons should still include an evidence table fallback"
 );
 
+const graphOverlayAnswer = chat.answerQuestion({
+  question: "truffle evidence before 1920",
+  menus: {
+    menus: [
+      {
+        uid: "cia:graph-only",
+        id: "graph-only",
+        title: "Graph Overlay Menu",
+        date: "1911",
+        year: 1911,
+        city: "Boston",
+        country: "United States",
+        sourceKey: "cia",
+        sourceShortLabel: "CIA",
+        topDishes: [],
+      },
+    ],
+  },
+  prices: { records: [] },
+  graphOverlay: {
+    menuOverlays: {
+      records: {
+        "cia:graph-only": {
+          counts: {
+            dishMentions: 2,
+            priceObservations: 1,
+            ingredientTags: 1,
+            ocrCandidates: 1,
+          },
+          topDishes: ["Eggs with truffle sauce"],
+          ingredientTags: ["truffle"],
+        },
+      },
+    },
+    evidenceIndex: {},
+  },
+});
+assert.strictEqual(graphOverlayAnswer.matches[0]?.uid, "cia:graph-only", "graph overlay OCR-derived terms should be searchable");
+assert.strictEqual(graphOverlayAnswer.matches[0]?.graphEvidenceCounts?.ingredientTags, 1, "graph evidence counts should stay attached to matches");
+
 console.log("chat-utils tests passed");

@@ -205,7 +205,9 @@
       .filter(Boolean)
       .map((record) => [record.confidence, record.decade || record.centerYear, (record.methods || []).join(" ")].filter(Boolean).join(" "));
     const topDishes = (overlay.topDishes || []).slice(0, 6);
-    const summary = [...topDishes, ...priceRows, ...dateRows].map(cleanValue).filter(Boolean);
+    const ingredientTags = (overlay.ingredientTags || []).slice(0, 10);
+    const recipeClusters = (overlay.recipeClusterIds || []).slice(0, 4);
+    const summary = [...topDishes, ...ingredientTags, ...priceRows, ...dateRows, ...recipeClusters].map(cleanValue).filter(Boolean);
     return {
       counts: {
         dishMentions: Number(counts.dishMentions || 0),
@@ -213,6 +215,11 @@
         dateEvidence: Number(counts.dateEvidence || 0),
         matches: Number(counts.matches || 0),
         ontologyTerms: Number(counts.ontologyTerms || 0),
+        ingredientTags: Number(counts.ingredientTags || ingredientTags.length || 0),
+        imageFeatures: Number(counts.imageFeatures || 0),
+        ocrCandidates: Number(counts.ocrCandidates || 0),
+        ocrFailures: Number(counts.ocrFailures || 0),
+        recipeClusters: Number(counts.recipeClusters || recipeClusters.length || 0),
       },
       snippet: summary.slice(0, 4).join("; "),
       searchable: summary.join(" | "),
@@ -1044,7 +1051,8 @@
       : `${intro}\n\nTry one fewer ingredient, a broader protein term, or a place/date constraint.`;
     const caveats = [
       "Static chat searches committed menu metadata, top dish summaries, structured NYPL dish rows, extracted price rows, and date estimate metadata.",
-      "CIA OCR transcripts are only represented where they were already indexed into static snapshots or price/text-derived fields.",
+      "Local Vision OCR evidence is represented through committed graph overlays, text-span evidence, dish mentions, price observations, and ingredient tags when those rows have been built.",
+      "Full raw OCR dumps, image blobs, and embedding vectors are not sent to the browser or Grok; only compact, provenance-bearing evidence summaries are used.",
       "Matches are evidence candidates, not full culinary assertions; open a menu to inspect the source image/transcription.",
     ];
 

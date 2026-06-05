@@ -840,7 +840,7 @@ function filteredMenusWithoutFacet() {
 }
 
 async function requestChatAnswer(question) {
-  const payload = { question, ...askCredentialPayload() };
+  const payload = { question, requireGrok: true, includeEnrichment: true, ...askCredentialPayload() };
   const remoteBase = remoteChatApiBase();
   const remoteUrl = remoteBase ? `${remoteBase}/api/chat` : "";
   const endpoints = shouldUseRemoteChatFirst()
@@ -862,7 +862,13 @@ async function requestChatAnswer(question) {
     }
   }
   if (window.MenuGraphArchive?.handle) {
-    return window.MenuGraphArchive.handle("/api/chat", { body: payload });
+    const fallback = await window.MenuGraphArchive.handle("/api/chat", { body: payload });
+    return {
+      ...fallback,
+      engine: fallback.engine || "local-retrieval",
+      grokStatus: fallback.grokStatus || "browser_archive_fallback",
+      llmError: fallback.llmError || "Grok endpoint unavailable; browser static archive fallback was used.",
+    };
   }
   throw new Error("Chat index is not available");
 }
@@ -889,8 +895,8 @@ async function askChat(question) {
   renderAskEntry();
   setActivity({
     label: "Chat Query",
-    title: "Searching menu, dish, price, and date indexes",
-    detail: "Retrieving candidate records first; the local server can synthesize with Grok when an API key is configured.",
+    title: "Searching indexes and requesting Grok synthesis",
+    detail: "Retrieving candidate records, graph overlays, and OCR enrichment first; static retrieval is now the fallback path.",
     indeterminate: true,
   });
   try {
@@ -908,14 +914,18 @@ async function askChat(question) {
       engine: answer.engine || "local-retrieval",
       model: answer.model,
       error: answer.llmError,
+      grokStatus: answer.grokStatus || "",
+      graphContext: answer.graphContext || null,
+      enrichmentContext: answer.enrichmentContext || null,
       searched: answer.searched,
       caveats: answer.caveats || [],
       diagnostics: buildChatDiagnostics(text, answer, elapsedMs),
     });
+    const grokStatus = answer.grokStatus || (answer.engine === "grok" ? "synthesized" : "not_reported");
     setActivity({
       label: answer.engine === "grok" ? "Grok Synthesis" : "Static Retrieval",
       title: `${Number(answer.matches?.length || 0).toLocaleString()} candidate records returned`,
-      detail: answer.llmError || "Results are grounded in committed MenuGraph snapshots and source-linked records.",
+      detail: answer.llmError || (grokStatus === "synthesized" ? "Grok synthesized the enriched retrieval context." : `Grok status: ${grokStatus}.`),
       progress: 1,
     });
   } catch (error) {
@@ -952,6 +962,7 @@ function buildChatDiagnostics(question, answer, elapsedMs) {
     model,
     cost,
     elapsedMs,
+    grokStatus: answer.grokStatus || "",
     usage,
     rawInput: {
       question,
@@ -961,6 +972,8 @@ function buildChatDiagnostics(question, answer, elapsedMs) {
       answer: answer.answer || "",
       localAnswer: answer.localAnswer || null,
       searched: answer.searched || null,
+      graphContext: answer.graphContext || null,
+      enrichmentContext: answer.enrichmentContext || null,
       chartOptions: (answer.chartRecommendation?.options || []).map((option) => ({
         id: option.id,
         chartType: option.chartType,
@@ -1008,10 +1021,12 @@ function buildChartRenderManifest(answerOrMessage) {
       Number(searched.duplicateCandidates || 0) ? `${Number(searched.duplicateCandidates).toLocaleString()} near-duplicate candidates were collapsed before rendering.` : "",
     ].filter(Boolean),
     provenance: {
-      source: "Committed MenuGraph snapshots, NYPL structured dish rows, extracted price rows, and date-estimate metadata where available.",
+      source: "Committed MenuGraph snapshots, graph overlays, local Vision OCR dish/price evidence, NYPL structured dish rows, and date-estimate metadata where available.",
       candidates: Number(answerOrMessage?.matches?.length || 0),
       searchedDocuments: Number(searched.documents || 0),
       returnedMatches: Number(searched.returnedMatches || answerOrMessage?.matches?.length || 0),
+      graphOverlayRecords: Number(answerOrMessage?.graphContext?.overlayRecords || 0),
+      ocrProcessedPages: Number(answerOrMessage?.enrichmentContext?.status?.ocrProcessedPages || 0),
     },
   };
 }
@@ -1027,7 +1042,13 @@ function renderChatPanel() {
   const status = document.createElement("span");
   status.className = "chat-engine";
   const lastAssistant = [...state.chatMessages].reverse().find((message) => message.role === "assistant");
-  status.textContent = state.askUnlocked ? (lastAssistant?.engine === "grok" ? `Grok ${lastAssistant.model || ""}`.trim() : "Static retrieval") : "Locked";
+  status.textContent = state.askUnlocked
+    ? lastAssistant?.engine === "grok"
+      ? `Grok ${lastAssistant.model || ""}`.trim()
+      : lastAssistant?.grokStatus && lastAssistant.grokStatus !== "not_requested"
+        ? "Grok fallback"
+        : "Static retrieval"
+    : "Locked";
   header.append(title, status);
 
   if (!state.askUnlocked) {
@@ -1079,7 +1100,7 @@ function renderChatPanel() {
   if (state.chatBusy) {
     const busy = document.createElement("div");
     busy.className = "chat-message chat-message--assistant";
-    busy.textContent = "Searching the static corpus...";
+    busy.textContent = "Searching evidence, graph overlays, and OCR enrichment before Grok synthesis...";
     messages.appendChild(busy);
   }
 
@@ -1208,6 +1229,7 @@ function renderChatDiagnostics(diagnostics) {
   [
     ["Engine", diagnostics.engine],
     ["Model", diagnostics.model],
+    ["Grok status", diagnostics.grokStatus || "not reported"],
     ["Cost", diagnostics.cost],
     ["Latency", elapsed],
     ["Usage", diagnostics.usage ? JSON.stringify(diagnostics.usage) : "Not reported"],
@@ -1842,6 +1864,7 @@ function askEntryStatusText() {
   if (!state.askUnlocked) return "Locked";
   const lastAssistant = [...state.chatMessages].reverse().find((message) => message.role === "assistant");
   if (lastAssistant?.engine === "grok") return `Grok ${lastAssistant.model || ""}`.trim();
+  if (lastAssistant?.grokStatus && lastAssistant.grokStatus !== "not_requested") return "Grok fallback";
   return "Static evidence";
 }
 
@@ -1859,7 +1882,7 @@ function renderAskEntryMain() {
   }
   if (state.chatBusy) {
     const busy = askEl("div", "ask-entry-message ask-entry-message--assistant");
-    busy.appendChild(askEl("div", "ask-entry-bubble", "Searching evidence and preparing chart options..."));
+    busy.appendChild(askEl("div", "ask-entry-bubble", "Searching evidence, graph overlays, OCR enrichment, and requesting Grok synthesis..."));
     thread.appendChild(busy);
   }
   main.append(thread, renderAskEntrySessionRail());
@@ -1871,7 +1894,7 @@ function renderAskEntryEmpty() {
   empty.append(
     askEl("span", "ask-entry-kicker", "Ask MenuGraph"),
     askEl("h1", "", "Ask a question. Get an answer, a chart, and the evidence behind it."),
-    askEl("p", "", "Charts are rendered deterministically from MenuGraph data; Grok can suggest framing and refine the prose.")
+    askEl("p", "", "Charts are rendered deterministically from MenuGraph data; Grok synthesis is requested for enriched prose when the API is configured.")
   );
   const prompts = askEl("div", "ask-entry-prompts");
   [
@@ -4865,9 +4888,9 @@ function renderMobileAsk() {
   wrap.appendChild(suggestions);
 
   const messages = mobileEl("div", "mobile-chat-stack chat-messages");
-  if (!state.chatMessages.length) messages.appendChild(mobileEl("div", "chat-empty", "Ask can reference visible filters, selected evidence, and price rows after unlock."));
+  if (!state.chatMessages.length) messages.appendChild(mobileEl("div", "chat-empty", "Ask can reference visible filters, selected evidence, graph overlays, OCR enrichment, and price rows after unlock."));
   state.chatMessages.forEach((message) => messages.appendChild(renderChatMessage(message)));
-  if (state.chatBusy) messages.appendChild(mobileEl("div", "chat-message chat-message--assistant", "Searching the static corpus..."));
+  if (state.chatBusy) messages.appendChild(mobileEl("div", "chat-message chat-message--assistant", "Searching evidence and requesting Grok synthesis..."));
   wrap.appendChild(messages);
   return wrap;
 }

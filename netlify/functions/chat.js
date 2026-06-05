@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
-const chatApi = require("../../docs/chat-utils");
+const { answerMenuGraphQuestion } = require("../../scripts/chat-service");
 
 const JSON_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
@@ -81,152 +81,13 @@ function readStaticJson(filename, fallback = null) {
   }
 }
 
-function compactChatMatches(matches) {
-  return (matches || []).slice(0, 12).map((match) => ({
-    title: match.title,
-    item: match.item,
-    snippet: match.snippet,
-    date: match.date,
-    year: match.year,
-    place: match.place,
-    source: match.source,
-    reasons: match.reasons,
-    price: match.price,
-    url: match.url,
-  }));
-}
-
-function chartMetricLabel(key) {
-  if (key === "medianTodayUsd") return "median today-indexed USD";
-  if (key === "medianRaw") return "median raw price";
-  if (key === "medianRelative") return "median relative index";
-  return "result count";
-}
-
-function chartDataQuality(option, rows) {
-  if (!option || rows.length < 2) return "thin";
-  if (option.chartType === "table") return rows.length < 6 ? "thin" : "usable";
-  return rows.length < 4 ? "thin" : "usable";
-}
-
-function chartRenderManifest(answer) {
-  const recommendation = answer.chartRecommendation;
-  const options = recommendation?.options || [];
-  const option = options.find((item) => item.id === recommendation?.defaultOptionId) || options[0] || null;
-  const rows = option?.rows || [];
-  const yKey = option?.spec?.y || "count";
-  const quality = chartDataQuality(option, rows);
-  return {
-    available: Boolean(option),
-    chartType: option?.chartType || "none",
-    title: option?.label || "No chart rendered",
-    metric: yKey,
-    metricLabel: chartMetricLabel(yKey),
-    rowsRendered: rows.length,
-    labels: rows.slice(0, 8).map((row) => row.label).filter(Boolean),
-    dataQuality: quality,
-    omissions: [
-      quality === "thin" ? "The retrieved evidence is too sparse for a strong visual claim." : "",
-      Number(answer.searched?.duplicateCandidates || 0) ? `${Number(answer.searched.duplicateCandidates).toLocaleString()} near-duplicate candidates were collapsed before rendering.` : "",
-    ].filter(Boolean),
-    provenance: {
-      source: "Committed MenuGraph snapshots, NYPL structured dish rows, extracted price rows, and date-estimate metadata where available.",
-      candidates: Number(answer.matches?.length || 0),
-      searchedDocuments: Number(answer.searched?.documents || 0),
-      returnedMatches: Number(answer.searched?.returnedMatches || answer.matches?.length || 0),
-    },
-  };
-}
-
-async function grokSynthesis(question, localAnswer) {
-  const apiKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
-  if (!apiKey) return null;
-
-  const base = (process.env.GROK_API_BASE || "https://api.x.ai/v1").replace(/\/+$/, "");
-  const model = process.env.GROK_MODEL || "grok-4.3";
-  const context = {
+async function answerQuestion(question, options = {}) {
+  return answerMenuGraphQuestion({
     question,
-    retrievalAnswer: localAnswer.answer,
-    parsed: localAnswer.parsed,
-    searched: localAnswer.searched,
-    facets: localAnswer.facets,
-    caveats: localAnswer.caveats,
-    chartRenderManifest: chartRenderManifest(localAnswer),
-    matches: compactChatMatches(localAnswer.matches),
-  };
-
-  const fetchImpl = globalThis.fetch;
-  if (!fetchImpl) throw new Error("This Netlify function requires a Node runtime with fetch support");
-  const apiResponse = await fetchImpl(`${base}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You answer questions about historical menu data using only the supplied retrieval context. Be concise, cite candidate menu titles/dates in prose, preserve uncertainty, and do not invent external facts.",
-        },
-        {
-          role: "user",
-          content: JSON.stringify(context),
-        },
-      ],
-    }),
+    readStaticJson,
+    requireGrok: options.requireGrok,
+    preferGrok: options.preferGrok,
   });
-
-  const payload = await apiResponse.json().catch(() => ({}));
-  if (!apiResponse.ok) {
-    const detail = payload.error?.message || payload.message || apiResponse.statusText;
-    throw new Error(`Grok request failed: ${detail}`);
-  }
-  const answer = payload.choices?.[0]?.message?.content;
-  if (!answer) throw new Error("Grok response did not include an answer");
-  return { answer, model };
-}
-
-async function answerQuestion(question) {
-  const [menus, ontology, prices, dateEstimates, analytics] = await Promise.all([
-    readStaticJson("menus.json"),
-    readStaticJson("ontology.json", null),
-    readStaticJson("prices.json", { records: [] }),
-    readStaticJson("date-estimates.json", { records: [] }),
-    readStaticJson("analytics.json", null),
-  ]);
-  const localAnswer = chatApi.answerQuestion({
-    question,
-    menus,
-    ontology,
-    prices,
-    dateEstimates,
-    analytics,
-  });
-  const manifest = chartRenderManifest(localAnswer);
-
-  try {
-    const grok = await grokSynthesis(question, localAnswer);
-    if (!grok) return { ...localAnswer, chartRenderManifest: manifest };
-    return {
-      ...localAnswer,
-      engine: "grok",
-      model: grok.model,
-      answer: grok.answer,
-      localAnswer: localAnswer.answer,
-      chartRenderManifest: manifest,
-    };
-  } catch (error) {
-    return {
-      ...localAnswer,
-      engine: "local-retrieval",
-      llmError: error.message,
-      chartRenderManifest: manifest,
-    };
-  }
 }
 
 exports.handler = async function handler(event) {
@@ -238,7 +99,10 @@ exports.handler = async function handler(event) {
     const question = cleanValue(body.question || body.q || event.queryStringParameters?.q || event.queryStringParameters?.question);
     if (!question) return response(400, { error: "Chat question is required" });
     if (!hasValidAskSecret(body, event.headers || {})) return response(401, { error: "Ask secret required" });
-    return response(200, await answerQuestion(question));
+    return response(200, await answerQuestion(question, {
+      requireGrok: Boolean(body.requireGrok || body.forceGrok),
+      preferGrok: body.preferGrok !== false,
+    }));
   } catch (error) {
     return response(500, { error: error.message || "Unexpected Netlify chat error" });
   }
