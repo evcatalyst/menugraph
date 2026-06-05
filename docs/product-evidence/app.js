@@ -228,6 +228,26 @@ function storyReadinessLabel(product, rows) {
   return "discovery";
 }
 
+function statusNarrative(status) {
+  const narratives = {
+    ground_truth_ready: "Reviewed enough to support a product-history claim.",
+    manual_review_ready: "Ready for a reviewer to turn visible evidence into text.",
+    candidate_found: "A source lead exists, but the claim still needs review.",
+    candidate_needs_panel: "The source points to the product, but the ingredient panel is not yet proven readable.",
+    candidate_needs_transcription: "A package/label lead exists; transcription and review are still required.",
+    candidate_needs_archive: "A current source exists; archive coordinates or a durable snapshot are still needed.",
+    no_source: "Unsupported gap. The story cannot assert a change for this era.",
+    discovered: "Known as a lead only.",
+    source_review: "Source identity and attribution need review.",
+    usable_photo: "Photo evidence may be usable after label roles are checked.",
+    label_visible: "A panel appears visible; OCR or manual transcription is the next step.",
+    ocr_extracted: "OCR exists and needs correction or acceptance.",
+    manual_verified: "Verified text can carry claims.",
+    rejected: "Do not use this evidence for the story.",
+  };
+  return narratives[status] || "Needs review before it can support a story claim.";
+}
+
 function evidenceClaimText(card) {
   const product = card.product;
   if (!product) {
@@ -253,6 +273,77 @@ function evidenceClaimText(card) {
     ["Still a gap", gapText],
     ["Proof needed", `${card.action || "Review source pages and attach readable label text."} Priority vintages: ${panelNeed}.`],
   ];
+}
+
+function storyQuestion(card) {
+  const product = card.product;
+  if (!product) {
+    return card.key === "evidence-gate"
+      ? "Which evidence can safely become a public product-history claim?"
+      : "What does this board know, and what still needs proof before publication?";
+  }
+  const name = product.display_name || product.canonical_name || "this product";
+  if (/oreo/i.test(`${product.display_name || ""} ${product.canonical_name || ""}`)) {
+    return "How did Oreo's ingredient label change across packages, and which source-attributable photos prove each era?";
+  }
+  if (product.category === "fast food") {
+    return `How did ${name} change across menus, nutrition PDFs, allergen disclosures, and package evidence without collapsing distinct restaurant documents?`;
+  }
+  return `What changed in ${name}, and which package labels can prove the timeline?`;
+}
+
+function storySupportedNow(card, evidenceRows) {
+  const product = card.product;
+  if (!product) {
+    return card.body;
+  }
+  const sourceDomains = storySourcePath(product, evidenceRows).slice(0, 3);
+  const sourceText = sourceDomains.length ? ` Source venues include ${sourceDomains.join(", ")}.` : "";
+  return `${product.display_name || product.canonical_name} has ${pluralize(product.product_candidate_count, "candidate")} across ${pluralize(product.slots_with_sources, "vintage slot")}.${sourceText}`;
+}
+
+function storyCannotSayYet(card, evidenceRows) {
+  const product = card.product;
+  const verified = evidenceRows.filter((row) => rowEvidenceStatus(row) === "manual_verified").length;
+  if (verified) {
+    return `${pluralize(verified, "verified label")} can support ingredient claims, but other vintages still need explicit evidence before diffs are generalized.`;
+  }
+  if (!product) {
+    return "Operational metrics are not product claims. They explain where evidence sits in the workflow until a source, date, and label are reviewed.";
+  }
+  const needed = product.panel_needed_vintages || product.archive_needed_vintages || product.missing_vintages || "open vintage slots";
+  return `No manual-verified ingredient statement is present in this snapshot. Do not publish ingredient diffs for ${needed} until readable panels and reviewed transcriptions exist.`;
+}
+
+function storyNextEvidenceStep(card, evidenceRows) {
+  const product = card.product;
+  const labelVisible = evidenceRows.filter((row) => rowEvidenceStatus(row) === "label_visible").length;
+  if (labelVisible) {
+    return `Start with the ${pluralize(labelVisible, "label-visible record")}: transcribe, attach reviewer notes, and promote only accepted text.`;
+  }
+  if (product?.recommended_next_action) return product.recommended_next_action;
+  return card.action || "Open source records, confirm attribution/date, then classify label visibility and transcription readiness.";
+}
+
+function renderStoryBrief(card, evidenceRows) {
+  const blocks = [
+    ["Story question", storyQuestion(card)],
+    ["Supported now", storySupportedNow(card, evidenceRows)],
+    ["Cannot say yet", storyCannotSayYet(card, evidenceRows)],
+    ["Next evidence step", storyNextEvidenceStep(card, evidenceRows)],
+  ];
+  return `
+    <section class="story-brief" aria-label="Story brief">
+      ${blocks
+        .map(([label, value]) => `
+          <article>
+            <strong>${escapeHtml(label)}</strong>
+            <p>${escapeHtml(value)}</p>
+          </article>
+        `)
+        .join("")}
+    </section>
+  `;
 }
 
 function storyLensRows(card, evidenceRows) {
@@ -860,6 +951,108 @@ function renderStoryLenses(card, evidenceRows) {
   `;
 }
 
+function storyChapterTitle(vintage) {
+  const titles = {
+    current_2020s: "Present-day SKU anchor",
+    "2010s": "Modern disclosure bridge",
+    "2000s": "Archive-web bridge",
+    "1990s": "Nutrition-panel era",
+    "1980s_or_earlier": "Vintage package hunt",
+    earliest_verified_label: "Earliest verified label",
+  };
+  return titles[vintage] || labelFor(vintage);
+}
+
+function storyChapterBody(product, vintage, info, rows) {
+  const status = info.status || "unknown";
+  const sourceCount = numeric(info.source_count || rows.length);
+  const base = statusNarrative(status);
+  if (status === "no_source") {
+    return `${base} Find an attributable package, archive page, menu document, or catalog before this chapter can enter the public timeline.`;
+  }
+  if (sourceCount) {
+    return `${base} ${pluralize(sourceCount, "source lead")} can be reviewed for product identity, date basis, label visibility, package size, and manufacturer/distributor text.`;
+  }
+  return `${base} Keep this chapter visible as an explicit gap.`;
+}
+
+function renderProductStoryArc(card, evidenceRows) {
+  const product = card.product;
+  return `
+    <section class="story-arc" aria-label="Product story chapters">
+      <div class="story-section-heading">
+        <div>
+          <p class="eyebrow">Story Arc</p>
+          <h4>Chapters Before Publication</h4>
+        </div>
+        <span>${escapeHtml(product.display_name || product.canonical_name || "")}</span>
+      </div>
+      <div class="story-chapters">
+        ${state.data.vintages
+          .map((vintage) => {
+            const info = product.vintage_statuses[vintage] || { status: "unknown", source_count: 0 };
+            const status = info.status || "unknown";
+            const rows = vintageEvidenceRows(product, evidenceRows, vintage);
+            const best = bestEvidenceRows(rows, 1)[0] || {};
+            const source = best.source_url || best.archive_url || "";
+            return `
+              <article class="story-chapter status-${escapeHtml(status)}">
+                <header>
+                  <span>${escapeHtml(vintageLabels[vintage] || vintage)}</span>
+                  <strong>${escapeHtml(storyChapterTitle(vintage))}</strong>
+                </header>
+                <p>${escapeHtml(storyChapterBody(product, vintage, info, rows))}</p>
+                <div class="story-chapter-meta">
+                  ${statusTag(status)}
+                  <span class="status-tag">${formatNumber(info.source_count || rows.length)} sources</span>
+                  ${source ? linkOrText(source, best.source_domain || "Source") : `<span class="gap-label">No source link</span>`}
+                </div>
+              </article>
+            `;
+          })
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderWorkflowStoryArc(card, evidenceRows) {
+  const counts = evidenceRows.reduce((acc, row) => {
+    const status = rowEvidenceStatus(row);
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {});
+  return `
+    <section class="story-arc" aria-label="Evidence workflow story">
+      <div class="story-section-heading">
+        <div>
+          <p class="eyebrow">Story Arc</p>
+          <h4>How A Lead Becomes A Claim</h4>
+        </div>
+        <span>${escapeHtml(card.kicker || "Evidence")}</span>
+      </div>
+      <div class="story-chapters">
+        ${workflowStatuses()
+          .map((status) => `
+            <article class="story-chapter status-${escapeHtml(status)}">
+              <header>
+                <span>${formatNumber(counts[status] || 0)} records</span>
+                <strong>${escapeHtml(statusLabels[status] || labelFor(status))}</strong>
+              </header>
+              <p>${escapeHtml(statusNarrative(status))}</p>
+              <div class="story-chapter-meta">${statusTag(status)}</div>
+            </article>
+          `)
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderStoryArc(card, evidenceRows) {
+  return card.product ? renderProductStoryArc(card, evidenceRows) : renderWorkflowStoryArc(card, evidenceRows);
+}
+
 function renderProvenanceTrail(evidenceRows) {
   const rows = bestEvidenceRows(evidenceRows, 6);
   if (!rows.length) {
@@ -916,9 +1109,10 @@ function renderStoryFocus(card, registryRows) {
           ${card.links || ""}
         </div>
       </div>
+      ${renderStoryBrief(card, evidenceRows)}
       <div class="story-proof-grid">${renderStoryClaimCards(card)}</div>
       ${renderStoryLenses(card, evidenceRows)}
-      ${renderStoryTimeline(card, evidenceRows)}
+      ${renderStoryArc(card, evidenceRows)}
     </div>
     <aside class="story-focus-sidebar">
       <div class="story-sidebar-heading">

@@ -293,6 +293,37 @@ code {
   margin-top: 9px;
   color: var(--muted);
   line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.story-brief {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.story-brief article {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.86);
+  padding: 10px;
+}
+
+.story-brief strong {
+  display: block;
+  color: var(--clay);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.story-brief p {
+  margin: 7px 0 0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.42;
 }
 
 .story-proof-grid,
@@ -333,6 +364,7 @@ code {
   color: var(--ink);
   font-size: 13px;
   line-height: 1.42;
+  overflow-wrap: anywhere;
 }
 
 .story-lenses {
@@ -351,6 +383,86 @@ code {
   color: var(--muted);
   font-size: 11px;
   line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.story-arc {
+  margin-top: 10px;
+}
+
+.story-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.story-section-heading h4,
+.story-section-heading p {
+  margin: 0;
+}
+
+.story-section-heading h4 {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.story-section-heading > span {
+  max-width: 42%;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.story-chapters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.story-chapter {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.story-chapter header {
+  display: grid;
+  gap: 4px;
+}
+
+.story-chapter header span {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.story-chapter header strong {
+  font-size: 15px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.story-chapter p {
+  min-height: 60px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.38;
+  overflow-wrap: anywhere;
+}
+
+.story-chapter-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .story-timeline {
@@ -581,6 +693,7 @@ code {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .story-stat-grid {
@@ -800,6 +913,7 @@ code {
 .small {
   color: var(--muted);
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .vintage-grid {
@@ -1406,7 +1520,9 @@ td {
   }
 
   .story-timeline,
-  .story-lenses {
+  .story-lenses,
+  .story-brief,
+  .story-chapters {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -1436,10 +1552,22 @@ td {
   .control-row,
   .legend,
   .story-summary,
+  .story-brief,
   .story-proof-grid,
   .story-lenses,
-  .story-timeline {
+  .story-timeline,
+  .story-chapters {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .story-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .story-section-heading > span {
+    max-width: 100%;
+    text-align: left;
   }
 
   .scale-title,
