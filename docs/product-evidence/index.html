@@ -11,18 +11,17 @@
       <header class="evidence-topbar">
         <div>
           <p class="eyebrow">MenuGraph Product Evidence</p>
-          <h1>Product Evidence Stories</h1>
-          <p class="summary">Evidence-backed product histories for ingredient, package, manufacturer, and price/weight changes, with every claim tied to source provenance or marked as a gap.</p>
+          <h1>Evidence-Backed Product Stories</h1>
+          <p class="summary">Reader-first product histories for ingredient, package, manufacturer, and price/weight changes, with every claim tied to source provenance or left visible as an unresolved gap.</p>
         </div>
         <nav class="topnav" aria-label="MenuGraph navigation">
           <a href="../">MenuGraph</a>
+          <a href="#story-desk">Story Desk</a>
           <a href="#stories">Stories</a>
-          <a href="#scale">Scale Priorities</a>
-          <a href="#evidence-registry">Evidence Registry</a>
-          <a href="#gaps">Collection Gaps</a>
-          <a href="#campaigns">Campaigns</a>
-          <a href="#acquisition">Acquisition Queue</a>
           <a href="#products">Products</a>
+          <a href="#evidence-registry">Evidence Registry</a>
+          <a href="#gaps">Gaps</a>
+          <a href="#scale">Paused Collection</a>
           <a href="#common-crawl">Common Crawl</a>
         </nav>
       </header>
@@ -32,17 +31,48 @@
         <span>Preparing collection queue, product coverage, and source-review views.</span>
       </section>
 
+      <section class="panel story-desk" id="story-desk">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Story Desk</p>
+            <h2>What The Reader Can Believe</h2>
+          </div>
+          <span id="story-desk-count" class="count-pill">0 story candidates</span>
+        </div>
+        <div class="reader-grid">
+          <article id="reader-lede" class="reader-lede"></article>
+          <div id="reader-readiness" class="reader-readiness"></div>
+        </div>
+        <div id="reader-pillars" class="reader-pillars"></div>
+        <div class="reader-followup-grid">
+          <section>
+            <div class="subsection-title">
+              <strong>Story Candidates</strong>
+              <span>Pick the narrative before opening the operations tables</span>
+            </div>
+            <div id="reader-lineup" class="reader-lineup"></div>
+          </section>
+          <section>
+            <div class="subsection-title">
+              <strong>Claim Boundaries</strong>
+              <span>Unsupported chapters stay visible</span>
+            </div>
+            <div id="reader-boundaries" class="reader-boundaries"></div>
+          </section>
+        </div>
+      </section>
+
       <section class="panel story-panel" id="stories">
         <div class="panel-heading">
           <div>
             <p class="eyebrow">Evidence Stories</p>
-            <h2>Story Reader And Proof Trail</h2>
+            <h2>Focused Story And Proof Trail</h2>
           </div>
           <span id="story-count" class="count-pill">0 stories</span>
         </div>
         <div class="story-toolbar">
           <div id="story-selector" class="story-selector" aria-label="Story selector"></div>
-          <p>Each story separates the reader-facing arc from the proof trail: what is supported, what remains a gap, and which source-attributable label would unlock publication.</p>
+          <p>The focused story separates the reader-facing arc from the proof trail: what is supported, what remains a gap, and which source-attributable label would unlock publication.</p>
         </div>
         <article id="story-focus" class="story-focus" aria-live="polite"></article>
         <div id="story-summary" class="story-summary"></div>
@@ -74,8 +104,8 @@
       <section class="panel" id="scale">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Scale Priorities</p>
-            <h2>Next Collection Lanes</h2>
+            <p class="eyebrow">Paused Collection</p>
+            <h2>Collection Lanes To Resume Later</h2>
           </div>
           <span id="scale-count" class="count-pill">0 lanes</span>
         </div>
@@ -155,7 +185,7 @@
         <section class="panel campaign-panel">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Collection Campaigns</p>
+              <p class="eyebrow">Paused Campaigns</p>
               <h2>Source Campaign Packets</h2>
             </div>
             <span id="campaign-count" class="count-pill">0 packets</span>
@@ -166,7 +196,7 @@
         <aside class="panel search-panel">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Mass Search</p>
+              <p class="eyebrow">Paused Search</p>
               <h2>Top Search Starts</h2>
             </div>
             <span id="search-task-count" class="count-pill">0 tasks</span>
@@ -190,7 +220,7 @@
       <section class="panel" id="acquisition">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Acquisition Queue</p>
+            <p class="eyebrow">Paused Queue</p>
             <h2>Operator-Ready Collection Batches</h2>
           </div>
           <span id="queue-count" class="count-pill">0 rows</span>

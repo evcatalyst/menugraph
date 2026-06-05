@@ -11,6 +11,12 @@ const els = {
   status: document.querySelector("#status"),
   metrics: document.querySelector("#metrics"),
   crawlHealth: document.querySelector("#crawl-health"),
+  storyDeskCount: document.querySelector("#story-desk-count"),
+  readerLede: document.querySelector("#reader-lede"),
+  readerReadiness: document.querySelector("#reader-readiness"),
+  readerPillars: document.querySelector("#reader-pillars"),
+  readerLineup: document.querySelector("#reader-lineup"),
+  readerBoundaries: document.querySelector("#reader-boundaries"),
   storySelector: document.querySelector("#story-selector"),
   storyFocus: document.querySelector("#story-focus"),
   storySummary: document.querySelector("#story-summary"),
@@ -415,6 +421,167 @@ function storyPublicationState(card, evidenceRows) {
     detail: "This view explains how evidence moves from a lead to a claim.",
     status: "discovered",
   };
+}
+
+function storyDisplayTitle(card) {
+  return card?.product?.display_name || card?.product?.canonical_name || card?.title || "Evidence story";
+}
+
+function storyEvidenceStage(product, evidenceRows) {
+  if (numeric(product?.ground_truth_slots) > 0 || evidenceRows.some((row) => rowEvidenceStatus(row) === "manual_verified" || row.manual_transcription_available)) return 4;
+  if (evidenceRows.some((row) => rowEvidenceStatus(row) === "ocr_extracted" || rowEvidenceStatus(row) === "label_visible" || row.ingredient_panel_visible)) return 3;
+  if (evidenceRows.some((row) => rowEvidenceStatus(row) === "usable_photo")) return 2;
+  if (evidenceRows.some((row) => rowEvidenceStatus(row) === "source_review")) return 1;
+  return evidenceRows.length ? 0 : -1;
+}
+
+function storyStageSteps(product, evidenceRows) {
+  const stage = storyEvidenceStage(product, evidenceRows);
+  return [
+    ["discovered", "Lead", "A product/date/source hint exists."],
+    ["source_review", "Source", "Attribution and source owner can be checked."],
+    ["usable_photo", "Photo", "Package or document evidence can be reviewed."],
+    ["label_visible", "Label", "Ingredient or disclosure text is visible enough to transcribe."],
+    ["manual_verified", "Claim", "Reviewed text can support a public claim."],
+  ].map(([status, label, detail], index) => ({
+    status,
+    label,
+    detail,
+    reached: stage >= index,
+  }));
+}
+
+function storyGapLabel(card) {
+  const product = card?.product;
+  if (!product) return "Product-specific gaps remain until a source, date, and readable label are attached.";
+  if (/oreo/i.test(`${product.display_name || ""} ${product.canonical_name || ""}`)) {
+    return "1912 original ingredient label not verified.";
+  }
+  return product.missing_vintages
+    ? `Missing source slots: ${product.missing_vintages}.`
+    : `Needs panel or transcription review: ${product.panel_needed_vintages || product.archive_needed_vintages || "open slots"}.`;
+}
+
+function storyBestSource(evidenceRows) {
+  const best = bestEvidenceRows(evidenceRows, 1)[0] || {};
+  const source = best.source_url || best.archive_url || "";
+  return {
+    title: best.source_title || best.source_domain || best.evidence_kind || "No source selected",
+    detail: best.reviewer_notes || best.unsupported_gap_note || best.promotion_blocker || best.ground_truth_fields_missing || "Open the provenance trail to inspect source, date, rights, and review state.",
+    status: rowEvidenceStatus(best),
+    source,
+    label: best.source_domain || "Source",
+  };
+}
+
+function renderReaderProgress(product, evidenceRows) {
+  return `
+    <div class="reader-progress" aria-label="Evidence-to-claim progress">
+      ${storyStageSteps(product, evidenceRows)
+        .map((step) => `
+          <span class="${step.reached ? "is-reached" : ""} status-${escapeHtml(step.status)}">
+            <strong>${escapeHtml(step.label)}</strong>
+            ${escapeHtml(step.detail)}
+          </span>
+        `)
+        .join("")}
+    </div>
+  `;
+}
+
+function renderReaderDesk(cards, selectedCard, registryRows) {
+  if (!els.readerLede) return;
+  const card = selectedCard || cards[0];
+  if (!card) {
+    els.storyDeskCount.textContent = "0 story candidates";
+    els.readerLede.innerHTML = `<p class="empty-note">No story candidates match the current filters.</p>`;
+    els.readerReadiness.innerHTML = "";
+    els.readerPillars.innerHTML = "";
+    els.readerLineup.innerHTML = "";
+    els.readerBoundaries.innerHTML = "";
+    return;
+  }
+
+  const evidenceRows = card.evidenceRows?.length ? card.evidenceRows : bestEvidenceRows(registryRows, 10);
+  const publicationState = storyPublicationState(card, evidenceRows);
+  const bestSource = storyBestSource(evidenceRows);
+  const title = storyDisplayTitle(card);
+  const boundaryRows = evidenceClaimText(card);
+
+  els.storyDeskCount.textContent = `${formatNumber(cards.length)} story candidates`;
+  els.readerLede.innerHTML = `
+    <p class="eyebrow">${escapeHtml(card.kicker || "Story")}</p>
+    <h2>${escapeHtml(storyQuestion(card))}</h2>
+    <p>${escapeHtml(publicationState.detail)}</p>
+    ${renderReaderProgress(card.product, evidenceRows)}
+  `;
+
+  els.readerReadiness.innerHTML = [
+    ["Publication state", publicationState.label, publicationState.status, "This is the headline constraint for the reader-facing story."],
+    ["Proof anchor", bestSource.title, bestSource.status, clipped(bestSource.detail, 130), bestSource.source, bestSource.label],
+    ["Open chapter", storyGapLabel(card), "missing_vintage_slot", "The story should show this as part of the narrative, not hide it in a table."],
+    [
+      "Ingredient claim rule",
+      evidenceRows.some((row) => rowEvidenceStatus(row) === "manual_verified" || row.manual_transcription_available) ? "scoped diffs allowed" : "diffs stay locked",
+      evidenceRows.some((row) => rowEvidenceStatus(row) === "manual_verified" || row.manual_transcription_available) ? "manual_verified" : "label_visible",
+      "No formulation change is promoted unless the supporting label text is verified.",
+    ],
+  ]
+    .map(([label, value, status, detail, source, sourceLabel]) => `
+      <article class="reader-readiness-card status-${escapeHtml(status || "unknown")}">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+        <p>${escapeHtml(detail)}</p>
+        <div class="lead-meta">
+          ${statusTag(status || "unknown")}
+          ${source ? linkOrText(source, sourceLabel || "Source") : ""}
+        </div>
+      </article>
+    `)
+    .join("");
+
+  els.readerPillars.innerHTML = storyLensRows(card, evidenceRows)
+    .map((lens) => `
+      <article class="reader-pillar">
+        <span>${escapeHtml(lens.label)}</span>
+        <strong>${escapeHtml(lens.value)}</strong>
+        <p>${escapeHtml(lens.detail)}</p>
+      </article>
+    `)
+    .join("");
+
+  els.readerLineup.innerHTML = cards
+    .slice(0, 6)
+    .map((story) => {
+      const rows = story.evidenceRows?.length ? story.evidenceRows : bestEvidenceRows(registryRows, 4);
+      const stateLabel = storyPublicationState(story, rows);
+      const selected = story.key === card.key;
+      return `
+        <button class="reader-lineup-card ${selected ? "is-selected" : ""}" type="button" data-story-key="${escapeHtml(story.key)}">
+          <span>${escapeHtml(story.kicker || "Story")}</span>
+          <strong>${escapeHtml(storyDisplayTitle(story))}</strong>
+          <p>${escapeHtml(clipped(storyCannotSayYet(story, rows), 120))}</p>
+          <em>${escapeHtml(stateLabel.label)}</em>
+        </button>
+      `;
+    })
+    .join("");
+
+  els.readerBoundaries.innerHTML = `
+    <article class="reader-boundary-reader">
+      <span>Selected story</span>
+      <strong>${escapeHtml(title)}</strong>
+      <p>${escapeHtml(storySupportedNow(card, evidenceRows))}</p>
+    </article>
+    ${boundaryRows
+      .map(([label, value]) => `
+        <article class="reader-boundary">
+          <span>${escapeHtml(label)}</span>
+          <p>${escapeHtml(value)}</p>
+        </article>
+      `)
+      .join("")}
+  `;
 }
 
 function vintageStatusSummary(product, vintage, evidenceRows) {
@@ -1468,6 +1635,7 @@ function renderStorylines() {
   const selectedCard = cards.find((card) => card.key === state.storyKey) || cards[0];
 
   els.storyCount.textContent = `${formatNumber(cards.length)} stories`;
+  renderReaderDesk(cards, selectedCard, registryRows);
   renderStorySelector(cards);
   renderStoryFocus(selectedCard, registryRows);
   els.storySummary.innerHTML = [
@@ -1974,8 +2142,8 @@ function renderRunLogs() {
 function renderStatus() {
   const generated = state.data.generated_at_utc ? new Date(state.data.generated_at_utc).toLocaleString() : "unknown";
   els.status.innerHTML = `
-    <strong>Snapshot loaded</strong>
-    <span>${formatNumber(state.data.metrics.evidence_registry_rows || state.data.evidence_registry?.length || 0)} registry records and ${formatNumber(state.data.metrics.acquisition_rows)} acquisition rows from ${escapeHtml(state.data.source_run)} · generated ${escapeHtml(generated)}</span>
+    <strong>Story mode loaded</strong>
+    <span>Data collection paused. Showing ${formatNumber(state.data.metrics.evidence_registry_rows || state.data.evidence_registry?.length || 0)} registry records from ${escapeHtml(state.data.source_run)} as a reader-facing proof snapshot · generated ${escapeHtml(generated)}</span>
   `;
 }
 
@@ -2008,6 +2176,7 @@ function attachEvents() {
     render();
     els.storyFocus.scrollIntoView({ block: "nearest", behavior: "smooth" });
   };
+  els.readerLineup.addEventListener("click", selectStory);
   els.storySelector.addEventListener("click", selectStory);
   els.storyRows.addEventListener("click", selectStory);
   els.search.addEventListener("input", () => {
