@@ -528,6 +528,26 @@ td {
   overflow: auto;
 }
 
+.subsection-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.subsection-heading h3,
+.subsection-heading p {
+  margin: 0;
+}
+
+.subsection-heading h3 {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
 .lead-item {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -546,6 +566,47 @@ td {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 8px;
+}
+
+.run-log-list {
+  display: grid;
+  gap: 8px;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.run-log-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.run-log-item p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.run-log-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.run-log-grid span {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  padding: 6px 7px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.run-log-grid strong {
+  color: var(--ink);
 }
 
 .registry-summary {

@@ -114,6 +114,7 @@ async function main() {
   const registry = board.evidence_registry || [];
   const photo = board.photo_evidence_matrix || [];
   const sweeps = board.common_crawl_sweep_plan || [];
+  const runLogs = board.common_crawl_run_logs || [];
   const candidates = board.candidates || [];
   const campaignPackets = board.source_collection_campaign_packets || [];
   const campaigns = board.source_collection_campaigns || [];
@@ -132,6 +133,7 @@ async function main() {
     collection_opportunities: products.length,
     current_web_manifests: currentWebManifests.length,
     common_crawl_sweeps: sweeps.length,
+    common_crawl_run_logs: runLogs.length,
     acquisition_rows: acquisition.length,
     source_review_ready: acquisitionStatusCounts.ready_for_source_review || 0,
     current_web_search_ready: acquisitionStatusCounts.ready_for_current_web_search || 0,
@@ -240,6 +242,20 @@ async function main() {
     "required_next_action",
     "cli_hint",
   ];
+  const runLogFields = [
+    "recorded_at_utc",
+    "command",
+    "query_contains",
+    "targets_considered",
+    "queries_run",
+    "query_errors",
+    "records_seen",
+    "records_rejected",
+    "candidates_inserted",
+    "error_sample",
+    "log_path",
+    "query_errors_path",
+  ];
 
   const summary = {
     generated_at_utc: new Date().toISOString(),
@@ -252,6 +268,11 @@ async function main() {
     acquisition_queue: acquisition,
     photo_evidence: photo,
     common_crawl_sweeps: sweeps,
+    common_crawl_run_logs: compactRows(
+      [...runLogs].sort((a, b) => String(b.recorded_at_utc || "").localeCompare(String(a.recorded_at_utc || ""))),
+      runLogFields,
+      60,
+    ),
     source_batches: buildSourceBatches(board.source_collection_batches || []),
     collection_campaigns: compactRows(campaigns, campaignFields, 80),
     collection_campaign_packets: compactRows(campaignPackets, packetFields, 80),
@@ -278,6 +299,8 @@ async function main() {
       categories: countBy(products, "category"),
       photo_statuses: countBy(photo, "evidence_status_label"),
       sweep_statuses: countBy(sweeps, "sweep_status"),
+      crawl_run_commands: countBy(runLogs, "command"),
+      crawl_run_queries: countBy(runLogs, "query_contains"),
       verification_gaps: countBy(photo, "promotion_blocker"),
       candidate_domains: countBy(candidates, "source_domain"),
       campaign_sources: countBy(campaigns, "source_key"),

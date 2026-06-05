@@ -30,6 +30,8 @@ const els = {
   photoCount: document.querySelector("#photo-count"),
   sweepRows: document.querySelector("#sweep-rows"),
   sweepCount: document.querySelector("#sweep-count"),
+  runLogRows: document.querySelector("#run-log-rows"),
+  runLogCount: document.querySelector("#run-log-count"),
 };
 
 const vintageLabels = {
@@ -57,6 +59,10 @@ const statusLabels = {
   ocr_extracted: "OCR",
   manual_verified: "Verified",
   rejected: "Rejected",
+  candidates_inserted: "Candidates",
+  query_errors: "Query Errors",
+  records_seen: "Records Seen",
+  empty_result: "Empty Result",
 };
 
 function escapeHtml(value) {
@@ -122,6 +128,13 @@ function statusTag(value, extraClass = "") {
 
 function textBlob(row) {
   return Object.values(row).join(" ").toLowerCase();
+}
+
+function runLogStatus(row) {
+  if (Number(row.candidates_inserted || 0) > 0) return "candidates_inserted";
+  if (Number(row.query_errors || 0) > 0) return "query_errors";
+  if (Number(row.records_seen || 0) > 0) return "records_seen";
+  return "empty_result";
 }
 
 function productBlob(row) {
@@ -195,6 +208,13 @@ function passesRegistry(row) {
   return true;
 }
 
+function passesRunLog(row) {
+  const query = state.search.trim().toLowerCase();
+  if (state.status && runLogStatus(row) !== state.status) return false;
+  if (query && !textBlob(row).includes(query)) return false;
+  return true;
+}
+
 function renderMetrics() {
   const metrics = state.data.metrics;
   const cards = [
@@ -206,6 +226,7 @@ function renderMetrics() {
     ["Acquisition Rows", metrics.acquisition_rows],
     ["Campaign Packets", metrics.collection_campaign_packets],
     ["Mass Search Tasks", metrics.mass_search_tasks],
+    ["CDX Runs", metrics.common_crawl_run_logs],
     ["Source Review", metrics.source_review_ready],
     ["Current-Web Search", metrics.current_web_search_ready],
     ["CDX Retry", metrics.cdx_retry_ready],
@@ -226,6 +247,7 @@ function renderFilters() {
       ...(state.data.collection_campaign_packets || []).map((row) => row.packet_status).filter(Boolean),
       ...(state.data.collection_campaigns || []).map((row) => row.campaign_status).filter(Boolean),
       ...(state.data.mass_search_tasks || []).map((row) => row.review_stage).filter(Boolean),
+      ...(state.data.common_crawl_run_logs || []).map(runLogStatus).filter(Boolean),
     ]),
   ].sort();
   els.category.innerHTML = `<option value="">All categories</option>${categories
@@ -505,6 +527,41 @@ function renderSweeps() {
     .join("");
 }
 
+function renderRunLogs() {
+  const rows = (state.data.common_crawl_run_logs || [])
+    .filter(passesRunLog)
+    .slice(0, 30);
+  els.runLogCount.textContent = `${formatNumber(rows.length)} runs`;
+  els.runLogRows.innerHTML = rows
+    .map((row) => {
+      const recorded = row.recorded_at_utc ? new Date(row.recorded_at_utc).toLocaleString() : "unknown";
+      return `
+        <article class="run-log-item">
+          <div class="lead-title">
+            <strong>${escapeHtml(row.query_contains || row.command || "Common Crawl")}</strong>
+            <span>${escapeHtml(recorded)}</span>
+          </div>
+          <div class="run-log-grid">
+            <span><strong>${formatNumber(row.targets_considered)}</strong> targets</span>
+            <span><strong>${formatNumber(row.queries_run)}</strong> queries</span>
+            <span><strong>${formatNumber(row.query_errors)}</strong> errors</span>
+            <span><strong>${formatNumber(row.records_seen)}</strong> seen</span>
+            <span><strong>${formatNumber(row.records_rejected)}</strong> rejected</span>
+            <span><strong>${formatNumber(row.candidates_inserted)}</strong> inserted</span>
+          </div>
+          <p>${escapeHtml(row.error_sample || "No error sample recorded.")}</p>
+          <div class="lead-meta">
+            ${statusTag(runLogStatus(row))}
+            ${statusTag(row.command)}
+            ${linkOrText(row.log_path, "Log")}
+            ${linkOrText(row.query_errors_path, "Errors")}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
 function renderStatus() {
   const generated = state.data.generated_at_utc ? new Date(state.data.generated_at_utc).toLocaleString() : "unknown";
   els.status.innerHTML = `
@@ -525,6 +582,7 @@ function render() {
   renderQueue();
   renderPhotos();
   renderSweeps();
+  renderRunLogs();
   renderStatus();
 }
 
