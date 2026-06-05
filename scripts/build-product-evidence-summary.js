@@ -47,6 +47,12 @@ function compactRows(rows, fields, limit) {
   });
 }
 
+function countHint(board, key, rows) {
+  const hinted = Number(board.compact_counts?.[key]);
+  if (Number.isFinite(hinted)) return hinted;
+  return Array.isArray(rows) ? rows.length : 0;
+}
+
 async function firstExistingPath(candidates) {
   for (const candidate of candidates) {
     try {
@@ -121,25 +127,25 @@ async function main() {
   const massSearch = board.mass_search_pack || [];
   const currentWebManifests = board.current_web_harvest_manifest || [];
 
-  const registryStatusCounts = countBy(registry, "evidence_status");
-  const acquisitionStatusCounts = countBy(acquisition, "acquisition_status");
+  const registryStatusCounts = board.compact_counts?.evidence_status_counts || countBy(registry, "evidence_status");
+  const acquisitionStatusCounts = board.compact_counts?.acquisition_status_counts || countBy(acquisition, "acquisition_status");
 
   const metrics = {
-    targets: (board.targets || []).length,
-    queries: (board.queries || []).length,
-    candidates: candidates.length,
-    photo_evidence_rows: photo.length,
-    label_review_packets: (board.label_review_packets || []).length,
+    targets: countHint(board, "targets", board.targets),
+    queries: countHint(board, "queries", board.queries),
+    candidates: countHint(board, "candidates", candidates),
+    photo_evidence_rows: countHint(board, "photo_evidence_matrix", photo),
+    label_review_packets: countHint(board, "label_review_packets", board.label_review_packets),
     collection_opportunities: products.length,
-    current_web_manifests: currentWebManifests.length,
-    common_crawl_sweeps: sweeps.length,
+    current_web_manifests: countHint(board, "current_web_harvest_manifest", currentWebManifests),
+    common_crawl_sweeps: countHint(board, "common_crawl_sweep_plan", sweeps),
     common_crawl_run_logs: runLogs.length,
-    acquisition_rows: acquisition.length,
+    acquisition_rows: countHint(board, "evidence_acquisition_queue", acquisition),
     source_review_ready: acquisitionStatusCounts.ready_for_source_review || 0,
     current_web_search_ready: acquisitionStatusCounts.ready_for_current_web_search || 0,
     cdx_retry_ready: acquisitionStatusCounts.ready_for_cdx_retry || 0,
     cdx_sweep_ready: acquisitionStatusCounts.ready_for_cdx_sweep || 0,
-    evidence_registry_rows: registry.length,
+    evidence_registry_rows: countHint(board, "evidence_registry", registry),
     unsupported_gap_records: registry.filter((row) => row.registry_record_type === "unsupported_gap").length,
     source_review_records: registryStatusCounts.source_review || 0,
     usable_photo_records: registryStatusCounts.usable_photo || 0,
@@ -149,7 +155,7 @@ async function main() {
     rejected_records: registryStatusCounts.rejected || 0,
     collection_campaigns: campaigns.length,
     collection_campaign_packets: campaignPackets.length,
-    mass_search_tasks: massSearch.length,
+    mass_search_tasks: countHint(board, "mass_search_pack", massSearch),
   };
 
   const campaignFields = [
