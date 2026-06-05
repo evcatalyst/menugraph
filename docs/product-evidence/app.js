@@ -20,6 +20,10 @@ const els = {
   registrySummary: document.querySelector("#registry-summary"),
   registryRows: document.querySelector("#registry-rows"),
   registryCount: document.querySelector("#registry-count"),
+  campaignRows: document.querySelector("#campaign-rows"),
+  campaignCount: document.querySelector("#campaign-count"),
+  searchTaskRows: document.querySelector("#search-task-rows"),
+  searchTaskCount: document.querySelector("#search-task-count"),
   queueRows: document.querySelector("#queue-rows"),
   queueCount: document.querySelector("#queue-count"),
   photoRows: document.querySelector("#photo-rows"),
@@ -81,6 +85,13 @@ function splitParts(value, limit = 4) {
     .slice(0, limit);
 }
 
+function linkList(value, label = "Open", limit = 3) {
+  return splitParts(value, limit)
+    .map((part, index) => linkOrText(part, `${label}${limit > 1 ? ` ${index + 1}` : ""}`))
+    .filter(Boolean)
+    .join("");
+}
+
 function labelFor(value) {
   return String(value || "")
     .replace(/_/g, " ")
@@ -94,6 +105,15 @@ function linkOrText(value, label = "Open") {
     return `<a href="${escapeHtml(text)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`;
   }
   return `<code>${escapeHtml(text)}</code>`;
+}
+
+function formatJsonBlock(value) {
+  if (!value) return "";
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch (_error) {
+    return String(value);
+  }
 }
 
 function statusTag(value, extraClass = "") {
@@ -135,6 +155,24 @@ function passesProduct(row) {
   return true;
 }
 
+function passesCampaign(row) {
+  const query = state.search.trim().toLowerCase();
+  if (state.category && !String(row.categories || "").split(";").includes(state.category)) return false;
+  if (state.surface && row.search_surface !== state.surface) return false;
+  if (state.status && row.packet_status !== state.status && row.campaign_status !== state.status) return false;
+  if (query && !textBlob(row).includes(query)) return false;
+  return true;
+}
+
+function passesSearchTask(row) {
+  const query = state.search.trim().toLowerCase();
+  if (state.category && row.category !== state.category) return false;
+  if (state.surface && row.search_surface !== state.surface) return false;
+  if (state.status && row.review_stage !== state.status) return false;
+  if (query && !textBlob(row).includes(query)) return false;
+  return true;
+}
+
 function passesPhoto(row) {
   const query = state.search.trim().toLowerCase();
   if (state.category && row.category !== state.category) return false;
@@ -166,6 +204,8 @@ function renderMetrics() {
     ["Registry Records", metrics.evidence_registry_rows || state.data.evidence_registry?.length || 0],
     ["Unsupported Gaps", metrics.unsupported_gap_records || 0],
     ["Acquisition Rows", metrics.acquisition_rows],
+    ["Campaign Packets", metrics.collection_campaign_packets],
+    ["Mass Search Tasks", metrics.mass_search_tasks],
     ["Source Review", metrics.source_review_ready],
     ["Current-Web Search", metrics.current_web_search_ready],
     ["CDX Retry", metrics.cdx_retry_ready],
@@ -183,6 +223,9 @@ function renderFilters() {
     ...new Set([
       ...state.data.acquisition_queue.map((row) => row.acquisition_status).filter(Boolean),
       ...(state.data.evidence_registry || []).map((row) => row.evidence_status).filter(Boolean),
+      ...(state.data.collection_campaign_packets || []).map((row) => row.packet_status).filter(Boolean),
+      ...(state.data.collection_campaigns || []).map((row) => row.campaign_status).filter(Boolean),
+      ...(state.data.mass_search_tasks || []).map((row) => row.review_stage).filter(Boolean),
     ]),
   ].sort();
   els.category.innerHTML = `<option value="">All categories</option>${categories
@@ -314,6 +357,79 @@ function renderRegistry() {
     .join("");
 }
 
+function renderCampaigns() {
+  const rows = (state.data.collection_campaign_packets || []).filter(passesCampaign).slice(0, 30);
+  els.campaignCount.textContent = `${formatNumber(rows.length)} packets`;
+  els.campaignRows.innerHTML = rows
+    .map((row) => {
+      const template = formatJsonBlock(row.candidate_jsonl_template);
+      return `
+        <article class="campaign-card">
+          <div class="campaign-head">
+            <div>
+              <strong>${escapeHtml(row.source_name || row.source_key)}</strong>
+              <span>${escapeHtml(labelFor(row.search_surface))} · ${escapeHtml(labelFor(row.source_kind))}</span>
+            </div>
+            <span class="priority-badge">${formatNumber(row.campaign_priority)}</span>
+          </div>
+          <p>${escapeHtml(row.operator_goal || "")}</p>
+          <div class="campaign-stats">
+            <span>${formatNumber(row.product_count)} products</span>
+            <span>${formatNumber(row.slot_count)} slots</span>
+            <span>${formatNumber(row.search_task_count)} searches</span>
+          </div>
+          <div class="small">${escapeHtml(row.categories || "")}</div>
+          <div class="campaign-products">${escapeHtml(row.top_products || "")}</div>
+          <div class="lead-meta">
+            ${statusTag(row.packet_status)}
+            ${statusTag(row.source_attribution_grade)}
+            ${linkList(row.search_urls_to_start, "Search", 2)}
+            ${linkList(row.image_urls_to_start, "Image", 2)}
+            ${linkOrText(firstPart(row.cli_hints), "CLI")}
+          </div>
+          <details>
+            <summary>Packet</summary>
+            <dl class="packet-fields">
+              <dt>Accept</dt>
+              <dd>${escapeHtml(row.acceptance_checklist || "")}</dd>
+              <dt>Gate</dt>
+              <dd>${escapeHtml(row.quality_gate || "")}</dd>
+              <dt>Template</dt>
+              <dd><pre>${escapeHtml(template)}</pre></dd>
+            </dl>
+          </details>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderSearchTasks() {
+  const rows = (state.data.mass_search_tasks || [])
+    .filter(passesSearchTask)
+    .sort((a, b) => Number(b.task_priority || 0) - Number(a.task_priority || 0))
+    .slice(0, 55);
+  els.searchTaskCount.textContent = `${formatNumber(rows.length)} tasks`;
+  els.searchTaskRows.innerHTML = rows
+    .map((row) => `
+      <article class="search-task">
+        <div class="lead-title">
+          <strong>${escapeHtml(row.display_name || row.canonical_name)}</strong>
+          <span>${escapeHtml(row.vintage_label || "")} · ${escapeHtml(row.source_name || row.source_key || "")}</span>
+        </div>
+        <p>${escapeHtml(row.query_text || row.common_crawl_patterns || "")}</p>
+        <div class="lead-meta">
+          ${statusTag(row.search_surface)}
+          ${statusTag(row.review_stage)}
+          ${linkOrText(row.search_url, "Search")}
+          ${linkOrText(row.image_search_url, "Images")}
+          ${linkOrText(row.cli_hint, "CLI")}
+        </div>
+      </article>
+    `)
+    .join("");
+}
+
 function renderQueue() {
   const rows = state.data.acquisition_queue.filter(passesQueue);
   els.queueCount.textContent = `${formatNumber(rows.length)} rows`;
@@ -402,6 +518,8 @@ function render() {
   renderLegend();
   renderProducts();
   renderSourceBars();
+  renderCampaigns();
+  renderSearchTasks();
   renderRegistrySummary();
   renderRegistry();
   renderQueue();

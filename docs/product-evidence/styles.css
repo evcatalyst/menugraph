@@ -330,6 +330,124 @@ a:hover {
   overflow: auto;
 }
 
+.campaign-grid,
+.search-task-list {
+  display: grid;
+  gap: 9px;
+  max-height: 620px;
+  overflow: auto;
+  padding-right: 3px;
+}
+
+.campaign-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.campaign-card,
+.search-task {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.campaign-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.campaign-head strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.campaign-head span,
+.campaign-card p,
+.search-task p,
+.campaign-products,
+.packet-fields {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.campaign-card p,
+.search-task p {
+  margin: 7px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.campaign-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin: 9px 0;
+}
+
+.campaign-stats span,
+.priority-badge {
+  display: grid;
+  place-items: center;
+  min-height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 253, 248, 0.78);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.priority-badge {
+  min-width: 46px;
+  padding: 0 6px;
+}
+
+.campaign-products {
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.campaign-card details {
+  margin-top: 8px;
+}
+
+.campaign-card summary {
+  cursor: pointer;
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.packet-fields {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 6px 10px;
+  margin: 8px 0 0;
+}
+
+.packet-fields dt {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.packet-fields dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.packet-fields pre {
+  max-height: 220px;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 253, 248, 0.9);
+  padding: 8px;
+  white-space: pre-wrap;
+}
+
 .source-bar {
   display: grid;
   gap: 5px;
@@ -556,6 +674,7 @@ td {
   }
 
   .product-row,
+  .campaign-grid,
   .registry-grid {
     grid-template-columns: 1fr;
   }
