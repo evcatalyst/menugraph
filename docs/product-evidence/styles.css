@@ -264,7 +264,8 @@ code {
 }
 
 .reader-grid,
-.reader-followup-grid {
+.reader-followup-grid,
+.reader-story-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.82fr);
   gap: 12px;
@@ -274,9 +275,11 @@ code {
 .reader-lede,
 .reader-readiness-card,
 .reader-pillar,
+.reader-claim,
+.reader-era,
 .reader-lineup-card,
-.reader-boundary,
-.reader-boundary-reader {
+.reader-unlock,
+.reader-unlock-reader {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -352,9 +355,11 @@ code {
 
 .reader-readiness-card > span,
 .reader-pillar > span,
+.reader-claim span,
+.reader-era header span,
 .reader-lineup-card > span,
-.reader-boundary > span,
-.reader-boundary-reader > span {
+.reader-unlock > span,
+.reader-unlock-reader > span {
   display: block;
   color: var(--clay);
   font-size: 10px;
@@ -365,8 +370,11 @@ code {
 
 .reader-readiness-card > strong,
 .reader-pillar > strong,
+.reader-claim strong,
+.reader-era header strong,
 .reader-lineup-card > strong,
-.reader-boundary-reader > strong {
+.reader-unlock > strong,
+.reader-unlock-reader > strong {
   display: block;
   margin-top: 5px;
   color: var(--ink);
@@ -377,9 +385,11 @@ code {
 
 .reader-readiness-card > p,
 .reader-pillar > p,
+.reader-claim > p,
+.reader-era > p,
 .reader-lineup-card > p,
-.reader-boundary > p,
-.reader-boundary-reader > p {
+.reader-unlock > p,
+.reader-unlock-reader > p {
   margin: 7px 0 0;
   color: var(--muted);
   font-size: 12px;
@@ -407,18 +417,87 @@ code {
   margin-top: 12px;
 }
 
-.reader-followup-grid > section {
+.reader-story-grid {
+  margin-top: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 0.92fr);
+}
+
+.reader-followup-grid > section,
+.reader-story-grid > section {
   min-width: 0;
 }
 
 .reader-lineup,
-.reader-boundaries {
+.reader-unlocks,
+.reader-claim-ledger,
+.reader-era-strip {
   display: grid;
   gap: 8px;
 }
 
 .reader-lineup {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.reader-claim-ledger {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.reader-era-strip {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.reader-unlocks {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.reader-claim {
+  min-height: 188px;
+  padding: 10px;
+}
+
+.reader-claim > div:first-child {
+  min-height: 52px;
+}
+
+.reader-claim strong {
+  font-size: 18px;
+}
+
+.reader-claim > p {
+  min-height: 76px;
+}
+
+.reader-era {
+  min-height: 154px;
+  padding: 9px;
+}
+
+.reader-era header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reader-era header span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  min-height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.84);
+  color: var(--teal);
+  letter-spacing: 0;
+}
+
+.reader-era header strong {
+  margin-top: 0;
+}
+
+.reader-era > p {
+  min-height: 64px;
 }
 
 .reader-lineup-card {
@@ -451,18 +530,22 @@ code {
   font-weight: 850;
 }
 
-.reader-boundaries {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.reader-boundary,
-.reader-boundary-reader {
+.reader-unlock,
+.reader-unlock-reader {
   padding: 10px;
 }
 
-.reader-boundary-reader {
+.reader-unlock-reader {
   grid-column: 1 / -1;
   border-color: rgba(49, 111, 115, 0.42);
+}
+
+.reader-unlock {
+  min-height: 142px;
+}
+
+.reader-unlock-boundary {
+  border-style: dashed;
 }
 
 .story-toolbar {
@@ -1903,7 +1986,8 @@ td {
   .story-reader,
   .story-toolbar,
   .reader-grid,
-  .reader-followup-grid {
+  .reader-followup-grid,
+  .reader-story-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1934,7 +2018,9 @@ td {
   .story-brief,
   .story-chapters,
   .reader-pillars,
-  .reader-lineup {
+  .reader-lineup,
+  .reader-claim-ledger,
+  .reader-era-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -1973,8 +2059,10 @@ td {
   .reader-progress,
   .reader-readiness,
   .reader-pillars,
+  .reader-claim-ledger,
+  .reader-era-strip,
   .reader-lineup,
-  .reader-boundaries {
+  .reader-unlocks {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -2023,14 +2111,18 @@ td {
   .reader-progress,
   .reader-readiness,
   .reader-pillars,
+  .reader-claim-ledger,
+  .reader-era-strip,
   .reader-lineup,
-  .reader-boundaries {
+  .reader-unlocks {
     grid-template-columns: 1fr;
   }
 
   .story-beat > p,
   .story-chapter p,
-  .story-timeline-row p {
+  .story-timeline-row p,
+  .reader-claim > p,
+  .reader-era > p {
     min-height: 0;
   }
 

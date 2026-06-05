@@ -15,8 +15,10 @@ const els = {
   readerLede: document.querySelector("#reader-lede"),
   readerReadiness: document.querySelector("#reader-readiness"),
   readerPillars: document.querySelector("#reader-pillars"),
+  readerClaimLedger: document.querySelector("#reader-claim-ledger"),
+  readerEraStrip: document.querySelector("#reader-era-strip"),
   readerLineup: document.querySelector("#reader-lineup"),
-  readerBoundaries: document.querySelector("#reader-boundaries"),
+  readerUnlocks: document.querySelector("#reader-unlocks"),
   storySelector: document.querySelector("#story-selector"),
   storyFocus: document.querySelector("#story-focus"),
   storySummary: document.querySelector("#story-summary"),
@@ -384,6 +386,253 @@ function storyLensRows(card, evidenceRows) {
   ];
 }
 
+function storyEvidenceFacts(evidenceRows) {
+  return {
+    manualLabels: evidenceRows.filter((row) => rowEvidenceStatus(row) === "manual_verified" || row.manual_transcription_available).length,
+    ocrLabels: evidenceRows.filter((row) => rowEvidenceStatus(row) === "ocr_extracted").length,
+    visibleLabels: evidenceRows.filter((row) => rowEvidenceStatus(row) === "label_visible" || row.ingredient_panel_visible).length,
+    usablePhotos: evidenceRows.filter((row) => rowEvidenceStatus(row) === "usable_photo").length,
+    packageFields: evidenceRows.filter((row) => row.net_weight_visible || row.net_weight_text || row.serving_size_text || row.servings_per_container_text).length,
+    orgFields: evidenceRows.filter((row) => row.manufacturer_text_visible || row.manufacturer_text || row.distributor_text || row.source_publisher_owner).length,
+    priceFields: evidenceRows.filter((row) => row.price_text || row.price_amount || row.unit_price_text || row.price_observation_id).length,
+    sourceLinks: evidenceRows.filter((row) => row.source_url || row.archive_url).length,
+    rightsNotes: evidenceRows.filter((row) => row.license_rights_note || row.source_attribution_grade).length,
+  };
+}
+
+function storyClaimLedgerRows(card, evidenceRows) {
+  const facts = storyEvidenceFacts(evidenceRows);
+  const product = card.product;
+  const lockedDiffText = product
+    ? `${product.panel_needed_vintages || product.missing_vintages || "open vintage slots"} still need readable labels.`
+    : "Product-specific formulation claims still need source, date, and verified text.";
+  return [
+    {
+      claim: "Ingredient changes",
+      state: facts.manualLabels ? "scoped claim allowed" : "locked",
+      status: facts.manualLabels ? "manual_verified" : facts.visibleLabels ? "label_visible" : "source_review",
+      evidence: facts.manualLabels ? `${pluralize(facts.manualLabels, "verified label")}` : `${pluralize(facts.visibleLabels, "label-visible lead")}`,
+      detail: facts.manualLabels
+        ? "Only vintages with reviewed label text can carry ingredient diffs."
+        : `No manual-verified ingredient statement is present. ${lockedDiffText}`,
+    },
+    {
+      claim: "Package size and serving context",
+      state: facts.packageFields ? "candidate context" : "waiting",
+      status: facts.packageFields ? "candidate_found" : "candidate_needs_panel",
+      evidence: facts.packageFields ? `${pluralize(facts.packageFields, "package field")}` : "no package fields",
+      detail: facts.packageFields
+        ? "Net weight, serving size, or servings fields can be reviewed beside formulation evidence."
+        : "Price normalization stays blocked until package size and serving fields are captured.",
+    },
+    {
+      claim: "Maker and distributor timeline",
+      state: facts.orgFields ? "candidate context" : "waiting",
+      status: facts.orgFields ? "source_review" : "no_source",
+      evidence: facts.orgFields ? `${pluralize(facts.orgFields, "organization clue")}` : product?.brand || "no maker text",
+      detail: facts.orgFields
+        ? "Organization text exists, but ownership and distributor changes still need product/date review."
+        : "Manufacturer, distributor, or source-owner text needs to be attached before identity changes become story claims.",
+    },
+    {
+      claim: "Price and weight overlay",
+      state: facts.priceFields && facts.packageFields ? "alignment candidate" : "deferred",
+      status: facts.priceFields && facts.packageFields ? "candidate_found" : "candidate_needs_archive",
+      evidence: `${pluralize(facts.priceFields, "price clue")} · ${pluralize(facts.packageFields, "package clue")}`,
+      detail: facts.priceFields && facts.packageFields
+        ? "Later analysis can normalize price against package fields after SKU identity review."
+        : "The story can show why economics are deferred without hiding package or price gaps.",
+    },
+    {
+      claim: "Source provenance",
+      state: facts.sourceLinks ? "attributable trail" : "unsupported gap",
+      status: facts.sourceLinks ? "source_review" : "no_source",
+      evidence: `${pluralize(facts.sourceLinks, "source link")} · ${pluralize(facts.rightsNotes, "rights note")}`,
+      detail: facts.sourceLinks
+        ? "The reader can trace each lead to a source owner, URL, archive coordinate, or rights note where recorded."
+        : "No public story claim should be shown without a source-attributable evidence record.",
+    },
+  ];
+}
+
+function renderReaderClaimLedger(card, evidenceRows) {
+  return storyClaimLedgerRows(card, evidenceRows)
+    .map((row) => `
+      <article class="reader-claim status-${escapeHtml(row.status || "unknown")}">
+        <div>
+          <span>${escapeHtml(row.claim)}</span>
+          <strong>${escapeHtml(row.state)}</strong>
+        </div>
+        <p>${escapeHtml(row.detail)}</p>
+        <div class="lead-meta">
+          ${statusTag(row.status || "unknown")}
+          <span class="status-tag">${escapeHtml(row.evidence)}</span>
+        </div>
+      </article>
+    `)
+    .join("");
+}
+
+function storyEraRows(card, evidenceRows) {
+  const product = card.product;
+  if (!product) {
+    const counts = evidenceRows.reduce((acc, row) => {
+      const status = rowEvidenceStatus(row);
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+    return workflowStatuses().map((status) => ({
+      label: statusLabels[status] || labelFor(status),
+      status,
+      count: counts[status] || 0,
+      detail: statusNarrative(status),
+      source: "",
+      sourceLabel: "",
+    }));
+  }
+  return state.data.vintages.map((vintage) => {
+    const info = product.vintage_statuses[vintage] || { status: "unknown", source_count: 0 };
+    const rows = vintageEvidenceRows(product, evidenceRows, vintage);
+    const best = bestEvidenceRows(rows, 1)[0] || {};
+    const source = best.source_url || best.archive_url || "";
+    const note = best.unsupported_gap_note || best.reviewer_notes || best.promotion_blocker || statusNarrative(info.status || "unknown");
+    return {
+      label: vintageLabels[vintage] || vintage,
+      status: info.status || "unknown",
+      count: numeric(info.source_count || rows.length),
+      detail: clipped(note, 116),
+      source,
+      sourceLabel: best.source_domain || "Source",
+    };
+  });
+}
+
+function renderReaderEraStrip(card, evidenceRows) {
+  return storyEraRows(card, evidenceRows)
+    .map((row) => `
+      <article class="reader-era status-${escapeHtml(row.status || "unknown")}">
+        <header>
+          <strong>${escapeHtml(row.label)}</strong>
+          <span>${formatNumber(row.count)}</span>
+        </header>
+        <p>${escapeHtml(row.detail)}</p>
+        <div class="lead-meta">
+          ${statusTag(row.status || "unknown")}
+          ${row.source ? linkOrText(row.source, row.sourceLabel || "Source") : ""}
+        </div>
+      </article>
+    `)
+    .join("");
+}
+
+function storyUnlockRows(card, evidenceRows) {
+  const product = card.product;
+  const facts = storyEvidenceFacts(evidenceRows);
+  if (!product) {
+    return [
+      {
+        label: "Attribution gate",
+        title: "Source owner and date before claim language",
+        detail: `${pluralize(facts.sourceLinks, "source link")} can move the workflow only after owner, URL, archive/date basis, and rights notes are checked.`,
+        status: facts.sourceLinks ? "source_review" : "no_source",
+        source: "",
+        sourceLabel: "",
+      },
+      {
+        label: "Photo gate",
+        title: "Visible package evidence before transcription",
+        detail: `${pluralize(facts.usablePhotos, "usable photo")} and ${pluralize(facts.visibleLabels, "label-visible lead")} are the bridge from discovery into OCR or manual review.`,
+        status: facts.visibleLabels ? "label_visible" : facts.usablePhotos ? "usable_photo" : "candidate_needs_panel",
+        source: "",
+        sourceLabel: "",
+      },
+      {
+        label: "Text gate",
+        title: "Manual labels before formulation diffs",
+        detail: `${pluralize(facts.manualLabels, "manual-verified label")} are available in this view; ingredient changes remain locked when this count is zero.`,
+        status: facts.manualLabels ? "manual_verified" : "label_visible",
+        source: "",
+        sourceLabel: "",
+      },
+      {
+        label: "Overlay gate",
+        title: "Package fields before normalized economics",
+        detail: `${pluralize(facts.packageFields, "package field")} and ${pluralize(facts.priceFields, "price clue")} are needed together for price-per-ounce or price-per-serving analysis.`,
+        status: facts.packageFields ? "candidate_found" : "candidate_needs_panel",
+        source: "",
+        sourceLabel: "",
+      },
+    ];
+  }
+  const labelQueue = bestEvidenceRows(
+    evidenceRows.filter((row) => ["label_visible", "ocr_extracted", "usable_photo", "source_review"].includes(rowEvidenceStatus(row))),
+    3,
+  );
+  const firstLabel = labelQueue[0] || {};
+  const currentRows = product ? vintageEvidenceRows(product, evidenceRows, "current_2020s") : [];
+  const currentBest = bestEvidenceRows(currentRows, 1)[0] || {};
+  const originRows = product ? vintageEvidenceRows(product, evidenceRows, "earliest_verified_label") : [];
+  const originBest = bestEvidenceRows(originRows, 1)[0] || {};
+  const originGap = product && /oreo/i.test(`${product.display_name || ""} ${product.canonical_name || ""}`)
+    ? "1912 original ingredient label not verified."
+    : product?.missing_vintages
+      ? `Missing vintages: ${product.missing_vintages}.`
+      : `Panel review needed: ${product?.panel_needed_vintages || "open slots"}.`;
+
+  return [
+    {
+      label: "Next readable label",
+      title: firstLabel.source_title || firstLabel.source_domain || "Label candidate needed",
+      detail: firstLabel.reviewer_notes || firstLabel.promotion_blocker || "Find a source-attributable package photo or document with readable ingredient text.",
+      status: firstLabel.source_title || firstLabel.source_domain ? rowEvidenceStatus(firstLabel) : "candidate_needs_panel",
+      source: firstLabel.source_url || firstLabel.archive_url || "",
+      sourceLabel: firstLabel.source_domain || "Source",
+    },
+    {
+      label: "Current anchor",
+      title: currentBest.source_title || currentBest.source_domain || "Current SKU anchor",
+      detail: currentBest.reviewer_notes || currentBest.promotion_blocker || "Current labels stay SKU- and package-specific until source/date review is complete.",
+      status: currentBest.source_title || currentBest.source_domain ? rowEvidenceStatus(currentBest) : "candidate_needs_archive",
+      source: currentBest.source_url || currentBest.archive_url || "",
+      sourceLabel: currentBest.source_domain || "Source",
+    },
+    {
+      label: "Origin chapter",
+      title: originGap,
+      detail: originBest.reviewer_notes || originBest.unsupported_gap_note || "The origin chapter remains visible as a gap unless a readable label source is attached.",
+      status: originBest.source_title || originBest.source_domain ? rowEvidenceStatus(originBest) : "missing_vintage_slot",
+      source: originBest.source_url || originBest.archive_url || "",
+      sourceLabel: originBest.source_domain || "Source",
+    },
+    {
+      label: "Overlay unlock",
+      title: facts.packageFields ? "Package context can join the story" : "Package fields still needed",
+      detail: facts.packageFields
+        ? `${pluralize(facts.packageFields, "package field")} can support future price/weight normalization after SKU review.`
+        : "Capture net weight, serving size, and package format when the label image is reviewed.",
+      status: facts.packageFields ? "candidate_found" : "candidate_needs_panel",
+      source: "",
+      sourceLabel: "",
+    },
+  ];
+}
+
+function renderReaderUnlocks(card, evidenceRows) {
+  return storyUnlockRows(card, evidenceRows)
+    .map((row) => `
+      <article class="reader-unlock status-${escapeHtml(row.status || "unknown")}">
+        <span>${escapeHtml(row.label)}</span>
+        <strong>${escapeHtml(row.title)}</strong>
+        <p>${escapeHtml(clipped(row.detail, 155))}</p>
+        <div class="lead-meta">
+          ${statusTag(row.status || "unknown")}
+          ${row.source ? linkOrText(row.source, row.sourceLabel || "Source") : ""}
+        </div>
+      </article>
+    `)
+    .join("");
+}
+
 function storyPublicationState(card, evidenceRows) {
   const manualLabels = evidenceRows.filter((row) => rowEvidenceStatus(row) === "manual_verified" || row.manual_transcription_available).length;
   const visibleLabels = evidenceRows.filter((row) => rowEvidenceStatus(row) === "label_visible" || row.ingredient_panel_visible).length;
@@ -497,8 +746,10 @@ function renderReaderDesk(cards, selectedCard, registryRows) {
     els.readerLede.innerHTML = `<p class="empty-note">No story candidates match the current filters.</p>`;
     els.readerReadiness.innerHTML = "";
     els.readerPillars.innerHTML = "";
+    els.readerClaimLedger.innerHTML = "";
+    els.readerEraStrip.innerHTML = "";
     els.readerLineup.innerHTML = "";
-    els.readerBoundaries.innerHTML = "";
+    els.readerUnlocks.innerHTML = "";
     return;
   }
 
@@ -550,6 +801,9 @@ function renderReaderDesk(cards, selectedCard, registryRows) {
     `)
     .join("");
 
+  els.readerClaimLedger.innerHTML = renderReaderClaimLedger(card, evidenceRows);
+  els.readerEraStrip.innerHTML = renderReaderEraStrip(card, evidenceRows);
+
   els.readerLineup.innerHTML = cards
     .slice(0, 6)
     .map((story) => {
@@ -567,20 +821,18 @@ function renderReaderDesk(cards, selectedCard, registryRows) {
     })
     .join("");
 
-  els.readerBoundaries.innerHTML = `
-    <article class="reader-boundary-reader">
+  els.readerUnlocks.innerHTML = `
+    <article class="reader-unlock-reader">
       <span>Selected story</span>
       <strong>${escapeHtml(title)}</strong>
       <p>${escapeHtml(storySupportedNow(card, evidenceRows))}</p>
     </article>
-    ${boundaryRows
-      .map(([label, value]) => `
-        <article class="reader-boundary">
-          <span>${escapeHtml(label)}</span>
-          <p>${escapeHtml(value)}</p>
-        </article>
-      `)
-      .join("")}
+    ${renderReaderUnlocks(card, evidenceRows)}
+    <article class="reader-unlock-reader reader-unlock-boundary">
+      <span>Claim boundary</span>
+      <strong>${escapeHtml(boundaryRows[1]?.[0] || "Still a gap")}</strong>
+      <p>${escapeHtml(boundaryRows[1]?.[1] || storyCannotSayYet(card, evidenceRows))}</p>
+    </article>
   `;
 }
 
@@ -1630,7 +1882,7 @@ function renderStorylines() {
   }));
 
   if (!cards.some((card) => card.key === state.storyKey)) {
-    state.storyKey = cards[0]?.key || "";
+    state.storyKey = cards.find((card) => card.key === "oreo-thread")?.key || cards[0]?.key || "";
   }
   const selectedCard = cards.find((card) => card.key === state.storyKey) || cards[0];
 
