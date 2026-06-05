@@ -1,0 +1,1771 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-05T11:26:25.424Z",
+  "sourceFile": "data/product-evidence/summary.json",
+  "view": "ingredient_journey",
+  "scope": {
+    "productRows": 100,
+    "selectedProducts": 10,
+    "note": "Product ingredient journeys are evidence-first. Ingredient themes are review targets until source-attributable label photos are transcribed.",
+    "recipeJourneyStatus": "not_published_until_recipe_rows_are_collected"
+  },
+  "metrics": {
+    "products": 10,
+    "ownershipMilestones": 7,
+    "evidencePhotoLinks": 55,
+    "ingredientThemes": 40
+  },
+  "ownershipSources": {
+    "mondelez_2012": {
+      "label": "Mondelez spin-off",
+      "sourceUrl": "https://ir.mondelezinternational.com/news-releases/news-release-details/mondelez-international-completes-spin-its-north-american-grocery/"
+    },
+    "kraft_heinz_2015": {
+      "label": "Kraft Heinz merger",
+      "sourceUrl": "https://news.kraftheinzcompany.com/press-releases-details/2015/The-Kraft-Heinz-Company-Announces-Successful-Completion-of-the-Merger-between-Kraft-Foods-Group-and-HJ-Heinz-Holding-Corporation/default.aspx"
+    },
+    "kellogg_split_2023": {
+      "label": "Kellogg split",
+      "sourceUrl": "https://newsroom.wkkellogg.com/2023-03-15-KELLOGG-COMPANY-UNVEILS-NAMES-FOR-GLOBAL-SNACKING-AND-NORTH-AMERICAN-CEREAL-BUSINESSES-FOLLOWING-PLANNED-SEPARATION"
+    },
+    "mars_kellanova_2025": {
+      "label": "Mars acquires Kellanova",
+      "sourceUrl": "https://www.mars.com/en-be/news-and-stories/press-releases-statements/mars-completes-acquisition-of-kellanova"
+    },
+    "campbell_rename_2024": {
+      "label": "Campbell name change",
+      "sourceUrl": "https://investor.thecampbellscompany.com/news-releases/news-release-details/shareholders-overwhelmingly-approve-change-company-name"
+    },
+    "hershey_reese_1963": {
+      "label": "Hershey acquires Reese",
+      "sourceUrl": "https://www.thehersheycompany.com/content/hershey-corporate/en-us/home/about-us/the-company/history.html"
+    }
+  },
+  "products": [
+    {
+      "canonicalName": "cheerios_original",
+      "displayName": "Cheerios Original",
+      "brand": "Cheerios",
+      "category": "cereal",
+      "subcategory": "oat cereal",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 13,
+      "photoEvidenceRows": 24,
+      "slotCoveragePct": 83.3,
+      "ingredientThemes": [
+        "whole grain oats",
+        "sugar and sweeteners",
+        "vitamin and mineral fortification",
+        "allergen and gluten context"
+      ],
+      "trendSummary": "Oat identity is stable; the label-review question is how sugar, fortification, and allergen language change across package eras.",
+      "ownershipMilestones": [],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 1,
+          "evidenceScore": 2,
+          "ingredientSignals": [
+            "whole grain oats",
+            "sugar and sweeteners",
+            "vitamin and mineral fortification",
+            "allergen and gluten context"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.cheerios.com/products/original-cheerios",
+              "sourceDomain": "www.cheerios.com",
+              "sourceTitle": "Original Cheerios - Cheerios",
+              "vintage": "current_2020s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.78
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "whole grain oats",
+            "sugar and sweeteners",
+            "vitamin and mineral fortification",
+            "allergen and gluten context"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "2000s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "whole grain oats",
+            "sugar and sweeteners",
+            "vitamin and mineral fortification",
+            "allergen and gluten context"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://americanhistory.si.edu/collections/search/object/nmah_1348223",
+              "sourceDomain": "americanhistory.si.edu",
+              "sourceTitle": "Cheerios Millennios Cereal Box - National Museum of American History",
+              "vintage": "2000s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.54
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1990s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "whole grain oats",
+            "sugar and sweeteners",
+            "vitamin and mineral fortification",
+            "allergen and gluten context"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_transcription",
+          "sourceCount": 8,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "whole grain oats",
+            "sugar and sweeteners",
+            "vitamin and mineral fortification",
+            "allergen and gluten context"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_transcription",
+          "sourceCount": 12,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "whole grain oats",
+            "sugar and sweeteners",
+            "vitamin and mineral fortification",
+            "allergen and gluten context"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.flickr.com/photos/25692985%40N07/5938738892",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "1984 General Mills Cheerios Cereal Boxes - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.7
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/25692985%40N07/3523833856",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "1985 General Mills Cheerios Cereal Box Back - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.7
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/25692985%40N07/3523028765/",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "1985 General Mills Cheerios Cereal Box Front - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.64
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 5,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "oreo_original_chocolate_sandwich_cookies",
+      "displayName": "Oreo Original Chocolate Sandwich Cookies",
+      "brand": "Oreo",
+      "category": "cookies",
+      "subcategory": "sandwich cookies",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 15,
+      "photoEvidenceRows": 23,
+      "slotCoveragePct": 100,
+      "ingredientThemes": [
+        "cocoa",
+        "sugar and corn sweeteners",
+        "vegetable oils",
+        "lecithin and emulsifiers"
+      ],
+      "trendSummary": "The high-value comparison is oils, sweeteners, and allergen language before and after the Kraft/Mondelez split.",
+      "ownershipMilestones": [
+        {
+          "year": 2012,
+          "owner": "Mondelez International",
+          "event": "Kraft Foods separated global snacks from North American grocery, placing Oreo/Nabisco snack evidence under Mondelez review.",
+          "sourceKey": "mondelez_2012",
+          "sourceLabel": "Mondelez spin-off",
+          "sourceUrl": "https://ir.mondelezinternational.com/news-releases/news-release-details/mondelez-international-completes-spin-its-north-american-grocery/"
+        }
+      ],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 5,
+          "evidenceScore": 4,
+          "ingredientSignals": [
+            "cocoa",
+            "sugar and corn sweeteners",
+            "vegetable oils",
+            "lecithin and emulsifiers"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://smartlabel.mondelez.info/00044000033262-0001-en-US/index.html",
+              "sourceDomain": "smartlabel.mondelez.info",
+              "sourceTitle": "Nabisco Oreo Sandwich Cookies 14.3 oz - SmartLabel",
+              "vintage": "current_2020s",
+              "rank": 4,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.82
+            },
+            {
+              "sourceUrl": "https://www.ewg.org/foodscores/products/0044000051617-OreoChocolateOriginalFlavorSandwichCookies/",
+              "sourceDomain": "www.ewg.org",
+              "sourceTitle": "EWG Food Scores - Oreo Chocolate Original Flavor Sandwich Cookies",
+              "vintage": "current_2020s",
+              "rank": 5,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.72
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 3,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "cocoa",
+            "sugar and corn sweeteners",
+            "vegetable oils",
+            "lecithin and emulsifiers"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/4359618633",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Nabisco Oreo Spring edition cookie package, 2010 - Flickr",
+              "vintage": "2010s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.58
+            },
+            {
+              "sourceUrl": "https://www.ewg.org/foodscores/products/044000081034-OreoChocolateSandwichCookiesOriginalWinter/",
+              "sourceDomain": "www.ewg.org",
+              "sourceTitle": "EWG Food Scores - Oreo Chocolate Sandwich Cookies, Original, Winter",
+              "vintage": "2010s",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.7
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/4786235805",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Nabisco Oreo Nascar Edition cookie package, 2010 - Flickr",
+              "vintage": "2010s",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.56
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2000s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 2,
+          "evidenceScore": 4,
+          "ingredientSignals": [
+            "cocoa",
+            "sugar and corn sweeteners",
+            "vegetable oils",
+            "lecithin and emulsifiers"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1990s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "cocoa",
+            "sugar and corn sweeteners",
+            "vegetable oils",
+            "lecithin and emulsifiers"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 3,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "cocoa",
+            "sugar and corn sweeteners",
+            "vegetable oils",
+            "lecithin and emulsifiers"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 9,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "cocoa",
+            "sugar and corn sweeteners",
+            "vegetable oils",
+            "lecithin and emulsifiers"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/6823914204",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Nabisco - Oreo - 6-pack cookie pack - 1993 - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.74
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/6823913378",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Nabisco Oreo Win Harley-Davidson cookie box, 2000 - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.72
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/4210393728",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Nabisco Oreo cookie package, 1960s - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.7
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 8,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "poptarts_frosted_strawberry",
+      "displayName": "Pop-Tarts Frosted Strawberry",
+      "brand": "Pop-Tarts",
+      "category": "breakfast",
+      "subcategory": "toaster pastries",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 11,
+      "photoEvidenceRows": 19,
+      "slotCoveragePct": 83.3,
+      "ingredientThemes": [
+        "enriched flour",
+        "fruit filling",
+        "colors",
+        "oils and shortening",
+        "corn sweeteners"
+      ],
+      "trendSummary": "Track fruit-filling wording, color additives, and oil/shortening language through Kellogg, Kellanova, and Mars-era packaging.",
+      "ownershipMilestones": [
+        {
+          "year": 2023,
+          "owner": "Kellanova",
+          "event": "Kellogg separated Kellanova from WK Kellogg Co; Pop-Tarts stayed with Kellanova.",
+          "sourceKey": "kellogg_split_2023",
+          "sourceLabel": "Kellogg split",
+          "sourceUrl": "https://newsroom.wkkellogg.com/2023-03-15-KELLOGG-COMPANY-UNVEILS-NAMES-FOR-GLOBAL-SNACKING-AND-NORTH-AMERICAN-CEREAL-BUSINESSES-FOLLOWING-PLANNED-SEPARATION"
+        },
+        {
+          "year": 2025,
+          "owner": "Mars",
+          "event": "Mars completed its acquisition of Kellanova; post-acquisition labels should be tracked as a new ownership era.",
+          "sourceKey": "mars_kellanova_2025",
+          "sourceLabel": "Mars acquires Kellanova",
+          "sourceUrl": "https://www.mars.com/en-be/news-and-stories/press-releases-statements/mars-completes-acquisition-of-kellanova"
+        }
+      ],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 5,
+          "evidenceScore": 4,
+          "ingredientSignals": [
+            "enriched flour",
+            "fruit filling",
+            "colors",
+            "oils and shortening",
+            "corn sweeteners"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://smartlabel.kelloggs.com/Product/Index/038000317316",
+              "sourceDomain": "smartlabel.kelloggs.com",
+              "sourceTitle": "Frosted Strawberry Pop-Tarts - SmartLabel",
+              "vintage": "current_2020s",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.84
+            },
+            {
+              "sourceUrl": "https://www.kroger.com/p/kellogg-s-pop-tarts-frosted-strawberry-toaster-pastries/0003800022273",
+              "sourceDomain": "www.kroger.com",
+              "sourceTitle": "Pop-Tarts Frosted Strawberry Toaster Pastries 20.3 oz - Kroger",
+              "vintage": "current_2020s",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.62
+            },
+            {
+              "sourceUrl": "https://www.poptarts.com/en_US/products/all-flavors/pop-tarts-frosted-strawberry-product.html",
+              "sourceDomain": "www.poptarts.com",
+              "sourceTitle": "Frosted Strawberry Pop-Tarts - Pop-Tarts",
+              "vintage": "current_2020s",
+              "rank": 4,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.76
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "candidate_found",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "enriched flour",
+            "fruit filling",
+            "colors",
+            "oils and shortening"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.foodrepo.org/en/products/47947",
+              "sourceDomain": "www.foodrepo.org",
+              "sourceTitle": "Kellogg's Pop-Tarts Frosted Strawberry 58.6 oz - FoodRepo",
+              "vintage": "2010s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.56
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2000s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 4,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "enriched flour",
+            "fruit filling",
+            "colors",
+            "oils and shortening"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1990s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "enriched flour",
+            "fruit filling",
+            "colors",
+            "oils and shortening"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 2,
+          "evidenceScore": 4,
+          "ingredientSignals": [
+            "enriched flour",
+            "fruit filling",
+            "colors",
+            "oils and shortening"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 6,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "enriched flour",
+            "fruit filling",
+            "colors",
+            "oils and shortening"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.flickr.com/photos/25692985%40N07/4198259897",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "1980 Kellogg's Frosted Pop-Tarts Box Milton the Toaster - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.66
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/3251907501",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Kellogg's Pop-Tarts Frosted Chocolate Fudge Box, 1974 - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.62
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/5204205477",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Kellogg's Pop-Tarts Frosted Strawberry Box, 2002 - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.58
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 7,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "kraft_macaroni_and_cheese_original",
+      "displayName": "Kraft Macaroni & Cheese Original",
+      "brand": "Kraft",
+      "category": "prepared foods",
+      "subcategory": "boxed pasta",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 9,
+      "photoEvidenceRows": 16,
+      "slotCoveragePct": 83.3,
+      "ingredientThemes": [
+        "wheat pasta",
+        "cheese sauce mix",
+        "dairy",
+        "colors and color-source claims",
+        "salt"
+      ],
+      "trendSummary": "The key comparison is cheese sauce color language and dairy/wheat allergen presentation before and after Kraft Heinz.",
+      "ownershipMilestones": [
+        {
+          "year": 2015,
+          "owner": "Kraft Heinz",
+          "event": "Kraft Foods Group and H.J. Heinz completed their merger, creating a clear ownership checkpoint for Kraft label evidence.",
+          "sourceKey": "kraft_heinz_2015",
+          "sourceLabel": "Kraft Heinz merger",
+          "sourceUrl": "https://news.kraftheinzcompany.com/press-releases-details/2015/The-Kraft-Heinz-Company-Announces-Successful-Completion-of-the-Merger-between-Kraft-Foods-Group-and-HJ-Heinz-Holding-Corporation/default.aspx"
+        }
+      ],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 3,
+          "evidenceScore": 4,
+          "ingredientSignals": [
+            "wheat pasta",
+            "cheese sauce mix",
+            "dairy",
+            "colors and color-source claims",
+            "salt"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.walmart.com/ip/10295759",
+              "sourceDomain": "www.walmart.com",
+              "sourceTitle": "Kraft Original Mac & Cheese Dinner, Family Size Value Pack, 14.5 oz Box - Walmart",
+              "vintage": "current_2020s",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.74
+            },
+            {
+              "sourceUrl": "https://www.kroger.com/p/kraft-original-mac-n-cheese-macaroni-and-cheese-dinner/0002100065883",
+              "sourceDomain": "www.kroger.com",
+              "sourceTitle": "Kraft Original Mac N Cheese Macaroni and Cheese Dinner, 7.25 oz - Kroger",
+              "vintage": "current_2020s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.64
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "wheat pasta",
+            "cheese sauce mix",
+            "dairy",
+            "colors and color-source claims"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/7994363814/",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Kraft Macaroni & Cheese Angry Birds Space boxes, 2012 - Flickr",
+              "vintage": "2010s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.56
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2000s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "wheat pasta",
+            "cheese sauce mix",
+            "dairy",
+            "colors and color-source claims"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1990s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "wheat pasta",
+            "cheese sauce mix",
+            "dairy",
+            "colors and color-source claims"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 4,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "wheat pasta",
+            "cheese sauce mix",
+            "dairy",
+            "colors and color-source claims"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 6,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "wheat pasta",
+            "cheese sauce mix",
+            "dairy",
+            "colors and color-source claims"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.ebay.com/itm/358501292533",
+              "sourceDomain": "www.ebay.com",
+              "sourceTitle": "Vintage Kraft Macaroni & Cheese Dinner The Cheesiest Original Flavor 7.25 oz - eBay",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.62
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/6175679516",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Kraft Dinner Macaroni-and-Cheese box, 1940s maybe 1950s - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.74
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/25692985%40N07/8404786724",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "1998 Kraft Macaroni & Cheese Charlie Brown Christmas Peanuts box - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.68
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 6,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "heinz_tomato_ketchup",
+      "displayName": "Heinz Tomato Ketchup",
+      "brand": "Heinz",
+      "category": "condiments",
+      "subcategory": "ketchup",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 5,
+      "photoEvidenceRows": 10,
+      "slotCoveragePct": 50,
+      "ingredientThemes": [
+        "tomato concentrate",
+        "vinegar",
+        "sweeteners",
+        "salt",
+        "spices and natural flavor"
+      ],
+      "trendSummary": "The high-value ingredient watchpoint is sweetener wording and tomato-concentrate language across pre- and post-Kraft Heinz labels.",
+      "ownershipMilestones": [
+        {
+          "year": 2015,
+          "owner": "Kraft Heinz",
+          "event": "Heinz entered the Kraft Heinz era after the 2015 Kraft/Heinz merger.",
+          "sourceKey": "kraft_heinz_2015",
+          "sourceLabel": "Kraft Heinz merger",
+          "sourceUrl": "https://news.kraftheinzcompany.com/press-releases-details/2015/The-Kraft-Heinz-Company-Announces-Successful-Completion-of-the-Merger-between-Kraft-Foods-Group-and-HJ-Heinz-Holding-Corporation/default.aspx"
+        }
+      ],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 1,
+          "evidenceScore": 2,
+          "ingredientSignals": [
+            "tomato concentrate",
+            "vinegar",
+            "sweeteners",
+            "salt",
+            "spices and natural flavor"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.heinz.com/products/00013000006408-tomato-ketchup",
+              "sourceDomain": "www.heinz.com",
+              "sourceTitle": "Tomato Ketchup - Heinz",
+              "vintage": "current_2020s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.72
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "tomato concentrate",
+            "vinegar",
+            "sweeteners",
+            "salt"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "2000s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "tomato concentrate",
+            "vinegar",
+            "sweeteners",
+            "salt"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1990s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "tomato concentrate",
+            "vinegar",
+            "sweeteners",
+            "salt"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 2,
+          "evidenceScore": 4,
+          "ingredientSignals": [
+            "tomato concentrate",
+            "vinegar",
+            "sweeteners",
+            "salt"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 4,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "tomato concentrate",
+            "vinegar",
+            "sweeteners",
+            "salt"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://laurelleaffarm.com/item-pages/antique-bottles/old-heinz-ketchup-bottles.htm",
+              "sourceDomain": "laurelleaffarm.com",
+              "sourceTitle": "Old Heinz Ketchup Bottles with Labels - Laurel Leaf Farm",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.5
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/36878773%40N07/3782511003",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Heinz Ketchup 1932 advertisement - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.48
+            },
+            {
+              "sourceUrl": "https://antiqueadvertising.com/free-antique-price-guide/ceramics-and-glass/heinz-ketchup-bottle/",
+              "sourceDomain": "antiqueadvertising.com",
+              "sourceTitle": "Heinz Ketchup Bottle - Antique Advertising",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.42
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 4,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "campbells_tomato_soup",
+      "displayName": "Campbell's Condensed Tomato Soup",
+      "brand": "Campbell's",
+      "category": "soup",
+      "subcategory": "condensed soup",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 6,
+      "photoEvidenceRows": 10,
+      "slotCoveragePct": 50,
+      "ingredientThemes": [
+        "tomato puree",
+        "sweeteners",
+        "wheat flour",
+        "salt and sodium language",
+        "flavoring"
+      ],
+      "trendSummary": "Track tomato, sweetener, wheat, and sodium wording as Campbell evolves from soup-focused branding to a broader food company.",
+      "ownershipMilestones": [
+        {
+          "year": 2024,
+          "owner": "The Campbell's Company",
+          "event": "Shareholders approved changing the corporate name from Campbell Soup Company to The Campbell's Company.",
+          "sourceKey": "campbell_rename_2024",
+          "sourceLabel": "Campbell name change",
+          "sourceUrl": "https://investor.thecampbellscompany.com/news-releases/news-release-details/shareholders-overwhelmingly-approve-change-company-name"
+        }
+      ],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 2,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "tomato puree",
+            "sweeteners",
+            "wheat flour",
+            "salt and sodium language",
+            "flavoring"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://dev.campbellsfoodservice.com/product/tomato-soup/?product-pdf=_",
+              "sourceDomain": "dev.campbellsfoodservice.com",
+              "sourceTitle": "Campbell's Condensed Tomato Soup, 10.75 oz Can - Foodservice PDF view",
+              "vintage": "current_2020s",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.68
+            },
+            {
+              "sourceUrl": "https://www.walmart.com/ip/10321636",
+              "sourceDomain": "www.walmart.com",
+              "sourceTitle": "Campbell's Condensed Tomato Soup, 10.75 oz Can - Walmart",
+              "vintage": "current_2020s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.7
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "tomato puree",
+            "sweeteners",
+            "wheat flour",
+            "salt and sodium language"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "2000s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "tomato puree",
+            "sweeteners",
+            "wheat flour",
+            "salt and sodium language"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1990s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "tomato puree",
+            "sweeteners",
+            "wheat flour",
+            "salt and sodium language"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "tomato puree",
+            "sweeteners",
+            "wheat flour",
+            "salt and sodium language"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 4,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "tomato puree",
+            "sweeteners",
+            "wheat flour",
+            "salt and sodium language"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://commons.wikimedia.org/wiki/Category%3ACampbell%27s_Condensed_Tomato_Soup",
+              "sourceDomain": "commons.wikimedia.org",
+              "sourceTitle": "Campbell's Condensed Tomato Soup - Wikimedia Commons Category",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.62
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/library_of_congress/50251904946",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Campbell's tomato soup. (LOC) - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.52
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/pennstate_harrisburg_archives/29079862112/in/album-72157719415160219/",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Campbell's Tomato Soup, 1947 (Canning) - Penn State Harrisburg Flickr album",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.5
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 5,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "reeses_peanut_butter_cups",
+      "displayName": "Reese's Peanut Butter Cups",
+      "brand": "Reese's",
+      "category": "candy",
+      "subcategory": "chocolate peanut butter candy",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 6,
+      "photoEvidenceRows": 8,
+      "slotCoveragePct": 50,
+      "ingredientThemes": [
+        "peanuts",
+        "milk chocolate",
+        "sugar",
+        "cocoa butter and oils",
+        "emulsifiers"
+      ],
+      "trendSummary": "A strong candidate for ownership-linked review because Hershey acquired H.B. Reese Candy Company in 1963.",
+      "ownershipMilestones": [
+        {
+          "year": 1963,
+          "owner": "The Hershey Company",
+          "event": "Hershey acquired H.B. Reese Candy Company, creating the long-running Reese ownership baseline.",
+          "sourceKey": "hershey_reese_1963",
+          "sourceLabel": "Hershey acquires Reese",
+          "sourceUrl": "https://www.thehersheycompany.com/content/hershey-corporate/en-us/home/about-us/the-company/history.html"
+        }
+      ],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 1,
+          "evidenceScore": 2,
+          "ingredientSignals": [
+            "peanuts",
+            "milk chocolate",
+            "sugar",
+            "cocoa butter and oils",
+            "emulsifiers"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://smartlabel.hersheys.com/034000430000-0001-en-US/index.html",
+              "sourceDomain": "smartlabel.hersheys.com",
+              "sourceTitle": "REESE'S Milk Chocolate Peanut Butter Cups, 1.5 oz - SmartLabel",
+              "vintage": "current_2020s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.86
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "peanuts",
+            "milk chocolate",
+            "sugar",
+            "cocoa butter and oils"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "2000s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "peanuts",
+            "milk chocolate",
+            "sugar",
+            "cocoa butter and oils"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1990s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "peanuts",
+            "milk chocolate",
+            "sugar",
+            "cocoa butter and oils"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "peanuts",
+            "milk chocolate",
+            "sugar",
+            "cocoa butter and oils"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 3,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "peanuts",
+            "milk chocolate",
+            "sugar",
+            "cocoa butter and oils"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://flickr.com/photos/jasonliebigstuff/4542661948",
+              "sourceDomain": "flickr.com",
+              "sourceTitle": "Hershey's Reese's Peanut Butter Cup Candy Wrapper, 1950s/1960s - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.72
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/3956090894",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Hershey Reese's Milk Chocolate 2 Peanut Butter Cups wrapper, 1984 - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.7
+            },
+            {
+              "sourceUrl": "https://www.ebay.com/itm/277765464989",
+              "sourceDomain": "www.ebay.com",
+              "sourceTitle": "Vintage Reese's Peanut Butter Cup Wrapper USA - eBay",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.5
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 4,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "mms_milk_chocolate",
+      "displayName": "M&M's Milk Chocolate Candies",
+      "brand": "M&M's",
+      "category": "candy",
+      "subcategory": "chocolate candies",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 7,
+      "photoEvidenceRows": 12,
+      "slotCoveragePct": 66.7,
+      "ingredientThemes": [
+        "milk chocolate",
+        "sugar",
+        "colors",
+        "lecithin",
+        "cocoa"
+      ],
+      "trendSummary": "Color and allergen language are the strongest current label-review targets; ownership is treated as stable Mars evidence unless future events are added.",
+      "ownershipMilestones": [],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 2,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "milk chocolate",
+            "sugar",
+            "colors",
+            "lecithin",
+            "cocoa"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.upcitemdb.com/upc/040000000327",
+              "sourceDomain": "www.upcitemdb.com",
+              "sourceTitle": "M&M'S Milk Chocolate Candy UPC 040000000327 - UPCitemdb",
+              "vintage": "current_2020s",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "front_or_primary_panel,ingredient_panel,transcribed_label_text,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.36
+            },
+            {
+              "sourceUrl": "https://www.mms.com/en-us/mms-milk-chocolate-candy/p/milk-chocolate-candy",
+              "sourceDomain": "www.mms.com",
+              "sourceTitle": "M&M'S Milk Chocolate Candy - M&M'S",
+              "vintage": "current_2020s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.66
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "milk chocolate",
+            "sugar",
+            "colors",
+            "lecithin"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "2000s",
+          "status": "no_source",
+          "sourceCount": 0,
+          "evidenceScore": 0,
+          "ingredientSignals": [
+            "milk chocolate",
+            "sugar",
+            "colors",
+            "lecithin"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Find a source-attributable package photo for this era."
+        },
+        {
+          "vintage": "1990s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "milk chocolate",
+            "sugar",
+            "colors",
+            "lecithin"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 3,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "milk chocolate",
+            "sugar",
+            "colors",
+            "lecithin"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 4,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "milk chocolate",
+            "sugar",
+            "colors",
+            "lecithin"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/4525987713",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "M&M's Plain chocolate candies 6-ounce bag, late 1950s early 1960s - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.66
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/6808569680",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "M&M's Plain Candy Package, 1981 - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.72
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/6173830257",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Mars M&M's Milk Chocolate candy wrapper, 1979 - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.66
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 5,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "doritos_nacho_cheese",
+      "displayName": "Doritos Nacho Cheese",
+      "brand": "Doritos",
+      "category": "chips",
+      "subcategory": "tortilla chips",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 10,
+      "photoEvidenceRows": 17,
+      "slotCoveragePct": 100,
+      "ingredientThemes": [
+        "corn",
+        "vegetable oils",
+        "cheese seasoning",
+        "colors",
+        "flavor enhancers"
+      ],
+      "trendSummary": "Track cheese-seasoning complexity, color additives, and flavor-enhancer language across Frito-Lay/PepsiCo package eras.",
+      "ownershipMilestones": [],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 2,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "corn",
+            "vegetable oils",
+            "cheese seasoning",
+            "colors",
+            "flavor enhancers"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://wvww.gardengrocer.com/product/1762-doritos-tortilla-chips-nacho-cheese-975oz-bag",
+              "sourceDomain": "wvww.gardengrocer.com",
+              "sourceTitle": "Doritos Tortilla Chips Nacho Cheese 9.75oz Bag - Garden Grocer",
+              "vintage": "current_2020s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.78
+            },
+            {
+              "sourceUrl": "https://www.kroger.com/p/doritos-nacho-cheese-flavored-tortilla-chips/0002840033579",
+              "sourceDomain": "www.kroger.com",
+              "sourceTitle": "Doritos Nacho Cheese Flavored Tortilla Chips, 10.5 oz - Kroger",
+              "vintage": "current_2020s",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.68
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "corn",
+            "vegetable oils",
+            "cheese seasoning",
+            "colors"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ADoritos_bag.jpg",
+              "sourceDomain": "commons.wikimedia.org",
+              "sourceTitle": "Doritos bag - Wikimedia Commons",
+              "vintage": "2010s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.44
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2000s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "corn",
+            "vegetable oils",
+            "cheese seasoning",
+            "colors"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1990s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 2,
+          "evidenceScore": 4,
+          "ingredientSignals": [
+            "corn",
+            "vegetable oils",
+            "cheese seasoning",
+            "colors"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 4,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "corn",
+            "vegetable oils",
+            "cheese seasoning",
+            "colors"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 7,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "corn",
+            "vegetable oils",
+            "cheese seasoning",
+            "colors"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/4269595755",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Frito-Lay Doritos Nacho Cheese Flavor 9/16-ounce snack size bag, 1970s - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.68
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/3496903865",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Frito-Lay Doritos Nacho Cheese Flavor 1-ounce bag, 1970s - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.72
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/4319728854/",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Frito-Lay - Doritos Big Grab - chip snack bag - Toy Story - 1995",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.72
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 6,
+      "evidenceStatus": "candidate_photo_links_ready"
+    },
+    {
+      "canonicalName": "coca_cola_classic",
+      "displayName": "Coca-Cola Classic",
+      "brand": "Coca-Cola",
+      "category": "beverages",
+      "subcategory": "cola",
+      "collectionTrack": "review_candidate_sources",
+      "productCandidateCount": 8,
+      "photoEvidenceRows": 13,
+      "slotCoveragePct": 100,
+      "ingredientThemes": [
+        "carbonated water",
+        "sweeteners",
+        "caramel color",
+        "phosphoric acid",
+        "natural flavors",
+        "caffeine"
+      ],
+      "trendSummary": "The label-review target is sweetener/caramel-color wording and nutrition panel changes, not product ownership.",
+      "ownershipMilestones": [],
+      "timeline": [
+        {
+          "vintage": "current_2020s",
+          "status": "candidate_needs_archive",
+          "sourceCount": 1,
+          "evidenceScore": 2,
+          "ingredientSignals": [
+            "carbonated water",
+            "sweeteners",
+            "caramel color",
+            "phosphoric acid",
+            "natural flavors"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original?redirect=true",
+              "sourceDomain": "www.coca-cola.com",
+              "sourceTitle": "Coca-Cola Original Soda Nutrition Facts & Ingredients - Coca-Cola US",
+              "vintage": "current_2020s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.72
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2010s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "carbonated water",
+            "sweeteners",
+            "caramel color",
+            "phosphoric acid"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://www.flickr.com/photos/skatepunk69/4985996111/",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Coke Classic can, 2011 - Flickr",
+              "vintage": "2010s",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.54
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "2000s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 2,
+          "evidenceScore": 4,
+          "ingredientSignals": [
+            "carbonated water",
+            "sweeteners",
+            "caramel color",
+            "phosphoric acid"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1990s",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "carbonated water",
+            "sweeteners",
+            "caramel color",
+            "phosphoric acid"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "status": "candidate_needs_panel",
+          "sourceCount": 1,
+          "evidenceScore": 3,
+          "ingredientSignals": [
+            "carbonated water",
+            "sweeteners",
+            "caramel color",
+            "phosphoric acid"
+          ],
+          "photoEvidence": [],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        },
+        {
+          "vintage": "earliest_verified_label",
+          "status": "candidate_needs_panel",
+          "sourceCount": 7,
+          "evidenceScore": 5,
+          "ingredientSignals": [
+            "carbonated water",
+            "sweeteners",
+            "caramel color",
+            "phosphoric acid"
+          ],
+          "photoEvidence": [
+            {
+              "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AOld_coca_cola_cans_1952.jpg",
+              "sourceDomain": "commons.wikimedia.org",
+              "sourceTitle": "Old Coca-Cola cans 1952 - Wikimedia Commons",
+              "vintage": "earliest_verified_label",
+              "rank": 1,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.58
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/jasonliebigstuff/3267332145/",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "Coca-Cola Classic aluminum bottle holiday design, 2009 - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 2,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.54
+            },
+            {
+              "sourceUrl": "https://www.flickr.com/photos/roitberg/6351768138",
+              "sourceDomain": "www.flickr.com",
+              "sourceTitle": "2000 Coca-Cola Classic USA Christmas - Flickr",
+              "vintage": "earliest_verified_label",
+              "rank": 3,
+              "role": "candidate_package_photo",
+              "disclosure": "ingredient_panel,transcribed_label_text,package_weight_or_size,manufacturer_or_distributor,archive_or_capture_coordinates",
+              "confidence": 0.54
+            }
+          ],
+          "nextAction": "Open candidate photos and promote only rows with readable ingredient or manufacturer evidence."
+        }
+      ],
+      "evidencePhotoCount": 5,
+      "evidenceStatus": "candidate_photo_links_ready"
+    }
+  ]
+}

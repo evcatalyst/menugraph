@@ -12,10 +12,12 @@
         <div>
           <p class="eyebrow">MenuGraph Product Evidence</p>
           <h1>Packaged Food Evidence Collection</h1>
-          <p class="summary">Source-attributable package photos, label review slots, current-web harvests, and Common Crawl sweeps for the 100-product ingredient-history board.</p>
+          <p class="summary">Source-attributable package photos, label review slots, ownership checkpoints, current-web harvests, and Common Crawl sweeps for the 100-product ingredient-history board.</p>
         </div>
         <nav class="topnav" aria-label="MenuGraph navigation">
           <a href="../">MenuGraph</a>
+          <a href="#ingredient-journey">Ingredient Journey</a>
+          <a href="#recipe-journey">Recipe Journey</a>
           <a href="#acquisition">Acquisition Queue</a>
           <a href="#products">Products</a>
           <a href="#common-crawl">Common Crawl</a>
@@ -46,6 +48,34 @@
           <span>Status</span>
           <select id="status-filter"><option value="">All statuses</option></select>
         </label>
+      </section>
+
+      <section class="panel journey-panel" id="ingredient-journey">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Ingredient Journey</p>
+            <h2>Product Ingredient History Overlay</h2>
+          </div>
+          <span id="journey-count" class="count-pill">0 products</span>
+        </div>
+        <div id="journey-summary" class="journey-summary" aria-label="Ingredient journey metrics"></div>
+        <div class="journey-controls">
+          <label>
+            <span>Product</span>
+            <select id="journey-product"></select>
+          </label>
+        </div>
+        <div id="journey-products" class="journey-products"></div>
+      </section>
+
+      <section class="panel recipe-placeholder" id="recipe-journey">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Recipe Journey</p>
+            <h2>Recipe Rows Pending</h2>
+          </div>
+        </div>
+        <p>Recipe Journey will publish after collected recipe rows can be linked to source-attributable products, ingredient panels, and recipe-dataset provenance.</p>
       </section>
 
       <section class="workspace-grid">

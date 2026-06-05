@@ -1,9 +1,11 @@
 const state = {
   data: null,
+  journey: null,
   search: "",
   category: "",
   surface: "",
   status: "",
+  selectedJourneyProduct: "",
 };
 
 const els = {
@@ -23,6 +25,10 @@ const els = {
   photoCount: document.querySelector("#photo-count"),
   sweepRows: document.querySelector("#sweep-rows"),
   sweepCount: document.querySelector("#sweep-count"),
+  journeyCount: document.querySelector("#journey-count"),
+  journeySummary: document.querySelector("#journey-summary"),
+  journeyProduct: document.querySelector("#journey-product"),
+  journeyProducts: document.querySelector("#journey-products"),
 };
 
 const vintageLabels = {
@@ -299,6 +305,149 @@ function renderSweeps() {
     .join("");
 }
 
+function renderIngredientTags(tags, limit = 8) {
+  return (tags || [])
+    .slice(0, limit)
+    .map((tag) => `<span>${escapeHtml(tag)}</span>`)
+    .join("");
+}
+
+function renderJourneySourceLead(lead, index) {
+  const label = lead.sourceTitle || lead.sourceDomain || `Evidence ${index + 1}`;
+  const meta = [lead.vintage && labelFor(lead.vintage), lead.role && labelFor(lead.role), lead.confidence ? `score ${lead.confidence}` : ""]
+    .filter(Boolean)
+    .join(" · ");
+  return `
+    <article class="source-lead">
+      <strong>${linkOrText(lead.sourceUrl, label)}</strong>
+      <span>${escapeHtml(meta)}</span>
+      <p>${escapeHtml(lead.disclosure || "")}</p>
+    </article>
+  `;
+}
+
+function renderJourneyEra(era) {
+  const evidenceLinks = (era.photoEvidence || []).length
+    ? `
+      <details class="source-leads">
+        <summary>Evidence leads (${formatNumber(era.photoEvidence.length)})</summary>
+        <div>${era.photoEvidence.map(renderJourneySourceLead).join("")}</div>
+      </details>
+    `
+    : `<p class="journey-next">${escapeHtml(era.nextAction || "")}</p>`;
+  return `
+    <article class="journey-era status-${escapeHtml(era.status || "unknown")}">
+      <header>
+        <strong>${escapeHtml(vintageLabels[era.vintage] || labelFor(era.vintage))}</strong>
+        ${statusTag(era.status || "unknown", `status-${era.status || "unknown"}`)}
+      </header>
+      <dl>
+        <div><dt>Sources</dt><dd>${formatNumber(era.sourceCount)}</dd></div>
+        <div><dt>Evidence</dt><dd>${formatNumber(era.evidenceScore)}</dd></div>
+      </dl>
+      <div class="ingredient-tags">${renderIngredientTags(era.ingredientSignals, 5)}</div>
+      ${evidenceLinks}
+    </article>
+  `;
+}
+
+function renderOwnershipMilestone(milestone) {
+  return `
+    <article class="ownership-item">
+      <strong>${escapeHtml(milestone.year)} · ${escapeHtml(milestone.owner || "")}</strong>
+      <p>${escapeHtml(milestone.event || "")}</p>
+      ${linkOrText(milestone.sourceUrl, milestone.sourceLabel || "Source")}
+    </article>
+  `;
+}
+
+function renderJourneyOverview(products, selectedId) {
+  return `
+    <div class="journey-overview" aria-label="Product journey comparison">
+      ${products
+        .map((product) => {
+          const years = product.ownershipMilestones.map((event) => event.year).join(", ") || "stable";
+          const selected = product.canonicalName === selectedId ? " selected" : "";
+          return `
+            <article class="journey-overview-card${selected}">
+              <strong>${escapeHtml(product.displayName || product.canonicalName)}</strong>
+              <span>${escapeHtml(product.category || "")} · ${escapeHtml(years)}</span>
+              <p>${escapeHtml(product.trendSummary || "")}</p>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function renderJourney() {
+  if (!els.journeyProducts) return;
+  const journey = state.journey;
+  const products = journey?.products || [];
+  if (!products.length) {
+    els.journeyCount.textContent = "No journey data";
+    els.journeySummary.innerHTML = "";
+    els.journeyProducts.innerHTML = `
+      <article class="journey-empty">
+        <strong>Ingredient journey artifact missing</strong>
+        <p>Run the product ingredient journey builder after the product evidence snapshot is available.</p>
+      </article>
+    `;
+    return;
+  }
+
+  if (!products.some((product) => product.canonicalName === state.selectedJourneyProduct)) {
+    state.selectedJourneyProduct = products[0].canonicalName;
+  }
+
+  const selected = products.find((product) => product.canonicalName === state.selectedJourneyProduct) || products[0];
+  els.journeyCount.textContent = `${formatNumber(products.length)} products`;
+  els.journeyProduct.innerHTML = products
+    .map((product) => `<option value="${escapeHtml(product.canonicalName)}">${escapeHtml(product.displayName || product.canonicalName)}</option>`)
+    .join("");
+  els.journeyProduct.value = selected.canonicalName;
+
+  const metrics = journey.metrics || {};
+  const summaryCards = [
+    ["Tracked Products", metrics.products],
+    ["Ownership Milestones", metrics.ownershipMilestones],
+    ["Evidence Links", metrics.evidencePhotoLinks],
+    ["Ingredient Themes", metrics.ingredientThemes],
+  ];
+  els.journeySummary.innerHTML = summaryCards
+    .map(([label, value]) => `<article class="metric journey-metric"><strong>${formatNumber(value)}</strong><span>${escapeHtml(label)}</span></article>`)
+    .join("");
+
+  const ownership = selected.ownershipMilestones.length
+    ? selected.ownershipMilestones.map(renderOwnershipMilestone).join("")
+    : `<article class="ownership-item"><strong>Stable ownership baseline</strong><p>No ownership checkpoint is attached to this v1 journey row.</p></article>`;
+
+  els.journeyProducts.innerHTML = `
+    <article class="journey-card">
+      <header class="journey-card-header">
+        <div>
+          <p class="eyebrow">${escapeHtml(selected.category || "Product")}</p>
+          <h3>${escapeHtml(selected.displayName || selected.canonicalName)}</h3>
+          <p>${escapeHtml(selected.trendSummary || "")}</p>
+        </div>
+        <div class="journey-score">
+          <strong>${formatNumber(selected.photoEvidenceRows)}</strong>
+          <span>photo rows</span>
+        </div>
+      </header>
+      <div class="ingredient-tags prominent">${renderIngredientTags(selected.ingredientThemes, 10)}</div>
+      <section class="ownership-list" aria-label="Ownership milestones">
+        ${ownership}
+      </section>
+      <section class="journey-stage-grid" aria-label="Ingredient evidence timeline">
+        ${selected.timeline.map(renderJourneyEra).join("")}
+      </section>
+    </article>
+    ${renderJourneyOverview(products, selected.canonicalName)}
+  `;
+}
+
 function renderStatus() {
   const generated = state.data.generated_at_utc ? new Date(state.data.generated_at_utc).toLocaleString() : "unknown";
   els.status.innerHTML = `
@@ -315,6 +464,7 @@ function render() {
   renderQueue();
   renderPhotos();
   renderSweeps();
+  renderJourney();
   renderStatus();
 }
 
@@ -335,13 +485,23 @@ function attachEvents() {
     state.status = els.statusFilter.value;
     render();
   });
+  if (els.journeyProduct) {
+    els.journeyProduct.addEventListener("change", () => {
+      state.selectedJourneyProduct = els.journeyProduct.value;
+      renderJourney();
+    });
+  }
 }
 
 async function init() {
   try {
-    const response = await fetch("../data/product-evidence/summary.json");
+    const [response, journeyResponse] = await Promise.all([
+      fetch("../data/product-evidence/summary.json"),
+      fetch("../data/product-evidence/ingredient-journey.json").catch(() => null),
+    ]);
     if (!response.ok) throw new Error(`Snapshot returned ${response.status}`);
     state.data = await response.json();
+    state.journey = journeyResponse?.ok ? await journeyResponse.json() : null;
     renderFilters();
     attachEvents();
     render();
