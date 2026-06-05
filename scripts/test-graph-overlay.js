@@ -6,6 +6,7 @@ const { buildGraphOverlay } = require("./build-graph-overlay");
 
 const DATA_DIR = path.join(__dirname, "..", "docs", "data");
 const GRAPH_DIR = path.join(DATA_DIR, "graph");
+const APP_JS = path.join(__dirname, "..", "docs", "app.js");
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -49,6 +50,7 @@ function hasRawBlob(value) {
 }
 
 const evaluations = readJson(path.join(DATA_DIR, "reference", "source-evaluations.json"));
+const appJs = fs.readFileSync(APP_JS, "utf8");
 assert.deepStrictEqual(graphContract.validateSourceEvaluations(evaluations), [], "source evaluations should validate");
 
 const manifest = readJson(path.join(GRAPH_DIR, "manifest.json"));
@@ -284,6 +286,11 @@ assert(
   evidenceIndex.sourceCoverage.unlv_menus_art_of_dining?.primaryNextAction === "source_route_review",
   "UNLV coverage row should prioritize source route review"
 );
+const architectureLensBody = appJs.match(/function renderArchitectureLens\(svg, width, height\) \{[\s\S]*?\n\}\n\nfunction renderGraphLens/);
+assert(architectureLensBody, "app should expose a Flow lens renderer");
+assert(!architectureLensBody[0].includes("renderGraphLens(svg, width, height)"), "Flow lens should be a dedicated data-flow view, not a graph lens alias");
+assert(appJs.includes("How to inspect the other sources"), "Flow lens should explain how to inspect external source data");
+assert(appJs.includes("Recipe1M+, RecipeNLG, Yummly, Sifter, Epicurious, and Food.com"), "Flow lens should surface recipe bridge inputs");
 if (manifest.summary.externalMenus?.records) {
   assert(manifest.summary.externalMenus.bySource.northwestern_transport_menus > 0, "external Northwestern rows should be summarized by source");
   assert(manifest.summary.externalMenus.bySource.uh_1850s_1860s_menus > 0, "external UH rows should be summarized by source");

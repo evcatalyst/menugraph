@@ -2508,7 +2508,149 @@ function renderPriceLens(svg, width, height) {
 }
 
 function renderArchitectureLens(svg, width, height) {
-  renderGraphLens(svg, width, height);
+  lensCopy();
+  const graph = state.graphOverlay;
+  if (!graph?.manifest) {
+    const text = svgEl("text", { x: width / 2, y: height / 2, "text-anchor": "middle", class: "axis-label" });
+    text.textContent = "Architecture model loading";
+    svg.appendChild(text);
+    return;
+  }
+
+  const summary = graph.manifest.summary || {};
+  const sourceSummary = summary.sourceCapabilities || {};
+  const core = summary.core || {};
+  const evidence = summary.evidence || {};
+  const overlays = summary.overlays || {};
+  const coverage = summary.coverage || {};
+  const externalMenus = summary.externalMenus || {};
+  const recipeBridge = summary.recipeBridge || {};
+  const runPlan = summary.runPlan || {};
+  const assimilation = summary.assimilationPlan || {};
+  const sourceRouteReview = summary.sourceRouteReview || assimilation.sourceRouteReview || {};
+  const pad = { top: 26, right: 24, bottom: 24, left: 24 };
+  const compactMode = width < 760;
+  const availableW = width - pad.left - pad.right;
+
+  svg.appendChild(svgEl("rect", { x: 12, y: 12, width: width - 24, height: height - 24, rx: 8, class: "flow-canvas" }));
+
+  const title = svgEl("text", { x: pad.left, y: pad.top + 2, class: "flow-title" });
+  title.textContent = "MenuGraph application structure and data flow";
+  svg.appendChild(title);
+  const subtitle = svgEl("text", { x: pad.left, y: pad.top + 21, class: "flow-muted" });
+  subtitle.textContent = compactMode
+    ? `${formatNumber(summary.menus || 0)} rows / ${formatNumber(externalMenus.records || 0)} external / ${formatNumber(recipeBridge.clusters || 0)} recipes`
+    : "Static app shell with source knowledge, menu evidence, recipe enrichment, local OCR queues, and compact graph overlays.";
+  svg.appendChild(subtitle);
+
+  const metricY = pad.top + 44;
+  const metricW = compactMode ? (availableW - 10) / 2 : (availableW - 30) / 4;
+  const metrics = [
+    { label: "Static Rows", value: formatNumber(coverage.rowCount || summary.menus || state.allMenus.length), detail: sourceIngestLabel() },
+    { label: "External Rows", value: formatNumber(externalMenus.records || 0), detail: `${formatNumber(coverage.menuSources || 0)} menu sources` },
+    { label: "Recipe Bridge", value: formatNumber(recipeBridge.clusters || 0), detail: `${formatNumber(recipeBridge.menusRepresented || 0)} menus linked` },
+    {
+      label: "Local Queue",
+      value: formatNumber(runPlan.pendingImages || 0),
+      detail: runPlan.storageOk ? `${formatNumber(runPlan.estimatedLocalRuntimeMinutes || 0)} min est.` : "storage gated",
+    },
+  ];
+  metrics.forEach((metric, index) => {
+    const col = compactMode ? index % 2 : index;
+    const row = compactMode ? Math.floor(index / 2) : 0;
+    drawFlowMetric(svg, pad.left + col * (metricW + 10), metricY + row * 58, metricW, metric);
+  });
+
+  const stageY = metricY + (compactMode ? 130 : 72);
+  const stageGap = compactMode ? 12 : 14;
+  const stageH = compactMode ? 82 : Math.min(118, Math.max(92, (height - stageY - pad.bottom - 94) * 0.58));
+  const stages = [
+    {
+      title: "Sources",
+      metric: `${formatNumber(sourceSummary.sources || 0)} modeled`,
+      lines: [
+        `CIA + NYPL static rows: ${formatNumber(summary.menus || state.allMenus.length)}`,
+        `External menu rows: ${formatNumber(externalMenus.records || 0)}`,
+        `Recipe/history sources: ${formatNumber(Object.keys(recipeBridge.sourceCandidates || {}).length)}`,
+        `Route review sources: ${formatNumber(sourceRouteReview.sources || 0)}`,
+      ],
+    },
+    {
+      title: "Processing",
+      metric: `${formatNumber(assimilation.readyWorkstreams || 0)}/${formatNumber(assimilation.workstreams || 0)} ready`,
+      lines: [
+        "Static snapshots: menus, matches, prices, dates",
+        `Local OCR candidates: ${formatNumber(runPlan.pendingCandidates || 0)}`,
+        `Image candidates: ${formatNumber(runPlan.pendingImages || 0)}`,
+        "Retagging, coverage, triage, assimilation plans",
+      ],
+    },
+    {
+      title: "Graph Artifacts",
+      metric: `${formatNumber(core.nodes || 0)} nodes`,
+      lines: [
+        `Edges: ${formatNumber(core.edges || 0)}`,
+        `Evidence records: ${formatNumber(Object.values(evidence).reduce((sum, value) => sum + (Number(value) || 0), 0))}`,
+        `Menu overlays: ${formatNumber(overlays.menus || 0)}`,
+        "Sharded by source and evidence type",
+      ],
+    },
+    {
+      title: "Serving",
+      metric: `${formatNumber(overlays.withDishes || 0)} enriched`,
+      lines: [
+        "Map lenses: time, place, source, graph, flow",
+        "Menu details: dish, price, date, recipe evidence",
+        "Ask context: compact summaries only",
+        "Artifact links for auditable source data",
+      ],
+    },
+  ];
+
+  if (compactMode) {
+    stages.forEach((stage, index) => {
+      const y = stageY + index * (stageH + stageGap);
+      drawArchitectureStage(svg, pad.left, y, availableW, stageH, stage, index === 2);
+      if (index < stages.length - 1) {
+        const x = pad.left + availableW / 2;
+        svg.appendChild(svgEl("line", { x1: x, y1: y + stageH, x2: x, y2: y + stageH + stageGap, class: "flow-connector" }));
+      }
+    });
+  } else {
+    const stageW = (availableW - stageGap * (stages.length - 1)) / stages.length;
+    stages.forEach((stage, index) => {
+      const x = pad.left + index * (stageW + stageGap);
+      drawArchitectureStage(svg, x, stageY, stageW, stageH, stage, index === 2);
+      if (index < stages.length - 1) {
+        svg.appendChild(
+          svgEl("line", {
+            x1: x + stageW,
+            y1: stageY + stageH / 2,
+            x2: x + stageW + stageGap,
+            y2: stageY + stageH / 2,
+            class: "flow-connector",
+          })
+        );
+      }
+    });
+  }
+
+  const lowerY = compactMode ? stageY + stages.length * (stageH + stageGap) + 8 : stageY + stageH + 24;
+  const lowerH = height - lowerY - pad.bottom;
+  const lowerPanelMinHeight = compactMode ? 86 : 230;
+  if (lowerH < lowerPanelMinHeight) {
+    drawArchitectureFooter(svg, pad.left, Math.max(height - pad.bottom - 38, lowerY), availableW, summary);
+    return;
+  }
+
+  if (compactMode) {
+    drawArchitectureFooter(svg, pad.left, lowerY, availableW, summary);
+    return;
+  }
+
+  const leftW = Math.max(330, availableW * 0.46);
+  drawEvidenceStack(svg, pad.left, lowerY, leftW, lowerH, summary);
+  drawArchitectureInspectionPanel(svg, pad.left + leftW + 18, lowerY, availableW - leftW - 18, lowerH, summary);
 }
 
 function renderGraphLens(svg, width, height) {
@@ -2737,6 +2879,109 @@ function drawFlowBox(svg, x, y, width, height, box, strong = false) {
   detail.textContent = box.detail.slice(0, Math.max(24, Math.floor((width - 18) / 5.5)));
   group.appendChild(detail);
   svg.appendChild(group);
+}
+
+function flowText(value, width, divisor = 5.5) {
+  return String(value || "").slice(0, Math.max(16, Math.floor(width / divisor)));
+}
+
+function drawArchitectureStage(svg, x, y, width, height, stage, strong = false) {
+  const group = svgEl("g");
+  group.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: strong ? "flow-box flow-box--strong" : "flow-box" }));
+  const title = svgEl("text", { x: x + 12, y: y + 20, class: "flow-box-title" });
+  title.textContent = flowText(stage.title, width, 6.4);
+  group.appendChild(title);
+  const metric = svgEl("text", { x: x + width - 12, y: y + 20, "text-anchor": "end", class: "flow-muted" });
+  metric.textContent = flowText(stage.metric, width * 0.42, 5.2);
+  group.appendChild(metric);
+  const rowH = Math.max(13, Math.min(16, (height - 34) / Math.max(stage.lines.length, 1)));
+  stage.lines.slice(0, Math.floor((height - 28) / rowH)).forEach((line, index) => {
+    const text = svgEl("text", { x: x + 12, y: y + 39 + index * rowH, class: "flow-muted" });
+    text.textContent = flowText(line, width - 24, 5.6);
+    group.appendChild(text);
+  });
+  svg.appendChild(group);
+}
+
+function drawArchitectureInspectionPanel(svg, x, y, width, height, summary) {
+  const sourceRows = graphSourceRows(state.graphOverlay);
+  const recipeBridge = summary.recipeBridge || {};
+  const externalMenus = summary.externalMenus || {};
+  const runPlan = summary.runPlan || {};
+  const assimilation = summary.assimilationPlan || {};
+  const sourceRouteReview = summary.sourceRouteReview || assimilation.sourceRouteReview || {};
+  const rows = [
+    {
+      label: "Source cards",
+      value: `${formatNumber(sourceRows.length)} sources`,
+      note: "Use the Source or Flow lens results list to open source rows and provenance links.",
+    },
+    {
+      label: "External rows",
+      value: formatNumber(externalMenus.records || 0),
+      note: "LAPL, Cornell, UH, Northwestern, Seattle, UW, Milwaukee, Denver, and NOLA live as compact external graph records.",
+    },
+    {
+      label: "Recipe layer",
+      value: `${formatNumber(recipeBridge.clusters || 0)} clusters`,
+      note: "Recipe1M+, RecipeNLG, Yummly, Sifter, Epicurious, and Food.com are bridge targets, not raw recipe rows.",
+    },
+    {
+      label: "Local enricher",
+      value: `${formatNumber(runPlan.pendingImages || 0)} images`,
+      note: "Pending OCR work stays routeable without changing the graph model.",
+    },
+    {
+      label: "Route review",
+      value: `${formatNumber(sourceRouteReview.sources || 0)} sources`,
+      note: "Image-route and license blockers are kept visible before deeper processing.",
+    },
+  ];
+  svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
+  const title = svgEl("text", { x: x + 12, y: y + 22, class: "flow-box-title" });
+  title.textContent = "How to inspect the other sources";
+  svg.appendChild(title);
+  const subtitle = svgEl("text", { x: x + 12, y: y + 40, class: "flow-muted" });
+  subtitle.textContent = "Right-hand cards expose rows, overlays, route reviews, and raw artifact links.";
+  svg.appendChild(subtitle);
+  const rowH = Math.min(34, Math.max(25, (height - 52) / rows.length));
+  rows.forEach((row, index) => {
+    const yy = y + 58 + index * rowH;
+    const label = svgEl("text", { x: x + 12, y: yy, class: "flow-source-label" });
+    label.textContent = flowText(row.label, width * 0.35, 6);
+    svg.appendChild(label);
+    const value = svgEl("text", { x: x + width - 12, y: yy, "text-anchor": "end", class: "flow-box-title" });
+    value.textContent = flowText(row.value, width * 0.36, 6);
+    svg.appendChild(value);
+    const note = svgEl("text", { x: x + 12, y: yy + 16, class: "flow-muted" });
+    note.textContent = flowText(row.note, width - 24, 5.6);
+    svg.appendChild(note);
+  });
+}
+
+function drawArchitectureFooter(svg, x, y, width, summary) {
+  const recipeBridge = summary.recipeBridge || {};
+  const externalMenus = summary.externalMenus || {};
+  const evidence = summary.evidence || {};
+  const rows = [
+    { label: "External", value: externalMenus.records || 0 },
+    { label: "Recipes", value: recipeBridge.clusters || evidence.recipeClusters || 0 },
+    { label: "Prices", value: summary.overlays?.withPrices || 0 },
+    { label: "Dishes", value: summary.overlays?.withDishes || 0 },
+    { label: "Gaps", value: evidence.enrichmentGaps || 0 },
+  ];
+  const height = 38;
+  svg.appendChild(svgEl("rect", { x, y, width, height, rx: 7, class: "flow-box" }));
+  const colW = width / rows.length;
+  rows.forEach((row, index) => {
+    const xx = x + index * colW + 10;
+    const value = svgEl("text", { x: xx, y: y + 16, class: "flow-box-title" });
+    value.textContent = formatNumber(row.value);
+    svg.appendChild(value);
+    const label = svgEl("text", { x: xx, y: y + 29, class: "flow-muted" });
+    label.textContent = row.label;
+    svg.appendChild(label);
+  });
 }
 
 function drawCompactEvidenceFooter(svg, x, y, width, summary) {
