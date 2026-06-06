@@ -15153,6 +15153,329 @@ body[data-story-mode="proof"] .lower-grid {
   overflow-wrap: anywhere;
 }
 
+.recipe-journey {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  border: 1px solid rgba(82, 111, 145, 0.34);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(191, 90, 64, 0.08), transparent 44%),
+    rgba(255, 253, 248, 0.9);
+  padding: 10px;
+}
+
+.recipe-journey-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.38fr);
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+}
+
+.recipe-journey-head h4,
+.recipe-journey-head p {
+  margin: 0;
+}
+
+.recipe-journey-head h4 {
+  color: var(--ink);
+  font-size: clamp(21px, 2.4vw, 32px);
+  line-height: 1.05;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.recipe-journey-head p:not(.eyebrow) {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.46;
+  overflow-wrap: anywhere;
+}
+
+.recipe-journey-score {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.recipe-journey-score span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  border: 1px solid rgba(49, 111, 115, 0.22);
+  border-radius: 7px;
+  background: rgba(255, 253, 248, 0.74);
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  padding: 7px;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.recipe-journey-score span strong {
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.recipe-journey-verdict {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 0;
+}
+
+.recipe-journey-verdict strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.recipe-journey-verdict span:not(.status-tag) {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.28fr) minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid rgba(49, 111, 115, 0.26);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.72);
+  padding: 10px;
+}
+
+.recipe-stitch-copy {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+  border-right: 1px solid var(--line);
+  padding-right: 10px;
+}
+
+.recipe-stitch-copy span,
+.recipe-stitch-node header strong,
+.recipe-stitch-node section span,
+.recipe-stitch-node footer b {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.18;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch-copy strong {
+  color: var(--ink);
+  font-size: 20px;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch-route {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.recipe-stitch-route::before {
+  content: "";
+  position: absolute;
+  top: 23px;
+  left: 18px;
+  right: 18px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(49, 111, 115, 0.52), rgba(170, 127, 46, 0.48), rgba(162, 79, 57, 0.48));
+}
+
+.recipe-stitch-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(76px, auto) auto;
+  gap: 8px;
+  min-width: 0;
+  min-height: 260px;
+  border: 1px solid rgba(49, 111, 115, 0.26);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.92);
+  padding: 8px;
+}
+
+.recipe-stitch-node header {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.recipe-stitch-node header span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid rgba(49, 111, 115, 0.36);
+  border-radius: 7px;
+  background: var(--paper-warm);
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.recipe-stitch-node header em,
+.recipe-stitch-node section p,
+.recipe-stitch-node footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1.32;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch-node section {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+
+.recipe-stitch-node footer {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+
+.recipe-journey-track {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.recipe-journey-card {
+  display: grid;
+  grid-template-rows: auto minmax(82px, auto) minmax(104px, 1fr) auto auto;
+  gap: 8px;
+  min-width: 0;
+  min-height: 430px;
+  border: 1px solid rgba(49, 111, 115, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.84);
+  padding: 9px;
+}
+
+.recipe-journey-card header {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.recipe-journey-card header span,
+.recipe-journey-card header em,
+.recipe-journey-card section span,
+.recipe-journey-card dt {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.recipe-journey-card header strong {
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.recipe-journey-card header em,
+.recipe-journey-card section em {
+  font-style: normal;
+}
+
+.recipe-journey-card section {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+
+.recipe-journey-card section p,
+.recipe-journey-card section em,
+.recipe-journey-card dd,
+.recipe-journey-card footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.34;
+  overflow-wrap: anywhere;
+}
+
+.recipe-journey-card section p {
+  margin-top: 5px;
+}
+
+.recipe-journey-card section em {
+  display: block;
+  margin-top: 5px;
+  color: var(--clay);
+}
+
+.recipe-journey-card dl {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+
+.recipe-journey-card dd {
+  margin: 0;
+}
+
+.recipe-journey-card footer {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+
+.recipe-journey-card footer p strong {
+  color: var(--ink);
+}
+
 .story-brief {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
@@ -16871,6 +17194,25 @@ td {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .recipe-stitch {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-stitch-copy {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding-right: 0;
+    padding-bottom: 9px;
+  }
+
+  .recipe-stitch-route {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .recipe-stitch-route::before {
+    display: none;
+  }
+
   .story-featured {
     grid-column: auto;
   }
@@ -17838,6 +18180,14 @@ td {
     grid-template-columns: 1fr 1fr;
   }
 
+  .recipe-journey-head {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-journey-track {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .status-panel {
     display: grid;
   }
@@ -18017,11 +18367,42 @@ td {
   .story-beat > p,
   .story-chapter p,
   .story-timeline-row p,
+  .recipe-stitch-node,
+  .recipe-journey-card,
   .reader-script-beat > p,
   .reader-visual-node > p,
   .reader-claim > p,
   .reader-era > p {
     min-height: 0;
+  }
+
+  .recipe-stitch-route {
+    grid-template-columns: 1fr;
+    padding-left: 36px;
+  }
+
+  .recipe-stitch-route::before {
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 14px;
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+
+  .recipe-stitch-node header {
+    grid-template-columns: 32px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .recipe-stitch-node header span {
+    margin-left: -38px;
+  }
+
+  .recipe-stitch-node header strong,
+  .recipe-stitch-node header em {
+    grid-column: 2;
   }
 
   .reader-lineup {

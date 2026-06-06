@@ -14957,6 +14957,237 @@ function renderStoryWorkflow(card, evidenceRows) {
   `;
 }
 
+function recipeJourneyEvidenceState(rows, info) {
+  const facts = storyEvidenceFacts(rows);
+  const statuses = rows.map(rowEvidenceStatus);
+  if (facts.manualLabels || statuses.includes("manual_verified")) {
+    return {
+      label: "Verified Recipe Text",
+      status: "manual_verified",
+      detail: "Reviewed ingredient text can support scoped formulation comparison for this chapter.",
+    };
+  }
+  if (facts.ocrLabels || statuses.includes("ocr_extracted")) {
+    return {
+      label: "OCR Candidate",
+      status: "ocr_extracted",
+      detail: "OCR text exists but still needs correction against the source image before recipe claims publish.",
+    };
+  }
+  if (facts.visibleLabels || rows.some((row) => truthyFlag(row.ingredient_panel_visible) || truthyFlag(row.ingredient_text_available))) {
+    return {
+      label: "Readable Label Candidate",
+      status: "label_visible",
+      detail: "Ingredient text or panel visibility is present, but the recipe is not ground truth until manual review.",
+    };
+  }
+  if (facts.usablePhotos || statuses.includes("usable_photo")) {
+    return {
+      label: "Package Photo Lead",
+      status: "usable_photo",
+      detail: "A product object can anchor the era visually, but the ingredient panel still needs to be read.",
+    };
+  }
+  if (numeric(info?.source_count) || rows.length) {
+    return {
+      label: "Source Lead",
+      status: info?.status || "source_review",
+      detail: "A source is attached, but it has not yet become readable ingredient evidence.",
+    };
+  }
+  return {
+    label: "Open Gap",
+    status: info?.status || "missing_vintage_slot",
+    detail: "No source-attributable recipe evidence is attached for this era.",
+  };
+}
+
+function recipeJourneyContextLine(rows, key, fallback) {
+  const row = rows.find((item) => presentText(item[key]));
+  return row ? row[key] : fallback;
+}
+
+function productRecipeJourneyRows(product, evidenceRows) {
+  return state.data.vintages.map((vintage, index) => {
+    const info = product.vintage_statuses?.[vintage] || { status: "unknown", source_count: 0 };
+    const rows = vintageEvidenceRows(product, evidenceRows, vintage);
+    const best = bestEvidenceRows(rows, 1)[0] || {};
+    const recipeState = recipeJourneyEvidenceState(rows, info);
+    const facts = storyEvidenceFacts(rows);
+    const source = best.source_url || best.archive_url || "";
+    const isOreoOrigin = /oreo/i.test(`${product.display_name || ""} ${product.canonical_name || ""}`) && vintage === "earliest_verified_label";
+    const boundary = recipeState.status === "manual_verified"
+      ? "Recipe comparison can be scoped to this verified chapter only."
+      : isOreoOrigin
+        ? "Do not describe the original 1912 Oreo recipe without verified label evidence."
+        : "Do not promote this chapter into a recipe-diff claim until ingredient text is reviewed.";
+    const nextProof = recipeState.status === "manual_verified"
+      ? "Compare canonical ingredient IDs, order, nested subingredients, and package context."
+      : facts.visibleLabels || facts.ocrLabels
+        ? "Correct/transcribe the ingredient text against the source image and attach reviewer attribution."
+        : facts.usablePhotos
+          ? "Confirm the ingredient panel is readable, then capture OCR/manual transcription."
+          : source
+            ? "Review the source object for label panel visibility, date basis, net weight, and rights."
+            : "Find a source-attributable package photo, label scan, archive page, or document for this era.";
+    return {
+      number: String(index + 1).padStart(2, "0"),
+      vintage,
+      label: vintageLabels[vintage] || vintage,
+      title: storyChapterTitle(vintage),
+      status: recipeState.status,
+      recipeState,
+      sourceCount: numeric(info.source_count || rows.length),
+      source,
+      sourceLabel: best.source_domain || "Source",
+      sourceTitle: best.source_title || best.source_domain || best.evidence_kind || "No source object",
+      dateBasis: best.claimed_product_date_text || best.capture_date_text || best.vintage_label || vintageLabels[vintage] || vintage,
+      packageContext: recipeJourneyContextLine(rows, "package_size_text", facts.packageFields ? `${pluralize(facts.packageFields, "package field")} present` : "Package weight/serving not captured"),
+      makerContext: recipeJourneyContextLine(rows, "manufacturer_distributor_text", facts.orgFields ? `${pluralize(facts.orgFields, "maker clue")} present` : "Maker/distributor text not captured"),
+      priceContext: recipeJourneyContextLine(rows, "price_text", facts.priceFields ? `${pluralize(facts.priceFields, "price clue")} present` : "Price/weight alignment deferred"),
+      boundary,
+      nextProof,
+    };
+  });
+}
+
+function productRecipeJourneySummary(product, evidenceRows, rows) {
+  const facts = storyEvidenceFacts(evidenceRows);
+  const verified = rows.filter((row) => row.status === "manual_verified").length;
+  const readable = rows.filter((row) => ["manual_verified", "ocr_extracted", "label_visible"].includes(row.status)).length;
+  const sourceSlots = rows.filter((row) => row.sourceCount || row.source).length;
+  const name = product.display_name || product.canonical_name || "This product";
+  const locked = verified < 2;
+  return {
+    name,
+    status: verified ? "manual_verified" : readable ? "label_visible" : sourceSlots ? "source_review" : "missing_vintage_slot",
+    headline: `${name} Recipe Journey`,
+    dek: locked
+      ? `${name} can show a source-backed recipe evidence path, but not an end-to-end formulation diff yet. The missing step is reviewed ingredient text across at least two comparable eras.`
+      : `${name} has multiple verified recipe chapters ready for scoped ingredient comparison.`,
+    metrics: [
+      ["Era chapters", rows.length],
+      ["Source-backed", sourceSlots],
+      ["Readable labels", readable],
+      ["Verified recipes", verified],
+      ["Package fields", facts.packageFields],
+      ["Price clues", facts.priceFields],
+    ],
+    verdict: locked
+      ? "Recipe diff locked"
+      : "Scoped recipe diff possible",
+    boundary: /oreo/i.test(`${product.display_name || ""} ${product.canonical_name || ""}`)
+      ? "The 1912 original Oreo ingredient label remains unverified, so the journey must show the proof chase before any original-to-current claim."
+      : "Only chapters with reviewed label text can support ingredient-change language.",
+  };
+}
+
+function recipeJourneyStitchLine(summary, rows) {
+  const current = rows[0] || {};
+  const earliest = rows[rows.length - 1] || {};
+  const currentLabel = current.recipeState?.label || "Current evidence";
+  const earliestLabel = earliest.recipeState?.label || "Earliest evidence";
+  return `${currentLabel} flows through ${formatNumber(rows.length)} dated chapters toward ${earliestLabel}; each break keeps its source object, claim boundary, and next proof visible. ${summary.boundary}`;
+}
+
+function renderProductRecipeJourney(card, evidenceRows) {
+  const product = card.product;
+  if (!product) return "";
+  const rows = productRecipeJourneyRows(product, evidenceRows);
+  const summary = productRecipeJourneySummary(product, evidenceRows, rows);
+  return `
+    <section class="recipe-journey status-${escapeHtml(summary.status)}" aria-label="Selected product recipe journey">
+      <header class="recipe-journey-head">
+        <div>
+          <p class="eyebrow">Recipe Journey</p>
+          <h4>${escapeHtml(summary.headline)}</h4>
+          <p>${escapeHtml(summary.dek)}</p>
+        </div>
+        <aside class="recipe-journey-score" aria-label="Recipe journey scorecard">
+          ${summary.metrics
+            .map(([label, value]) => `<span><strong>${formatNumber(value)}</strong>${escapeHtml(label)}</span>`)
+            .join("")}
+        </aside>
+      </header>
+      <div class="recipe-journey-verdict">
+        ${statusTag(summary.status)}
+        <strong>${escapeHtml(summary.verdict)}</strong>
+        <span>${escapeHtml(summary.boundary)}</span>
+      </div>
+      <div class="recipe-stitch" aria-label="Stitched recipe story route">
+        <aside class="recipe-stitch-copy">
+          <span>Story Stitch</span>
+          <strong>${escapeHtml(summary.name)}</strong>
+          <p>${escapeHtml(recipeJourneyStitchLine(summary, rows))}</p>
+        </aside>
+        <div class="recipe-stitch-route">
+          ${rows
+            .map((row) => `
+              <article class="recipe-stitch-node status-${escapeHtml(row.status)}">
+                <header>
+                  <span>${escapeHtml(row.number)}</span>
+                  <strong>${escapeHtml(row.label)}</strong>
+                  <em>${escapeHtml(row.dateBasis)}</em>
+                </header>
+                <section>
+                  <span>${escapeHtml(row.recipeState.label)}</span>
+                  <p>${escapeHtml(clipped(row.sourceTitle, 92))}</p>
+                </section>
+                <footer>
+                  <b>${escapeHtml(`${formatNumber(row.sourceCount)} source${row.sourceCount === 1 ? "" : "s"}`)}</b>
+                  <p>${escapeHtml(clipped(row.nextProof, 118))}</p>
+                  <div class="lead-meta">
+                    ${statusTag(row.status)}
+                    ${row.source ? linkOrText(row.source, row.sourceLabel) : `<span class="gap-label">No source link</span>`}
+                  </div>
+                </footer>
+              </article>
+            `)
+            .join("")}
+        </div>
+      </div>
+      <div class="recipe-journey-track">
+        ${rows
+          .map((row) => `
+            <article class="recipe-journey-card status-${escapeHtml(row.status)}">
+              <header>
+                <span>${escapeHtml(`${row.number} ${row.label}`)}</span>
+                <strong>${escapeHtml(row.recipeState.label)}</strong>
+                <em>${escapeHtml(`${formatNumber(row.sourceCount)} source${row.sourceCount === 1 ? "" : "s"}`)}</em>
+              </header>
+              <section>
+                <span>Evidence Object</span>
+                <p>${escapeHtml(clipped(row.sourceTitle, 120))}</p>
+                <em>${escapeHtml(clipped(row.dateBasis, 92))}</em>
+              </section>
+              <section>
+                <span>Recipe State</span>
+                <p>${escapeHtml(row.recipeState.detail)}</p>
+              </section>
+              <dl>
+                <dt>Package</dt>
+                <dd>${escapeHtml(clipped(row.packageContext, 80))}</dd>
+                <dt>Maker</dt>
+                <dd>${escapeHtml(clipped(row.makerContext, 80))}</dd>
+                <dt>Price/Weight</dt>
+                <dd>${escapeHtml(clipped(row.priceContext, 80))}</dd>
+              </dl>
+              <footer>
+                <p><strong>Boundary:</strong> ${escapeHtml(row.boundary)}</p>
+                <p><strong>Next:</strong> ${escapeHtml(row.nextProof)}</p>
+                <div class="lead-meta">
+                  ${statusTag(row.status)}
+                  ${row.source ? linkOrText(row.source, row.sourceLabel) : `<span class="gap-label">No source link</span>`}
+                </div>
+              </footer>
+            </article>
+          `)
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function vintageEvidenceRows(product, evidenceRows, vintage) {
   const rows = evidenceRows.filter((row) => row.vintage_label === vintage);
   if (rows.length) return rows;
@@ -15169,6 +15400,7 @@ function renderStoryFocus(card, registryRows) {
         </div>
       </div>
       ${renderStoryReader(card, evidenceRows)}
+      ${renderProductRecipeJourney(card, evidenceRows)}
       ${renderStoryBrief(card, evidenceRows)}
       <div class="story-proof-grid">${renderStoryClaimCards(card)}</div>
       ${renderStoryLenses(card, evidenceRows)}
