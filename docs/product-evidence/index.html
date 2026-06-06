@@ -11,13 +11,17 @@
       <header class="evidence-topbar">
         <div>
           <p class="eyebrow">MenuGraph Product Evidence</p>
-          <h1>Packaged Food Evidence Collection</h1>
-          <p class="summary">Source-attributable package photos, label review slots, current-web harvests, and Common Crawl sweeps for the 100-product ingredient-history board.</p>
+          <h1>Evidence-Backed Product Stories</h1>
+          <p class="summary">Reader-first product histories for ingredient, package, manufacturer, and price/weight changes, with every claim tied to source provenance or left visible as an unresolved gap.</p>
         </div>
         <nav class="topnav" aria-label="MenuGraph navigation">
           <a href="../">MenuGraph</a>
-          <a href="#acquisition">Acquisition Queue</a>
+          <a href="#story-desk">Story Desk</a>
+          <a href="#stories">Stories</a>
           <a href="#products">Products</a>
+          <a href="#evidence-registry">Evidence Registry</a>
+          <a href="#gaps">Gaps</a>
+          <a href="#scale">Collection Plan</a>
           <a href="#common-crawl">Common Crawl</a>
         </nav>
       </header>
@@ -27,7 +31,72 @@
         <span>Preparing collection queue, product coverage, and source-review views.</span>
       </section>
 
+      <section class="panel story-desk" id="story-desk">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Story Desk</p>
+            <h2>What The Reader Can Believe</h2>
+          </div>
+          <span id="story-desk-count" class="count-pill">0 story candidates</span>
+        </div>
+        <div class="reader-grid">
+          <article id="reader-lede" class="reader-lede"></article>
+          <div id="reader-readiness" class="reader-readiness"></div>
+        </div>
+        <div id="reader-pillars" class="reader-pillars"></div>
+        <div class="reader-story-grid">
+          <section>
+            <div class="subsection-title">
+              <strong>Claim Ledger</strong>
+              <span>Supported, locked, and waiting claims</span>
+            </div>
+            <div id="reader-claim-ledger" class="reader-claim-ledger"></div>
+          </section>
+          <section>
+            <div class="subsection-title">
+              <strong>Era Strip</strong>
+              <span>Each chapter keeps its proof state</span>
+            </div>
+            <div id="reader-era-strip" class="reader-era-strip"></div>
+          </section>
+        </div>
+        <div class="reader-followup-grid">
+          <section>
+            <div class="subsection-title">
+              <strong>Story Candidates</strong>
+              <span>Reader arcs with proof limits</span>
+            </div>
+            <div id="reader-lineup" class="reader-lineup"></div>
+          </section>
+          <section>
+            <div class="subsection-title">
+              <strong>Publication Unlocks</strong>
+              <span>The next evidence that changes the story</span>
+            </div>
+            <div id="reader-unlocks" class="reader-unlocks"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel story-panel" id="stories">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Evidence Stories</p>
+            <h2>Focused Story And Proof Trail</h2>
+          </div>
+          <span id="story-count" class="count-pill">0 stories</span>
+        </div>
+        <div class="story-toolbar">
+          <div id="story-selector" class="story-selector" aria-label="Story selector"></div>
+          <p>The focused story separates the reader-facing arc from the proof trail: what is supported, what remains a gap, and which source-attributable label would unlock publication.</p>
+        </div>
+        <article id="story-focus" class="story-focus" aria-live="polite"></article>
+        <div id="story-summary" class="story-summary"></div>
+        <div id="story-rows" class="story-grid"></div>
+      </section>
+
       <section id="metrics" class="metrics-grid" aria-label="Collection metrics"></section>
+      <section id="crawl-health" class="crawl-health-grid" aria-label="Common Crawl health"></section>
 
       <section class="control-row" aria-label="Evidence filters">
         <label>
@@ -46,6 +115,39 @@
           <span>Status</span>
           <select id="status-filter"><option value="">All statuses</option></select>
         </label>
+      </section>
+
+      <section class="panel" id="scale">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Collection Plan</p>
+            <h2>Active Collection Lanes</h2>
+          </div>
+          <span id="scale-count" class="count-pill">0 lanes</span>
+        </div>
+        <div class="scale-grid">
+          <section>
+            <div class="subsection-title">
+              <strong>Weak Products</strong>
+              <span>Lowest vintage coverage first</span>
+            </div>
+            <div id="scale-product-rows" class="scale-stack"></div>
+          </section>
+          <section>
+            <div class="subsection-title">
+              <strong>Category Backlog</strong>
+              <span>Where missing slots cluster</span>
+            </div>
+            <div id="scale-category-rows" class="scale-stack"></div>
+          </section>
+          <section>
+            <div class="subsection-title">
+              <strong>Source Domains</strong>
+              <span>Dense venues for review</span>
+            </div>
+            <div id="scale-domain-rows" class="scale-stack"></div>
+          </section>
+        </div>
       </section>
 
       <section class="workspace-grid">
@@ -70,6 +172,65 @@
           </div>
           <div id="source-bars" class="source-bars"></div>
         </aside>
+      </section>
+
+      <section class="workspace-grid" id="gaps">
+        <section class="panel gap-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Collection Gaps</p>
+              <h2>Next Evidence Targets</h2>
+            </div>
+            <span id="gap-count" class="count-pill">0 gaps</span>
+          </div>
+          <div id="gap-rows" class="gap-grid"></div>
+        </section>
+
+        <aside class="panel coverage-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Coverage</p>
+              <h2>Board Snapshot</h2>
+            </div>
+          </div>
+          <div id="coverage-summary" class="coverage-summary"></div>
+        </aside>
+      </section>
+
+      <section class="workspace-grid" id="campaigns">
+        <section class="panel campaign-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Collection Campaigns</p>
+              <h2>Source Campaign Packets</h2>
+            </div>
+            <span id="campaign-count" class="count-pill">0 packets</span>
+          </div>
+          <div id="campaign-rows" class="campaign-grid"></div>
+        </section>
+
+        <aside class="panel search-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Mass Search</p>
+              <h2>Top Search Starts</h2>
+            </div>
+            <span id="search-task-count" class="count-pill">0 tasks</span>
+          </div>
+          <div id="search-task-rows" class="search-task-list"></div>
+        </aside>
+      </section>
+
+      <section class="panel" id="evidence-registry">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Evidence Registry</p>
+            <h2>Source Provenance And Review State</h2>
+          </div>
+          <span id="registry-count" class="count-pill">0 records</span>
+        </div>
+        <div id="registry-summary" class="registry-summary"></div>
+        <div id="registry-rows" class="registry-grid"></div>
       </section>
 
       <section class="panel" id="acquisition">
@@ -120,6 +281,14 @@
             <span id="sweep-count" class="count-pill">0 sweeps</span>
           </div>
           <div id="sweep-rows" class="lead-list"></div>
+          <div class="subsection-heading">
+            <div>
+              <p class="eyebrow">Run Telemetry</p>
+              <h3>Recent CDX Attempts</h3>
+            </div>
+            <span id="run-log-count" class="count-pill">0 runs</span>
+          </div>
+          <div id="run-log-rows" class="run-log-list"></div>
         </section>
       </section>
     </main>

@@ -682,21 +682,36 @@ function serveStatic(req, res, pathname) {
     requested = `${requested}/index.html`;
   }
   const filePath = path.normalize(path.join(PUBLIC_DIR, requested));
-  if (!filePath.startsWith(PUBLIC_DIR)) {
+  const isPublicPath = (targetPath) => targetPath === PUBLIC_DIR || targetPath.startsWith(`${PUBLIC_DIR}${path.sep}`);
+  if (!isPublicPath(filePath)) {
     notFound(res);
     return;
   }
-  fs.readFile(filePath, (error, data) => {
-    if (error) {
-      notFound(res);
-      return;
-    }
-    res.writeHead(200, {
-      "Content-Type": contentTypeFor(filePath),
-      "Cache-Control": "no-cache",
+
+  const sendFile = (targetPath, allowDirectoryIndex = true) => {
+    fs.readFile(targetPath, (error, data) => {
+      if (error && allowDirectoryIndex && !path.extname(targetPath)) {
+        const indexPath = path.join(targetPath, "index.html");
+        if (!isPublicPath(indexPath)) {
+          notFound(res);
+          return;
+        }
+        sendFile(indexPath, false);
+        return;
+      }
+      if (error) {
+        notFound(res);
+        return;
+      }
+      res.writeHead(200, {
+        "Content-Type": contentTypeFor(targetPath),
+        "Cache-Control": "no-cache",
+      });
+      res.end(data);
     });
-    res.end(data);
-  });
+  };
+
+  sendFile(filePath);
 }
 
 async function proxyImage(req, res, id) {
