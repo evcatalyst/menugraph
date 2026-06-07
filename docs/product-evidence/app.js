@@ -15932,6 +15932,7 @@ function renderCorpusOcrScale() {
   const candidateExtracts = summary.ocr_candidate_extract_summary || state.data.ocr_candidate_extract_summary || {};
   const manualVerification = summary.ocr_manual_verification_summary || state.data.ocr_manual_verification_summary || {};
   const storyBriefs = state.data.full_corpus_story_briefs_summary || {};
+  const commonsImport = state.data.commons_photo_proof_import_summary || {};
   const candidateCount = numeric(summary.ocr_candidate_count);
   els.corpusOcrCount.textContent = `${formatNumber(candidateCount)} rows`;
 
@@ -15962,6 +15963,8 @@ function renderCorpusOcrScale() {
     ["Extract reviews", manualVerification.candidate_extract_review_rows],
     ["Source reviews", manualVerification.needs_source_review_rows],
     ["Story briefs", storyBriefs.product_count],
+    ["Commons photo embeds", commonsImport.publishable_import_count],
+    ["Commons blockers", commonsImport.not_publishable_count],
     ["Review queue", hybrid.review_queue?.rows],
   ];
   els.corpusOcrSummary.innerHTML = `
@@ -15988,6 +15991,7 @@ function renderCorpusOcrScale() {
       ${candidateExtracts.public_safety ? `<p>${escapeHtml(`Candidate extract import: ${formatNumber(candidateExtracts.accepted_candidate_count)} accepted, ${formatNumber(candidateExtracts.rejected_candidate_count)} rejected. Public text included: ${candidateExtracts.public_safety.public_text_included ? "yes" : "no"}.`)}</p>` : ""}
       ${manualVerification.public_safety ? `<p>${escapeHtml(`Manual verification queue: ${formatNumber(manualVerification.verification_queue_rows)} rows, ${formatNumber(manualVerification.candidate_extract_review_rows)} candidate extract reviews, ${formatNumber(manualVerification.needs_source_review_rows)} source reviews. Claim promotion allowed: ${manualVerification.public_safety.claim_promotion_allowed ? "yes" : "no"}.`)}</p>` : ""}
       ${storyBriefs.public_policy ? `<p>${escapeHtml(`Story briefs: ${formatNumber(storyBriefs.product_count)} products, ${formatNumber(storyBriefs.source_receipts)} source receipts, ${formatNumber(storyBriefs.public_embeds)} public image embeds. ${storyBriefs.public_policy}`)}</p>` : ""}
+      ${commonsImport.public_safety ? `<p>${escapeHtml(`Commons photo import: ${formatNumber(commonsImport.commons_candidate_count)} candidates, ${formatNumber(commonsImport.publishable_import_count)} promoted public images, ${formatNumber(commonsImport.not_publishable_count)} blocked by metadata. ${commonsImport.public_safety.rights_gate}`)}</p>` : ""}
       <div class="lead-meta">
         ${artifactLink(summary.queue_csv, "Queue CSV")}
         ${artifactLink(summary.gap_report_csv, "Gap CSV")}
@@ -16003,6 +16007,8 @@ function renderCorpusOcrScale() {
         ${artifactLink(manualVerification.public_artifacts?.manual_verification_queue_csv, "Manual Verification CSV")}
         ${artifactLink(storyBriefs.public_artifacts?.story_briefs_markdown, "Story Briefs MD")}
         ${artifactLink(storyBriefs.public_artifacts?.story_briefs_csv, "Story Briefs CSV")}
+        ${artifactLink(commonsImport.public_artifacts?.candidate_csv, "Commons Photo CSV")}
+        ${artifactLink(commonsImport.public_artifacts?.summary_json, "Commons Photo Summary")}
         ${artifactLink(hybrid.public_artifacts?.model_assist_summary_csv, "Model CSV")}
         ${artifactLink(hybrid.public_artifacts?.review_queue_csv, "Review CSV")}
       </div>

@@ -43,9 +43,9 @@ assert.strictEqual(data.corpus_summary.embedded_public_images, 0, "public build 
 assert(data.corpus_summary.link_only_photo_receipts >= 1000, "expected broad source-linked photo/evidence receipts");
 assert(data.full_corpus_story_briefs_summary, "navigator should expose full-corpus story brief summary");
 assert.strictEqual(data.full_corpus_story_briefs_summary.product_count, 120, "story brief summary should cover 120 products");
-assert.strictEqual(data.full_corpus_story_briefs_summary.public_embeds, 3, "story brief summary should count reviewed public image embeds");
+assert.strictEqual(data.full_corpus_story_briefs_summary.public_embeds, 31, "story brief summary should count reviewed public image embeds");
 assert(data.full_corpus_story_briefs_summary.site_artifacts?.story_briefs_markdown, "story brief markdown link should be exposed");
-assert.strictEqual(publicPhotoManifest.published_image_count, 3, "public photo proof manifest should publish reviewed Commons images");
+assert.strictEqual(publicPhotoManifest.published_image_count, 31, "public photo proof manifest should publish reviewed Commons images");
 assert(
   publicPhotoManifest.published_images.every((row) => row.image_display_policy === "embed_rights_cleared"),
   "published public photo rows must be rights-cleared embeds",

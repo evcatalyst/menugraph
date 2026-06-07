@@ -186949,8 +186949,8 @@
   "public_photo_proof_summary": {
     "schema_version": "public_photo_proof_manifest.v1",
     "generated_at": "2026-06-07T20:30:00Z",
-    "registry_rows": 3,
-    "published_image_count": 3,
+    "registry_rows": 31,
+    "published_image_count": 31,
     "pending_or_rejected_count": 0,
     "registry_csv": "docs/data/product-evidence/exports/public_photo_proof_registry.csv",
     "manifest_json": "docs/data/product-evidence/public_photo_proof_manifest.json",
@@ -187105,8 +187105,8 @@
     "products_with_candidate_text": 10,
     "products_with_source_gaps": 117,
     "source_receipts": 1369,
-    "link_only_receipts": 1366,
-    "public_embeds": 3,
+    "link_only_receipts": 1338,
+    "public_embeds": 31,
     "public_safety": {
       "candidate_only": true,
       "manual_verified_created": false,
@@ -187117,7 +187117,7 @@
     },
     "public_policy": "Story briefs can show source receipts and candidate text state. Ingredient claims still require manual verification; external photos remain link-only unless marked embed_rights_cleared.",
     "public_photo_manifest": "docs/data/product-evidence/public_photo_proof_manifest.json",
-    "public_photo_manifest_published_images": 3,
+    "public_photo_manifest_published_images": 31,
     "public_artifacts": {
       "story_briefs_json": "docs/data/product-evidence/exports/full_corpus_story_briefs.json",
       "story_briefs_csv": "docs/data/product-evidence/exports/full_corpus_story_briefs.csv",
@@ -187127,6 +187127,25 @@
       "story_briefs_json": "../data/product-evidence/exports/full_corpus_story_briefs.json",
       "story_briefs_csv": "../data/product-evidence/exports/full_corpus_story_briefs.csv",
       "story_briefs_markdown": "../data/product-evidence/exports/full_corpus_story_briefs.md"
+    }
+  },
+  "commons_photo_proof_import_summary": {
+    "schema_version": "commons_photo_proof_import_summary.v1",
+    "generated_at": "2026-06-07T21:25:00Z",
+    "commons_candidate_count": 33,
+    "publishable_import_count": 31,
+    "not_publishable_count": 2,
+    "registry_rows_after_merge": 31,
+    "public_safety": {
+      "source": "Wikimedia Commons API imageinfo extmetadata",
+      "ingredient_claims_verified": false,
+      "requires_registry_manifest_validation": true,
+      "rights_gate": "Only rows with public-safe image URLs, clear Commons rights metadata, and attribution are promoted."
+    },
+    "public_artifacts": {
+      "candidate_csv": "docs/data/product-evidence/exports/commons_photo_proof_import_candidates.csv",
+      "summary_json": "docs/data/product-evidence/commons_photo_proof_import_summary.json",
+      "registry_csv": "docs/data/product-evidence/exports/public_photo_proof_registry.csv"
     }
   }
 }
