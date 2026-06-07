@@ -105,6 +105,9 @@ const els = {
   corpusOcrSummary: document.querySelector("#corpus-ocr-summary"),
   corpusOcrGaps: document.querySelector("#corpus-ocr-gaps"),
   corpusOcrProducts: document.querySelector("#corpus-ocr-products"),
+  photoProofUpgradeSummary: document.querySelector("#photo-proof-upgrade-summary"),
+  photoProofUpgradeProducts: document.querySelector("#photo-proof-upgrade-products"),
+  photoProofUpgradeQueue: document.querySelector("#photo-proof-upgrade-queue"),
   registrySummary: document.querySelector("#registry-summary"),
   registryRows: document.querySelector("#registry-rows"),
   registryCount: document.querySelector("#registry-count"),
@@ -15980,6 +15983,111 @@ function renderCorpusOcrScale() {
     : `<p class="empty-note">No product OCR summaries match the current filters.</p>`;
 }
 
+function renderPhotoProofUpgrades() {
+  if (!els.photoProofUpgradeSummary) return;
+  const summary = state.data.photo_proof_upgrade_summary || {};
+  const policy = summary.public_policy || {};
+  const statRows = [
+    ["Evidence rows", summary.evidence_row_count],
+    ["Embeddable photos", summary.embed_ready_count],
+    ["Source receipts", summary.source_receipt_only_count],
+    ["Panel capture", summary.panel_capture_needed_count],
+    ["Source pages", summary.source_page_capture_needed_count],
+    ["Source gaps", summary.source_discovery_needed_count],
+    ["Ingredient signals", summary.ingredient_signal_row_count],
+  ];
+  const laneRows = summary.lane_counts || [];
+  const artifacts = summary.artifacts || {};
+  els.photoProofUpgradeSummary.innerHTML = summary.evidence_row_count ? `
+    <div class="photo-proof-stat-grid">
+      ${statRows.map(([label, value]) => `
+        <article class="photo-proof-stat">
+          <strong>${formatNumber(value)}</strong>
+          <span>${escapeHtml(label)}</span>
+        </article>
+      `).join("")}
+    </div>
+    <article class="photo-proof-policy">
+      <strong>Public display rule</strong>
+      <p>${escapeHtml(policy.summary || "External product photos remain link-only until rights are reviewed.")}</p>
+      <p>${escapeHtml(policy.publishable_image_rule || "Only rows marked embed-ready may render public images.")}</p>
+      <div class="lead-meta">
+        ${artifactLink(artifacts.queue_csv, "Queue CSV")}
+        ${artifactLink(artifacts.queue_json, "Queue JSON")}
+        ${artifactLink(artifacts.report_markdown, "Report")}
+      </div>
+    </article>
+    <div class="photo-proof-lanes">
+      ${laneRows.map((row) => `
+        <span>${statusTag(row.value)} <strong>${formatNumber(row.count)}</strong></span>
+      `).join("")}
+    </div>
+  ` : `<p class="empty-note">No photo proof upgrade queue has been generated yet.</p>`;
+
+  const productRows = (summary.top_products || [])
+    .filter((product) => {
+      const query = state.search.trim().toLowerCase();
+      return !query || `${product.name} ${product.id}`.toLowerCase().includes(query);
+    })
+    .slice(0, 12);
+  els.photoProofUpgradeProducts.innerHTML = productRows.length
+    ? productRows.map((product) => `
+      <article class="photo-proof-product">
+        <div class="lead-title">
+          <strong>${escapeHtml(product.name || product.id)}</strong>
+          <span>${escapeHtml(labelFor(product.corpus_scope || "product"))}</span>
+        </div>
+        <div class="photo-proof-product-grid">
+          <span><strong>${formatNumber(product.row_count)}</strong> rows</span>
+          <span><strong>${formatNumber(product.ingredient_signal_count)}</strong> signals</span>
+          <span><strong>${formatNumber(product.source_receipt_count)}</strong> receipts</span>
+          <span><strong>${formatNumber(product.panel_capture_needed_count)}</strong> panels</span>
+        </div>
+        <p>${escapeHtml(product.next_action || "Review source receipt and display policy.")}</p>
+      </article>
+    `).join("")
+    : `<p class="empty-note">No photo proof product rows match the current filters.</p>`;
+
+  const queueRows = (summary.top_queue || [])
+    .filter((row) => {
+      const query = state.search.trim().toLowerCase();
+      return !query || textBlob(row).includes(query);
+    })
+    .slice(0, 16);
+  els.photoProofUpgradeQueue.innerHTML = queueRows.length
+    ? queueRows.map((row) => `
+      <article class="photo-proof-row">
+        <div class="lead-title">
+          <strong>${escapeHtml(row.product_name || row.product_id)}</strong>
+          <span>${escapeHtml(row.source_owner || row.evidence_kind || "")}</span>
+        </div>
+        <p>${escapeHtml(row.next_action || "")}</p>
+        <dl class="photo-proof-row-fields">
+          <div>
+            <dt>Photo role</dt>
+            <dd>${escapeHtml(row.photo_role || "source receipt")}</dd>
+          </div>
+          <div>
+            <dt>Panel</dt>
+            <dd>${escapeHtml(row.label_panel_state || "not reviewed")}</dd>
+          </div>
+          <div>
+            <dt>Rights</dt>
+            <dd>${escapeHtml(row.rights_status || "rights note needed")}</dd>
+          </div>
+        </dl>
+        <div class="lead-meta">
+          ${statusTag(row.display_lane)}
+          ${statusTag(row.public_display_decision)}
+          ${row.ingredient_signal ? statusTag("ingredient_signal") : ""}
+          ${row.has_label_extract ? statusTag("label_extract") : ""}
+          ${linkOrText(row.source_url, "Source")}
+        </div>
+      </article>
+    `).join("")
+    : `<p class="empty-note">No photo proof evidence rows match the current filters.</p>`;
+}
+
 function renderRegistrySummary() {
   const rows = state.data.evidence_registry || [];
   const workflow = state.data.evidence_registry_status_workflow || [
@@ -16240,6 +16348,7 @@ function render() {
   renderCoverageSummary();
   renderGaps();
   renderCorpusOcrScale();
+  renderPhotoProofUpgrades();
   renderCampaigns();
   renderSearchTasks();
   renderRegistrySummary();
