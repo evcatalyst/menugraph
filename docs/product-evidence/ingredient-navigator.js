@@ -464,6 +464,7 @@ function renderExports(productRow) {
     ["Evidence CSV", exports.evidence_csv],
     ["Visible Extracts CSV", exports.extracts_csv],
     ["Gap Closure CSV", exports.gap_closure_csv],
+    ["OCR Queue CSV", exports.ocr_queue_csv],
     ["Story Briefs", exports.story_markdown],
   ].filter(([, href]) => href);
   els.exportLinks.innerHTML = rows.length

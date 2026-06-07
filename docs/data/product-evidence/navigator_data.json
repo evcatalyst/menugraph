@@ -813,7 +813,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "review_queue": [
         {
@@ -886,7 +887,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 1,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 5
+      }
     },
     {
       "id": "doritos_nacho_cheese",
@@ -928,7 +935,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Photo and package evidence drive this story. Gap handling is now confirmed.",
@@ -1530,7 +1538,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 0,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 4
+      }
     },
     {
       "id": "cheerios_original",
@@ -1573,7 +1587,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Photo and package evidence drive this story. Gap handling is now confirmed.",
@@ -2220,7 +2235,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 1,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 2,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 7
+      }
     },
     {
       "id": "coca_cola_classic",
@@ -2259,7 +2280,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Photo and package evidence drive this story. Gap handling is now confirmed.",
@@ -2789,7 +2811,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 0,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 7,
+        "high_priority_count": 2,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 5
+      }
     },
     {
       "id": "campbells_tomato_soup",
@@ -2832,7 +2860,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Photo and package evidence drive this story. Gap handling is now confirmed.",
@@ -3562,7 +3591,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 2,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 6
+      }
     },
     {
       "id": "heinz_tomato_ketchup",
@@ -3605,7 +3640,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Photo and package evidence drive this story. Gap handling is now confirmed.",
@@ -4314,7 +4350,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 2,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 5
+      }
     },
     {
       "id": "poptarts_frosted_strawberry",
@@ -4355,7 +4397,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Photo and package evidence drive this story. Gap handling is now confirmed.",
@@ -5019,7 +5062,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 1,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 6
+      }
     },
     {
       "id": "kraft_macaroni_and_cheese_original",
@@ -5061,7 +5110,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Photo and package evidence drive this story. Gap handling is now confirmed.",
@@ -5776,7 +5826,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 1,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 8
+      }
     },
     {
       "id": "mcdonalds_big_mac",
@@ -5815,7 +5871,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Document evidence drives this story. Gap handling is now confirmed.",
@@ -6353,7 +6410,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 0,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 7,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 4
+      }
     },
     {
       "id": "mcdonalds_chicken_mcnuggets",
@@ -6394,7 +6457,8 @@
         "evidence_csv": "../data/product-evidence/exports/ten_product_pilot_evidence.csv",
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
-        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv"
+        "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv"
       },
       "photo_quality_summary": {
         "headline": "Document evidence drives this story. Gap handling is now confirmed.",
@@ -7032,7 +7096,13 @@
       "outstanding_gap_count": 0,
       "resolved_gap_count": 1,
       "resolved_story_slots": 6,
-      "story_resolution_coverage": 100
+      "story_resolution_coverage": 100,
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "needs_panel_review_count": 4
+      }
     }
   ],
   "product_index": [
@@ -7721,5 +7791,14 @@
       "missing_fields": "panel crop/document capture; corrected transcription; reviewer attribution; package/serving fields",
       "next_action": "Open the document sources, record capture dates, scope U.S. formulation, and transcribe only dated ingredient/allergen disclosures."
     }
-  ]
+  ],
+  "ingredient_ocr_summary": {
+    "generated_at_utc": "2026-06-07T19:00:00Z",
+    "ocr_candidate_count": 101,
+    "high_priority_count": 46,
+    "local_image_ready_count": 0,
+    "manifest_path": "docs/data/product-evidence/ingredient_ocr_manifest.json",
+    "queue_csv": "docs/data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+    "claim_policy": "Native OCR output is candidate evidence only until reviewer corrected and manually verified."
+  }
 }
