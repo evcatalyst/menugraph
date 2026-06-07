@@ -4,7 +4,13 @@ const assert = require("assert");
 
 const root = path.join(__dirname, "..");
 const dataPath = path.join(root, "docs/data/product-evidence/navigator_data.json");
+const htmlPath = path.join(root, "docs/product-evidence/ingredient-navigator.html");
+const jsPath = path.join(root, "docs/product-evidence/ingredient-navigator.js");
+const cssPath = path.join(root, "docs/product-evidence/ingredient-navigator.css");
 const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+const html = fs.readFileSync(htmlPath, "utf8");
+const js = fs.readFileSync(jsPath, "utf8");
+const css = fs.readFileSync(cssPath, "utf8");
 
 const expectedPilotProducts = [
   "oreo_original_chocolate_sandwich_cookies",
@@ -33,6 +39,13 @@ assert.strictEqual(data.corpus_summary.story_rich_pilot_count, 10, "corpus summa
 assert.strictEqual(data.corpus_summary.full_corpus_shell_count, 110, "corpus summary should add 110 proof shells");
 assert.strictEqual(data.corpus_summary.embedded_public_images, 0, "public build should not embed uncleared photos");
 assert(data.corpus_summary.link_only_photo_receipts >= 1000, "expected broad source-linked photo/evidence receipts");
+assert(html.includes('id="corpus-mode"'), "navigator should expose corpus mode controls");
+assert(js.includes('corpusMode: "full"'), "navigator should default to full-corpus mode");
+assert(js.includes('data-corpus-mode="${escapeHtml(definition.id)}"'), "navigator should render selectable corpus modes");
+assert(js.includes("renderProductProofRail"), "navigator should render a source-linked photo proof rail");
+assert(js.includes("No product photos are embedded yet"), "navigator should explain why photos are source-linked instead of embedded");
+assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
+assert(css.includes(".proof-source-rail"), "photo proof rail should be styled");
 
 const requiredStatuses = new Set([
   "story_ready",
