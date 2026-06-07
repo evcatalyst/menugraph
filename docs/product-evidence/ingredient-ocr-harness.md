@@ -79,3 +79,38 @@ The public full-corpus gap report is the handoff queue for future collection run
 - `document_text_pipeline_needed`: for fast food and foodservice records, extract text from official PDFs, allergen pages, archived menus, or screenshots before treating them as package labels.
 - `source_discovery_needed`: run targeted source discovery before OCR; there is no source object to process yet.
 - `package_identity_review_needed`: confirm product identity, SKU, date cues, and package size before spending OCR effort.
+
+## Hybrid Model Pipeline
+
+The capture-to-OCR pipeline now separates bounded model work from high-stakes review:
+
+- `gpt-5.3-codex-spark`: packet generation, capture strategy, crop targets, OCR structuring, and reviewer-note drafts.
+- `gpt-5.5`: compact batch review and quality gates after OCR/Spark has reduced the data.
+- Grok/xAI: source hunting, validation advice, missing vintage leads, and source-domain strategy.
+
+All model outputs are assistive candidates. They cannot create `manual_verified`, cannot invent ingredient text, and cannot publish unverified formulation claims.
+
+Default top-250 run:
+
+```sh
+npm run build:ingredient-ocr
+node scripts/build-spark-ocr-packets.js --run-id=hybrid-ocr-v1 --limit=250 --packet-size=20
+node scripts/capture-ingredient-ocr-assets.js --run-id=hybrid-ocr-v1 --limit=250 --no-network --dry-run
+node scripts/model-assist-router.js --run-id=hybrid-ocr-v1 --limit=250 --no-network --max-grok-calls=0 --max-gpt55-batches=5
+node scripts/summarize-ingredient-ocr-run.js --run-id=hybrid-ocr-v1
+```
+
+Private image-map run:
+
+```sh
+node scripts/capture-ingredient-ocr-assets.js --run-id=hybrid-ocr-v1 --limit=250 --image-map=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-input.json
+swift scripts/vision-ocr.swift .cache/ingredient-ocr/runs/hybrid-ocr-v1/processed/example-panel.jpg
+```
+
+Grok-assisted source hunting, when explicitly enabled:
+
+```sh
+xai_api=... node scripts/model-assist-router.js --run-id=hybrid-ocr-v1 --gap-category=source_discovery_needed --max-grok-calls=3
+```
+
+Public rollups may include counts, statuses, hashes, model names, and blockers. They must not include external images, local file paths, API keys, private prompts, or unverified ingredient claims.
