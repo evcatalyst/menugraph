@@ -75,6 +75,8 @@ assert.strictEqual(pipelineSummary.image_map_audit.ready_for_capture, 0, "blank 
 assert.strictEqual(pipelineSummary.image_map_audit.no_private_path_supplied, 101, "blank pilot template should need private paths");
 assert.strictEqual(pipelineSummary.capture_task_summary.task_count, 101, "capture task summary should cover pilot rows");
 assert.strictEqual(pipelineSummary.capture_task_summary.paths_needed, 101, "pilot capture tasks should need private paths");
+assert(pipelineSummary.capture_task_summary.first_tasks[0].source_url, "pilot capture tasks should expose source URLs");
+assert("crop_target" in pipelineSummary.capture_task_summary.first_tasks[0], "pilot capture tasks should expose crop targets");
 assert.strictEqual(pipelineSummary.review_queue.rows, 101, "review queue should cover pilot capture rows");
 assert.strictEqual(pipelineSummary.review_queue.needs_source_review, 101, "dry run rows should need source review");
 assert.strictEqual(pipelineSummary.ocr.ocr_result_rows, 101, "native OCR dry run should cover pilot capture rows");

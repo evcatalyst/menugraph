@@ -322,6 +322,58 @@ a:hover {
   padding-top: 6px;
 }
 
+.capture-task-handoff {
+  grid-column: 1 / -1;
+}
+
+.capture-task-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.capture-task-card {
+  display: grid;
+  align-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(22, 23, 20, 0.72);
+  padding: 9px;
+}
+
+.capture-task-card span,
+.capture-task-card p {
+  display: block;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.36;
+  overflow-wrap: anywhere;
+}
+
+.capture-task-card > div > span {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.capture-task-card strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.capture-task-card p {
+  margin-top: 6px;
+}
+
 .journey-status {
   display: flex;
   justify-content: space-between;
@@ -1307,6 +1359,10 @@ a:hover {
     grid-template-columns: 1fr;
   }
 
+  .capture-task-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .proof-card-body {
     grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   }
@@ -1336,6 +1392,7 @@ a:hover {
   .proof-card-grid.is-compare,
   .proof-card-body,
   .proof-card-head,
+  .capture-task-list,
   .price-weight,
   .export-links,
   .cluster-list,

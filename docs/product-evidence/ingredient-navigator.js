@@ -29,6 +29,7 @@ const els = {
 
 const state = {
   data: null,
+  summary: null,
   productId: "",
   versionId: "",
   facetId: "",
@@ -139,9 +140,46 @@ function corpusHandoffStats() {
   };
 }
 
+function captureTaskSummary() {
+  const summary = state.summary || {};
+  return summary.pilot_capture_task_summary
+    || summary.pilot_capture_pipeline_summary?.capture_task_summary
+    || summary.hybrid_ocr_capture_task_summary
+    || summary.hybrid_ocr_pipeline_summary?.capture_task_summary
+    || {};
+}
+
+function renderCaptureTaskPreview(taskSummary = {}) {
+  const tasks = taskSummary.first_tasks || [];
+  if (!tasks.length) return "";
+  return `
+    <article class="corpus-handoff-card capture-task-handoff">
+      <span>First Photo Capture Tasks</span>
+      <strong>${escapeHtml(taskSummary.task_count || tasks.length)} queued source/crop tasks</strong>
+      <p>These are public-safe source receipts, not published photos. Open a source, capture a private panel crop, then run OCR before any image or ingredient text can be promoted.</p>
+      <div class="capture-task-list">
+        ${tasks.slice(0, 6).map((task) => `
+          <article class="capture-task-card">
+            <div>
+              <span>${escapeHtml(`${task.rank || ""}. ${task.vintage_label || "vintage"}`)}</span>
+              <strong>${escapeHtml(task.product_name || "Product capture task")}</strong>
+              <p>${escapeHtml(task.crop_target || task.next_action || "Capture a readable panel crop.")}</p>
+            </div>
+            <div class="lead-meta">
+              <span class="source-chip">${escapeHtml(task.source_url ? sourceHost(task.source_url) : task.source_domain || "source")}</span>
+              ${task.source_url ? `<a href="${escapeHtml(task.source_url)}" target="_blank" rel="noreferrer">Open source</a>` : ""}
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
+  const tasks = captureTaskSummary();
   els.corpusHandoff.innerHTML = `
     <article class="corpus-handoff-card">
       <span>Corpus Loaded</span>
@@ -182,6 +220,7 @@ function renderCorpusHandoff() {
       <strong>Private capture then review</strong>
       <p>Capture/crop source pages privately, run native OCR, batch-review candidate text, then publish only rights-cleared images or link-only proof cards.</p>
     </article>
+    ${renderCaptureTaskPreview(tasks)}
   `;
 }
 
@@ -898,9 +937,15 @@ function attachEvents() {
 
 async function init() {
   try {
-    const response = await fetch("../data/product-evidence/navigator_data.json");
+    const [response, summary] = await Promise.all([
+      fetch("../data/product-evidence/navigator_data.json"),
+      fetch("../data/product-evidence/summary.json")
+        .then((summaryResponse) => (summaryResponse.ok ? summaryResponse.json() : {}))
+        .catch(() => ({})),
+    ]);
     if (!response.ok) throw new Error(`Navigator data returned ${response.status}`);
     state.data = await response.json();
+    state.summary = summary;
     state.productId = state.data.default_product;
     state.maxYear = Number(els.timeRange.value || 2026);
     attachEvents();

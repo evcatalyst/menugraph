@@ -83,6 +83,8 @@ const taskSummary = buildTaskSummary({
 });
 assert.strictEqual(taskSummary.task_count, 3, "expected capture task summary rows");
 assert.strictEqual(taskSummary.paths_needed, 3, "blank capture tasks should need private paths");
+assert(taskSummary.first_tasks[0].source_url, "capture task summary should carry source URLs");
+assert("crop_target" in taskSummary.first_tasks[0], "capture task summary should carry crop targets");
 assertNoPrivatePaths(JSON.stringify(taskRows), "capture task rows");
 assertNoPrivatePaths(JSON.stringify(taskSummary), "capture task summary");
 
@@ -111,5 +113,7 @@ assert.strictEqual(publicSummary.image_map_audit.template_rows, 250, "hybrid sum
 assert.strictEqual(publicSummary.image_map_audit.ready_for_capture, 0, "default public template should not be capture-ready yet");
 assert.strictEqual(publicSummary.capture_task_summary.task_count, 250, "hybrid summary should expose capture tasks");
 assert.strictEqual(publicSummary.capture_task_summary.paths_needed, 250, "default capture tasks should need private paths");
+assert(publicSummary.capture_task_summary.first_tasks[0].source_url, "hybrid summary should expose first-task source URLs");
+assert("crop_target" in publicSummary.capture_task_summary.first_tasks[0], "hybrid summary should expose first-task crop targets");
 
 console.log("hybrid OCR pipeline tests passed");
