@@ -1,0 +1,1033 @@
+{
+  "generated_at_utc": "2026-06-07T14:17:48Z",
+  "products": [
+    {
+      "id": "oreo_original_chocolate_sandwich_cookies",
+      "name": "Oreo Original Chocolate Sandwich Cookies",
+      "category": "packaged cookies",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "1912 original ingredient label not verified. Do not imply a verified original recipe or a full original-to-current formulation diff.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1912,
+          "status": "gap",
+          "headline": "Original label not verified",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1960,
+          "status": "label_text_candidate",
+          "headline": "Partial wrapper text is visible",
+          "source_count": 4,
+          "evidence_ids": [
+            "flickr_oreo_1960s",
+            "flickr_oreo_1960s_box",
+            "packaging_digest_century",
+            "seattlepi_century"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1993,
+          "status": "label_text_candidate",
+          "headline": "Readable 1993 panel candidate",
+          "source_count": 1,
+          "evidence_ids": [
+            "flickr_oreo_1993"
+          ]
+        },
+        {
+          "vintage": "2000s",
+          "year": 2002,
+          "status": "usable_photo",
+          "headline": "Archive-era package leads",
+          "source_count": 2,
+          "evidence_ids": [
+            "flickr_oreo_harley_2000",
+            "flickr_oreo_uhoh_2002"
+          ]
+        },
+        {
+          "vintage": "2010s",
+          "year": 2010,
+          "status": "label_text_candidate",
+          "headline": "Package-derived label text candidate",
+          "source_count": 3,
+          "evidence_ids": [
+            "ewg_oreo_winter_2010",
+            "flickr_oreo_spring_2010",
+            "flickr_oreo_nascar_2010"
+          ]
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current label text candidate, archive needed",
+          "source_count": 6,
+          "evidence_ids": [
+            "smartlabel_oreo_143",
+            "ewg_oreo_current",
+            "kroger_oreo_current",
+            "walmart_oreo_current"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Fat/Oil System",
+          "status": "blocked",
+          "why": "The early wrapper and 1993 panel now show oil/fat terms, but neither has manual verification.",
+          "photo_target": "Verify the 1993 panel and find higher-resolution 1950s-1960s label/back-panel evidence."
+        },
+        {
+          "lane": "Sweetener Transitions",
+          "status": "blocked",
+          "why": "The 1993 candidate shows HFCS and the early wrapper shows sugar, but screenshot text is not enough for a claim.",
+          "photo_target": "Attach corrected transcriptions from source-attributable label photos."
+        },
+        {
+          "lane": "Package Downsizing",
+          "status": "photo_enriched",
+          "why": "Current package-size hints are visible in source titles, but vintage net weights are not captured.",
+          "photo_target": "Prioritize package photos with net weight and serving-size panels."
+        },
+        {
+          "lane": "1912 Original Recipe",
+          "status": "gap",
+          "why": "Packaging-history photos do not equal an ingredient label.",
+          "photo_target": "Find a source-attributable 1912 label, archive object, trade catalog, or defensible transcription."
+        }
+      ]
+    },
+    {
+      "id": "doritos_nacho_cheese",
+      "name": "Doritos Nacho Cheese",
+      "category": "chips",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "usable_photo",
+          "headline": "Earliest bounded chapter source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "doritos_nacho_cheese_evidence_0",
+            "doritos_nacho_cheese_evidence_1",
+            "doritos_nacho_cheese_evidence_2",
+            "doritos_nacho_cheese_evidence_3"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "usable_photo",
+          "headline": "1980s or earlier source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "doritos_nacho_cheese_evidence_0",
+            "doritos_nacho_cheese_evidence_2",
+            "doritos_nacho_cheese_evidence_4",
+            "doritos_nacho_cheese_evidence_5"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "usable_photo",
+          "headline": "1990s bridge source-backed chapter",
+          "source_count": 2,
+          "evidence_ids": [
+            "doritos_nacho_cheese_evidence_1",
+            "doritos_nacho_cheese_evidence_3"
+          ]
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "usable_photo",
+          "headline": "2000s bridge source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "doritos_nacho_cheese_evidence_6"
+          ]
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "label_text_candidate",
+          "headline": "2010s bridge source-backed chapter",
+          "source_count": 2,
+          "evidence_ids": [
+            "doritos_nacho_cheese_evidence_7",
+            "doritos_nacho_cheese_evidence_6"
+          ]
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "doritos_nacho_cheese_evidence_8",
+            "doritos_nacho_cheese_evidence_9",
+            "doritos_nacho_cheese_evidence_7",
+            "doritos_nacho_cheese_evidence_10"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Cheese/Dairy + Flavor System",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Readable ingredient-panel photos and corrected text for current plus older slots."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "story_ready",
+          "why": "All six vintage slots have at least candidate source coverage.",
+          "photo_target": "Move from source presence to transcription and review."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 2010s, 2000s, 1990s, 1980s_or_earlier, earliest_verified_label.",
+          "photo_target": "Capture label panel crops and OCR/manual transcriptions."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    },
+    {
+      "id": "cheerios_original",
+      "name": "Cheerios Original",
+      "category": "cereal",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "label_text_candidate",
+          "headline": "Earliest bounded chapter source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "cheerios_original_evidence_0",
+            "cheerios_original_evidence_1",
+            "cheerios_original_evidence_2",
+            "cheerios_original_evidence_3"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "label_text_candidate",
+          "headline": "1980s or earlier source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "cheerios_original_evidence_0",
+            "cheerios_original_evidence_1",
+            "cheerios_original_evidence_2",
+            "cheerios_original_evidence_4"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "usable_photo",
+          "headline": "1990s bridge source-backed chapter",
+          "source_count": 2,
+          "evidence_ids": [
+            "cheerios_original_evidence_5",
+            "cheerios_original_evidence_6"
+          ]
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "usable_photo",
+          "headline": "2000s bridge source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "cheerios_original_evidence_7"
+          ]
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "gap",
+          "headline": "2010s bridge gap is explicit",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "cheerios_original_evidence_8"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Whole Grain Oats",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Readable ingredient-panel photos and corrected text for current plus older slots."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "gap_publishable",
+          "why": "Missing source-backed slots: 2010s.",
+          "photo_target": "Use targeted collector, archive, museum, retailer, and Wayback searches."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 2000s, 1990s, 1980s_or_earlier, earliest_verified_label.",
+          "photo_target": "Capture label panel crops and OCR/manual transcriptions."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    },
+    {
+      "id": "coca_cola_classic",
+      "name": "Coca-Cola Classic",
+      "category": "beverages",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "label_text_candidate",
+          "headline": "Earliest bounded chapter source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "coca_cola_classic_evidence_0",
+            "coca_cola_classic_evidence_1",
+            "coca_cola_classic_evidence_2",
+            "coca_cola_classic_evidence_3"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "label_text_candidate",
+          "headline": "1980s or earlier source-backed chapter",
+          "source_count": 2,
+          "evidence_ids": [
+            "coca_cola_classic_evidence_0",
+            "coca_cola_classic_evidence_1"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "usable_photo",
+          "headline": "1990s bridge source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "coca_cola_classic_evidence_4"
+          ]
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "usable_photo",
+          "headline": "2000s bridge source-backed chapter",
+          "source_count": 2,
+          "evidence_ids": [
+            "coca_cola_classic_evidence_2",
+            "coca_cola_classic_evidence_3"
+          ]
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "usable_photo",
+          "headline": "2010s bridge source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "coca_cola_classic_evidence_5"
+          ]
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "coca_cola_classic_evidence_6"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Sweetener Disclosure",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Readable ingredient-panel photos and corrected text for current plus older slots."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "story_ready",
+          "why": "All six vintage slots have at least candidate source coverage.",
+          "photo_target": "Move from source presence to transcription and review."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 2010s, 2000s, 1990s.",
+          "photo_target": "Capture label panel crops and OCR/manual transcriptions."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    },
+    {
+      "id": "campbells_tomato_soup",
+      "name": "Campbell's Condensed Tomato Soup",
+      "category": "soup",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "usable_photo",
+          "headline": "Earliest bounded chapter source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "campbells_tomato_soup_evidence_0",
+            "campbells_tomato_soup_evidence_1",
+            "campbells_tomato_soup_evidence_2",
+            "campbells_tomato_soup_evidence_3"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "label_text_candidate",
+          "headline": "1980s or earlier source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "campbells_tomato_soup_evidence_1",
+            "campbells_tomato_soup_evidence_3",
+            "campbells_tomato_soup_evidence_4",
+            "campbells_tomato_soup_evidence_5"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "gap",
+          "headline": "1990s bridge gap is explicit",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "gap",
+          "headline": "2000s bridge gap is explicit",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "usable_photo",
+          "headline": "2010s bridge source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "campbells_tomato_soup_evidence_6"
+          ]
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "campbells_tomato_soup_evidence_7",
+            "campbells_tomato_soup_evidence_8",
+            "campbells_tomato_soup_evidence_9",
+            "campbells_tomato_soup_evidence_10"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Tomato Base",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Readable ingredient-panel photos and corrected text for current plus older slots."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "gap_publishable",
+          "why": "Missing source-backed slots: 2000s, 1990s.",
+          "photo_target": "Use targeted collector, archive, museum, retailer, and Wayback searches."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 2010s, 1980s_or_earlier, earliest_verified_label.",
+          "photo_target": "Capture label panel crops and OCR/manual transcriptions."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    },
+    {
+      "id": "heinz_tomato_ketchup",
+      "name": "Heinz Tomato Ketchup",
+      "category": "condiments",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "usable_photo",
+          "headline": "Earliest bounded chapter source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "heinz_tomato_ketchup_evidence_0",
+            "heinz_tomato_ketchup_evidence_1",
+            "heinz_tomato_ketchup_evidence_2",
+            "heinz_tomato_ketchup_evidence_3"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "usable_photo",
+          "headline": "1980s or earlier source-backed chapter",
+          "source_count": 3,
+          "evidence_ids": [
+            "heinz_tomato_ketchup_evidence_1",
+            "heinz_tomato_ketchup_evidence_2",
+            "heinz_tomato_ketchup_evidence_4"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "gap",
+          "headline": "1990s bridge gap is explicit",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "usable_photo",
+          "headline": "2000s bridge source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "heinz_tomato_ketchup_evidence_5"
+          ]
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "gap",
+          "headline": "2010s bridge gap is explicit",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "heinz_tomato_ketchup_evidence_6",
+            "heinz_tomato_ketchup_evidence_7",
+            "heinz_tomato_ketchup_evidence_8",
+            "heinz_tomato_ketchup_evidence_9"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Tomato Concentrate",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Readable ingredient-panel photos and corrected text for current plus older slots."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "gap_publishable",
+          "why": "Missing source-backed slots: 2010s, 1990s.",
+          "photo_target": "Use targeted collector, archive, museum, retailer, and Wayback searches."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 2000s, 1980s_or_earlier, earliest_verified_label.",
+          "photo_target": "Capture label panel crops and OCR/manual transcriptions."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    },
+    {
+      "id": "poptarts_frosted_strawberry",
+      "name": "Pop-Tarts Frosted Strawberry",
+      "category": "breakfast",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "usable_photo",
+          "headline": "Earliest bounded chapter source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "poptarts_frosted_strawberry_evidence_0",
+            "poptarts_frosted_strawberry_evidence_1",
+            "poptarts_frosted_strawberry_evidence_2",
+            "poptarts_frosted_strawberry_evidence_3"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "usable_photo",
+          "headline": "1980s or earlier source-backed chapter",
+          "source_count": 2,
+          "evidence_ids": [
+            "poptarts_frosted_strawberry_evidence_0",
+            "poptarts_frosted_strawberry_evidence_1"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "gap",
+          "headline": "1990s bridge gap is explicit",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "usable_photo",
+          "headline": "2000s bridge source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "poptarts_frosted_strawberry_evidence_2",
+            "poptarts_frosted_strawberry_evidence_3",
+            "poptarts_frosted_strawberry_evidence_4",
+            "poptarts_frosted_strawberry_evidence_5"
+          ]
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "label_text_candidate",
+          "headline": "2010s bridge source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "poptarts_frosted_strawberry_evidence_6"
+          ]
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "poptarts_frosted_strawberry_evidence_7",
+            "poptarts_frosted_strawberry_evidence_8",
+            "poptarts_frosted_strawberry_evidence_9",
+            "poptarts_frosted_strawberry_evidence_10"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Enriched Flour",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Readable ingredient-panel photos and corrected text for current plus older slots."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "gap_publishable",
+          "why": "Missing source-backed slots: 1990s.",
+          "photo_target": "Use targeted collector, archive, museum, retailer, and Wayback searches."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 2000s, 1980s_or_earlier, earliest_verified_label.",
+          "photo_target": "Capture label panel crops and OCR/manual transcriptions."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    },
+    {
+      "id": "kraft_macaroni_and_cheese_original",
+      "name": "Kraft Macaroni & Cheese Original",
+      "category": "prepared foods",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "usable_photo",
+          "headline": "Earliest bounded chapter source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "kraft_macaroni_and_cheese_original_evidence_0",
+            "kraft_macaroni_and_cheese_original_evidence_1",
+            "kraft_macaroni_and_cheese_original_evidence_2",
+            "kraft_macaroni_and_cheese_original_evidence_3"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "usable_photo",
+          "headline": "1980s or earlier source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "kraft_macaroni_and_cheese_original_evidence_0",
+            "kraft_macaroni_and_cheese_original_evidence_2",
+            "kraft_macaroni_and_cheese_original_evidence_3",
+            "kraft_macaroni_and_cheese_original_evidence_4"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "usable_photo",
+          "headline": "1990s bridge source-backed chapter",
+          "source_count": 3,
+          "evidence_ids": [
+            "kraft_macaroni_and_cheese_original_evidence_1",
+            "kraft_macaroni_and_cheese_original_evidence_5",
+            "kraft_macaroni_and_cheese_original_evidence_6"
+          ]
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "gap",
+          "headline": "2000s bridge gap is explicit",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "usable_photo",
+          "headline": "2010s bridge source-backed chapter",
+          "source_count": 1,
+          "evidence_ids": [
+            "kraft_macaroni_and_cheese_original_evidence_7"
+          ]
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor source-backed chapter",
+          "source_count": 4,
+          "evidence_ids": [
+            "kraft_macaroni_and_cheese_original_evidence_8",
+            "kraft_macaroni_and_cheese_original_evidence_9",
+            "kraft_macaroni_and_cheese_original_evidence_10",
+            "kraft_macaroni_and_cheese_original_evidence_11"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Artificial Dye Removal",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Readable ingredient-panel photos and corrected text for current plus older slots."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "gap_publishable",
+          "why": "Missing source-backed slots: 2000s.",
+          "photo_target": "Use targeted collector, archive, museum, retailer, and Wayback searches."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 2010s, 1990s, 1980s_or_earlier, earliest_verified_label.",
+          "photo_target": "Capture label panel crops and OCR/manual transcriptions."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    },
+    {
+      "id": "mcdonalds_big_mac",
+      "name": "McDonald's Big Mac",
+      "category": "fast food",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "usable_photo",
+          "headline": "Earliest bounded chapter document evidence",
+          "source_count": 3,
+          "evidence_ids": [
+            "mcdonalds_big_mac_evidence_0",
+            "mcdonalds_big_mac_evidence_1",
+            "mcdonalds_big_mac_evidence_2"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "usable_photo",
+          "headline": "1980s or earlier document evidence",
+          "source_count": 2,
+          "evidence_ids": [
+            "mcdonalds_big_mac_evidence_0",
+            "mcdonalds_big_mac_evidence_2"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "usable_photo",
+          "headline": "1990s bridge document evidence",
+          "source_count": 1,
+          "evidence_ids": [
+            "mcdonalds_big_mac_evidence_3"
+          ]
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "label_text_candidate",
+          "headline": "2000s bridge document evidence",
+          "source_count": 2,
+          "evidence_ids": [
+            "mcdonalds_big_mac_evidence_1",
+            "mcdonalds_big_mac_evidence_4"
+          ]
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "label_text_candidate",
+          "headline": "2010s bridge document evidence",
+          "source_count": 2,
+          "evidence_ids": [
+            "mcdonalds_big_mac_evidence_1",
+            "mcdonalds_big_mac_evidence_4"
+          ]
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor document evidence",
+          "source_count": 2,
+          "evidence_ids": [
+            "mcdonalds_big_mac_evidence_5",
+            "mcdonalds_big_mac_evidence_6"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Document Trail",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Dated official product pages, nutrition PDFs, allergen PDFs, and archived captures."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "story_ready",
+          "why": "All six vintage slots have at least candidate source coverage.",
+          "photo_target": "Move from source presence to transcription and review."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 1990s, 1980s_or_earlier, earliest_verified_label.",
+          "photo_target": "Capture disclosure document text with date and market scope."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    },
+    {
+      "id": "mcdonalds_chicken_mcnuggets",
+      "name": "McDonald's Chicken McNuggets",
+      "category": "fast food",
+      "pilot_rollup_status": "story_ready",
+      "claim_rollup_status": "needs_manual_verification",
+      "claim_boundary": "No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.",
+      "versions": [
+        {
+          "vintage": "earliest_verified_label",
+          "year": 1950,
+          "status": "usable_photo",
+          "headline": "Earliest bounded chapter document evidence",
+          "source_count": 3,
+          "evidence_ids": [
+            "mcdonalds_chicken_mcnuggets_evidence_0",
+            "mcdonalds_chicken_mcnuggets_evidence_1",
+            "mcdonalds_chicken_mcnuggets_evidence_2"
+          ]
+        },
+        {
+          "vintage": "1980s_or_earlier",
+          "year": 1985,
+          "status": "usable_photo",
+          "headline": "1980s or earlier document evidence",
+          "source_count": 3,
+          "evidence_ids": [
+            "mcdonalds_chicken_mcnuggets_evidence_0",
+            "mcdonalds_chicken_mcnuggets_evidence_1",
+            "mcdonalds_chicken_mcnuggets_evidence_3"
+          ]
+        },
+        {
+          "vintage": "1990s",
+          "year": 1995,
+          "status": "gap",
+          "headline": "1990s bridge gap is explicit",
+          "source_count": 0,
+          "evidence_ids": []
+        },
+        {
+          "vintage": "2000s",
+          "year": 2005,
+          "status": "label_text_candidate",
+          "headline": "2000s bridge document evidence",
+          "source_count": 3,
+          "evidence_ids": [
+            "mcdonalds_chicken_mcnuggets_evidence_4",
+            "mcdonalds_chicken_mcnuggets_evidence_2",
+            "mcdonalds_chicken_mcnuggets_evidence_5"
+          ]
+        },
+        {
+          "vintage": "2010s",
+          "year": 2015,
+          "status": "label_text_candidate",
+          "headline": "2010s bridge document evidence",
+          "source_count": 4,
+          "evidence_ids": [
+            "mcdonalds_chicken_mcnuggets_evidence_4",
+            "mcdonalds_chicken_mcnuggets_evidence_6",
+            "mcdonalds_chicken_mcnuggets_evidence_2",
+            "mcdonalds_chicken_mcnuggets_evidence_5"
+          ]
+        },
+        {
+          "vintage": "current_2020s",
+          "year": 2026,
+          "status": "label_text_candidate",
+          "headline": "Current anchor document evidence",
+          "source_count": 2,
+          "evidence_ids": [
+            "mcdonalds_chicken_mcnuggets_evidence_7",
+            "mcdonalds_chicken_mcnuggets_evidence_8"
+          ]
+        }
+      ],
+      "blocked_map": [
+        {
+          "lane": "Document Trail",
+          "status": "blocked",
+          "why": "Evidence exists at candidate level, but formulation language is not claim-ready without manual verification.",
+          "photo_target": "Dated official product pages, nutrition PDFs, allergen PDFs, and archived captures."
+        },
+        {
+          "lane": "Missing Vintage Slots",
+          "status": "gap_publishable",
+          "why": "Missing source-backed slots: 1990s.",
+          "photo_target": "Use targeted collector, archive, museum, retailer, and Wayback searches."
+        },
+        {
+          "lane": "Readable Label / Document Text",
+          "status": "needs_label_transcription",
+          "why": "Panel/text review still needed for: 1980s_or_earlier, earliest_verified_label.",
+          "photo_target": "Capture disclosure document text with date and market scope."
+        },
+        {
+          "lane": "Price + Weight",
+          "status": "photo_enriched",
+          "why": "Several sources expose package or serving clues, but normalized analysis waits for SKU/date alignment.",
+          "photo_target": "Record net weight, serving size, package format, and matching price evidence."
+        }
+      ]
+    }
+  ]
+}

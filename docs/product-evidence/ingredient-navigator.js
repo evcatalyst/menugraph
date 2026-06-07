@@ -6,6 +6,7 @@ const els = {
   compareToggle: document.querySelector("#compare-toggle"),
   status: document.querySelector("#journey-status"),
   productSummary: document.querySelector("#product-summary"),
+  storyReadiness: document.querySelector("#story-readiness"),
   storyHero: document.querySelector("#story-hero"),
   timelineAxis: document.querySelector("#timeline-axis"),
   timelineTrack: document.querySelector("#timeline-track"),
@@ -18,7 +19,9 @@ const els = {
   eventList: document.querySelector("#event-list"),
   versionDetail: document.querySelector("#version-detail"),
   evidenceGallery: document.querySelector("#evidence-gallery"),
+  reviewQueue: document.querySelector("#review-queue"),
   priceWeight: document.querySelector("#price-weight"),
+  exportLinks: document.querySelector("#export-links"),
   clusterList: document.querySelector("#cluster-list"),
 };
 
@@ -88,7 +91,7 @@ function renderProductPicker() {
     .map((row) => `
       <button class="product-card ${row.id === state.productId ? "is-selected" : ""}" type="button" data-product-id="${escapeHtml(row.id)}" ${row.status !== "loaded" ? "disabled" : ""}>
         <strong>${escapeHtml(row.label)}</strong>
-        <span>${escapeHtml(row.status === "loaded" ? "Loaded journey" : "Planned corpus target")}</span>
+        <span>${escapeHtml(row.status === "loaded" ? "Pilot story loaded" : "Planned corpus target")}</span>
       </button>
     `)
     .join("");
@@ -122,10 +125,42 @@ function renderSummary(productRow) {
   `;
 }
 
+function renderStoryReadiness(productRow) {
+  els.storyReadiness.innerHTML = `
+    <article class="readiness-card">
+      <div class="readiness-pair">
+        <span>Story</span>
+        ${statusBadge(productRow.pilot_rollup_status || "story_ready")}
+      </div>
+      <div class="readiness-pair">
+        <span>Claims</span>
+        ${statusBadge(productRow.claim_rollup_status || "needs_manual_verification")}
+      </div>
+      <dl class="photo-summary-list">
+        <div>
+          <dt>Identity Scope</dt>
+          <dd>${escapeHtml(productRow.identity_scope || "Variant and SKU boundaries need review.")}</dd>
+        </div>
+        <div>
+          <dt>Maker Timeline</dt>
+          <dd>${escapeHtml(productRow.maker_timeline || "Manufacturer/distributor context needs source-backed review.")}</dd>
+        </div>
+        <div>
+          <dt>Grok / xAI</dt>
+          <dd>${escapeHtml(productRow.grok_research_assist?.recommended_use || "Optional research assist only; not evidence.")}</dd>
+        </div>
+      </dl>
+    </article>
+  `;
+}
+
 function renderHero(productRow) {
+  const frame = productRow.category === "fast food"
+    ? "document journey first, formulation claims later"
+    : "package journey first, recipe comparison later";
   els.storyHero.innerHTML = `
     <p class="eyebrow">Reader Story</p>
-    <h2>${escapeHtml(productRow.name)}: package journey first, recipe comparison later</h2>
+    <h2>${escapeHtml(productRow.name)}: ${escapeHtml(frame)}</h2>
     <p>${escapeHtml(productRow.story_thesis)}</p>
       <div class="hero-metrics">
         <span><strong>${escapeHtml(productRow.source_backed_slots)}</strong>Source-backed chapters</span>
@@ -136,8 +171,9 @@ function renderHero(productRow) {
         <span><strong>${escapeHtml(productRow.source_domains.length)}</strong>Source venues</span>
       </div>
     <div class="lead-meta reader-tags">
+      ${statusBadge(productRow.pilot_rollup_status || "story_ready")}
+      ${statusBadge(productRow.claim_rollup_status || "needs_manual_verification")}
       ${statusBadge("source_review")}
-      ${statusBadge("label_visible")}
       ${statusBadge("gap")}
       ${productRow.source_domains.slice(0, 4).map((source) => `<span class="source-chip">${escapeHtml(source)}</span>`).join("")}
     </div>
@@ -210,7 +246,7 @@ function renderFlow(productRow) {
         <strong>${escapeHtml(facet.label)}</strong>
         <div class="flow-line" style="grid-template-columns:repeat(${Math.max(1, versions.length)}, minmax(0, 1fr))" aria-label="${escapeHtml(facet.label)} readiness by vintage">
           ${versions.map((version) => {
-            const className = ["label_visible", "label_text_candidate"].includes(version.status) ? "is-ready" : version.status === "usable_photo" ? "is-photo" : version.status === "gap" ? "is-gap" : "";
+            const className = ["manual_verified", "ocr_extracted", "label_visible", "label_text_candidate"].includes(version.status) ? "is-ready" : version.status === "usable_photo" || version.status === "source_review" ? "is-photo" : version.status === "gap" ? "is-gap" : "";
             return `<span class="${className}" title="${escapeHtml(version.label)}: ${escapeHtml(labelFor(version.status))}"></span>`;
           }).join("")}
         </div>
@@ -334,10 +370,37 @@ function renderDetail(productRow, version) {
     `).join("")
     : `<article class="evidence-card"><strong>No verified source object shown</strong><p>This slot is intentionally held as an explicit gap.</p>${statusBadge("gap")}</article>`;
   els.priceWeight.innerHTML = `
-    <span><strong>Deferred</strong>Price/oz</span>
-    <span><strong>Deferred</strong>Price/100g</span>
-    <span><strong>Deferred</strong>Serving</span>
+    <span><strong>${escapeHtml(version.price_weight_context.includes("candidate") ? "Candidate" : "Deferred")}</strong>Price/oz</span>
+    <span><strong>${escapeHtml(version.package_context.includes("serving") ? "Candidate" : "Deferred")}</strong>Price/100g</span>
+    <span><strong>${escapeHtml(version.price_weight_context.includes("serving") ? "Candidate" : "Deferred")}</strong>Serving</span>
   `;
+}
+
+function renderReviewQueue(productRow) {
+  els.reviewQueue.innerHTML = (productRow.review_queue || [])
+    .map((row) => `
+      <article class="review-card">
+        <span>${escapeHtml(row.vintage)}</span>
+        <strong>${escapeHtml(row.label)}</strong>
+        <p>${escapeHtml(row.missing_fields)}</p>
+        <em>${escapeHtml(row.next_action)}</em>
+        ${statusBadge(row.status)}
+      </article>
+    `)
+    .join("");
+}
+
+function renderExports(productRow) {
+  const exports = productRow.export_paths || {};
+  const rows = [
+    ["Timeline JSON", exports.timeline_json],
+    ["Evidence CSV", exports.evidence_csv],
+    ["Visible Extracts CSV", exports.extracts_csv],
+    ["Story Briefs", exports.story_markdown],
+  ].filter(([, href]) => href);
+  els.exportLinks.innerHTML = rows.length
+    ? rows.map(([label, href]) => `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`).join("")
+    : `<p class="empty-note">Exports are not configured for this product.</p>`;
 }
 
 function renderClusters(productRow) {
@@ -370,6 +433,7 @@ function render() {
   renderProductPicker();
   renderStatus(productRow);
   renderSummary(productRow);
+  renderStoryReadiness(productRow);
   renderHero(productRow);
   renderPhotoSummary(productRow);
   renderTimeline(productRow);
@@ -378,6 +442,8 @@ function render() {
   renderBlockedMap(productRow);
   renderEvents(productRow);
   renderDetail(productRow, version);
+  renderReviewQueue(productRow);
+  renderExports(productRow);
   renderClusters(productRow);
 }
 
