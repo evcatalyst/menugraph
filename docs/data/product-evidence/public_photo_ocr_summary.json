@@ -27,17 +27,17 @@
     "secondary_product_context_rows": 29,
     "ocr_planned": 0,
     "ocr_attempted": 28,
-    "ocr_succeeded": 0,
-    "primary_ocr_succeeded": 0,
-    "secondary_ocr_succeeded": 0,
-    "ocr_failed": 28,
-    "vision_runtime_nil_error": 28,
+    "ocr_succeeded": 28,
+    "primary_ocr_succeeded": 2,
+    "secondary_ocr_succeeded": 26,
+    "ocr_failed": 0,
+    "vision_runtime_nil_error": 0,
     "vision_pixel_buffer_failure": 0,
     "no_private_image_map_entry": 3,
     "ocr_skipped_no_image": 3,
-    "ingredient_signal_found": 0,
-    "primary_ingredient_signal_found": 0,
-    "secondary_ingredient_signal_found": 0,
+    "ingredient_signal_found": 5,
+    "primary_ingredient_signal_found": 2,
+    "secondary_ingredient_signal_found": 3,
     "private_image_present": 28
   },
   "public_safety": {
@@ -54,5 +54,14 @@
     "capture_summary_csv": "docs/data/product-evidence/exports/public_photo_ocr_capture_summary.csv",
     "ocr_summary_csv": "docs/data/product-evidence/exports/public_photo_native_ocr_summary.csv",
     "image_map_template_csv": "docs/data/product-evidence/exports/public_photo_ocr_image_map_template.csv"
+  },
+  "candidate_extracts": {
+    "accepted_candidate_count": 2,
+    "rejected_candidate_count": 0,
+    "public_text_included": true,
+    "public_artifacts": {
+      "candidate_extracts_csv": "docs/data/product-evidence/exports/public_photo_ocr_candidate_extracts.csv",
+      "candidate_extracts_summary_json": "docs/data/product-evidence/public_photo_ocr_candidate_extracts_summary.json"
+    }
   }
 }

@@ -65,6 +65,8 @@ assert(js.includes("Primary Display Gate"), "navigator should expose the ingredi
 assert(js.includes("Product-front photos are only context unless they expose label text"), "navigator should explain the panel-first proof hierarchy");
 assert(js.includes("Public Photo OCR Run"), "navigator should expose public photo OCR run status");
 assert(js.includes("Vision runtime nilError"), "navigator should explain local Vision OCR runtime blockers");
+assert(js.includes("Candidate Text CSV"), "navigator should link public candidate OCR text artifacts");
+assert(js.includes("never as verified formulation claims"), "navigator should preserve OCR candidate claim boundary");
 assert(js.includes("Story Brief Exports"), "navigator should render full-corpus story brief exports");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
 assert(css.includes(".corpus-directory-grid"), "all-product directory should be styled");

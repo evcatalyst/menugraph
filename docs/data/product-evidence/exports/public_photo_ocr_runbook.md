@@ -11,8 +11,8 @@ This queue converts rights-cleared public photo proof into a private OCR run. It
 - Secondary product-context rows: 29
 - High-priority panel/text candidates: 2
 - Capture ready rows: 28
-- OCR succeeded rows: 0
-- Ingredient-signal rows: 0
+- OCR succeeded rows: 28
+- Ingredient-signal rows: 5
 
 Suggested run:
 

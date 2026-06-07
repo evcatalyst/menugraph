@@ -440,6 +440,8 @@ function renderPublicPhotoOcrStatus() {
   const capture = summary.capture || {};
   const ocr = summary.ocr || {};
   const artifacts = summary.public_artifacts || {};
+  const candidates = summary.candidate_extracts || state.summary?.public_photo_ocr_candidate_extract_summary || {};
+  const candidateArtifacts = candidates.public_artifacts || {};
   const blocker = Number(ocr.vision_runtime_nil_error || 0)
     ? `${ocr.vision_runtime_nil_error} Vision runtime nilError rows`
     : Number(ocr.vision_pixel_buffer_failure || 0)
@@ -451,7 +453,7 @@ function renderPublicPhotoOcrStatus() {
     <article class="corpus-handoff-card public-ocr-status-card status-needs_manual_verification">
       <span>Public Photo OCR Run</span>
       <strong>${escapeHtml(`${summary.primary_ingredient_panel_rows || 0} primary panel rows · ${summary.secondary_product_context_rows || 0} secondary context rows`)}</strong>
-      <p>Rights-cleared public images were captured privately, but OCR text remains unpublished and candidate-only. Current blocker: ${escapeHtml(blocker)}.</p>
+      <p>Rights-cleared public images were captured privately. Primary OCR text is shown only as candidate review text, never as verified formulation claims. Current blocker: ${escapeHtml(blocker)}.</p>
       <dl>
         <div>
           <dt>Captured</dt>
@@ -465,11 +467,16 @@ function renderPublicPhotoOcrStatus() {
           <dt>OCR succeeded</dt>
           <dd>${escapeHtml(ocr.ocr_succeeded || 0)}</dd>
         </div>
+        <div>
+          <dt>Candidates</dt>
+          <dd>${escapeHtml(candidates.accepted_candidate_count || 0)}</dd>
+        </div>
       </dl>
       <div class="corpus-handoff-links">
         ${artifacts.queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.queue_csv))}">Queue CSV</a>` : ""}
         ${artifacts.capture_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_summary_csv))}">Capture CSV</a>` : ""}
         ${artifacts.ocr_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ocr_summary_csv))}">OCR CSV</a>` : ""}
+        ${candidateArtifacts.candidate_extracts_csv ? `<a href="${escapeHtml(navigatorArtifactHref(candidateArtifacts.candidate_extracts_csv))}">Candidate Text CSV</a>` : ""}
         ${artifacts.runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.runbook_md))}">Runbook</a>` : ""}
       </div>
     </article>
