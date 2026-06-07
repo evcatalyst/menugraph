@@ -365,6 +365,7 @@ module.exports = {
   groupKeyForRow,
   hasFlag,
   hashFile,
+  isPrivatePath,
   modelDefaults,
   normalizeText,
   numberArg,
