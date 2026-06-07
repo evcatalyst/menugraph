@@ -1,0 +1,369 @@
+{
+  "schema_version": "hybrid_ingredient_ocr_capture_task_summary.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "hybrid-ocr-v1",
+  "task_count": 250,
+  "high_priority_tasks": 250,
+  "ready_for_capture": 0,
+  "paths_needed": 250,
+  "source_discovery_tasks": 0,
+  "by_status": [
+    {
+      "key": "no_private_path_supplied",
+      "count": 250
+    }
+  ],
+  "by_product": [
+    {
+      "key": "Ritz Original Crackers",
+      "tasks": 12,
+      "high_priority": 12,
+      "ready_for_capture": 0,
+      "paths_needed": 12,
+      "top_task_id": "capture_686ceac8f3f594",
+      "top_source_domain": "www.foodrepo.org"
+    },
+    {
+      "key": "Chips Ahoy! Original Cookies",
+      "tasks": 11,
+      "high_priority": 11,
+      "ready_for_capture": 0,
+      "paths_needed": 11,
+      "top_task_id": "capture_d608187555a019",
+      "top_source_domain": "upcfoodsearch.com"
+    },
+    {
+      "key": "Pop-Tarts Frosted Brown Sugar Cinnamon",
+      "tasks": 8,
+      "high_priority": 8,
+      "ready_for_capture": 0,
+      "paths_needed": 8,
+      "top_task_id": "capture_371a85c49bdef2",
+      "top_source_domain": "www.walmart.com"
+    },
+    {
+      "key": "Wheat Thins Original",
+      "tasks": 8,
+      "high_priority": 8,
+      "ready_for_capture": 0,
+      "paths_needed": 8,
+      "top_task_id": "capture_533d0969c7ef78",
+      "top_source_domain": "smartlabel.mondelez.info"
+    },
+    {
+      "key": "Campbell's Condensed Tomato Soup",
+      "tasks": 7,
+      "high_priority": 7,
+      "ready_for_capture": 0,
+      "paths_needed": 7,
+      "top_task_id": "capture_30991f948be147",
+      "top_source_domain": "www.ingredientinspector.org"
+    },
+    {
+      "key": "Cap'n Crunch Original",
+      "tasks": 7,
+      "high_priority": 7,
+      "ready_for_capture": 0,
+      "paths_needed": 7,
+      "top_task_id": "capture_2ee8448c62d43d",
+      "top_source_domain": "underunderstood.com"
+    },
+    {
+      "key": "Mountain Dew Original",
+      "tasks": 7,
+      "high_priority": 7,
+      "ready_for_capture": 0,
+      "paths_needed": 7,
+      "top_task_id": "capture_aaabf6a4d801e4",
+      "top_source_domain": "smartlabel.pepsico.info"
+    },
+    {
+      "key": "Pop-Tarts Frosted Strawberry",
+      "tasks": 7,
+      "high_priority": 7,
+      "ready_for_capture": 0,
+      "paths_needed": 7,
+      "top_task_id": "capture_0ce62a9e45af42",
+      "top_source_domain": "www.foodrepo.org"
+    },
+    {
+      "key": "Kellogg's Froot Loops",
+      "tasks": 6,
+      "high_priority": 6,
+      "ready_for_capture": 0,
+      "paths_needed": 6,
+      "top_task_id": "capture_ae94bcd5a991a0",
+      "top_source_domain": "www.flickr.com"
+    },
+    {
+      "key": "Kellogg's Frosted Flakes",
+      "tasks": 6,
+      "high_priority": 6,
+      "ready_for_capture": 0,
+      "paths_needed": 6,
+      "top_task_id": "capture_f7dd997cdc3b93",
+      "top_source_domain": "www.flickr.com"
+    },
+    {
+      "key": "Kraft Singles American Cheese",
+      "tasks": 6,
+      "high_priority": 6,
+      "ready_for_capture": 0,
+      "paths_needed": 6,
+      "top_task_id": "capture_b60418765f584b",
+      "top_source_domain": "www.ewg.org"
+    },
+    {
+      "key": "Lay's Classic Potato Chips",
+      "tasks": 6,
+      "high_priority": 6,
+      "ready_for_capture": 0,
+      "paths_needed": 6,
+      "top_task_id": "capture_21136b7b8e39e2",
+      "top_source_domain": "lays.backend.headless.majestic.dev"
+    }
+  ],
+  "by_source_domain": [
+    {
+      "key": "www.walmart.com",
+      "tasks": 53,
+      "high_priority": 53,
+      "ready_for_capture": 0,
+      "paths_needed": 53,
+      "top_task_id": "capture_517275d6a596c4",
+      "top_source_domain": "www.walmart.com"
+    },
+    {
+      "key": "smartlabel.pepsico.info",
+      "tasks": 24,
+      "high_priority": 24,
+      "ready_for_capture": 0,
+      "paths_needed": 24,
+      "top_task_id": "capture_946165a9caf4d8",
+      "top_source_domain": "smartlabel.pepsico.info"
+    },
+    {
+      "key": "www.flickr.com",
+      "tasks": 20,
+      "high_priority": 20,
+      "ready_for_capture": 0,
+      "paths_needed": 20,
+      "top_task_id": "capture_3d0d56cd953a56",
+      "top_source_domain": "www.flickr.com"
+    },
+    {
+      "key": "www.kroger.com",
+      "tasks": 16,
+      "high_priority": 16,
+      "ready_for_capture": 0,
+      "paths_needed": 16,
+      "top_task_id": "capture_b1b63ffafdb992",
+      "top_source_domain": "www.kroger.com"
+    },
+    {
+      "key": "smartlabel.mondelez.info",
+      "tasks": 14,
+      "high_priority": 14,
+      "ready_for_capture": 0,
+      "paths_needed": 14,
+      "top_task_id": "capture_deb6b95df98263",
+      "top_source_domain": "smartlabel.mondelez.info"
+    },
+    {
+      "key": "smartlabel.kelloggs.com",
+      "tasks": 9,
+      "high_priority": 9,
+      "ready_for_capture": 0,
+      "paths_needed": 9,
+      "top_task_id": "capture_5fac771f64459e",
+      "top_source_domain": "smartlabel.kelloggs.com"
+    },
+    {
+      "key": "upcfoodsearch.com",
+      "tasks": 8,
+      "high_priority": 8,
+      "ready_for_capture": 0,
+      "paths_needed": 8,
+      "top_task_id": "capture_d608187555a019",
+      "top_source_domain": "upcfoodsearch.com"
+    },
+    {
+      "key": "www.foodrepo.org",
+      "tasks": 7,
+      "high_priority": 7,
+      "ready_for_capture": 0,
+      "paths_needed": 7,
+      "top_task_id": "capture_0ce62a9e45af42",
+      "top_source_domain": "www.foodrepo.org"
+    },
+    {
+      "key": "smartlabel.hersheys.com",
+      "tasks": 5,
+      "high_priority": 5,
+      "ready_for_capture": 0,
+      "paths_needed": 5,
+      "top_task_id": "capture_924541a91afd1d",
+      "top_source_domain": "smartlabel.hersheys.com"
+    },
+    {
+      "key": "www.campbells.com",
+      "tasks": 4,
+      "high_priority": 4,
+      "ready_for_capture": 0,
+      "paths_needed": 4,
+      "top_task_id": "capture_dbd127b524ca57",
+      "top_source_domain": "www.campbells.com"
+    },
+    {
+      "key": "www.directionsforme.org",
+      "tasks": 4,
+      "high_priority": 4,
+      "ready_for_capture": 0,
+      "paths_needed": 4,
+      "top_task_id": "capture_0802512a810c9d",
+      "top_source_domain": "www.directionsforme.org"
+    },
+    {
+      "key": "www.ewg.org",
+      "tasks": 4,
+      "high_priority": 4,
+      "ready_for_capture": 0,
+      "paths_needed": 4,
+      "top_task_id": "capture_b60418765f584b",
+      "top_source_domain": "www.ewg.org"
+    }
+  ],
+  "first_tasks": [
+    {
+      "task_id": "capture_517275d6a596c4",
+      "rank": 1,
+      "product_name": "Campbell's Chicken Noodle Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.walmart.com",
+      "evidence_id": "campbells_chicken_noodle_soup__current_2020s__312__1",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_dbd127b524ca57",
+      "rank": 2,
+      "product_name": "Campbell's Chicken Noodle Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.campbells.com",
+      "evidence_id": "campbells_chicken_noodle_soup__current_2020s__36__5",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_846f486641f620",
+      "rank": 3,
+      "product_name": "Campbell's Chicken Noodle Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.walmart.com",
+      "evidence_id": "campbells_chicken_noodle_soup__current_2020s__37__4",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_e07e6dd87de86f",
+      "rank": 4,
+      "product_name": "Campbell's Chicken Noodle Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.thefreshgrocer.com",
+      "evidence_id": "campbells_chicken_noodle_soup__current_2020s__529__3",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_602b6ed0e675f6",
+      "rank": 5,
+      "product_name": "Campbell's Chicken Noodle Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.thefreshgrocer.com",
+      "evidence_id": "campbells_chicken_noodle_soup__current_2020s__858__6",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_30991f948be147",
+      "rank": 6,
+      "product_name": "Campbell's Condensed Tomato Soup",
+      "vintage_label": "1980s_or_earlier",
+      "source_domain": "www.ingredientinspector.org",
+      "evidence_id": "campbells_tomato_soup__1980s_or_earlier__971__4",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_e6ba62ebd54a86",
+      "rank": 7,
+      "product_name": "Campbell's Condensed Tomato Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.campbells.com",
+      "evidence_id": "campbells_tomato_soup__current_2020s__1077__9",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_499ed6db98090b",
+      "rank": 8,
+      "product_name": "Campbell's Condensed Tomato Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.walmart.com",
+      "evidence_id": "campbells_tomato_soup__current_2020s__281__3",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_0b0007fb0d5d16",
+      "rank": 9,
+      "product_name": "Campbell's Condensed Tomato Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.campbells.com",
+      "evidence_id": "campbells_tomato_soup__current_2020s__501__1",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_5fcc4d948704fd",
+      "rank": 10,
+      "product_name": "Campbell's Condensed Tomato Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.campbells.com",
+      "evidence_id": "campbells_tomato_soup__current_2020s__726__8",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_da4d9171e6e61f",
+      "rank": 11,
+      "product_name": "Campbell's Condensed Tomato Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.walmart.com",
+      "evidence_id": "campbells_tomato_soup__current_2020s__845__2",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_193bf6a2ae7e92",
+      "rank": 12,
+      "product_name": "Campbell's Condensed Tomato Soup",
+      "vintage_label": "current_2020s",
+      "source_domain": "www.ingredientinspector.org",
+      "evidence_id": "campbells_tomato_soup__current_2020s__971__10",
+      "priority_score": 143,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    }
+  ],
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "images_committed": false,
+    "manual_verified_created": false
+  },
+  "public_artifacts": {
+    "capture_task_csv": "docs/data/product-evidence/exports/hybrid_ocr_capture_tasks.csv",
+    "capture_task_json": "docs/data/product-evidence/hybrid_ocr_capture_tasks.json",
+    "capture_task_runbook_md": "docs/data/product-evidence/exports/hybrid_ocr_capture_task_runbook.md"
+  }
+}

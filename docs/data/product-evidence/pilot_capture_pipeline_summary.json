@@ -121,7 +121,10 @@
     "model_assist_summary_csv": "docs/data/product-evidence/exports/pilot_capture_model_assist_summary.csv",
     "review_queue_csv": "docs/data/product-evidence/exports/pilot_capture_review_queue.csv",
     "image_map_audit_csv": "docs/data/product-evidence/exports/pilot_capture_image_map_audit.csv",
-    "image_map_audit_json": "docs/data/product-evidence/pilot_capture_image_map_audit.json"
+    "image_map_audit_json": "docs/data/product-evidence/pilot_capture_image_map_audit.json",
+    "capture_task_csv": "docs/data/product-evidence/exports/pilot_capture_tasks.csv",
+    "capture_task_json": "docs/data/product-evidence/pilot_capture_tasks.json",
+    "capture_task_runbook_md": "docs/data/product-evidence/exports/pilot_capture_task_runbook.md"
   },
   "image_map_audit": {
     "schema_version": "hybrid_ingredient_ocr_image_map_audit.v1",
@@ -331,6 +334,357 @@
     "public_artifacts": {
       "audit_summary_csv": "docs/data/product-evidence/exports/pilot_capture_image_map_audit.csv",
       "audit_summary_json": "docs/data/product-evidence/pilot_capture_image_map_audit.json"
+    }
+  },
+  "capture_task_summary": {
+    "schema_version": "hybrid_ingredient_ocr_capture_task_summary.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "run_id": "pilot-photo-capture-dry-run",
+    "task_count": 101,
+    "high_priority_tasks": 83,
+    "ready_for_capture": 0,
+    "paths_needed": 101,
+    "source_discovery_tasks": 0,
+    "by_status": [
+      {
+        "key": "no_private_path_supplied",
+        "count": 101
+      }
+    ],
+    "by_product": [
+      {
+        "key": "Kraft Macaroni & Cheese Original",
+        "tasks": 12,
+        "high_priority": 11,
+        "ready_for_capture": 0,
+        "paths_needed": 12,
+        "top_task_id": "capture_1248c1787fc9e6",
+        "top_source_domain": "www.flickr.com"
+      },
+      {
+        "key": "Oreo Original Chocolate Sandwich Cookies",
+        "tasks": 14,
+        "high_priority": 10,
+        "ready_for_capture": 0,
+        "paths_needed": 14,
+        "top_task_id": "capture_d22a89a8845d85",
+        "top_source_domain": "www.ewg.org"
+      },
+      {
+        "key": "Doritos Nacho Cheese",
+        "tasks": 11,
+        "high_priority": 10,
+        "ready_for_capture": 0,
+        "paths_needed": 11,
+        "top_task_id": "capture_ac9ae000de4be1",
+        "top_source_domain": "www.flickr.com"
+      },
+      {
+        "key": "Campbell's Condensed Tomato Soup",
+        "tasks": 11,
+        "high_priority": 9,
+        "ready_for_capture": 0,
+        "paths_needed": 11,
+        "top_task_id": "capture_f546b418854320",
+        "top_source_domain": "www.flickr.com"
+      },
+      {
+        "key": "Pop-Tarts Frosted Strawberry",
+        "tasks": 11,
+        "high_priority": 9,
+        "ready_for_capture": 0,
+        "paths_needed": 11,
+        "top_task_id": "capture_9536daa10c5687",
+        "top_source_domain": "www.flickr.com"
+      },
+      {
+        "key": "Cheerios Original",
+        "tasks": 9,
+        "high_priority": 8,
+        "ready_for_capture": 0,
+        "paths_needed": 9,
+        "top_task_id": "capture_16289763884b27",
+        "top_source_domain": "www.flickr.com"
+      },
+      {
+        "key": "McDonald's Chicken McNuggets",
+        "tasks": 9,
+        "high_priority": 8,
+        "ready_for_capture": 0,
+        "paths_needed": 9,
+        "top_task_id": "capture_a5a9c7b9be06b1",
+        "top_source_domain": "www.flickr.com"
+      },
+      {
+        "key": "Heinz Tomato Ketchup",
+        "tasks": 10,
+        "high_priority": 6,
+        "ready_for_capture": 0,
+        "paths_needed": 10,
+        "top_task_id": "capture_6033763c398867",
+        "top_source_domain": "laurelleaffarm.com"
+      },
+      {
+        "key": "Coca-Cola Classic",
+        "tasks": 7,
+        "high_priority": 6,
+        "ready_for_capture": 0,
+        "paths_needed": 7,
+        "top_task_id": "capture_6201aecc36f319",
+        "top_source_domain": "commons.wikimedia.org"
+      },
+      {
+        "key": "McDonald's Big Mac",
+        "tasks": 7,
+        "high_priority": 6,
+        "ready_for_capture": 0,
+        "paths_needed": 7,
+        "top_task_id": "capture_7281cd3248a567",
+        "top_source_domain": "www.flickr.com"
+      }
+    ],
+    "by_source_domain": [
+      {
+        "key": "www.flickr.com",
+        "tasks": 45,
+        "high_priority": 35,
+        "ready_for_capture": 0,
+        "paths_needed": 45,
+        "top_task_id": "capture_f546b418854320",
+        "top_source_domain": "www.flickr.com"
+      },
+      {
+        "key": "www.walmart.com",
+        "tasks": 5,
+        "high_priority": 5,
+        "ready_for_capture": 0,
+        "paths_needed": 5,
+        "top_task_id": "capture_b35ea938a21787",
+        "top_source_domain": "www.walmart.com"
+      },
+      {
+        "key": "www.mcdonalds.com",
+        "tasks": 4,
+        "high_priority": 4,
+        "ready_for_capture": 0,
+        "paths_needed": 4,
+        "top_task_id": "capture_48cf470ffa0d94",
+        "top_source_domain": "www.mcdonalds.com"
+      },
+      {
+        "key": "www.campbells.com",
+        "tasks": 3,
+        "high_priority": 3,
+        "ready_for_capture": 0,
+        "paths_needed": 3,
+        "top_task_id": "capture_5d08e290e3430e",
+        "top_source_domain": "www.campbells.com"
+      },
+      {
+        "key": "commons.wikimedia.org",
+        "tasks": 4,
+        "high_priority": 2,
+        "ready_for_capture": 0,
+        "paths_needed": 4,
+        "top_task_id": "capture_659f3e6deda8ee",
+        "top_source_domain": "commons.wikimedia.org"
+      },
+      {
+        "key": "americanhistory.si.edu",
+        "tasks": 3,
+        "high_priority": 2,
+        "ready_for_capture": 0,
+        "paths_needed": 3,
+        "top_task_id": "capture_f7c52b178c5b60",
+        "top_source_domain": "americanhistory.si.edu"
+      },
+      {
+        "key": "www.canceredinstitute.org",
+        "tasks": 2,
+        "high_priority": 2,
+        "ready_for_capture": 0,
+        "paths_needed": 2,
+        "top_task_id": "capture_dcdb272401d931",
+        "top_source_domain": "www.canceredinstitute.org"
+      },
+      {
+        "key": "www.ewg.org",
+        "tasks": 2,
+        "high_priority": 2,
+        "ready_for_capture": 0,
+        "paths_needed": 2,
+        "top_task_id": "capture_d22a89a8845d85",
+        "top_source_domain": "www.ewg.org"
+      },
+      {
+        "key": "www.kroger.com",
+        "tasks": 2,
+        "high_priority": 2,
+        "ready_for_capture": 0,
+        "paths_needed": 2,
+        "top_task_id": "capture_a58ae3dd73ae91",
+        "top_source_domain": "www.kroger.com"
+      },
+      {
+        "key": "www.poptarts.com",
+        "tasks": 2,
+        "high_priority": 2,
+        "ready_for_capture": 0,
+        "paths_needed": 2,
+        "top_task_id": "capture_7a416359a29b7e",
+        "top_source_domain": "www.poptarts.com"
+      },
+      {
+        "key": "antiqueadvertising.com",
+        "tasks": 1,
+        "high_priority": 1,
+        "ready_for_capture": 0,
+        "paths_needed": 1,
+        "top_task_id": "capture_047e988601bbb4",
+        "top_source_domain": "antiqueadvertising.com"
+      },
+      {
+        "key": "business.walmart.com",
+        "tasks": 1,
+        "high_priority": 1,
+        "ready_for_capture": 0,
+        "paths_needed": 1,
+        "top_task_id": "capture_5bd389b8d61135",
+        "top_source_domain": "business.walmart.com"
+      }
+    ],
+    "first_tasks": [
+      {
+        "task_id": "capture_f546b418854320",
+        "rank": 1,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "earliest_verified_label",
+        "source_domain": "www.flickr.com",
+        "evidence_id": "campbells_tomato_soup_evidence_0",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_659f3e6deda8ee",
+        "rank": 2,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "earliest_verified_label;1980s_or_earlier",
+        "source_domain": "commons.wikimedia.org",
+        "evidence_id": "campbells_tomato_soup_evidence_1",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_c26057fc23c742",
+        "rank": 3,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "current_2020s",
+        "source_domain": "www.campbellsfoodservice.com",
+        "evidence_id": "campbells_tomato_soup_evidence_10",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_b548c4fc76c641",
+        "rank": 4,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "earliest_verified_label",
+        "source_domain": "www.flickr.com",
+        "evidence_id": "campbells_tomato_soup_evidence_2",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_ecbd812e5839ac",
+        "rank": 5,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "earliest_verified_label;1980s_or_earlier",
+        "source_domain": "www.loc.gov",
+        "evidence_id": "campbells_tomato_soup_evidence_3",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_06a30c4b924c21",
+        "rank": 6,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "1980s_or_earlier",
+        "source_domain": "www.ingredientinspector.org",
+        "evidence_id": "campbells_tomato_soup_evidence_5",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_5d08e290e3430e",
+        "rank": 7,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "current_2020s",
+        "source_domain": "www.campbells.com",
+        "evidence_id": "campbells_tomato_soup_evidence_7",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_131641428adb5b",
+        "rank": 8,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "current_2020s",
+        "source_domain": "www.campbells.com",
+        "evidence_id": "campbells_tomato_soup_evidence_8",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_42a39d6280beb9",
+        "rank": 9,
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "vintage_label": "current_2020s",
+        "source_domain": "www.campbells.com",
+        "evidence_id": "campbells_tomato_soup_evidence_9",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_16289763884b27",
+        "rank": 10,
+        "product_name": "Cheerios Original",
+        "vintage_label": "earliest_verified_label;1980s_or_earlier",
+        "source_domain": "www.flickr.com",
+        "evidence_id": "cheerios_original_evidence_0",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_ae39b32695a414",
+        "rank": 11,
+        "product_name": "Cheerios Original",
+        "vintage_label": "earliest_verified_label;1980s_or_earlier",
+        "source_domain": "www.flickr.com",
+        "evidence_id": "cheerios_original_evidence_1",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      },
+      {
+        "task_id": "capture_dcd172f10fe3d2",
+        "rank": 12,
+        "product_name": "Cheerios Original",
+        "vintage_label": "earliest_verified_label;1980s_or_earlier",
+        "source_domain": "www.flickr.com",
+        "evidence_id": "cheerios_original_evidence_2",
+        "priority_score": 155,
+        "next_action": "Open source, capture a private panel crop, then fill the private template path."
+      }
+    ],
+    "public_safety": {
+      "candidate_only": true,
+      "private_paths_committed": false,
+      "images_committed": false,
+      "manual_verified_created": false
+    },
+    "public_artifacts": {
+      "capture_task_csv": "docs/data/product-evidence/exports/pilot_capture_tasks.csv",
+      "capture_task_json": "docs/data/product-evidence/pilot_capture_tasks.json",
+      "capture_task_runbook_md": "docs/data/product-evidence/exports/pilot_capture_task_runbook.md"
     }
   }
 }

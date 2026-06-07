@@ -107,6 +107,7 @@ node scripts/build-spark-ocr-packets.js --run-id=hybrid-ocr-v1 --limit=250 --pac
 node scripts/capture-ingredient-ocr-assets.js --run-id=hybrid-ocr-v1 --limit=250 --no-network --dry-run
 node scripts/model-assist-router.js --run-id=hybrid-ocr-v1 --limit=250 --no-network --max-grok-calls=0 --max-gpt55-batches=5
 node scripts/summarize-ingredient-ocr-run.js --run-id=hybrid-ocr-v1
+node scripts/build-capture-task-manifest.js --run-id=hybrid-ocr-v1
 ```
 
 The capture dry run writes a public-safe image-map starter CSV. It contains evidence IDs, source URLs, crop targets, rights/publication policy, and accepted image-map keys, but leaves private path fields blank. Fill those paths in a private copy only.
@@ -115,6 +116,7 @@ Private image-map run:
 
 ```sh
 cp docs/data/product-evidence/exports/hybrid_ocr_image_map_template.csv .cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-template.private.csv
+# Use docs/data/product-evidence/exports/hybrid_ocr_capture_task_runbook.md to choose the first source pages and panel targets.
 # Fill local_private_image_path or processed_private_image_path in the private copy.
 node scripts/audit-image-map-template.js --run-id=hybrid-ocr-v1 --template=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-template.private.csv --public-audit-summary=docs/data/product-evidence/exports/hybrid_ocr_image_map_audit.csv --public-audit-json=docs/data/product-evidence/hybrid_ocr_image_map_audit.json
 node scripts/build-image-map-from-template.js --run-id=hybrid-ocr-v1 --template=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-template.private.csv --output=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-input.json
