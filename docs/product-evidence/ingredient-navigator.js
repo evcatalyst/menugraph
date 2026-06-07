@@ -121,6 +121,33 @@ function productReviewReady(productRow) {
     || (productRow?.evidence || []).some((row) => row.visible_extract);
 }
 
+function publicPhotoRowsForProduct(productRow) {
+  const productId = productRow?.id || "";
+  const rows = (state.photoProofManifest?.published_images || [])
+    .filter((row) => row.product_id === productId && row.image_display_policy === "embed_rights_cleared");
+  const seen = new Set();
+  return rows.filter((row) => {
+    const key = row.evidence_id || row.public_image_url || row.thumbnail_url || row.source_url;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function allPublicPhotoRows() {
+  const productNames = new Map((state.data?.products || []).map((row) => [row.id, row.name]));
+  return (state.photoProofManifest?.published_images || [])
+    .filter((row) => row.image_display_policy === "embed_rights_cleared" && (row.public_image_url || row.thumbnail_url))
+    .map((row) => ({
+      ...row,
+      product_name: row.product_name || productNames.get(row.product_id) || row.product_id || "Product photo proof",
+    }));
+}
+
+function productHasPublicPhoto(productRow) {
+  return publicPhotoRowsForProduct(productRow).length > 0;
+}
+
 function corpusModeDefinitions() {
   return [
     {
@@ -134,6 +161,12 @@ function corpusModeDefinitions() {
       label: "Story Pilot",
       detail: "10 stitched narratives",
       matches: (productRow) => productRow?.corpus_scope === "story_rich_pilot",
+    },
+    {
+      id: "public_photos",
+      label: "Public Photos",
+      detail: "Rights-cleared embeds",
+      matches: productHasPublicPhoto,
     },
     {
       id: "needs_photo",
@@ -249,8 +282,25 @@ function corpusHandoffStats() {
   };
 }
 
+function corpusIngredientPanelProofStats() {
+  const rows = (state.data.products || []).flatMap((productRow) => (
+    ingredientPanelProofRows(productRow).map((row) => ({ productRow, row }))
+  ));
+  return {
+    rows: rows.length,
+    products: new Set(rows.map((entry) => entry.productRow.id)).size,
+    publicEmbeds: rows.filter((entry) => canEmbedProofImage(entry.row)).length,
+    linkOnly: rows.filter((entry) => proofSourceUrl(entry.row) && !canEmbedProofImage(entry.row)).length,
+    candidateText: rows.filter((entry) => entry.row.visible_extract).length,
+  };
+}
+
 function productPublicEmbedCount(productRow) {
-  return (productRow?.evidence || []).filter((row) => canEmbedProofImage(row)).length;
+  const evidenceIds = new Set(publicPhotoRowsForProduct(productRow).map((row) => row.evidence_id).filter(Boolean));
+  for (const row of productRow?.evidence || []) {
+    if (canEmbedProofImage(row)) evidenceIds.add(row.id);
+  }
+  return evidenceIds.size;
 }
 
 function productCandidateTextCount(productRow) {
@@ -347,9 +397,96 @@ function renderCaptureTaskPreview(taskSummary = {}) {
   `;
 }
 
+function renderPublicPhotoProofStrip() {
+  const rows = allPublicPhotoRows();
+  if (!rows.length) return "";
+  const productCount = new Set(rows.map((row) => row.product_id).filter(Boolean)).size;
+  return `
+    <article class="corpus-handoff-card public-photo-strip-card">
+      <header class="public-photo-strip-head">
+        <div>
+          <span>Secondary Context: Product Photos</span>
+          <strong>${escapeHtml(`${rows.length} public product images across ${productCount} products`)}</strong>
+          <p>These rights-cleared images help identify packages, eras, and variants. They are secondary to ingredient-panel photos and do not prove recipe history unless a readable ingredient or nutrition panel is visible.</p>
+        </div>
+        <button type="button" data-corpus-mode-jump="public_photos">Show photo products</button>
+      </header>
+      <div class="public-photo-strip" aria-label="Rights-cleared product photo proof examples">
+        ${rows.slice(0, 12).map((row) => {
+          const image = row.thumbnail_url || row.public_image_url;
+          return `
+            <article class="public-photo-card">
+              <button type="button" data-product-id="${escapeHtml(row.product_id || "")}">
+                <img src="${escapeHtml(image)}" alt="${escapeHtml(`${row.product_name} public photo proof`)}" loading="lazy" />
+                <span>${escapeHtml(row.product_name || "Product")}</span>
+                <strong>${escapeHtml(row.evidence_title || row.source_title || "Public photo proof")}</strong>
+              </button>
+              <p>${escapeHtml(row.attribution_text || row.source_owner || "Attribution recorded in manifest.")}</p>
+              <div class="lead-meta">
+                <span class="source-chip">${escapeHtml(row.rights_status || "rights recorded")}</span>
+                ${row.source_url ? `<a href="${escapeHtml(row.source_url)}" target="_blank" rel="noreferrer">${escapeHtml(sourceHost(row.source_url))}</a>` : ""}
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderPublicPhotoOcrStatus() {
+  const summary = state.summary?.public_photo_ocr_summary || state.data?.public_photo_ocr_summary || {};
+  if (!summary.queue_rows) return "";
+  const capture = summary.capture || {};
+  const ocr = summary.ocr || {};
+  const artifacts = summary.public_artifacts || {};
+  const candidates = summary.candidate_extracts || state.summary?.public_photo_ocr_candidate_extract_summary || {};
+  const candidateArtifacts = candidates.public_artifacts || {};
+  const blocker = Number(ocr.vision_runtime_nil_error || 0)
+    ? `${ocr.vision_runtime_nil_error} Vision runtime nilError rows`
+    : Number(ocr.vision_pixel_buffer_failure || 0)
+      ? `${ocr.vision_pixel_buffer_failure} Vision pixel-buffer rows`
+      : Number(ocr.no_private_image_map_entry || 0)
+        ? `${ocr.no_private_image_map_entry} missing image-map rows`
+        : "No OCR blocker recorded";
+  return `
+    <article class="corpus-handoff-card public-ocr-status-card status-needs_manual_verification">
+      <span>Public Photo OCR Run</span>
+      <strong>${escapeHtml(`${summary.primary_ingredient_panel_rows || 0} primary panel rows · ${summary.secondary_product_context_rows || 0} secondary context rows`)}</strong>
+      <p>Rights-cleared public images were captured privately. Primary OCR text is shown only as candidate review text, never as verified formulation claims. Current blocker: ${escapeHtml(blocker)}.</p>
+      <dl>
+        <div>
+          <dt>Captured</dt>
+          <dd>${escapeHtml(`${capture.ready_for_ocr || 0}/${summary.queue_rows || 0}`)}</dd>
+        </div>
+        <div>
+          <dt>Primary ready</dt>
+          <dd>${escapeHtml(capture.primary_ready_for_ocr || 0)}</dd>
+        </div>
+        <div>
+          <dt>OCR succeeded</dt>
+          <dd>${escapeHtml(ocr.ocr_succeeded || 0)}</dd>
+        </div>
+        <div>
+          <dt>Candidates</dt>
+          <dd>${escapeHtml(candidates.accepted_candidate_count || 0)}</dd>
+        </div>
+      </dl>
+      <div class="corpus-handoff-links">
+        ${artifacts.queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.queue_csv))}">Queue CSV</a>` : ""}
+        ${artifacts.capture_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_summary_csv))}">Capture CSV</a>` : ""}
+        ${artifacts.ocr_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ocr_summary_csv))}">OCR CSV</a>` : ""}
+        ${candidateArtifacts.candidate_extracts_csv ? `<a href="${escapeHtml(navigatorArtifactHref(candidateArtifacts.candidate_extracts_csv))}">Candidate Text CSV</a>` : ""}
+        ${artifacts.runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.runbook_md))}">Runbook</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
+  const panelStats = corpusIngredientPanelProofStats();
   const tasks = captureTaskSummary();
   const storyBriefs = state.data.full_corpus_story_briefs_summary || {};
   const storyArtifacts = storyBriefs.site_artifacts || storyBriefs.public_artifacts || {};
@@ -370,21 +507,21 @@ function renderCorpusHandoff() {
       </dl>
     </article>
     <article class="corpus-handoff-card status-source_review">
-      <span>Photo Display Gate</span>
-      <strong>${escapeHtml(stats.embedReadyEvidence ? `${stats.embedReadyEvidence} public embeds` : "Link-only photo proof mode")}</strong>
-      <p>Source receipts can sit beside ingredient candidates today. Actual package photos render inline only when a row has a public image URL and <code>embed_rights_cleared</code>.</p>
+      <span>Primary Display Gate</span>
+      <strong>${escapeHtml(panelStats.publicEmbeds ? `${panelStats.publicEmbeds} public panel embeds` : "Ingredient panels are still link/candidate-first")}</strong>
+      <p>Ingredient or nutrition panel photos are the primary recipe-history proof. Product-front photos render only as secondary context unless the panel is readable.</p>
       <dl>
         <div>
-          <dt>Source-linked evidence</dt>
-          <dd>${escapeHtml(stats.sourceLinkedEvidence)}</dd>
+          <dt>Panel/document leads</dt>
+          <dd>${escapeHtml(panelStats.rows)}</dd>
         </div>
         <div>
-          <dt>Link-only receipts</dt>
-          <dd>${escapeHtml(stats.sourceLinkOnly)}</dd>
+          <dt>Panel link-only</dt>
+          <dd>${escapeHtml(panelStats.linkOnly)}</dd>
         </div>
         <div>
           <dt>Text candidates</dt>
-          <dd>${escapeHtml(stats.candidateExtracts)}</dd>
+          <dd>${escapeHtml(panelStats.candidateText || stats.candidateExtracts)}</dd>
         </div>
       </dl>
     </article>
@@ -393,6 +530,8 @@ function renderCorpusHandoff() {
       <strong>Private capture then review</strong>
       <p>Capture/crop source pages privately, run native OCR, batch-review candidate text, then publish only rights-cleared images or link-only proof cards.</p>
     </article>
+    ${renderPublicPhotoProofStrip()}
+    ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">
         <span>Story Brief Exports</span>
@@ -871,6 +1010,27 @@ function sourceProofRows(productRow) {
     });
 }
 
+function isIngredientPanelProof(row) {
+  const text = [
+    row?.photo_role,
+    row?.label_panel_state,
+    row?.ocr_expected_surface,
+    row?.title,
+    row?.kind,
+  ].join(" ").toLowerCase();
+  return Boolean(row?.visible_extract)
+    || /ingredient|nutrition|allergen|label panel|back panel|readable panel|panel visible|partial package text|wrapper text|document text/.test(text);
+}
+
+function ingredientPanelProofRows(productRow) {
+  return sourceProofRows(productRow).filter(isIngredientPanelProof);
+}
+
+function secondaryPackageProofRows(productRow) {
+  const panelIds = new Set(ingredientPanelProofRows(productRow).map((row) => row.id));
+  return sourceProofRows(productRow).filter((row) => !panelIds.has(row.id));
+}
+
 function sourceProofStats(productRow) {
   const rows = sourceProofRows(productRow);
   const embedReady = rows.filter((row) => canEmbedProofImage(row)).length;
@@ -882,6 +1042,31 @@ function sourceProofStats(productRow) {
     embedReady,
     linkOnly: rows.filter((row) => proofSourceUrl(row) && !canEmbedProofImage(row)).length,
     candidateText,
+  };
+}
+
+function ingredientPanelProofStats(productRow) {
+  const rows = ingredientPanelProofRows(productRow);
+  const embedReady = rows.filter((row) => canEmbedProofImage(row)).length;
+  const candidateText = rows.filter((row) => row.visible_extract).length
+    + (productRow.versions || []).filter((row) => row.label_extract).length;
+  return {
+    rows,
+    sourceLinked: rows.filter((row) => proofSourceUrl(row)).length,
+    embedReady,
+    linkOnly: rows.filter((row) => proofSourceUrl(row) && !canEmbedProofImage(row)).length,
+    candidateText,
+  };
+}
+
+function secondaryPackageProofStats(productRow) {
+  const rows = secondaryPackageProofRows(productRow);
+  return {
+    rows,
+    sourceLinked: rows.filter((row) => proofSourceUrl(row)).length,
+    embedReady: rows.filter((row) => canEmbedProofImage(row)).length,
+    linkOnly: rows.filter((row) => proofSourceUrl(row) && !canEmbedProofImage(row)).length,
+    candidateText: rows.filter((row) => row.visible_extract).length,
   };
 }
 
@@ -926,25 +1111,105 @@ function renderProofDisplayGate(stats) {
   `;
 }
 
-function renderProductProofRail(productRow) {
-  const stats = sourceProofStats(productRow);
+function renderIngredientPanelProofRail(productRow) {
+  const stats = ingredientPanelProofStats(productRow);
   const rows = stats.rows.slice(0, 8);
+  const hasPublicPanelImage = stats.embedReady > 0;
   return `
-    <section class="proof-source-rail" aria-label="Source-linked photo proof inventory">
+    <section class="proof-source-rail proof-source-rail-primary" aria-label="Primary ingredient panel proof inventory">
       <header>
         <div>
-          <span>Photo Proof Inventory</span>
-          <strong>${escapeHtml(stats.sourceLinked)} source-linked receipts · ${escapeHtml(stats.embedReady)} public embeds</strong>
+          <span>Primary Proof: Ingredient Panels</span>
+          <strong>${escapeHtml(stats.sourceLinked)} panel/document leads · ${escapeHtml(stats.embedReady)} public panel embeds</strong>
         </div>
-        <p>${escapeHtml(stats.embedReady ? "Rights-cleared images can render inline; other source objects remain link-only." : "No product photos are embedded yet. The page shows source-linked proof receipts beside ingredient candidates until image reuse is reviewed and cleared.")}</p>
+        <p>${escapeHtml(hasPublicPanelImage ? "Ingredient or nutrition panels with clear display rights render here first." : "No rights-cleared ingredient-panel photos are embedded for this product yet. Link-only panel leads and visible text candidates stay primary until a readable panel image clears review.")}</p>
       </header>
       <div class="proof-source-metrics">
-        <span><strong>${escapeHtml(stats.linkOnly)}</strong>Link-only proof</span>
-        <span><strong>${escapeHtml(stats.candidateText)}</strong>Candidate text</span>
+        <span><strong>${escapeHtml(stats.linkOnly)}</strong>Panel link-only</span>
+        <span><strong>${escapeHtml(stats.candidateText)}</strong>Ingredient text candidates</span>
+        <span><strong>${escapeHtml(productRow.ingredient_ocr_summary?.ingredient_text_candidate_count || 0)}</strong>OCR text leads</span>
+        <span><strong>${escapeHtml(productRow.ingredient_ocr_summary?.label_visible_count || 0)}</strong>Label-visible rows</span>
+      </div>
+      <div class="proof-display-gate" aria-label="Ingredient panel display gate">
+        <article>
+          <span>Publication Priority</span>
+          <strong>Ingredient panel first</strong>
+          <p>Readable ingredient or nutrition panels are the primary proof object for recipe history. Product-front photos are only context unless they expose label text.</p>
+        </article>
+        <article>
+          <span>Current State</span>
+          <strong>${escapeHtml(hasPublicPanelImage ? "panel image available" : "panel proof still link/candidate")}</strong>
+          <p>${escapeHtml(hasPublicPanelImage ? "At least one panel-like image can render inline with attribution." : "Use the source link, OCR queue, and manual transcription workflow before presenting this as verified ingredient proof.")}</p>
+        </article>
+        <article>
+          <span>Claim Boundary</span>
+          <strong>candidate-only</strong>
+          <p>Visible extracts are not verified recipes until reviewer attribution and corrected transcription are recorded.</p>
+        </article>
+      </div>
+      <div class="proof-source-list">
+        ${rows.length ? rows.map((row) => {
+          const source = proofSourceUrl(row);
+          return `
+            <article class="proof-source-card status-${escapeHtml(row.status || "source_review")}">
+              ${renderProofSourceThumb(productRow, row)}
+              <span>${escapeHtml(evidenceVersionLabels(productRow, row.id) || row.date_basis_state || "panel/document lead")}</span>
+              <strong>${escapeHtml(row.title || "Ingredient panel proof lead")}</strong>
+              <p>${escapeHtml(row.quality_note || row.label_panel_state || "Review panel readability, crop target, OCR output, and manual transcription before promotion.")}</p>
+              <dl>
+                <div>
+                  <dt>Host</dt>
+                  <dd>${escapeHtml(sourceHost(source))}</dd>
+                </div>
+                <div>
+                  <dt>Panel role</dt>
+                  <dd>${escapeHtml(row.photo_role || "ingredient/document panel candidate")}</dd>
+                </div>
+                <div>
+                  <dt>Panel</dt>
+                  <dd>${escapeHtml(row.label_panel_state || "not reviewed")}</dd>
+                </div>
+                <div>
+                  <dt>Policy</dt>
+                  <dd>${escapeHtml(imageDisplayPolicy(row))}</dd>
+                </div>
+              </dl>
+              <div class="lead-meta">
+                ${statusBadge(canEmbedProofImage(row) ? "embed_rights_cleared" : "source_link_only_rights_unclear")}
+                ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">Open panel source</a>` : ""}
+              </div>
+            </article>
+          `;
+        }).join("") : `
+          <article class="proof-source-card proof-source-card-empty">
+            <strong>No ingredient-panel photo is publishable yet</strong>
+            <p>Next step: capture a readable back/side panel or document ingredient page, then run OCR and manual correction. Product photos stay secondary until they reveal ingredient text.</p>
+            ${statusBadge("needs_label_transcription")}
+          </article>
+        `}
+      </div>
+    </section>
+  `;
+}
+
+function renderProductProofRail(productRow) {
+  const stats = secondaryPackageProofStats(productRow);
+  const rows = stats.rows.slice(0, 8);
+  return `
+    <section class="proof-source-rail proof-source-rail-secondary" aria-label="Secondary package and product object proof inventory">
+      <header>
+        <div>
+          <span>Secondary Proof: Product / Package Context</span>
+          <strong>${escapeHtml(stats.sourceLinked)} object/context receipts · ${escapeHtml(stats.embedReady)} public embeds</strong>
+        </div>
+        <p>${escapeHtml(stats.embedReady ? "Rights-cleared product or package-object images can render inline as context. They do not prove ingredients unless the label panel is readable." : "No secondary product photos are embedded yet. Ingredient-panel evidence above remains the primary recipe-history proof object.")}</p>
+      </header>
+      <div class="proof-source-metrics">
+        <span><strong>${escapeHtml(stats.linkOnly)}</strong>Link-only context</span>
+        <span><strong>${escapeHtml(stats.candidateText)}</strong>Text on context rows</span>
         <span><strong>${escapeHtml(productRow.ingredient_ocr_summary?.local_image_ready_count || 0)}</strong>Private image-ready</span>
         <span><strong>${escapeHtml(productRow.ingredient_ocr_summary?.source_page_capture_needed_count || 0)}</strong>Capture needed</span>
       </div>
-      ${renderProofDisplayGate(stats)}
       <div class="proof-source-list">
         ${rows.length ? rows.map((row) => {
           const source = proofSourceUrl(row);
@@ -978,7 +1243,7 @@ function renderProductProofRail(productRow) {
               </div>
             </article>
           `;
-        }).join("") : `<article class="proof-source-card"><strong>No source proof recorded</strong><p>This product needs source discovery before a photo or ingredient story can be shown.</p>${statusBadge("source_discovery_needed")}</article>`}
+        }).join("") : `<article class="proof-source-card"><strong>No secondary product photo recorded</strong><p>This is acceptable if ingredient-panel proof above is stronger. Product-front imagery is context, not the primary recipe-history evidence.</p>${statusBadge("source_discovery_needed")}</article>`}
       </div>
     </section>
   `;
@@ -1003,16 +1268,17 @@ function renderProofReader(productRow, version) {
   ];
   els.proofReader.innerHTML = `
     <header class="proof-reader-head">
-      <div>
-        <p class="eyebrow">Recipe History Proof</p>
-        <h2>Photo/source proof next to ingredient text</h2>
-        <p>Toggle an era to inspect the source-attributed photo or document receipt beside the ingredient extract. Rights-unclear images stay link-only; candidate text stays candidate until manual verification.</p>
+    <div>
+      <p class="eyebrow">Recipe History Proof</p>
+        <h2>Ingredient panel proof next to ingredient text</h2>
+        <p>Toggle an era to inspect the ingredient-panel photo, document receipt, or source lead beside the ingredient extract. Product/package photos are secondary context unless the label panel is readable.</p>
       </div>
       <aside class="proof-disclaimer">
         <strong>Publication note</strong>
-        <p>This page is not legal advice. It cites source pages and avoids reproducing external package photos unless rights are recorded as clear. Ingredient extracts are evidence candidates, not verified formulation claims.</p>
+        <p>This page is not legal advice. It cites source pages and avoids reproducing external package photos unless rights are recorded as clear. Ingredient-panel extracts are evidence candidates, not verified formulation claims.</p>
       </aside>
     </header>
+    ${renderIngredientPanelProofRail(productRow)}
     ${renderProductProofRail(productRow)}
     <div class="proof-era-toggle" aria-label="Recipe history era toggle">
       ${versions.map((row) => `
@@ -1272,6 +1538,24 @@ function attachEvents() {
     render();
   });
   els.corpusDirectory?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-product-id]");
+    if (!button || button.disabled) return;
+    state.productId = button.dataset.productId;
+    state.versionId = "";
+    render();
+  });
+  els.corpusHandoff?.addEventListener("click", (event) => {
+    const modeButton = event.target.closest("[data-corpus-mode-jump]");
+    if (modeButton) {
+      state.corpusMode = modeButton.dataset.corpusModeJump || "full";
+      const modeRows = productRowsForMode();
+      if (modeRows.length && !modeRows.some((row) => row.id === state.productId)) {
+        state.productId = modeRows[0].id;
+        state.versionId = "";
+      }
+      render();
+      return;
+    }
     const button = event.target.closest("[data-product-id]");
     if (!button || button.disabled) return;
     state.productId = button.dataset.productId;

@@ -1,0 +1,89 @@
+run_id,evidence_id,product_id,product_name,vintage_label,source_domain,source_url,review_status,candidate_field_count,candidate_text_hash,has_ingredient_text,has_allergen_text,has_manufacturer_or_distributor,has_net_weight,has_serving_size,confidence,uncertainty_note,provider,model,packet_id,prompt_hash,response_hash,candidate_only,manual_verified,public_text_included,promotion_allowed,rejection_reason,unsupported_ocr_tokens,candidate_raw_ingredient_text,candidate_allergen_text,candidate_manufacturer_or_distributor,candidate_net_weight,candidate_serving_size
+public-photo-ocr-v1,subway_italian_bmt__2010s__945__1,subway_italian_bmt,Subway Italian B.M.T.,2010s bridge,commons.wikimedia.org,https://commons.wikimedia.org/wiki/File%3A%22US_Product_Ingredient_Guide%22_%28April_2020%29%2C_Subway.pdf,candidate_review_ready,2,6b6276785bb6bff7,1,1,0,0,0,1,Candidate OCR text from a primary ingredient/document proof row. Reviewer correction and source review are required before any formulation claim.,apple_vision,macos_vision_text_recognition,public-photo-ocr-v1:primary_ocr_candidate,,c11a420f61497a7e86d2a6645d1ca1b9b856fa4f259a121107de1314c5045a82,1,0,1,0,,,"US Product Ingredient Guide
+current however it is possible that ingredient changes and substitutions may
+promotional items as ingredients vary.
+9-GRAIN WHEAT Whole wheat flour, enriched flour (wheat flour, malted barley
+flour, niacin, iron, thiamine mononitrate, riboflavin, folic acid, yeast, sugar, grain and
+millet, sorghum), wheat gluten, contains 2% or less of: salt, soybean oil, malted
+barley flour, cultured wheat flour, sunflower lecithin, dough conditioners (ascorbic
+acid, enzymes). Contains wheat.
+FLATBREAD, ARTISAN Whole wheat flour, enriched wheat flour (wheat flour,
+blend (sourdough (water, fermented wheat flour, fermented rye flour), wheat grains,
+rye grains, oat grains, flaxseed, millet seed, teff seed, salt), soybean oil, sugar, wheat
+gluten, yeast, salt, natural flavors, oat bran, oat fiber, cultured wheat flour, enzymes,
+milk. Contains wheat and milk.
+tapioca starch, palm oil, sugar, distilled monoglycerides, contains less than 2% of the
+following: yeast, rice bran and germ, salt, natural flavor, leavening (sodium acid
+carbohydrate gum, guar gum, enzyme. Contains eggs. May contain Soy
+HEARTY ITALIAN BREAD Subway® Italian bread and yellow cornmeal. Contains wheat.
+oats, brown sugar, honey, wheat starch, and natural flavor). Contains wheat.
+ITALIAN (WHITE) BREAD Enriched flour (wheat flour, niacin, reduced iron, thiamine
+mononitrate, riboflavin, folic acid), water, yeast, sugar, soybean oil, salt, wheat
+gluten, cultured wheat flour, malted barley flour, sunflower lecithin, dough
+conditioner (enzymes, ascorbic acid). Contains wheat.
+blend [Monterey Jack cheese (cultured pasteurized milk, salt, enzymes), cheddar
+cheese (cultured pasteurized milk, salt, enzymes, annatto color), potato starch and
+Corn maltodextrin, enriched wheat flour (flour, niacin, reduced iron, thiamine","9-GRAIN WHEAT Whole wheat flour, enriched flour (wheat flour, malted barley
+millet, sorghum), wheat gluten, contains 2% or less of: salt, soybean oil, malted
+barley flour, cultured wheat flour, sunflower lecithin, dough conditioners (ascorbic
+acid, enzymes). Contains wheat.
+FLATBREAD, ARTISAN Whole wheat flour, enriched wheat flour (wheat flour,
+blend (sourdough (water, fermented wheat flour, fermented rye flour), wheat grains,
+rye grains, oat grains, flaxseed, millet seed, teff seed, salt), soybean oil, sugar, wheat
+gluten, yeast, salt, natural flavors, oat bran, oat fiber, cultured wheat flour, enzymes,
+milk. Contains wheat and milk.
+tapioca starch, palm oil, sugar, distilled monoglycerides, contains less than 2% of the
+carbohydrate gum, guar gum, enzyme. Contains eggs. May contain Soy
+HEARTY ITALIAN BREAD Subway® Italian bread and yellow cornmeal. Contains wheat.
+oats, brown sugar, honey, wheat starch, and natural flavor). Contains wheat.
+ITALIAN (WHITE) BREAD Enriched flour (wheat flour, niacin, reduced iron, thiamine
+mononitrate, riboflavin, folic acid), water, yeast, sugar, soybean oil, salt, wheat
+gluten, cultured wheat flour, malted barley flour, sunflower lecithin, dough
+conditioner (enzymes, ascorbic acid). Contains wheat.
+blend [Monterey Jack cheese (cultured pasteurized milk, salt, enzymes), cheddar
+cheese (cultured pasteurized milk, salt, enzymes, annatto color), potato starch and
+Corn maltodextrin, enriched wheat flour (flour, niacin, reduced iron, thiamine",,,
+public-photo-ocr-v1,subway_italian_bmt__earliest_verified_label__945__1,subway_italian_bmt,Subway Italian B.M.T.,Earliest label hunt,commons.wikimedia.org,https://commons.wikimedia.org/wiki/File%3A%22US_Product_Ingredient_Guide%22_%28April_2020%29%2C_Subway.pdf,candidate_review_ready,2,6b6276785bb6bff7,1,1,0,0,0,1,Candidate OCR text from a primary ingredient/document proof row. Reviewer correction and source review are required before any formulation claim.,apple_vision,macos_vision_text_recognition,public-photo-ocr-v1:primary_ocr_candidate,,0016d5c9a307407ea74eb01fb34de4a71347359ada2e4533e5e2fb2713877871,1,0,1,0,,,"US Product Ingredient Guide
+current however it is possible that ingredient changes and substitutions may
+promotional items as ingredients vary.
+9-GRAIN WHEAT Whole wheat flour, enriched flour (wheat flour, malted barley
+flour, niacin, iron, thiamine mononitrate, riboflavin, folic acid, yeast, sugar, grain and
+millet, sorghum), wheat gluten, contains 2% or less of: salt, soybean oil, malted
+barley flour, cultured wheat flour, sunflower lecithin, dough conditioners (ascorbic
+acid, enzymes). Contains wheat.
+FLATBREAD, ARTISAN Whole wheat flour, enriched wheat flour (wheat flour,
+blend (sourdough (water, fermented wheat flour, fermented rye flour), wheat grains,
+rye grains, oat grains, flaxseed, millet seed, teff seed, salt), soybean oil, sugar, wheat
+gluten, yeast, salt, natural flavors, oat bran, oat fiber, cultured wheat flour, enzymes,
+milk. Contains wheat and milk.
+tapioca starch, palm oil, sugar, distilled monoglycerides, contains less than 2% of the
+following: yeast, rice bran and germ, salt, natural flavor, leavening (sodium acid
+carbohydrate gum, guar gum, enzyme. Contains eggs. May contain Soy
+HEARTY ITALIAN BREAD Subway® Italian bread and yellow cornmeal. Contains wheat.
+oats, brown sugar, honey, wheat starch, and natural flavor). Contains wheat.
+ITALIAN (WHITE) BREAD Enriched flour (wheat flour, niacin, reduced iron, thiamine
+mononitrate, riboflavin, folic acid), water, yeast, sugar, soybean oil, salt, wheat
+gluten, cultured wheat flour, malted barley flour, sunflower lecithin, dough
+conditioner (enzymes, ascorbic acid). Contains wheat.
+blend [Monterey Jack cheese (cultured pasteurized milk, salt, enzymes), cheddar
+cheese (cultured pasteurized milk, salt, enzymes, annatto color), potato starch and
+Corn maltodextrin, enriched wheat flour (flour, niacin, reduced iron, thiamine","9-GRAIN WHEAT Whole wheat flour, enriched flour (wheat flour, malted barley
+millet, sorghum), wheat gluten, contains 2% or less of: salt, soybean oil, malted
+barley flour, cultured wheat flour, sunflower lecithin, dough conditioners (ascorbic
+acid, enzymes). Contains wheat.
+FLATBREAD, ARTISAN Whole wheat flour, enriched wheat flour (wheat flour,
+blend (sourdough (water, fermented wheat flour, fermented rye flour), wheat grains,
+rye grains, oat grains, flaxseed, millet seed, teff seed, salt), soybean oil, sugar, wheat
+gluten, yeast, salt, natural flavors, oat bran, oat fiber, cultured wheat flour, enzymes,
+milk. Contains wheat and milk.
+tapioca starch, palm oil, sugar, distilled monoglycerides, contains less than 2% of the
+carbohydrate gum, guar gum, enzyme. Contains eggs. May contain Soy
+HEARTY ITALIAN BREAD Subway® Italian bread and yellow cornmeal. Contains wheat.
+oats, brown sugar, honey, wheat starch, and natural flavor). Contains wheat.
+ITALIAN (WHITE) BREAD Enriched flour (wheat flour, niacin, reduced iron, thiamine
+mononitrate, riboflavin, folic acid), water, yeast, sugar, soybean oil, salt, wheat
+gluten, cultured wheat flour, malted barley flour, sunflower lecithin, dough
+conditioner (enzymes, ascorbic acid). Contains wheat.
+blend [Monterey Jack cheese (cultured pasteurized milk, salt, enzymes), cheddar
+cheese (cultured pasteurized milk, salt, enzymes, annatto color), potato starch and
+Corn maltodextrin, enriched wheat flour (flour, niacin, reduced iron, thiamine",,,

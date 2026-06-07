@@ -1,0 +1,34 @@
+{
+  "schema_version": "public_photo_ocr_candidate_extracts_summary.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "public-photo-ocr-v1",
+  "input_record_count": 2,
+  "accepted_candidate_count": 2,
+  "rejected_candidate_count": 0,
+  "candidate_review_ready": 2,
+  "needs_manual_transcription": 0,
+  "needs_better_crop": 0,
+  "needs_source_review": 0,
+  "rejected_by_reason": [],
+  "field_presence": {
+    "ingredient_text": 2,
+    "allergen_text": 2,
+    "manufacturer_or_distributor": 0,
+    "net_weight": 0,
+    "serving_size": 0
+  },
+  "public_safety": {
+    "candidate_only": true,
+    "manual_verified_created": false,
+    "promotion_allowed": false,
+    "private_paths_committed": false,
+    "public_text_included": true,
+    "default_text_policy": "Candidate text is omitted by default; use --publish-candidate-text only after deciding the public page may show candidate OCR text with visible candidate labels."
+  },
+  "public_artifacts": {
+    "candidate_extracts_csv": "docs/data/product-evidence/exports/public_photo_ocr_candidate_extracts.csv"
+  },
+  "source_ocr_result_count": 31,
+  "primary_input_candidate_count": 2,
+  "public_policy": "Candidate OCR text is shown only for primary ingredient/document proof rows and cannot support formulation claims until manually verified."
+}

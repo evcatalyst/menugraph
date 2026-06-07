@@ -1,6 +1,7 @@
 import Foundation
 import Vision
 import ImageIO
+import CoreImage
 
 struct BoundingBox: Codable {
     let x: Double
@@ -33,20 +34,18 @@ guard CommandLine.arguments.count >= 2 else {
 
 let imagePath = CommandLine.arguments[1]
 let imageUrl = URL(fileURLWithPath: imagePath)
-guard let source = CGImageSourceCreateWithURL(imageUrl as CFURL, nil),
-      let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+guard CGImageSourceCreateWithURL(imageUrl as CFURL, nil) != nil,
+      let ciImage = CIImage(contentsOf: imageUrl) else {
     fail("could not read image at \(imagePath)")
 }
 
 let request = VNRecognizeTextRequest()
 request.recognitionLevel = .accurate
 request.usesLanguageCorrection = true
+request.recognitionLanguages = ["en-US"]
 request.minimumTextHeight = 0.008
-if #available(macOS 13.0, *) {
-    request.revision = VNRecognizeTextRequestRevision3
-}
 
-let handler = VNImageRequestHandler(cgImage: image, options: [:])
+let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
 do {
     try handler.perform([request])
 } catch {
