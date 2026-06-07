@@ -7,7 +7,9 @@ const dataPath = path.join(root, "docs/data/product-evidence/navigator_data.json
 const htmlPath = path.join(root, "docs/product-evidence/ingredient-navigator.html");
 const jsPath = path.join(root, "docs/product-evidence/ingredient-navigator.js");
 const cssPath = path.join(root, "docs/product-evidence/ingredient-navigator.css");
+const publicPhotoManifestPath = path.join(root, "docs/data/product-evidence/public_photo_proof_manifest.json");
 const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+const publicPhotoManifest = JSON.parse(fs.readFileSync(publicPhotoManifestPath, "utf8"));
 const html = fs.readFileSync(htmlPath, "utf8");
 const js = fs.readFileSync(jsPath, "utf8");
 const css = fs.readFileSync(cssPath, "utf8");
@@ -41,18 +43,29 @@ assert.strictEqual(data.corpus_summary.embedded_public_images, 0, "public build 
 assert(data.corpus_summary.link_only_photo_receipts >= 1000, "expected broad source-linked photo/evidence receipts");
 assert(data.full_corpus_story_briefs_summary, "navigator should expose full-corpus story brief summary");
 assert.strictEqual(data.full_corpus_story_briefs_summary.product_count, 120, "story brief summary should cover 120 products");
+assert.strictEqual(data.full_corpus_story_briefs_summary.public_embeds, 3, "story brief summary should count reviewed public image embeds");
 assert(data.full_corpus_story_briefs_summary.site_artifacts?.story_briefs_markdown, "story brief markdown link should be exposed");
+assert.strictEqual(publicPhotoManifest.published_image_count, 3, "public photo proof manifest should publish reviewed Commons images");
+assert(
+  publicPhotoManifest.published_images.every((row) => row.image_display_policy === "embed_rights_cleared"),
+  "published public photo rows must be rights-cleared embeds",
+);
 assert(html.includes('id="corpus-mode"'), "navigator should expose corpus mode controls");
+assert(html.includes('id="corpus-directory"'), "navigator should expose all-product directory");
 assert(js.includes('corpusMode: "full"'), "navigator should default to full-corpus mode");
 assert(js.includes('data-corpus-mode="${escapeHtml(definition.id)}"'), "navigator should render selectable corpus modes");
+assert(js.includes("renderCorpusDirectory"), "navigator should render the all-product directory");
 assert(js.includes("renderProductProofRail"), "navigator should render a source-linked photo proof rail");
+assert(js.includes("renderProofSourceThumb"), "navigator should render proof thumbnails for public image rows");
 assert(js.includes("No product photos are embedded yet"), "navigator should explain why photos are source-linked instead of embedded");
 assert(js.includes("-product corpus loaded"), "navigator should make the product corpus visible in the product strip");
 assert(js.includes("Current public photo mode"), "navigator should expose the current public photo display mode");
 assert(js.includes("Source receipts can sit beside ingredient candidates today"), "navigator should explain source receipts beside ingredient candidates");
 assert(js.includes("Story Brief Exports"), "navigator should render full-corpus story brief exports");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
+assert(css.includes(".corpus-directory-grid"), "all-product directory should be styled");
 assert(css.includes(".proof-source-rail"), "photo proof rail should be styled");
+assert(css.includes(".proof-source-thumb"), "public photo thumbnails should be styled");
 assert(css.includes(".product-strip-ledger"), "corpus ledger should be styled");
 assert(css.includes(".proof-display-gate"), "photo display gate should be styled");
 assert(css.includes(".corpus-handoff-links"), "story export links should be styled");

@@ -92117,17 +92117,19 @@
     "products_with_candidate_text": 10,
     "products_with_source_gaps": 117,
     "source_receipts": 1369,
-    "link_only_receipts": 1369,
-    "public_embeds": 0,
+    "link_only_receipts": 1366,
+    "public_embeds": 3,
     "public_safety": {
       "candidate_only": true,
       "manual_verified_created": false,
       "claim_promotion_allowed": false,
       "only_embed_rights_cleared_images": true,
-      "external_images_published": false,
+      "external_images_published": true,
       "private_paths_committed": false
     },
     "public_policy": "Story briefs can show source receipts and candidate text state. Ingredient claims still require manual verification; external photos remain link-only unless marked embed_rights_cleared.",
+    "public_photo_manifest": "docs/data/product-evidence/public_photo_proof_manifest.json",
+    "public_photo_manifest_published_images": 3,
     "public_artifacts": {
       "story_briefs_json": "docs/data/product-evidence/exports/full_corpus_story_briefs.json",
       "story_briefs_csv": "docs/data/product-evidence/exports/full_corpus_story_briefs.csv",

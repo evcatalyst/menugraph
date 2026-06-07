@@ -26,6 +26,7 @@ assert.strictEqual(publicImageUrlOk("https://example.org/oreo-panel.jpg"), true,
 assert.strictEqual(publicImageUrlOk("../assets/product-evidence/oreo.jpg"), true, "relative public assets should be allowed");
 assert.strictEqual(publicImageUrlOk("/private/tmp/oreo.jpg"), false, "private paths must be rejected");
 assert.strictEqual(rightsClear("Wikimedia Commons CC-BY 4.0"), true, "clear Creative Commons rights should pass");
+assert.strictEqual(rightsClear("Wikimedia Commons no known copyright restrictions"), true, "Commons no-restrictions rows should pass");
 assert.strictEqual(rightsClear("External source; rights note needed before reproducing imagery."), false, "unclear rights should fail");
 
 const manifest = buildManifest({
@@ -86,6 +87,11 @@ const manifestPath = path.join(root, "docs/data/product-evidence/public_photo_pr
 const registryPath = path.join(root, "docs/data/product-evidence/exports/public_photo_proof_registry.csv");
 assert(fs.existsSync(manifestPath), "real public photo proof manifest should be written");
 assert(fs.existsSync(registryPath), "real public photo proof registry CSV should exist");
+assert(realManifest.published_image_count >= 3, "real manifest should publish reviewed Commons image rows");
+assert(
+  realManifest.published_images.some((row) => row.evidence_id === "doritos_nacho_cheese_evidence_6"),
+  "real manifest should publish the reviewed Doritos Commons proof row",
+);
 assert.strictEqual(realManifest.public_safety.source_link_only_default, true, "source-link-only should remain default");
 assert(!JSON.stringify(realManifest).includes("/private/"), "real manifest must not leak private paths");
 

@@ -38,10 +38,10 @@ Blocked lanes:
 - Story status: confirmed_story_ready
 - Claim status: needs_manual_verification
 - Source-backed slots: 6/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 11
 - Candidate text chapters: 2
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -94,10 +94,10 @@ Blocked lanes:
 - Story status: confirmed_story_ready
 - Claim status: needs_manual_verification
 - Source-backed slots: 6/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 7
 - Candidate text chapters: 3
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -122,10 +122,10 @@ Blocked lanes:
 - Story status: confirmed_story_ready
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 11
 - Candidate text chapters: 2
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: No manual-verified ingredient labels are attached in this pilot snapshot; do not publish definitive formulation diffs.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 

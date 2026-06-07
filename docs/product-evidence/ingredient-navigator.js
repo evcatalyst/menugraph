@@ -4,6 +4,7 @@ const els = {
   corpusMode: document.querySelector("#corpus-mode"),
   productStrip: document.querySelector("#product-strip"),
   corpusHandoff: document.querySelector("#corpus-handoff"),
+  corpusDirectory: document.querySelector("#corpus-directory"),
   timeRange: document.querySelector("#time-range"),
   compareToggle: document.querySelector("#compare-toggle"),
   status: document.querySelector("#journey-status"),
@@ -246,6 +247,68 @@ function corpusHandoffStats() {
     candidateExtracts,
     sourceLinkOnly,
   };
+}
+
+function productPublicEmbedCount(productRow) {
+  return (productRow?.evidence || []).filter((row) => canEmbedProofImage(row)).length;
+}
+
+function productCandidateTextCount(productRow) {
+  return (productRow?.evidence || []).filter((row) => row.visible_extract).length
+    + (productRow?.versions || []).filter((row) => row.label_extract).length;
+}
+
+function renderCorpusDirectory() {
+  if (!els.corpusDirectory) return;
+  const modeRows = productRowsForMode();
+  const rows = searchedProductRows(modeRows);
+  const modeLabel = corpusModeDefinitions().find((row) => row.id === state.corpusMode)?.label || "Full Corpus";
+  const publicEmbeds = rows.reduce((sum, row) => sum + productPublicEmbedCount(productById(row.id)), 0);
+  const candidateTexts = rows.reduce((sum, row) => sum + productCandidateTextCount(productById(row.id)), 0);
+  const sourceSlots = rows.reduce((sum, row) => sum + Number(row.source_backed_slots || 0), 0);
+  els.corpusDirectory.innerHTML = `
+    <header class="corpus-directory-head">
+      <div>
+        <span>All Product Story Directory</span>
+        <strong>${escapeHtml(`${rows.length} products shown from ${modeLabel}`)}</strong>
+        <p>Use this as the working map for the corpus. Every card is selectable; image counts mean rights-cleared public embeds, while source slots mean attributable evidence receipts that may still be link-only.</p>
+      </div>
+      <dl>
+        <div>
+          <dt>Total corpus</dt>
+          <dd>${escapeHtml((state.data.product_index || []).length)}</dd>
+        </div>
+        <div>
+          <dt>Source slots</dt>
+          <dd>${escapeHtml(sourceSlots)}</dd>
+        </div>
+        <div>
+          <dt>Public photos</dt>
+          <dd>${escapeHtml(publicEmbeds)}</dd>
+        </div>
+        <div>
+          <dt>Text candidates</dt>
+          <dd>${escapeHtml(candidateTexts)}</dd>
+        </div>
+      </dl>
+    </header>
+    <div class="corpus-directory-grid">
+      ${rows.map((row, index) => {
+        const productRow = productById(row.id);
+        const embedCount = productPublicEmbedCount(productRow);
+        const textCount = productCandidateTextCount(productRow);
+        return `
+          <button type="button" class="corpus-directory-card ${row.id === state.productId ? "is-selected" : ""}" data-product-id="${escapeHtml(row.id)}">
+            <span>${escapeHtml(String(index + 1).padStart(2, "0"))}</span>
+            <strong>${escapeHtml(row.label)}</strong>
+            <em>${escapeHtml(productRow?.category || row.scope || "product")}</em>
+            <small>${escapeHtml(row.scope === "story_rich_pilot" ? "Story pilot" : "Proof shell")} · ${escapeHtml(row.source_backed_slots || 0)}/${escapeHtml(row.total_slots || 6)} source slots</small>
+            <b>${escapeHtml(embedCount)} photos · ${escapeHtml(textCount)} extracts</b>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
 }
 
 function captureTaskSummary() {
@@ -822,6 +885,24 @@ function sourceProofStats(productRow) {
   };
 }
 
+function renderProofSourceThumb(productRow, row) {
+  const image = proofImageUrl(row);
+  if (image && canEmbedProofImage(row)) {
+    return `
+      <figure class="proof-source-thumb">
+        <img src="${escapeHtml(image)}" alt="${escapeHtml(`${productRow.name} source photo proof`)}" loading="lazy" />
+        <figcaption>${escapeHtml(imageAttribution(row))}</figcaption>
+      </figure>
+    `;
+  }
+  return `
+    <div class="proof-source-thumb proof-source-thumb-receipt" aria-hidden="true">
+      <span>${escapeHtml(sourceHost(proofSourceUrl(row)))}</span>
+      <strong>${escapeHtml(row.photo_role || "source receipt")}</strong>
+    </div>
+  `;
+}
+
 function renderProofDisplayGate(stats) {
   const mode = stats.embedReady ? "mixed image/source mode" : "source receipts only";
   return `
@@ -869,6 +950,7 @@ function renderProductProofRail(productRow) {
           const source = proofSourceUrl(row);
           return `
             <article class="proof-source-card status-${escapeHtml(row.status || "source_review")}">
+              ${renderProofSourceThumb(productRow, row)}
               <span>${escapeHtml(evidenceVersionLabels(productRow, row.id) || row.date_basis_state || "source receipt")}</span>
               <strong>${escapeHtml(row.title || "Source proof")}</strong>
               <p>${escapeHtml(row.quality_note || row.rights || "Review source, visible panels, date cues, and rights before promotion.")}</p>
@@ -1140,6 +1222,7 @@ function render() {
   const version = selectedVersion(productRow);
   renderProductPicker();
   renderCorpusHandoff();
+  renderCorpusDirectory();
   renderStatus(productRow);
   renderSummary(productRow);
   renderStoryReadiness(productRow);
@@ -1168,6 +1251,7 @@ function attachEvents() {
   els.productSearch.addEventListener("input", () => {
     state.search = els.productSearch.value;
     renderProductPicker();
+    renderCorpusDirectory();
   });
   els.corpusMode?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-corpus-mode]");
@@ -1181,6 +1265,13 @@ function attachEvents() {
     render();
   });
   els.productStrip.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-product-id]");
+    if (!button || button.disabled) return;
+    state.productId = button.dataset.productId;
+    state.versionId = "";
+    render();
+  });
+  els.corpusDirectory?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-product-id]");
     if (!button || button.disabled) return;
     state.productId = button.dataset.productId;
