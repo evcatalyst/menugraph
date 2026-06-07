@@ -766,6 +766,61 @@ function renderConfectionWrapperReviewQueueStatus() {
   `;
 }
 
+function renderConfectionWrapperCaptureHandoffStatus() {
+  const summary = state.summary?.confection_wrapper_capture_handoff_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.capture_rows) return "";
+  const artifacts = summary.artifacts || {};
+  const rows = summary.first_rows || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-source_page_capture_needed">
+      <span>Confection Wrapper Capture Handoff</span>
+      <strong>${escapeHtml(`${totals.capture_rows || 0} capture rows · ${totals.high_priority_rows || 0} high priority`)}</strong>
+      <p>These Candy Wrapper Archive leads now have capture-ready handoff rows and image-map template entries. Collection pages stay source triage; item pages move to private screenshot/panel review before any ingredient OCR.</p>
+      <dl>
+        <div>
+          <dt>Source-page rows</dt>
+          <dd>${escapeHtml(totals.source_page_capture_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Item triage</dt>
+          <dd>${escapeHtml(totals.item_page_triage_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Collection triage</dt>
+          <dd>${escapeHtml(totals.collection_index_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Source hunts</dt>
+          <dd>${escapeHtml(totals.source_discovery_rows || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Confection wrapper capture handoff rows">
+        ${rows.slice(0, 4).map((row) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(labelFor(row.panel_acquisition_state || row.ocr_gap_category || "capture row"))}</span>
+            <strong>${escapeHtml(row.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${labelFor(row.ocr_priority || "priority")} · ${row.source_url ? sourceHost(row.source_url) : "source hunt"}`)}</p>
+            <em>${escapeHtml(row.ocr_recommended_action || "Review source before capture/OCR.")}</em>
+            ${row.source_url ? `<a href="${escapeHtml(row.source_url)}" target="_blank" rel="noopener">Open source</a>` : `<em>${escapeHtml(row.search_queries || "Targeted archive search")}</em>`}
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Confection wrapper capture guardrails">
+        <span>Image-map template is private-path blank</span>
+        <span>Native OCR only after readable panel triage</span>
+        <span>No verified ingredient claims created</span>
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.queue_csv))}">Capture Queue CSV</a>` : ""}
+        ${artifacts.image_map_template_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_template_csv))}">Image Map Template</a>` : ""}
+        ${artifacts.runbook_markdown ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.runbook_markdown))}">Runbook</a>` : ""}
+        ${artifacts.handoff_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.handoff_json))}">Handoff JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
@@ -819,6 +874,7 @@ function renderCorpusHandoff() {
     ${renderPanelCapturePipelineStatus()}
     ${renderConfectionWrapperPriorityStatus()}
     ${renderConfectionWrapperReviewQueueStatus()}
+    ${renderConfectionWrapperCaptureHandoffStatus()}
     ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">
