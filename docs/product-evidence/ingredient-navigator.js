@@ -877,6 +877,61 @@ function renderConfectionWrapperItemCandidateStatus() {
   `;
 }
 
+function renderConfectionWrapperItemPanelTriageStatus() {
+  const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.triage_rows) return "";
+  const artifacts = summary.artifacts || {};
+  const rows = summary.first_rows || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-panel_capture_needed">
+      <span>Confection Item Panel Triage Queue</span>
+      <strong>${escapeHtml(`${totals.triage_rows || 0} triage rows · ${totals.high_priority_rows || 0} high priority`)}</strong>
+      <p>Item pages are now capture/OCR-compatible rows. Direct archive image URLs are private capture references only; OCR waits on panel readability review, and product-front wrapper photos stay secondary context.</p>
+      <dl>
+        <div>
+          <dt>Direct image refs</dt>
+          <dd>${escapeHtml(totals.direct_image_reference_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Source-page rows</dt>
+          <dd>${escapeHtml(totals.source_page_capture_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Existing item pages</dt>
+          <dd>${escapeHtml(totals.item_page_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Collection items</dt>
+          <dd>${escapeHtml(totals.collection_item_rows || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Confection item panel triage rows">
+        ${rows.slice(0, 4).map((row) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(labelFor(row.capture_strategy || row.ocr_priority || "panel triage"))}</span>
+            <strong>${escapeHtml(row.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${row.source_title || "Item page"} · ${row.vintage_label || "date review"}`)}</p>
+            <em>${escapeHtml(row.ocr_recommended_action || "Capture privately, classify panel visibility, then OCR only readable text surfaces.")}</em>
+            ${row.source_url ? `<a href="${escapeHtml(row.source_url)}" target="_blank" rel="noopener">Open item</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Confection item panel triage guardrails">
+        <span>Ingredient panels first</span>
+        <span>Wrapper fronts are context</span>
+        <span>Manual verification required</span>
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.queue_csv))}">Panel Triage CSV</a>` : ""}
+        ${artifacts.image_map_template_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_template_csv))}">Image Map Template</a>` : ""}
+        ${artifacts.runbook_markdown ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.runbook_markdown))}">Runbook</a>` : ""}
+        ${artifacts.triage_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.triage_json))}">Triage JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
@@ -932,6 +987,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperReviewQueueStatus()}
     ${renderConfectionWrapperCaptureHandoffStatus()}
     ${renderConfectionWrapperItemCandidateStatus()}
+    ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">
