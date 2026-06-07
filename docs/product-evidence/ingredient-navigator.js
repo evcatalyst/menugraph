@@ -8,6 +8,7 @@ const els = {
   productSummary: document.querySelector("#product-summary"),
   storyReadiness: document.querySelector("#story-readiness"),
   storyHero: document.querySelector("#story-hero"),
+  proofReader: document.querySelector("#proof-reader"),
   timelineAxis: document.querySelector("#timeline-axis"),
   timelineTrack: document.querySelector("#timeline-track"),
   facetList: document.querySelector("#facet-list"),
@@ -320,6 +321,183 @@ function renderLabelExtract(extract, compact = false) {
   `;
 }
 
+function proofSourceUrl(row) {
+  return row?.url || row?.source_url || row?.archive_url || "";
+}
+
+function proofImageUrl(row) {
+  return row?.image_url || row?.image_path_or_url || row?.package_image_url || row?.screenshot_image_path || "";
+}
+
+function rightsNote(row) {
+  return row?.rights || row?.license_rights_note || "External source; rights note needed before reproducing imagery.";
+}
+
+function canEmbedProofImage(row) {
+  const image = proofImageUrl(row);
+  if (!image) return false;
+  const rights = rightsNote(row).toLowerCase();
+  const source = `${row?.source || ""} ${row?.url || ""}`.toLowerCase();
+  const clearLicense = /public domain|cc[- ]?by|creative commons|wikimedia commons|owned image|rights cleared/.test(rights);
+  const blocked = /inspect license|rights note needed|before reuse|external source|collector photo/.test(rights);
+  return clearLicense && !blocked && !/flickr\.com/.test(source);
+}
+
+function bestProofEvidence(productRow, version) {
+  const evidenceRows = versionEvidence(productRow, version);
+  const ranked = [...evidenceRows].sort((a, b) => {
+    const rank = (row) => (
+      (row.visible_extract ? 40 : 0) +
+      (/ingredient|label/i.test(`${row.label_panel_state || ""} ${row.photo_role || ""}`) ? 25 : 0) +
+      (proofImageUrl(row) ? 15 : 0) +
+      (proofSourceUrl(row) ? 10 : 0) +
+      (row.status === "manual_verified" ? 10 : row.status === "label_text_candidate" ? 8 : row.status === "usable_photo" ? 5 : 0)
+    );
+    return rank(b) - rank(a);
+  });
+  return ranked[0] || {};
+}
+
+function proofExtractFor(version, row) {
+  return version.label_extract || row.visible_extract || null;
+}
+
+function renderProofVisual(productRow, version, row) {
+  const image = proofImageUrl(row);
+  const source = proofSourceUrl(row);
+  const embedImage = canEmbedProofImage(row);
+  const title = row.title || `${version.label} photo proof`;
+  if (embedImage) {
+    return `
+      <figure class="proof-photo">
+        <img src="${escapeHtml(image)}" alt="${escapeHtml(`${productRow.name} ${version.label} source photo proof`)}" loading="lazy" />
+        <figcaption>${escapeHtml(row.source || "Source image")} · ${escapeHtml(rightsNote(row))}</figcaption>
+      </figure>
+    `;
+  }
+  return `
+    <div class="proof-photo proof-photo-receipt status-${escapeHtml(row.status || version.status || "unknown")}">
+      <span>${escapeHtml(row.kind || "source receipt")}</span>
+      <strong>${escapeHtml(title || "Photo proof needed")}</strong>
+      <p>${escapeHtml(image ? "Image reference is present, but this page keeps it link-only until rights are reviewed." : "Photo proof is source-attributed, but no rights-cleared embeddable image URL is stored yet.")}</p>
+      <dl>
+        <div>
+          <dt>Photo role</dt>
+          <dd>${escapeHtml(row.photo_role || version.photo_quality?.role || "not classified")}</dd>
+        </div>
+        <div>
+          <dt>Panel state</dt>
+          <dd>${escapeHtml(row.label_panel_state || version.photo_quality?.label_panel || "not reviewed")}</dd>
+        </div>
+        <div>
+          <dt>Rights</dt>
+          <dd>${escapeHtml(rightsNote(row))}</dd>
+        </div>
+      </dl>
+      ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">Open source photo/document</a>` : ""}
+    </div>
+  `;
+}
+
+function renderProofIngredients(version, row) {
+  const extract = proofExtractFor(version, row);
+  if (extract) {
+    return `
+      <section class="proof-ingredients">
+        <span>${escapeHtml(extract.status || version.status || "ingredient candidate")}</span>
+        <h3>Visible ingredient text</h3>
+        ${renderLabelExtract(extract)}
+      </section>
+    `;
+  }
+  if (version.gap_resolution) {
+    return `
+      <section class="proof-ingredients proof-gap">
+        <span>${escapeHtml(version.gap_resolution.state || "gap_publishable")}</span>
+        <h3>No ingredient label published</h3>
+        <p>${escapeHtml(version.gap_resolution.can_say || version.ingredient_summary)}</p>
+        <p><strong>Cannot say:</strong> ${escapeHtml(version.gap_resolution.cannot_say || "Do not publish ingredient changes without verified label text.")}</p>
+      </section>
+    `;
+  }
+  return `
+    <section class="proof-ingredients proof-gap">
+      <span>${escapeHtml(version.status || "needs_label_transcription")}</span>
+      <h3>Ingredient text not ready</h3>
+      <p>${escapeHtml(version.photo_quality?.blocker || version.next_step || "Readable label text needs OCR/manual transcription before publication.")}</p>
+    </section>
+  `;
+}
+
+function renderProofCard(productRow, version, modeLabel) {
+  const row = bestProofEvidence(productRow, version);
+  const source = proofSourceUrl(row);
+  const extract = proofExtractFor(version, row);
+  return `
+    <article class="proof-card status-${escapeHtml(version.status || "unknown")}">
+      <header class="proof-card-head">
+        <div>
+          <span>${escapeHtml(modeLabel)}</span>
+          <h3>${escapeHtml(`${version.year} · ${version.label}`)}</h3>
+          <p>${escapeHtml(version.headline || version.ingredient_summary)}</p>
+        </div>
+        <div class="proof-status-stack">
+          ${statusBadge(version.status)}
+          ${statusBadge(extract ? "needs_manual_verification" : version.gap_resolution ? "gap_publishable" : "needs_label_transcription")}
+        </div>
+      </header>
+      <div class="proof-card-body">
+        ${renderProofVisual(productRow, version, row)}
+        ${renderProofIngredients(version, row)}
+      </div>
+      <footer class="proof-card-foot">
+        <span>${escapeHtml(version.validation_state?.public_label || labelFor(version.status))}</span>
+        <p>${escapeHtml(version.validation_state?.note || "Candidate evidence remains separate from verified formulation claims.")}</p>
+        <div class="lead-meta">
+          <span class="source-chip">${escapeHtml(`${version.source_count || version.evidence_ids?.length || 0} sources`)}</span>
+          ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">${escapeHtml(row.source || "Source")}</a>` : ""}
+        </div>
+      </footer>
+    </article>
+  `;
+}
+
+function renderProofReader(productRow, version) {
+  if (!els.proofReader) return;
+  const versions = visibleVersions(productRow);
+  const current = productRow.versions.find((row) => row.vintage === "current_2020s") || versions[versions.length - 1] || version;
+  const cards = state.compare && current.id !== version.id
+    ? [
+      { version, label: "Selected era" },
+      { version: current, label: "Current anchor" },
+    ]
+    : [{ version, label: "Selected era" }];
+  els.proofReader.innerHTML = `
+    <header class="proof-reader-head">
+      <div>
+        <p class="eyebrow">Recipe History Proof</p>
+        <h2>Photo/source proof next to ingredient text</h2>
+        <p>Toggle an era to inspect the source-attributed photo or document receipt beside the ingredient extract. Rights-unclear images stay link-only; candidate text stays candidate until manual verification.</p>
+      </div>
+      <aside class="proof-disclaimer">
+        <strong>Publication note</strong>
+        <p>This page is not legal advice. It cites source pages and avoids reproducing external package photos unless rights are recorded as clear. Ingredient extracts are evidence candidates, not verified formulation claims.</p>
+      </aside>
+    </header>
+    <div class="proof-era-toggle" aria-label="Recipe history era toggle">
+      ${versions.map((row) => `
+        <button type="button" data-version-id="${escapeHtml(row.id)}" class="${row.id === version.id ? "is-selected" : ""}">
+          <span>${escapeHtml(row.year)}</span>
+          <strong>${escapeHtml(row.label)}</strong>
+        </button>
+      `).join("")}
+    </div>
+    <div class="proof-card-grid ${state.compare && cards.length > 1 ? "is-compare" : ""}">
+      ${cards.map((card) => renderProofCard(productRow, card.version, card.label)).join("")}
+    </div>
+  `;
+}
+
 function renderSourceTargets(targets = []) {
   if (!targets.length) return "";
   return `
@@ -504,6 +682,7 @@ function render() {
   renderSummary(productRow);
   renderStoryReadiness(productRow);
   renderHero(productRow);
+  renderProofReader(productRow, version);
   renderPhotoSummary(productRow);
   renderTimeline(productRow);
   renderFacets(productRow);
@@ -541,6 +720,12 @@ function attachEvents() {
     state.versionId = button.dataset.versionId;
     render();
   });
+  els.proofReader.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-version-id]");
+    if (!button) return;
+    state.versionId = button.dataset.versionId;
+    render();
+  });
   els.facetList.addEventListener("click", (event) => {
     const button = event.target.closest("[data-facet-id]");
     if (!button) return;
@@ -559,6 +744,7 @@ function attachEvents() {
     state.compare = !state.compare;
     els.compareToggle.setAttribute("aria-pressed", String(state.compare));
     els.compareToggle.textContent = state.compare ? "Compare Mode On" : "Compare Mode";
+    render();
   });
 }
 
