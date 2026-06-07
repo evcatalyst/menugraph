@@ -8,6 +8,7 @@ const {
   buildPrivateOcrResult,
   imageMapValue,
   ingredientSignalLines,
+  publicFailureReason,
   publicOcrRow,
   summarize,
 } = require("./run-ingredient-ocr");
@@ -35,6 +36,8 @@ const row = {
   vintage_label: "1990s",
   source_domain: "www.flickr.com",
   source_url: "https://www.flickr.com/photos/jasonliebigstuff/6823914204",
+  proof_lane: "primary_ingredient_panel",
+  proof_lane_rank: "1",
 };
 const privatePath = path.join(os.tmpdir(), "ingredient-ocr-private-panel.jpg");
 fs.writeFileSync(privatePath, "fake image bytes for hashing");
@@ -59,12 +62,21 @@ const publicRow = publicOcrRow(privateResult);
 assert.strictEqual(publicRow.candidate_only, 1, "public OCR row should be candidate-only");
 assert.strictEqual(publicRow.manual_verified, 0, "OCR cannot create manual verification");
 assert.strictEqual(publicRow.ingredient_signal_found, 1, "public OCR row should preserve signal flag");
+assert.strictEqual(publicRow.proof_lane, "primary_ingredient_panel", "public OCR row should preserve proof lane");
 assertNoPrivatePaths(JSON.stringify(publicRow), "public OCR row");
 assert(!JSON.stringify(publicRow).includes("INGREDIENTS"), "public OCR row should not expose OCR text");
+assert.strictEqual(
+  publicFailureReason({ error: "vision text recognition failed for /private/tmp/example.jpg: nilError" }),
+  "vision_runtime_nil_error",
+  "failure reason should be categorized without exposing private paths",
+);
 
 const summary = summarize("ocr-runner-unit", [privateResult], path.join(root, "docs/data/product-evidence/exports/test_native_ocr_summary.csv"));
 assert.strictEqual(summary.public_safety.ocr_text_committed, false, "summary should not publish OCR text");
 assert.strictEqual(summary.totals.ocr_succeeded, 1, "summary should count OCR successes");
+assert.strictEqual(summary.totals.primary_ingredient_panel_rows, 1, "summary should count primary panel rows");
+assert.strictEqual(summary.totals.primary_ingredient_signal_found, 1, "summary should count primary panel signal rows");
+assert.strictEqual(summary.totals.vision_runtime_nil_error, 0, "successful summary should not count runtime errors");
 assertNoPrivatePaths(JSON.stringify(summary), "OCR summary");
 
 const skippedSummary = summarize("ocr-runner-skipped", [{

@@ -187147,5 +187147,63 @@
       "summary_json": "docs/data/product-evidence/commons_photo_proof_import_summary.json",
       "registry_csv": "docs/data/product-evidence/exports/public_photo_proof_registry.csv"
     }
+  },
+  "public_photo_ocr_summary": {
+    "schema_version": "public_photo_ocr_summary.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "queue_rows": 31,
+    "product_count": 21,
+    "public_photo_count": 31,
+    "primary_ingredient_panel_rows": 2,
+    "secondary_product_context_rows": 29,
+    "high_priority_rows": 2,
+    "medium_priority_rows": 29,
+    "low_priority_rows": 0,
+    "capture": {
+      "rows": 31,
+      "primary_ingredient_panel_rows": 2,
+      "secondary_product_context_rows": 29,
+      "ready_for_ocr": 28,
+      "primary_ready_for_ocr": 2,
+      "secondary_ready_for_ocr": 26,
+      "downloaded_direct_image": 28,
+      "download_planned": 0,
+      "blocked_no_network": 0,
+      "direct_image_download_failed": 3
+    },
+    "ocr": {
+      "rows": 31,
+      "primary_ingredient_panel_rows": 2,
+      "secondary_product_context_rows": 29,
+      "ocr_planned": 0,
+      "ocr_attempted": 28,
+      "ocr_succeeded": 0,
+      "primary_ocr_succeeded": 0,
+      "secondary_ocr_succeeded": 0,
+      "ocr_failed": 28,
+      "vision_runtime_nil_error": 28,
+      "vision_pixel_buffer_failure": 0,
+      "no_private_image_map_entry": 3,
+      "ocr_skipped_no_image": 3,
+      "ingredient_signal_found": 0,
+      "primary_ingredient_signal_found": 0,
+      "secondary_ingredient_signal_found": 0,
+      "private_image_present": 28
+    },
+    "public_safety": {
+      "source": "public_photo_proof_manifest.embed_rights_cleared rows",
+      "private_images_committed": false,
+      "ocr_text_committed": false,
+      "ingredient_claims_verified": false,
+      "candidate_only": true,
+      "manual_verified_created": false
+    },
+    "public_artifacts": {
+      "queue_csv": "docs/data/product-evidence/exports/public_photo_ocr_intake_queue.csv",
+      "runbook_md": "docs/data/product-evidence/exports/public_photo_ocr_runbook.md",
+      "capture_summary_csv": "docs/data/product-evidence/exports/public_photo_ocr_capture_summary.csv",
+      "ocr_summary_csv": "docs/data/product-evidence/exports/public_photo_native_ocr_summary.csv",
+      "image_map_template_csv": "docs/data/product-evidence/exports/public_photo_ocr_image_map_template.csv"
+    }
   }
 }

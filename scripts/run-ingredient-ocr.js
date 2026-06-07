@@ -126,6 +126,8 @@ function buildPrivateOcrResult(row, imagePath, runResult, options = {}) {
     vintage_label: row.vintage_label,
     source_domain: row.source_domain,
     source_url: row.source_url,
+    proof_lane: row.proof_lane || "",
+    proof_lane_rank: row.proof_lane_rank || "",
     status: runResult.status,
     processor: runResult.output?.processor || (options.dryRun ? "dry_run" : "macos_vision_text_recognition"),
     private_image_path: imagePath,
@@ -141,6 +143,17 @@ function buildPrivateOcrResult(row, imagePath, runResult, options = {}) {
   };
 }
 
+function publicFailureReason(privateRow) {
+  const error = String(privateRow.error || "").toLowerCase();
+  if (!error) return "";
+  if (/no private image-map entry/.test(error)) return "no_private_image_map_entry";
+  if (/nilerror/.test(error)) return "vision_runtime_nil_error";
+  if (/cvpixelbuffer|pixelbuffer/.test(error)) return "vision_pixel_buffer_failure";
+  if (/could not read image/.test(error)) return "image_decode_failed";
+  if (/parse swift\/vision ocr json|parse/.test(error)) return "swift_output_parse_failed";
+  return "ocr_runtime_failed";
+}
+
 function publicOcrRow(privateRow) {
   return {
     run_id: privateRow.run_id,
@@ -149,8 +162,11 @@ function publicOcrRow(privateRow) {
     product_name: privateRow.product_name,
     vintage_label: privateRow.vintage_label,
     source_domain: privateRow.source_domain,
+    proof_lane: privateRow.proof_lane || "",
+    proof_lane_rank: privateRow.proof_lane_rank || "",
     ocr_status: privateRow.status,
     processor: privateRow.processor,
+    failure_reason: publicFailureReason(privateRow),
     image_sha256: privateRow.image_sha256,
     line_count: privateRow.line_count,
     ingredient_signal_found: privateRow.ingredient_signal_found ? 1 : 0,
@@ -196,8 +212,11 @@ function writeMergedPublicOcrRows(runId, publicRows, outputPath) {
     "product_name",
     "vintage_label",
     "source_domain",
+    "proof_lane",
+    "proof_lane_rank",
     "ocr_status",
     "processor",
+    "failure_reason",
     "image_sha256",
     "line_count",
     "ingredient_signal_found",
@@ -229,12 +248,21 @@ function summarize(runId, privateRows, publicOcrSummaryPath) {
     },
     totals: {
       rows_selected: privateRows.length,
+      primary_ingredient_panel_rows: privateRows.filter((row) => row.proof_lane === "primary_ingredient_panel").length,
+      secondary_product_context_rows: privateRows.filter((row) => row.proof_lane === "secondary_product_context").length,
       ocr_planned: countStatus("ocr_planned"),
       ocr_attempted: countStatus("ocr_succeeded") + countStatus("ocr_failed"),
       ocr_succeeded: countStatus("ocr_succeeded"),
+      primary_ocr_succeeded: privateRows.filter((row) => row.proof_lane === "primary_ingredient_panel" && row.status === "ocr_succeeded").length,
+      secondary_ocr_succeeded: privateRows.filter((row) => row.proof_lane === "secondary_product_context" && row.status === "ocr_succeeded").length,
       ocr_failed: countStatus("ocr_failed"),
+      vision_runtime_nil_error: privateRows.filter((row) => publicFailureReason(row) === "vision_runtime_nil_error").length,
+      vision_pixel_buffer_failure: privateRows.filter((row) => publicFailureReason(row) === "vision_pixel_buffer_failure").length,
+      no_private_image_map_entry: privateRows.filter((row) => publicFailureReason(row) === "no_private_image_map_entry").length,
       ocr_skipped_no_image: countStatus("ocr_skipped_no_image"),
       ingredient_signal_found: privateRows.filter((row) => row.ingredient_signal_found).length,
+      primary_ingredient_signal_found: privateRows.filter((row) => row.proof_lane === "primary_ingredient_panel" && row.ingredient_signal_found).length,
+      secondary_ingredient_signal_found: privateRows.filter((row) => row.proof_lane === "secondary_product_context" && row.ingredient_signal_found).length,
       needs_human_correction: privateRows.filter((row) => row.status === "ocr_succeeded").length,
     },
     public_artifacts: {
@@ -276,8 +304,11 @@ function main() {
     "product_name",
     "vintage_label",
     "source_domain",
+    "proof_lane",
+    "proof_lane_rank",
     "ocr_status",
     "processor",
+    "failure_reason",
     "image_sha256",
     "line_count",
     "ingredient_signal_found",
@@ -310,6 +341,7 @@ module.exports = {
   imageMapValue,
   ingredientSignalLines,
   plannedOcrResult,
+  publicFailureReason,
   publicOcrRow,
   skippedOcrResult,
   summarize,

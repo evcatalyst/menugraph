@@ -94,7 +94,11 @@ async function downloadDirectImage(row, dirs, dryRun = false) {
     };
   }
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "MenuGraphProductEvidenceBot/0.1 (private OCR capture; https://github.com/evcatalyst/menugraph)",
+    },
+  });
   if (!response.ok) throw new Error(`Image download failed ${response.status} ${url}`);
   const buffer = Buffer.from(await response.arrayBuffer());
   fs.writeFileSync(capturePath, buffer);
@@ -130,6 +134,24 @@ function sourcePagePlan(row, noNetwork) {
   };
 }
 
+function downloadFailurePlan(row, error) {
+  return {
+    evidence_id: row.evidence_id,
+    capture_status: "direct_image_download_failed",
+    processed_status: "not_ready_for_ocr",
+    original_sha256: "",
+    processed_sha256: "",
+    original_private_path: "",
+    processed_private_path: "",
+    cleanup_actions: [
+      "download_external_image_privately",
+      `download_failed:${String(error?.message || error || "unknown").slice(0, 120)}`,
+      "retry_with_smaller_thumbnail_or_source-host-specific_backoff",
+    ],
+    image_map_value: "",
+  };
+}
+
 async function captureRow(row, imageMap, dirs, options) {
   const mappedImage = imageMapValue(imageMap, row);
   if (mappedImage) return captureFromLocalImage(row, mappedImage, dirs, options.dryRun);
@@ -151,6 +173,8 @@ function publicCaptureRow(row, capture) {
     vintage_label: row.vintage_label,
     source_domain: row.source_domain,
     source_type: row.evidence_kind,
+    proof_lane: row.proof_lane || "",
+    proof_lane_rank: row.proof_lane_rank || "",
     ocr_gap_category: row.ocr_gap_category,
     ocr_priority: row.ocr_priority,
     capture_status: capture.capture_status,
@@ -196,6 +220,8 @@ function imageMapTemplateRow(runId, row) {
     source_url: row.source_url,
     source_title: row.source_title,
     source_type: row.evidence_kind,
+    proof_lane: row.proof_lane || "",
+    proof_lane_rank: row.proof_lane_rank || "",
     ocr_gap_category: row.ocr_gap_category,
     ocr_priority: row.ocr_priority,
     capture_strategy: row.capture_strategy || row.ocr_recommended_action || "",
@@ -242,6 +268,7 @@ function summarize(runId, selectedRows, publicRows, options) {
       local_image_ready: publicRows.filter((row) => /local_image/.test(row.capture_status)).length,
       image_map_template_rows: templateRows.length,
       image_map_key_count: imageMapKeyCount,
+      direct_image_download_failed: count("capture_status", "direct_image_download_failed"),
     },
     public_artifacts: {
       run_summary_csv: options.publicRunSummaryRef,
@@ -276,7 +303,12 @@ async function main() {
   const publicRows = [];
   const imageMapTemplateRows = buildImageMapTemplateRows(runId, selectedRows);
   for (const row of selectedRows) {
-    const capture = await captureRow(row, imageMap, dirs, { dryRun, noNetwork });
+    let capture;
+    try {
+      capture = await captureRow(row, imageMap, dirs, { dryRun, noNetwork });
+    } catch (error) {
+      capture = downloadFailurePlan(row, error);
+    }
     privateRows.push({ ...row, ...capture });
     publicRows.push(publicCaptureRow(row, capture));
   }
@@ -297,6 +329,8 @@ async function main() {
     "vintage_label",
     "source_domain",
     "source_type",
+    "proof_lane",
+    "proof_lane_rank",
     "ocr_gap_category",
     "ocr_priority",
     "capture_status",
@@ -315,6 +349,8 @@ async function main() {
     "vintage_label",
     "source_domain",
     "source_type",
+    "proof_lane",
+    "proof_lane_rank",
     "ocr_gap_category",
     "ocr_priority",
     "capture_status",
@@ -335,6 +371,8 @@ async function main() {
     "source_url",
     "source_title",
     "source_type",
+    "proof_lane",
+    "proof_lane_rank",
     "ocr_gap_category",
     "ocr_priority",
     "capture_strategy",
@@ -370,6 +408,7 @@ module.exports = {
   buildImageMapTemplateRows,
   buildImageMap,
   captureFromLocalImage,
+  downloadFailurePlan,
   imageMapKeysForRow,
   publicCaptureRow,
 };
