@@ -15929,6 +15929,7 @@ function renderCorpusOcrScale() {
   const imageMapAudit = hybrid.image_map_audit || state.data.hybrid_ocr_image_map_audit || {};
   const captureTasks = hybrid.capture_task_summary || state.data.hybrid_ocr_capture_task_summary || {};
   const ocrStructuring = summary.ocr_structuring_summary || state.data.ocr_structuring_summary || {};
+  const candidateExtracts = summary.ocr_candidate_extract_summary || state.data.ocr_candidate_extract_summary || {};
   const candidateCount = numeric(summary.ocr_candidate_count);
   els.corpusOcrCount.textContent = `${formatNumber(candidateCount)} rows`;
 
@@ -15953,6 +15954,8 @@ function renderCorpusOcrScale() {
     ["OCR attempted", hybrid.ocr?.ocr_attempted],
     ["OCR skipped", hybrid.ocr?.ocr_skipped_no_image],
     ["OCR structuring packets", ocrStructuring.packet_count],
+    ["Candidate extracts", candidateExtracts.accepted_candidate_count],
+    ["Rejected extracts", candidateExtracts.rejected_candidate_count],
     ["Review queue", hybrid.review_queue?.rows],
   ];
   els.corpusOcrSummary.innerHTML = `
@@ -15976,6 +15979,7 @@ function renderCorpusOcrScale() {
       <p>${escapeHtml(summary.claim_policy || "OCR output remains candidate evidence until reviewer verified.")}</p>
       <p>${escapeHtml(summary.public_image_policy || "External photos stay link-only; private image maps drive OCR execution.")}</p>
       ${hybrid.model_routes ? `<p>${escapeHtml(`Hybrid routing: ${hybrid.model_routes.spark_model || "Spark"} for bounded packets, ${hybrid.model_routes.gpt55_review_model || "GPT-5.5"} for batch review, ${hybrid.model_routes.grok_research_model || "Grok"} for research assists.`)}</p>` : ""}
+      ${candidateExtracts.public_safety ? `<p>${escapeHtml(`Candidate extract import: ${formatNumber(candidateExtracts.accepted_candidate_count)} accepted, ${formatNumber(candidateExtracts.rejected_candidate_count)} rejected. Public text included: ${candidateExtracts.public_safety.public_text_included ? "yes" : "no"}.`)}</p>` : ""}
       <div class="lead-meta">
         ${artifactLink(summary.queue_csv, "Queue CSV")}
         ${artifactLink(summary.gap_report_csv, "Gap CSV")}
@@ -15987,6 +15991,7 @@ function renderCorpusOcrScale() {
         ${artifactLink(hybrid.public_artifacts?.capture_task_runbook_md || captureTasks.public_artifacts?.capture_task_runbook_md, "Capture Runbook")}
         ${artifactLink(hybrid.public_artifacts?.ocr_summary_csv, "OCR CSV")}
         ${artifactLink(ocrStructuring.public_artifacts?.packet_summary_csv, "OCR Structuring CSV")}
+        ${artifactLink(candidateExtracts.public_artifacts?.candidate_extracts_csv, "Candidate Extracts CSV")}
         ${artifactLink(hybrid.public_artifacts?.model_assist_summary_csv, "Model CSV")}
         ${artifactLink(hybrid.public_artifacts?.review_queue_csv, "Review CSV")}
       </div>

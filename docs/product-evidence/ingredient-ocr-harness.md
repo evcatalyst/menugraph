@@ -124,9 +124,12 @@ node scripts/capture-ingredient-ocr-assets.js --run-id=hybrid-ocr-v1 --limit=250
 node scripts/run-ingredient-ocr.js --run-id=hybrid-ocr-v1 --limit=250
 node scripts/summarize-ingredient-ocr-run.js --run-id=hybrid-ocr-v1
 node scripts/build-ocr-structuring-packets.js --run-id=hybrid-ocr-v1 --packet-size=10
+node scripts/import-ocr-candidate-extracts.js --run-id=hybrid-ocr-v1
 ```
 
 `build-ocr-structuring-packets.js` writes OCR text only to private packet JSON files under `.cache/ingredient-ocr/runs/<run-id>/spark-packets/ocr-structuring/`. The public CSV/JSON expose packet counts, evidence IDs, model route, and signal counts only.
+
+`import-ocr-candidate-extracts.js` reads private Spark/GPT review output from `.cache/ingredient-ocr/runs/<run-id>/gpt55-review/ocr-candidate-extracts.jsonl` by default and writes a public-safe candidate manifest. It rejects rows that try to mark `manual_verified`, rows without an evidence ID, rows with private paths, and rows whose candidate text is contradicted by supplied OCR lines. By default it publishes only field presence, hashes, confidence, review status, and rejection reasons; use `--publish-candidate-text` only when the public page should show clearly labeled candidate OCR text.
 
 Grok-assisted source hunting, when explicitly enabled:
 

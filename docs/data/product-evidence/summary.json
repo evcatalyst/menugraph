@@ -182743,6 +182743,37 @@
       "public_artifacts": {
         "packet_summary_csv": "docs/data/product-evidence/exports/hybrid_ocr_structuring_packets.csv"
       }
+    },
+    "ocr_candidate_extract_summary": {
+      "schema_version": "ingredient_ocr_candidate_extracts_summary.v1",
+      "generated_at": "2026-06-07T20:30:00Z",
+      "run_id": "hybrid-ocr-v1",
+      "input_record_count": 0,
+      "accepted_candidate_count": 0,
+      "rejected_candidate_count": 0,
+      "candidate_review_ready": 0,
+      "needs_manual_transcription": 0,
+      "needs_better_crop": 0,
+      "needs_source_review": 0,
+      "rejected_by_reason": [],
+      "field_presence": {
+        "ingredient_text": 0,
+        "allergen_text": 0,
+        "manufacturer_or_distributor": 0,
+        "net_weight": 0,
+        "serving_size": 0
+      },
+      "public_safety": {
+        "candidate_only": true,
+        "manual_verified_created": false,
+        "promotion_allowed": false,
+        "private_paths_committed": false,
+        "public_text_included": false,
+        "default_text_policy": "Candidate text is omitted by default; use --publish-candidate-text only after deciding the public page may show candidate OCR text with visible candidate labels."
+      },
+      "public_artifacts": {
+        "candidate_extracts_csv": "docs/data/product-evidence/exports/hybrid_ocr_candidate_extracts.csv"
+      }
     }
   },
   "hybrid_ocr_pipeline_summary": {
@@ -186870,6 +186901,37 @@
     },
     "public_artifacts": {
       "packet_summary_csv": "docs/data/product-evidence/exports/hybrid_ocr_structuring_packets.csv"
+    }
+  },
+  "ocr_candidate_extract_summary": {
+    "schema_version": "ingredient_ocr_candidate_extracts_summary.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "run_id": "hybrid-ocr-v1",
+    "input_record_count": 0,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "candidate_review_ready": 0,
+    "needs_manual_transcription": 0,
+    "needs_better_crop": 0,
+    "needs_source_review": 0,
+    "rejected_by_reason": [],
+    "field_presence": {
+      "ingredient_text": 0,
+      "allergen_text": 0,
+      "manufacturer_or_distributor": 0,
+      "net_weight": 0,
+      "serving_size": 0
+    },
+    "public_safety": {
+      "candidate_only": true,
+      "manual_verified_created": false,
+      "promotion_allowed": false,
+      "private_paths_committed": false,
+      "public_text_included": false,
+      "default_text_policy": "Candidate text is omitted by default; use --publish-candidate-text only after deciding the public page may show candidate OCR text with visible candidate labels."
+    },
+    "public_artifacts": {
+      "candidate_extracts_csv": "docs/data/product-evidence/exports/hybrid_ocr_candidate_extracts.csv"
     }
   }
 }
