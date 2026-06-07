@@ -181965,6 +181965,234 @@
         "suggested_future_run": "Review the source photo for front panel, SKU, package size, and date cues before spending OCR effort on an ingredient crop.",
         "example_source_urls": "https://www.flickr.com/photos/36878773%40N07/3782511003; https://commons.wikimedia.org/wiki/File%3ACampbell%27s_Chicken_Noodle_Soup%2C_1910.jpg; https://en.wikipedia.org/wiki/Heinz_Tomato_Ketchup; https://digitalcommons.risd.edu/picturecollection_vintageadvertisements/2/; https://www.upcitemdb.com/upc/040000000327"
       }
-    ]
+    ],
+    "hybrid_pipeline": {
+      "schema_version": "hybrid_ingredient_ocr_public_rollup.v1",
+      "generated_at": "2026-06-07T20:30:00Z",
+      "run_id": "hybrid-ocr-v1",
+      "public_safety": {
+        "images_committed": false,
+        "private_paths_committed": false,
+        "prompts_with_private_paths_committed": false,
+        "api_keys_committed": false,
+        "unverified_ingredient_claims_published": false,
+        "manual_verified_created": false,
+        "candidate_only": true
+      },
+      "model_routes": {
+        "spark_model": "gpt-5.3-codex-spark",
+        "gpt55_review_model": "gpt-5.5",
+        "grok_research_model": "grok-4.3",
+        "spark_packets_generated": 109,
+        "gpt55_review_batches_planned": 5,
+        "grok_assist_batches_created": 0
+      },
+      "capture": {
+        "selected_rows": 250,
+        "rows_captured": 250,
+        "ready_for_ocr": 0,
+        "blocked_no_network": 250
+      },
+      "ocr": {
+        "ocr_result_rows": 0,
+        "ocr_attempted": 0,
+        "ocr_succeeded": 0,
+        "ocr_failed": 0,
+        "ingredient_signal_found": 0,
+        "needs_human_correction": 0
+      },
+      "review_queue": {
+        "rows": 250,
+        "by_status": [
+          {
+            "key": "needs_source_review",
+            "count": 250
+          }
+        ],
+        "candidate_review_ready": 0,
+        "needs_better_crop": 0,
+        "needs_source_review": 250,
+        "needs_manual_transcription": 0
+      },
+      "blockers": {
+        "top_gap_categories": [
+          {
+            "key": "panel_capture_needed",
+            "count": 250
+          }
+        ],
+        "top_source_domains": [
+          {
+            "key": "www.walmart.com",
+            "count": 53
+          },
+          {
+            "key": "smartlabel.pepsico.info",
+            "count": 24
+          },
+          {
+            "key": "www.flickr.com",
+            "count": 20
+          },
+          {
+            "key": "www.kroger.com",
+            "count": 16
+          },
+          {
+            "key": "smartlabel.mondelez.info",
+            "count": 14
+          },
+          {
+            "key": "smartlabel.kelloggs.com",
+            "count": 9
+          },
+          {
+            "key": "upcfoodsearch.com",
+            "count": 8
+          },
+          {
+            "key": "www.foodrepo.org",
+            "count": 7
+          },
+          {
+            "key": "smartlabel.hersheys.com",
+            "count": 5
+          },
+          {
+            "key": "www.campbells.com",
+            "count": 4
+          },
+          {
+            "key": "www.directionsforme.org",
+            "count": 4
+          },
+          {
+            "key": "www.ewg.org",
+            "count": 4
+          }
+        ],
+        "top_products": "Ritz Original Crackers (12); Chips Ahoy! Original Cookies (11); Pop-Tarts Frosted Brown Sugar Cinnamon (8); Wheat Thins Original (8); Campbell's Condensed Tomato Soup (7); Cap'n Crunch Original (7); Mountain Dew Original (7); Pop-Tarts Frosted Strawberry (7); Kellogg's Froot Loops (6); Kellogg's Frosted Flakes (6); Kraft Singles American Cheese (6); Lay's Classic Potato Chips (6)"
+      },
+      "public_artifacts": {
+        "pipeline_summary_json": "docs/data/product-evidence/hybrid_ocr_pipeline_summary.json",
+        "run_summary_csv": "docs/data/product-evidence/exports/hybrid_ocr_run_summary.csv",
+        "model_assist_summary_csv": "docs/data/product-evidence/exports/hybrid_ocr_model_assist_summary.csv",
+        "review_queue_csv": "docs/data/product-evidence/exports/hybrid_ocr_review_queue.csv"
+      }
+    }
+  },
+  "hybrid_ocr_pipeline_summary": {
+    "schema_version": "hybrid_ingredient_ocr_public_rollup.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "run_id": "hybrid-ocr-v1",
+    "public_safety": {
+      "images_committed": false,
+      "private_paths_committed": false,
+      "prompts_with_private_paths_committed": false,
+      "api_keys_committed": false,
+      "unverified_ingredient_claims_published": false,
+      "manual_verified_created": false,
+      "candidate_only": true
+    },
+    "model_routes": {
+      "spark_model": "gpt-5.3-codex-spark",
+      "gpt55_review_model": "gpt-5.5",
+      "grok_research_model": "grok-4.3",
+      "spark_packets_generated": 109,
+      "gpt55_review_batches_planned": 5,
+      "grok_assist_batches_created": 0
+    },
+    "capture": {
+      "selected_rows": 250,
+      "rows_captured": 250,
+      "ready_for_ocr": 0,
+      "blocked_no_network": 250
+    },
+    "ocr": {
+      "ocr_result_rows": 0,
+      "ocr_attempted": 0,
+      "ocr_succeeded": 0,
+      "ocr_failed": 0,
+      "ingredient_signal_found": 0,
+      "needs_human_correction": 0
+    },
+    "review_queue": {
+      "rows": 250,
+      "by_status": [
+        {
+          "key": "needs_source_review",
+          "count": 250
+        }
+      ],
+      "candidate_review_ready": 0,
+      "needs_better_crop": 0,
+      "needs_source_review": 250,
+      "needs_manual_transcription": 0
+    },
+    "blockers": {
+      "top_gap_categories": [
+        {
+          "key": "panel_capture_needed",
+          "count": 250
+        }
+      ],
+      "top_source_domains": [
+        {
+          "key": "www.walmart.com",
+          "count": 53
+        },
+        {
+          "key": "smartlabel.pepsico.info",
+          "count": 24
+        },
+        {
+          "key": "www.flickr.com",
+          "count": 20
+        },
+        {
+          "key": "www.kroger.com",
+          "count": 16
+        },
+        {
+          "key": "smartlabel.mondelez.info",
+          "count": 14
+        },
+        {
+          "key": "smartlabel.kelloggs.com",
+          "count": 9
+        },
+        {
+          "key": "upcfoodsearch.com",
+          "count": 8
+        },
+        {
+          "key": "www.foodrepo.org",
+          "count": 7
+        },
+        {
+          "key": "smartlabel.hersheys.com",
+          "count": 5
+        },
+        {
+          "key": "www.campbells.com",
+          "count": 4
+        },
+        {
+          "key": "www.directionsforme.org",
+          "count": 4
+        },
+        {
+          "key": "www.ewg.org",
+          "count": 4
+        }
+      ],
+      "top_products": "Ritz Original Crackers (12); Chips Ahoy! Original Cookies (11); Pop-Tarts Frosted Brown Sugar Cinnamon (8); Wheat Thins Original (8); Campbell's Condensed Tomato Soup (7); Cap'n Crunch Original (7); Mountain Dew Original (7); Pop-Tarts Frosted Strawberry (7); Kellogg's Froot Loops (6); Kellogg's Frosted Flakes (6); Kraft Singles American Cheese (6); Lay's Classic Potato Chips (6)"
+    },
+    "public_artifacts": {
+      "pipeline_summary_json": "docs/data/product-evidence/hybrid_ocr_pipeline_summary.json",
+      "run_summary_csv": "docs/data/product-evidence/exports/hybrid_ocr_run_summary.csv",
+      "model_assist_summary_csv": "docs/data/product-evidence/exports/hybrid_ocr_model_assist_summary.csv",
+      "review_queue_csv": "docs/data/product-evidence/exports/hybrid_ocr_review_queue.csv"
+    }
   }
 }

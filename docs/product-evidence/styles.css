@@ -17112,7 +17112,7 @@ td {
 
 .corpus-ocr-summary {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(260px, 0.8fr);
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -17121,6 +17121,10 @@ td {
   display: grid;
   grid-template-columns: repeat(6, minmax(92px, 1fr));
   gap: 8px;
+}
+
+.corpus-ocr-summary > .corpus-ocr-stat-grid {
+  grid-template-columns: repeat(2, minmax(92px, 1fr));
 }
 
 .corpus-ocr-stat,

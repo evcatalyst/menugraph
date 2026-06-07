@@ -1,0 +1,282 @@
+const fs = require("fs");
+const path = require("path");
+const {
+  argValue,
+  ensureRunDirs,
+  generatedAt,
+  hasFlag,
+  hashFile,
+  numberArg,
+  publicRunSummaryCsvPath,
+  readFullQueue,
+  readJson,
+  redactPrivate,
+  runDirFromArgs,
+  runIdFromArgs,
+  selectQueueRows,
+  shortHash,
+  slug,
+  writeCsv,
+  writeJson,
+} = require("./ingredient-ocr-pipeline-utils");
+
+function imageMapValue(imageMap, row) {
+  if (!imageMap) return "";
+  const candidates = [
+    row.evidence_id,
+    `${row.product_id}:${row.evidence_id}`,
+    row.source_url,
+  ].filter(Boolean);
+  for (const key of candidates) {
+    const value = imageMap[key];
+    if (value && fs.existsSync(value)) return value;
+  }
+  return "";
+}
+
+function extensionFor(value, fallback = ".jpg") {
+  const ext = path.extname(String(value || "").split("?")[0]).toLowerCase();
+  return /^\.(jpg|jpeg|png|webp|gif|tif|tiff|heic)$/.test(ext) ? ext : fallback;
+}
+
+function privateAssetName(row, sourcePath = "") {
+  const product = slug(row.product_id || row.product_name || "product");
+  const vintage = slug(row.vintage_label || "vintage");
+  const evidence = slug(row.evidence_id || shortHash(row.source_url || sourcePath));
+  return `${product}__${vintage}__${evidence}${extensionFor(sourcePath)}`;
+}
+
+function captureFromLocalImage(row, sourcePath, dirs, dryRun = false) {
+  const name = privateAssetName(row, sourcePath);
+  const capturePath = path.join(dirs.capturesDir, name);
+  const processedPath = path.join(dirs.processedDir, name);
+  if (!dryRun) {
+    fs.copyFileSync(sourcePath, capturePath);
+    fs.copyFileSync(sourcePath, processedPath);
+  }
+  const originalHash = dryRun ? shortHash(`${sourcePath}:dry-run`) : hashFile(capturePath);
+  const processedHash = dryRun ? originalHash : hashFile(processedPath);
+  return {
+    evidence_id: row.evidence_id,
+    capture_status: dryRun ? "local_image_ready_dry_run" : "captured_local_image",
+    processed_status: dryRun ? "cleanup_planned" : "processed_passthrough",
+    original_sha256: originalHash,
+    processed_sha256: processedHash,
+    original_private_path: capturePath,
+    processed_private_path: processedPath,
+    cleanup_actions: ["preserve_original", "copy_for_vision_ocr", "defer_crop_deskew_until_panel_coordinates"],
+    image_map_value: processedPath,
+  };
+}
+
+async function downloadDirectImage(row, dirs, dryRun = false) {
+  const url = row.image_reference || "";
+  const name = privateAssetName(row, url);
+  const capturePath = path.join(dirs.capturesDir, name);
+  const processedPath = path.join(dirs.processedDir, name);
+  if (dryRun) {
+    return {
+      evidence_id: row.evidence_id,
+      capture_status: "direct_image_download_planned",
+      processed_status: "cleanup_planned",
+      original_sha256: shortHash(url),
+      processed_sha256: shortHash(`${url}:processed`),
+      original_private_path: capturePath,
+      processed_private_path: processedPath,
+      cleanup_actions: ["download_external_image_privately", "deskew_or_rotate", "contrast_sharpen", "crop_panel_candidate"],
+      image_map_value: processedPath,
+    };
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Image download failed ${response.status} ${url}`);
+  const buffer = Buffer.from(await response.arrayBuffer());
+  fs.writeFileSync(capturePath, buffer);
+  fs.writeFileSync(processedPath, buffer);
+  return {
+    evidence_id: row.evidence_id,
+    capture_status: "downloaded_direct_image",
+    processed_status: "processed_passthrough",
+    original_sha256: hashFile(capturePath),
+    processed_sha256: hashFile(processedPath),
+    original_private_path: capturePath,
+    processed_private_path: processedPath,
+    cleanup_actions: ["download_external_image_privately", "copy_for_vision_ocr", "defer_crop_deskew_until_panel_coordinates"],
+    image_map_value: processedPath,
+  };
+}
+
+function sourcePagePlan(row, noNetwork) {
+  return {
+    evidence_id: row.evidence_id,
+    capture_status: noNetwork ? "source_page_capture_blocked_no_network" : "source_page_capture_requires_browser_or_screenshot",
+    processed_status: "not_ready_for_ocr",
+    original_sha256: "",
+    processed_sha256: "",
+    original_private_path: "",
+    processed_private_path: "",
+    cleanup_actions: [
+      "capture_rights_safe_private_screenshot",
+      "crop_visible_label_or_document_surface",
+      "deskew_rotate_contrast_sharpen",
+    ],
+    image_map_value: "",
+  };
+}
+
+async function captureRow(row, imageMap, dirs, options) {
+  const mappedImage = imageMapValue(imageMap, row);
+  if (mappedImage) return captureFromLocalImage(row, mappedImage, dirs, options.dryRun);
+  if (row.local_image_path && fs.existsSync(row.local_image_path)) {
+    return captureFromLocalImage(row, row.local_image_path, dirs, options.dryRun);
+  }
+  if (row.image_reference && /^https?:\/\/.+\.(jpe?g|png|webp|gif|tiff?|heic)(\?|$)/i.test(row.image_reference)) {
+    if (options.noNetwork) return sourcePagePlan(row, true);
+    return downloadDirectImage(row, dirs, options.dryRun);
+  }
+  return sourcePagePlan(row, options.noNetwork);
+}
+
+function publicCaptureRow(row, capture) {
+  return {
+    evidence_id: row.evidence_id,
+    product_id: row.product_id,
+    product_name: row.product_name,
+    vintage_label: row.vintage_label,
+    source_domain: row.source_domain,
+    source_type: row.evidence_kind,
+    ocr_gap_category: row.ocr_gap_category,
+    ocr_priority: row.ocr_priority,
+    capture_status: capture.capture_status,
+    processed_status: capture.processed_status,
+    original_sha256: capture.original_sha256,
+    processed_sha256: capture.processed_sha256,
+    cleanup_actions: capture.cleanup_actions.join("; "),
+    ready_for_ocr: capture.image_map_value ? 1 : 0,
+    candidate_only: 1,
+  };
+}
+
+function buildImageMap(captureRows) {
+  const map = {};
+  for (const row of captureRows) {
+    if (row.image_map_value) map[row.evidence_id] = row.image_map_value;
+  }
+  return map;
+}
+
+function summarize(runId, selectedRows, publicRows, options) {
+  const count = (field, value) => publicRows.filter((row) => row[field] === value).length;
+  return {
+    schema_version: "hybrid_ingredient_ocr_capture_summary.v1",
+    generated_at: generatedAt,
+    run_id: runId,
+    run_mode: options.dryRun ? "dry_run" : "private_capture",
+    public_safety: {
+      candidate_only: true,
+      images_committed: false,
+      private_paths_redacted: true,
+      private_prompts_committed: false,
+    },
+    totals: {
+      selected_rows: selectedRows.length,
+      rows_captured: publicRows.length,
+      ready_for_ocr: publicRows.filter((row) => Number(row.ready_for_ocr)).length,
+      source_page_capture_blocked_no_network: count("capture_status", "source_page_capture_blocked_no_network"),
+      direct_image_download_planned: count("capture_status", "direct_image_download_planned"),
+      local_image_ready: publicRows.filter((row) => /local_image/.test(row.capture_status)).length,
+    },
+    public_artifacts: {
+      run_summary_csv: "docs/data/product-evidence/exports/hybrid_ocr_run_summary.csv",
+    },
+  };
+}
+
+async function main() {
+  const runId = runIdFromArgs("hybrid-ocr");
+  const runDir = runDirFromArgs(runId);
+  const limit = numberArg("limit", 250);
+  const dryRun = hasFlag("dry-run");
+  const noNetwork = hasFlag("no-network") || dryRun;
+  const dirs = ensureRunDirs(runDir);
+  const imageMapPath = argValue("image-map");
+  const imageMap = readJson(imageMapPath, {});
+  const rows = readFullQueue();
+  const selectedRows = selectQueueRows(rows, {
+    limit,
+    product: argValue("product"),
+    category: argValue("category"),
+    sourceDomain: argValue("source-domain"),
+    gapCategory: argValue("gap-category"),
+    priority: argValue("priority"),
+  });
+
+  const privateRows = [];
+  const publicRows = [];
+  for (const row of selectedRows) {
+    const capture = await captureRow(row, imageMap, dirs, { dryRun, noNetwork });
+    privateRows.push({ ...row, ...capture });
+    publicRows.push(publicCaptureRow(row, capture));
+  }
+
+  writeJson(path.join(runDir, "capture_manifest.private.json"), privateRows);
+  writeJson(path.join(runDir, "image-map.json"), buildImageMap(privateRows));
+  const summary = redactPrivate(summarize(runId, selectedRows, publicRows, { dryRun }));
+  writeJson(path.join(runDir, "capture_summary.public.json"), summary);
+  writeCsv(path.join(runDir, "capture_summary.public.csv"), [
+    "evidence_id",
+    "product_id",
+    "product_name",
+    "vintage_label",
+    "source_domain",
+    "source_type",
+    "ocr_gap_category",
+    "ocr_priority",
+    "capture_status",
+    "processed_status",
+    "original_sha256",
+    "processed_sha256",
+    "cleanup_actions",
+    "ready_for_ocr",
+    "candidate_only",
+  ], publicRows);
+  writeCsv(publicRunSummaryCsvPath, [
+    "run_id",
+    "evidence_id",
+    "product_id",
+    "product_name",
+    "vintage_label",
+    "source_domain",
+    "source_type",
+    "ocr_gap_category",
+    "ocr_priority",
+    "capture_status",
+    "processed_status",
+    "original_sha256",
+    "processed_sha256",
+    "cleanup_actions",
+    "ready_for_ocr",
+    "candidate_only",
+  ], publicRows.map((row) => ({ run_id: runId, ...row })));
+
+  console.log(JSON.stringify({
+    run_id: runId,
+    selected_rows: selectedRows.length,
+    rows_captured: publicRows.length,
+    ready_for_ocr: summary.totals.ready_for_ocr,
+    dry_run: dryRun,
+  }, null, 2));
+}
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.stack || error.message);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  buildImageMap,
+  captureFromLocalImage,
+  publicCaptureRow,
+};

@@ -15874,6 +15874,7 @@ function artifactLink(value, label) {
 function renderCorpusOcrScale() {
   if (!els.corpusOcrSummary) return;
   const summary = state.data.ingredient_ocr_summary || {};
+  const hybrid = summary.hybrid_pipeline || state.data.hybrid_ocr_pipeline_summary || {};
   const candidateCount = numeric(summary.ocr_candidate_count);
   els.corpusOcrCount.textContent = `${formatNumber(candidateCount)} rows`;
 
@@ -15885,6 +15886,14 @@ function renderCorpusOcrScale() {
     ["Needs capture/discovery", summary.not_easily_accessible_count],
     ["Visible panels", summary.ingredient_panel_visible_count],
   ];
+  const hybridCards = [
+    ["Spark packets", hybrid.model_routes?.spark_packets_generated],
+    ["GPT-5.5 batches", hybrid.model_routes?.gpt55_review_batches_planned],
+    ["Grok assists", hybrid.model_routes?.grok_assist_batches_created],
+    ["Captured", hybrid.capture?.rows_captured],
+    ["OCR attempted", hybrid.ocr?.ocr_attempted],
+    ["Review queue", hybrid.review_queue?.rows],
+  ];
   els.corpusOcrSummary.innerHTML = `
     <div class="corpus-ocr-stat-grid">
       ${summaryCards.map(([label, value]) => `
@@ -15894,13 +15903,25 @@ function renderCorpusOcrScale() {
         </article>
       `).join("")}
     </div>
+    <div class="corpus-ocr-stat-grid corpus-ocr-hybrid-grid">
+      ${hybridCards.map(([label, value]) => `
+        <article class="corpus-ocr-stat">
+          <strong>${formatNumber(value)}</strong>
+          <span>${escapeHtml(label)}</span>
+        </article>
+      `).join("")}
+    </div>
     <div class="corpus-ocr-policy">
       <p>${escapeHtml(summary.claim_policy || "OCR output remains candidate evidence until reviewer verified.")}</p>
       <p>${escapeHtml(summary.public_image_policy || "External photos stay link-only; private image maps drive OCR execution.")}</p>
+      ${hybrid.model_routes ? `<p>${escapeHtml(`Hybrid routing: ${hybrid.model_routes.spark_model || "Spark"} for bounded packets, ${hybrid.model_routes.gpt55_review_model || "GPT-5.5"} for batch review, ${hybrid.model_routes.grok_research_model || "Grok"} for research assists.`)}</p>` : ""}
       <div class="lead-meta">
         ${artifactLink(summary.queue_csv, "Queue CSV")}
         ${artifactLink(summary.gap_report_csv, "Gap CSV")}
         ${artifactLink(summary.manifest_path, "Manifest")}
+        ${artifactLink(hybrid.public_artifacts?.run_summary_csv, "Capture CSV")}
+        ${artifactLink(hybrid.public_artifacts?.model_assist_summary_csv, "Model CSV")}
+        ${artifactLink(hybrid.public_artifacts?.review_queue_csv, "Review CSV")}
       </div>
     </div>
   `;
