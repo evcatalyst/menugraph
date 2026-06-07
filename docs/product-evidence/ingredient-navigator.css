@@ -199,6 +199,40 @@ a:hover {
   text-align: left;
 }
 
+.product-strip-summary {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  flex: 0 0 250px;
+  min-height: 96px;
+  border: 1px solid rgba(101, 183, 177, 0.42);
+  border-radius: 8px;
+  background: rgba(22, 23, 20, 0.82);
+  padding: 10px;
+}
+
+.product-strip-summary span {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.product-strip-summary strong {
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.08;
+}
+
+.product-strip-summary p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .product-card[disabled] {
   cursor: not-allowed;
   opacity: 0.54;
@@ -621,6 +655,43 @@ a:hover {
   align-content: start;
   gap: 8px;
   padding: 10px;
+}
+
+.proof-receipt-visual {
+  display: grid;
+  gap: 6px;
+  min-height: 128px;
+  border: 1px solid rgba(101, 183, 177, 0.3);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(101, 183, 177, 0.14), transparent 48%),
+    linear-gradient(0deg, rgba(245, 240, 230, 0.05), rgba(245, 240, 230, 0.02)),
+    rgba(13, 14, 12, 0.72);
+  padding: 12px;
+}
+
+.proof-receipt-visual span,
+.proof-receipt-visual em {
+  color: var(--clay);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.proof-receipt-visual strong {
+  align-self: end;
+  color: var(--ink);
+  font-size: 26px;
+  line-height: 0.98;
+  overflow-wrap: anywhere;
+}
+
+.proof-receipt-visual em {
+  color: var(--muted);
+  text-transform: none;
 }
 
 .proof-photo-receipt strong {

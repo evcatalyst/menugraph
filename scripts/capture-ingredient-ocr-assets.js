@@ -8,6 +8,7 @@ const {
   hashFile,
   numberArg,
   pathFromArg,
+  publicArtifactRef,
   publicRunSummaryCsvPath,
   queuePathFromArgs,
   readFullQueue,
@@ -229,7 +230,7 @@ async function main() {
   writeJson(path.join(runDir, "image-map.json"), buildImageMap(privateRows));
   const summary = redactPrivate(summarize(runId, selectedRows, publicRows, {
     dryRun,
-    publicRunSummaryRef: path.relative(root, publicRunSummaryPath),
+    publicRunSummaryRef: publicArtifactRef(publicRunSummaryPath),
   }));
   writeJson(path.join(runDir, "capture_summary.public.json"), summary);
   writeCsv(path.join(runDir, "capture_summary.public.csv"), [

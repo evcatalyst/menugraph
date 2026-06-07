@@ -1,0 +1,102 @@
+run_id,evidence_id,product_id,product_name,vintage_label,source_domain,ocr_status,processor,image_sha256,line_count,ingredient_signal_found,ingredient_signal_line_count,average_confidence,private_image_present,candidate_only,manual_verified
+pilot-photo-capture-dry-run,flickr_oreo_1960s,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,flickr_oreo_1993,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,1990s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,flickr_oreo_1960s_box,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,packaging_digest_century,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,1980s_or_earlier,www.packagingdigest.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,seattlepi_century,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,1980s_or_earlier,www.seattlepi.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_5,campbells_tomato_soup,Campbell's Condensed Tomato Soup,1980s_or_earlier,www.ingredientinspector.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_1,cheerios_original,Cheerios Original,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,coca_cola_classic_evidence_1,coca_cola_classic,Coca-Cola Classic,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_10,campbells_tomato_soup,Campbell's Condensed Tomato Soup,current_2020s,www.campbellsfoodservice.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_7,campbells_tomato_soup,Campbell's Condensed Tomato Soup,current_2020s,www.campbells.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_8,campbells_tomato_soup,Campbell's Condensed Tomato Soup,current_2020s,www.campbells.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_9,campbells_tomato_soup,Campbell's Condensed Tomato Soup,current_2020s,www.campbells.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_8,cheerios_original,Cheerios Original,current_2020s,www.cheerios.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,coca_cola_classic_evidence_6,coca_cola_classic,Coca-Cola Classic,current_2020s,www.coca-cola.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_10,doritos_nacho_cheese,Doritos Nacho Cheese,current_2020s,smartlabel.pepsico.info,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_7,doritos_nacho_cheese,Doritos Nacho Cheese,2010s;current_2020s,www.heb.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_8,doritos_nacho_cheese,Doritos Nacho Cheese,current_2020s,wvww.gardengrocer.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_9,doritos_nacho_cheese,Doritos Nacho Cheese,current_2020s,www.kroger.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_6,heinz_tomato_ketchup,Heinz Tomato Ketchup,current_2020s,www.walmart.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_7,heinz_tomato_ketchup,Heinz Tomato Ketchup,current_2020s,www.walmart.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_8,heinz_tomato_ketchup,Heinz Tomato Ketchup,current_2020s,www.heinz.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_9,heinz_tomato_ketchup,Heinz Tomato Ketchup,current_2020s,www.henderson-foodservice.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_10,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,current_2020s,giantfood.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_11,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,current_2020s,www.super99.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_8,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,current_2020s,www.walmart.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_9,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,current_2020s,www.walmart.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_big_mac_evidence_4,mcdonalds_big_mac,McDonald's Big Mac,2000s;2010s,www.canceredinstitute.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_big_mac_evidence_5,mcdonalds_big_mac,McDonald's Big Mac,current_2020s,www.mcdonalds.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_big_mac_evidence_6,mcdonalds_big_mac,McDonald's Big Mac,current_2020s,www.mcdonalds.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_4,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,2000s;2010s,s3.amazonaws.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_5,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,2000s;2010s,www.canceredinstitute.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_6,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,2010s,krissyowens.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_7,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,current_2020s,www.mcdonalds.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_8,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,current_2020s,www.mcdonalds.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,ewg_oreo_current,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,current_2020s,www.ewg.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,ewg_oreo_winter_2010,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,2010s,www.ewg.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kroger_oreo_current,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,current_2020s,www.kroger.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,smartlabel_oreo_143,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,current_2020s,smartlabel.mondelez.info,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,walmart_oreo_current,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,current_2020s,business.walmart.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_10,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,current_2020s,www.poptarts.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_6,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,2010s,www.foodrepo.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_7,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,current_2020s,smartlabel.kelloggs.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_8,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,current_2020s,www.poptarts.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_9,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,current_2020s,www.walmart.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_0,campbells_tomato_soup,Campbell's Condensed Tomato Soup,earliest_verified_label,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_1,campbells_tomato_soup,Campbell's Condensed Tomato Soup,earliest_verified_label;1980s_or_earlier,commons.wikimedia.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_2,campbells_tomato_soup,Campbell's Condensed Tomato Soup,earliest_verified_label,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_3,campbells_tomato_soup,Campbell's Condensed Tomato Soup,earliest_verified_label;1980s_or_earlier,www.loc.gov,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_0,cheerios_original,Cheerios Original,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_2,cheerios_original,Cheerios Original,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_3,cheerios_original,Cheerios Original,earliest_verified_label,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_4,cheerios_original,Cheerios Original,1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_5,cheerios_original,Cheerios Original,1990s,theimaginaryworld.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_6,cheerios_original,Cheerios Original,1990s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,coca_cola_classic_evidence_0,coca_cola_classic,Coca-Cola Classic,earliest_verified_label;1980s_or_earlier,commons.wikimedia.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,coca_cola_classic_evidence_2,coca_cola_classic,Coca-Cola Classic,earliest_verified_label;2000s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,coca_cola_classic_evidence_3,coca_cola_classic,Coca-Cola Classic,earliest_verified_label;2000s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,coca_cola_classic_evidence_4,coca_cola_classic,Coca-Cola Classic,1990s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_0,doritos_nacho_cheese,Doritos Nacho Cheese,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_1,doritos_nacho_cheese,Doritos Nacho Cheese,earliest_verified_label;1990s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_2,doritos_nacho_cheese,Doritos Nacho Cheese,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_3,doritos_nacho_cheese,Doritos Nacho Cheese,earliest_verified_label;1990s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_4,doritos_nacho_cheese,Doritos Nacho Cheese,1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_5,doritos_nacho_cheese,Doritos Nacho Cheese,1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_0,heinz_tomato_ketchup,Heinz Tomato Ketchup,earliest_verified_label,laurelleaffarm.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_2,heinz_tomato_ketchup,Heinz Tomato Ketchup,earliest_verified_label;1980s_or_earlier,antiqueadvertising.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_0,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_1,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,earliest_verified_label;1990s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_2,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,earliest_verified_label;1980s_or_earlier,www.ebay.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_3,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_4,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_5,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,1990s,americanhistory.si.edu,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_6,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,1990s,americanhistory.si.edu,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_big_mac_evidence_0,mcdonalds_big_mac,McDonald's Big Mac,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_big_mac_evidence_2,mcdonalds_big_mac,McDonald's Big Mac,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_big_mac_evidence_3,mcdonalds_big_mac,McDonald's Big Mac,1990s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_0,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_1,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_3,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_0,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_1,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_2,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,earliest_verified_label;2000s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_3,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,earliest_verified_label;2000s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_6,campbells_tomato_soup,Campbell's Condensed Tomato Soup,2010s,commons.wikimedia.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,cheerios_original_evidence_7,cheerios_original,Cheerios Original,2000s,americanhistory.si.edu,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,coca_cola_classic_evidence_5,coca_cola_classic,Coca-Cola Classic,2010s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,doritos_nacho_cheese_evidence_6,doritos_nacho_cheese,Doritos Nacho Cheese,2000s;2010s,commons.wikimedia.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_5,heinz_tomato_ketchup,Heinz Tomato Ketchup,2000s,flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,kraft_macaroni_and_cheese_original_evidence_7,kraft_macaroni_and_cheese_original,Kraft Macaroni & Cheese Original,2010s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,flickr_oreo_nascar_2010,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,2010s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,flickr_oreo_spring_2010,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,2010s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,flickr_oreo_uhoh_2002,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,2000s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_4,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,2000s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,poptarts_frosted_strawberry_evidence_5,poptarts_frosted_strawberry,Pop-Tarts Frosted Strawberry,2000s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,campbells_tomato_soup_evidence_4,campbells_tomato_soup,Campbell's Condensed Tomato Soup,1980s_or_earlier,www.artsbma.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_1,heinz_tomato_ketchup,Heinz Tomato Ketchup,earliest_verified_label;1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_3,heinz_tomato_ketchup,Heinz Tomato Ketchup,earliest_verified_label,en.wikipedia.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,heinz_tomato_ketchup_evidence_4,heinz_tomato_ketchup,Heinz Tomato Ketchup,1980s_or_earlier,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_big_mac_evidence_1,mcdonalds_big_mac,McDonald's Big Mac,earliest_verified_label;2000s;2010s,grist.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,mcdonalds_chicken_mcnuggets_evidence_2,mcdonalds_chicken_mcnuggets,McDonald's Chicken McNuggets,earliest_verified_label;2000s;2010s,grist.org,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0
+pilot-photo-capture-dry-run,flickr_oreo_harley_2000,oreo_original_chocolate_sandwich_cookies,Oreo Original Chocolate Sandwich Cookies,2000s,www.flickr.com,ocr_skipped_no_image,not_run,,0,0,0,,0,1,0

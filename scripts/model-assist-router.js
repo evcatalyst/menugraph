@@ -11,6 +11,7 @@ const {
   parseCsv,
   pathFromArg,
   promptHash,
+  publicArtifactRef,
   publicModelSummaryCsvPath,
   queuePathFromArgs,
   readFullQueue,
@@ -376,7 +377,7 @@ async function main() {
     allowed_capture_strategies: allowedCaptureStrategies,
     allowed_gpt55_review_statuses: reviewStatuses,
     public_artifacts: {
-      model_assist_summary_csv: path.relative(root, publicModelSummaryPath),
+      model_assist_summary_csv: publicArtifactRef(publicModelSummaryPath),
     },
   });
   writeJson(path.join(runDir, "model_assist_summary.public.json"), summary);
