@@ -1,0 +1,81 @@
+{
+  "schema_version": "ingredient_ocr_manual_verification_summary.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "hybrid-ocr-v1",
+  "candidate_extract_rows": 0,
+  "source_review_rows": 250,
+  "verification_queue_rows": 250,
+  "candidate_extract_review_rows": 0,
+  "needs_manual_transcription_rows": 0,
+  "needs_better_crop_rows": 0,
+  "needs_source_review_rows": 250,
+  "rejected_audit_rows": 0,
+  "by_lane": [
+    {
+      "key": "needs_source_review",
+      "count": 250
+    }
+  ],
+  "top_products": [
+    {
+      "key": "Ritz Original Crackers",
+      "count": 12
+    },
+    {
+      "key": "Chips Ahoy! Original Cookies",
+      "count": 11
+    },
+    {
+      "key": "Pop-Tarts Frosted Brown Sugar Cinnamon",
+      "count": 8
+    },
+    {
+      "key": "Wheat Thins Original",
+      "count": 8
+    },
+    {
+      "key": "Campbell's Condensed Tomato Soup",
+      "count": 7
+    },
+    {
+      "key": "Cap'n Crunch Original",
+      "count": 7
+    },
+    {
+      "key": "Mountain Dew Original",
+      "count": 7
+    },
+    {
+      "key": "Pop-Tarts Frosted Strawberry",
+      "count": 7
+    },
+    {
+      "key": "Kellogg's Froot Loops",
+      "count": 6
+    },
+    {
+      "key": "Kellogg's Frosted Flakes",
+      "count": 6
+    },
+    {
+      "key": "Kraft Singles American Cheese",
+      "count": 6
+    },
+    {
+      "key": "Lay's Classic Potato Chips",
+      "count": 6
+    }
+  ],
+  "public_safety": {
+    "candidate_only": true,
+    "manual_verified_created": false,
+    "claim_promotion_allowed": false,
+    "reviewer_fields_blank_by_default": true,
+    "public_text_included": false,
+    "private_paths_committed": false
+  },
+  "promotion_policy": "This queue is a reviewer worklist only. A separate human-reviewed artifact must record corrected text, reviewer, reviewed_at, and decision before any evidence can become manual_verified.",
+  "public_artifacts": {
+    "manual_verification_queue_csv": "docs/data/product-evidence/exports/hybrid_ocr_manual_verification_queue.csv"
+  }
+}
