@@ -14290,6 +14290,112 @@ function storyProofBeatRows(card, evidenceRows) {
   ];
 }
 
+function readerStoryFrame(card, evidenceRows) {
+  const product = card.product;
+  const facts = storyEvidenceFacts(evidenceRows);
+  const publicationState = storyPublicationState(card, evidenceRows);
+  const name = storyDisplayTitle(card);
+  const sourceBacked = product
+    ? `${formatNumber(product.slots_with_sources || 0)} of ${formatNumber(product.slots_total || state.data.vintages.length)}`
+    : pluralize(facts.sourceLinks, "source link");
+  const sourcePath = product ? storySourcePath(product, evidenceRows).slice(0, 4) : [];
+  const isOreo = /oreo/i.test(`${product?.display_name || ""} ${product?.canonical_name || ""}`);
+  const thesis = isOreo
+    ? "This is not yet the story of how Oreo's recipe changed. It is the story of how a package history becomes a recipe history only when each label earns its place."
+    : product
+      ? `${name} has a product-history path, but ingredient-change language waits for comparable reviewed label text.`
+      : "The reader should see evidence becoming claims, with every unsupported step held in view.";
+  const readerPayoff = isOreo
+    ? "The tension is the proof break: current label leads and vintage package objects exist, but the original-to-current ingredient claim is still locked."
+    : "The useful story is where proof gets stronger, where it breaks, and which source would change the conclusion.";
+  const noClaim = isOreo
+    ? "Do not imply a verified 1912 Oreo ingredient statement or a full original-to-current formulation diff."
+    : storyCannotSayYet(card, evidenceRows);
+  const unlock = facts.visibleLabels || facts.ocrLabels
+    ? "Turn the label-visible records into corrected OCR/manual transcriptions with reviewer attribution."
+    : storyNextEvidenceStep(card, evidenceRows);
+  return {
+    name,
+    status: publicationState.status,
+    label: publicationState.label,
+    thesis,
+    metrics: [
+      ["Source-backed slots", sourceBacked],
+      ["Label-visible leads", facts.visibleLabels],
+      ["Verified labels", facts.manualLabels],
+      ["Source links", facts.sourceLinks],
+    ],
+    beats: [
+      {
+        label: "Say Now",
+        title: "A sourced package journey exists",
+        body: product
+          ? `${name} has source leads in ${sourceBacked} vintage slots, enough to show a research route without overstating formulation change.`
+          : storySupportedNow(card, evidenceRows),
+        status: facts.sourceLinks ? "source_review" : "discovered",
+      },
+      {
+        label: "Hold",
+        title: "The recipe claim is not earned",
+        body: noClaim,
+        status: facts.manualLabels ? "manual_verified" : "missing_vintage_slot",
+      },
+      {
+        label: "Reader Payoff",
+        title: "Show the proof break",
+        body: readerPayoff,
+        status: publicationState.status,
+      },
+      {
+        label: "Unlock",
+        title: facts.visibleLabels || facts.ocrLabels ? "Transcribe visible labels" : "Find readable labels",
+        body: unlock,
+        status: facts.visibleLabels || facts.ocrLabels ? "label_visible" : "candidate_needs_panel",
+      },
+    ],
+    sourcePath,
+  };
+}
+
+function renderReaderStoryFrame(card, evidenceRows) {
+  const frame = readerStoryFrame(card, evidenceRows);
+  return `
+    <section class="reader-storyline status-${escapeHtml(frame.status)}" aria-label="Reader story frame">
+      <header class="reader-storyline-head">
+        <div>
+          <p class="eyebrow">Reader Story</p>
+          <h4>${escapeHtml(frame.name)}</h4>
+          <p>${escapeHtml(frame.thesis)}</p>
+          <div class="lead-meta">
+            ${statusTag(frame.status)}
+            <span class="status-tag">${escapeHtml(frame.label)}</span>
+          </div>
+        </div>
+        <aside class="reader-storyline-metrics" aria-label="Story evidence metrics">
+          ${frame.metrics
+            .map(([label, value]) => `<span><strong>${escapeHtml(value)}</strong>${escapeHtml(label)}</span>`)
+            .join("")}
+        </aside>
+      </header>
+      <div class="reader-storyline-grid">
+        ${frame.beats
+          .map((beat) => `
+            <article class="reader-storyline-beat status-${escapeHtml(beat.status)}">
+              <span>${escapeHtml(beat.label)}</span>
+              <strong>${escapeHtml(beat.title)}</strong>
+              <p>${escapeHtml(beat.body)}</p>
+              ${statusTag(beat.status)}
+            </article>
+          `)
+          .join("")}
+      </div>
+      ${frame.sourcePath.length
+        ? `<footer class="reader-storyline-sources">${frame.sourcePath.map((source) => `<span>${escapeHtml(source)}</span>`).join("")}</footer>`
+        : ""}
+    </section>
+  `;
+}
+
 function renderStoryReader(card, evidenceRows) {
   const headline = storyReaderHeadline(card, evidenceRows);
   const publicationState = storyPublicationState(card, evidenceRows);
@@ -15400,6 +15506,7 @@ function renderStoryFocus(card, registryRows) {
         </div>
       </div>
       ${renderStoryReader(card, evidenceRows)}
+      ${renderReaderStoryFrame(card, evidenceRows)}
       ${renderProductRecipeJourney(card, evidenceRows)}
       ${renderStoryBrief(card, evidenceRows)}
       <div class="story-proof-grid">${renderStoryClaimCards(card)}</div>
