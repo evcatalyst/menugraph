@@ -73,6 +73,8 @@ assert(pipelineSummary.capture.image_map_key_count >= 303, "dry run should expos
 assert.strictEqual(pipelineSummary.image_map_audit.template_rows, 101, "image-map audit should cover pilot rows");
 assert.strictEqual(pipelineSummary.image_map_audit.ready_for_capture, 0, "blank pilot template should not be capture-ready");
 assert.strictEqual(pipelineSummary.image_map_audit.no_private_path_supplied, 101, "blank pilot template should need private paths");
+assert.strictEqual(pipelineSummary.capture_task_summary.task_count, 101, "capture task summary should cover pilot rows");
+assert.strictEqual(pipelineSummary.capture_task_summary.paths_needed, 101, "pilot capture tasks should need private paths");
 assert.strictEqual(pipelineSummary.review_queue.rows, 101, "review queue should cover pilot capture rows");
 assert.strictEqual(pipelineSummary.review_queue.needs_source_review, 101, "dry run rows should need source review");
 assert.strictEqual(pipelineSummary.ocr.ocr_result_rows, 101, "native OCR dry run should cover pilot capture rows");
@@ -127,6 +129,11 @@ assert.strictEqual(
   siteSummary.pilot_capture_pipeline_summary.public_artifacts.image_map_audit_csv,
   "docs/data/product-evidence/exports/pilot_capture_image_map_audit.csv",
   "site summary should link image-map audit artifact",
+);
+assert.strictEqual(
+  siteSummary.pilot_capture_pipeline_summary.public_artifacts.capture_task_csv,
+  "docs/data/product-evidence/exports/pilot_capture_tasks.csv",
+  "site summary should link capture task artifact",
 );
 assert.strictEqual(
   siteSummary.pilot_capture_pipeline_summary.public_artifacts.ocr_summary_csv,
