@@ -508,6 +508,51 @@ function renderPublicPhotoOcrStatus() {
   `;
 }
 
+function renderIngredientPanelAcquisitionStatus() {
+  const summary = state.summary?.ingredient_panel_acquisition_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.slots) return "";
+  const artifacts = summary.artifacts || {};
+  const targets = summary.top_slot_targets || [];
+  return `
+    <article class="corpus-handoff-card panel-acquisition-card status-needs_photo_review">
+      <span>Ingredient Panel Acquisition Board</span>
+      <strong>${escapeHtml(`${totals.public_panel_embed_slots || 0} public primary slots · ${totals.needs_panel_acquisition_slots || 0} acquisition slots`)}</strong>
+      <p>${escapeHtml(summary.public_policy?.primary_rule || "Ingredient/nutrition/document panels are the primary proof target; product photos stay secondary unless a readable panel is visible.")}</p>
+      <dl>
+        <div>
+          <dt>Vintage slots</dt>
+          <dd>${escapeHtml(totals.slots || 0)}</dd>
+        </div>
+        <div>
+          <dt>Missing panels</dt>
+          <dd>${escapeHtml(totals.missing_primary_panel_slots || 0)}</dd>
+        </div>
+        <div>
+          <dt>Pilot targets</dt>
+          <dd>${escapeHtml(totals.pilot_needs_panel_acquisition_slots || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-acquisition-list" aria-label="Top ingredient panel acquisition targets">
+        ${targets.slice(0, 4).map((target) => `
+          <article class="panel-acquisition-target">
+            <span>${escapeHtml(target.panel_acquisition_state || "panel target")}</span>
+            <strong>${escapeHtml(target.product_name || "Product")}</strong>
+            <p>${escapeHtml(`${target.version_label || target.vintage || "Vintage slot"} · ${target.top_source_domain || "source hunt"}`)}</p>
+            <em>${escapeHtml(target.next_action || "Find a readable ingredient or nutrition panel.")}</em>
+          </article>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.slot_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.slot_csv))}">Slot CSV</a>` : ""}
+        ${artifacts.product_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.product_csv))}">Product CSV</a>` : ""}
+        ${artifacts.report_markdown ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.report_markdown))}">Report</a>` : ""}
+        ${artifacts.board_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.board_json))}">Board JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
@@ -556,6 +601,7 @@ function renderCorpusHandoff() {
       <p>Capture/crop source pages privately, run native OCR, batch-review candidate text, then publish only rights-cleared images or link-only proof cards.</p>
     </article>
     ${renderPublicPhotoProofStrip()}
+    ${renderIngredientPanelAcquisitionStatus()}
     ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">
