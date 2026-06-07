@@ -12,7 +12,7 @@
         <div>
           <p class="eyebrow">MenuGraph Ingredient Journey Navigator</p>
           <h1>See a product recipe journey without losing the evidence.</h1>
-          <p>Oreo opens as the default journey: a complete source-backed package route, explicit label gaps, and the proof steps that unlock real ingredient comparison.</p>
+          <p>Ten pilot products now load as attributable evidence stories: source-backed chapters, explicit gaps, review queues, and exports without overstating formulation claims.</p>
         </div>
         <nav class="navigator-links" aria-label="MenuGraph navigation">
           <a href="./">Evidence Studio</a>
@@ -46,6 +46,12 @@
       <section class="navigator-grid" aria-label="Ingredient journey workspace">
         <aside class="navigator-sidebar" aria-label="Product summary and filters">
           <section id="product-summary" class="panel"></section>
+          <section class="panel">
+            <div class="panel-title">
+              <span>Story Readiness</span>
+            </div>
+            <div id="story-readiness" class="story-readiness"></div>
+          </section>
           <section class="panel">
             <div class="panel-title">
               <span>Facet Filters</span>
@@ -111,10 +117,24 @@
           </section>
           <section class="panel">
             <div class="panel-title">
+              <span>Review Queue</span>
+              <small>Selected product</small>
+            </div>
+            <div id="review-queue" class="review-queue"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">
               <span>Price + Weight Alignment</span>
               <small>Deferred until package fields are verified</small>
             </div>
             <div id="price-weight" class="price-weight"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">
+              <span>Exports</span>
+              <small>JSON / CSV / Markdown</small>
+            </div>
+            <div id="export-links" class="export-links"></div>
           </section>
         </aside>
       </section>
