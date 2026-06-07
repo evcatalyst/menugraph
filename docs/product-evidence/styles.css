@@ -17168,6 +17168,36 @@ td {
   gap: 14px;
 }
 
+.capture-task-preview {
+  grid-column: 1 / -1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 10px;
+}
+
+.capture-task-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.capture-task-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.capture-task-card p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .corpus-ocr-gaps,
 .corpus-ocr-products {
   display: grid;
@@ -18208,6 +18238,7 @@ td {
   .corpus-pilot-lineup,
   .corpus-heatmap-summary,
   .corpus-ocr-stat-grid,
+  .capture-task-grid,
   .corpus-ocr-product-grid,
   .photo-proof-stat-grid,
   .photo-proof-product-grid,
@@ -18805,6 +18836,7 @@ td {
   .corpus-pilot-lineup,
   .corpus-heatmap-summary,
   .corpus-heatmap-cells,
+  .capture-task-grid,
   .story-timeline,
   .story-era-visual-track,
   .story-visual-gap-grid,

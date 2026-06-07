@@ -15877,6 +15877,51 @@ function artifactLink(value, label) {
   return `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
 }
 
+function renderCaptureTaskCards(taskSummary = {}, options = {}) {
+  const tasks = taskSummary.first_tasks || [];
+  if (!tasks.length) return "";
+  const title = options.title || "First Capture Tasks";
+  const note = options.note || "Open the source, capture a private panel crop, then fill the private image-map template.";
+  return `
+    <section class="capture-task-preview" aria-label="${escapeHtml(title)}">
+      <div class="subsection-title">
+        <strong>${escapeHtml(title)}</strong>
+        <span>${escapeHtml(note)}</span>
+      </div>
+      <div class="capture-task-grid">
+        ${tasks.slice(0, options.limit || 6).map((task) => `
+          <article class="capture-task-card">
+            <div class="lead-title">
+              <strong>${escapeHtml(`${task.rank || ""}. ${task.product_name || "Capture task"}`)}</strong>
+              <span>${escapeHtml(task.source_domain || "source needed")}</span>
+            </div>
+            <p>${escapeHtml(task.next_action || "Capture a private panel crop and fill the image-map template.")}</p>
+            <dl class="photo-proof-row-fields">
+              <div>
+                <dt>Vintage</dt>
+                <dd>${escapeHtml(task.vintage_label || "not recorded")}</dd>
+              </div>
+              <div>
+                <dt>Crop target</dt>
+                <dd>${escapeHtml(task.crop_target || "panel crop needed")}</dd>
+              </div>
+              <div>
+                <dt>Evidence</dt>
+                <dd><code>${escapeHtml(task.evidence_id || task.task_id || "task")}</code></dd>
+              </div>
+            </dl>
+            <div class="lead-meta">
+              ${statusTag("source_link_only_no_public_image")}
+              ${task.priority_score ? `<span class="status-tag">${formatNumber(task.priority_score)} score</span>` : ""}
+              ${linkOrText(task.source_url, "Open source")}
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderCorpusOcrScale() {
   if (!els.corpusOcrSummary) return;
   const summary = state.data.ingredient_ocr_summary || {};
@@ -15943,6 +15988,11 @@ function renderCorpusOcrScale() {
         ${artifactLink(hybrid.public_artifacts?.review_queue_csv, "Review CSV")}
       </div>
     </div>
+    ${renderCaptureTaskCards(captureTasks, {
+      title: "First Hybrid Capture Tasks",
+      note: "Top source-linked rows to capture privately before native OCR.",
+      limit: 6,
+    })}
   `;
 
   const gapRows = summary.top_gap_groups || [];
@@ -16228,6 +16278,11 @@ function renderPhotoProofUpgrades() {
           ${statusTag("source_link_only_no_public_image")}
         </div>
       </article>
+      ${renderCaptureTaskCards(dryTasks, {
+        title: "First Pilot Capture Tasks",
+        note: "Start with these pilot sources when filling the private image-map template.",
+        limit: 6,
+      })}
     ` : `<p class="empty-note">No pilot dry-run capture summary has been generated yet.</p>`;
   }
 }

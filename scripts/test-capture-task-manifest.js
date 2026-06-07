@@ -34,6 +34,8 @@ assert.strictEqual(summary.task_count, 8, "summary should count tasks");
 assert.strictEqual(summary.paths_needed, 8, "blank tasks should need paths");
 assert.strictEqual(summary.ready_for_capture, 0, "blank tasks should not be capture-ready");
 assert(summary.first_tasks.length > 0, "summary should expose first tasks");
+assert(summary.first_tasks[0].source_url, "first tasks should expose source URL for capture operators");
+assert("crop_target" in summary.first_tasks[0], "first tasks should expose crop target");
 assertNoPrivatePaths(JSON.stringify(summary), "capture task summary");
 
 const runbook = renderRunbook(summary, tasks);
