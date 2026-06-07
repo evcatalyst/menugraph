@@ -1,0 +1,18 @@
+{
+  "schema_version": "public_photo_proof_manifest.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "registry_csv": "docs/data/product-evidence/exports/public_photo_proof_registry.csv",
+  "manifest_json": "docs/data/product-evidence/public_photo_proof_manifest.json",
+  "registry_rows": 0,
+  "published_image_count": 0,
+  "pending_or_rejected_count": 0,
+  "public_safety": {
+    "private_paths_committed": false,
+    "model_or_ocr_can_clear_rights": false,
+    "requires_reviewer": true,
+    "requires_rights_clear_status": true,
+    "source_link_only_default": true
+  },
+  "published_images": [],
+  "pending_or_rejected": []
+}

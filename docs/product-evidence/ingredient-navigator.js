@@ -30,6 +30,8 @@ const els = {
 const state = {
   data: null,
   summary: null,
+  photoProofManifest: null,
+  photoProofImagesByEvidenceId: new Map(),
   productId: "",
   versionId: "",
   facetId: "",
@@ -222,6 +224,15 @@ function renderCorpusHandoff() {
     </article>
     ${renderCaptureTaskPreview(tasks)}
   `;
+}
+
+function applyPhotoProofManifest(manifest = {}) {
+  state.photoProofManifest = manifest || {};
+  state.photoProofImagesByEvidenceId = new Map(
+    (manifest.published_images || [])
+      .filter((row) => row.evidence_id && row.public_image_url && row.image_display_policy === "embed_rights_cleared")
+      .map((row) => [row.evidence_id, row]),
+  );
 }
 
 function renderSummary(productRow) {
@@ -461,16 +472,29 @@ function sourceHost(url) {
 }
 
 function proofImageUrl(row) {
-  return row?.public_image_url || row?.thumbnail_url || row?.image_url || row?.image_path_or_url || row?.package_image_url || row?.screenshot_image_path || "";
+  const published = state.photoProofImagesByEvidenceId.get(row?.id || "");
+  return published?.public_image_url || row?.public_image_url || row?.thumbnail_url || row?.image_url || row?.image_path_or_url || row?.package_image_url || row?.screenshot_image_path || "";
 }
 
 function rightsNote(row) {
-  return row?.rights_status || row?.rights || row?.license_rights_note || "External source; rights note needed before reproducing imagery.";
+  const published = state.photoProofImagesByEvidenceId.get(row?.id || "");
+  return published?.rights_status || row?.rights_status || row?.rights || row?.license_rights_note || "External source; rights note needed before reproducing imagery.";
+}
+
+function imageDisplayPolicy(row) {
+  const published = state.photoProofImagesByEvidenceId.get(row?.id || "");
+  return published?.image_display_policy || row?.image_display_policy || "source_link_only_no_public_image";
+}
+
+function imageAttribution(row) {
+  const published = state.photoProofImagesByEvidenceId.get(row?.id || "");
+  return published?.attribution_text || row?.source || "Source image";
 }
 
 function canEmbedProofImage(row) {
   const image = proofImageUrl(row);
   if (!image) return false;
+  if (state.photoProofImagesByEvidenceId.has(row?.id || "")) return imageDisplayPolicy(row) === "embed_rights_cleared";
   if (row?.image_display_policy) return row.image_display_policy === "embed_rights_cleared";
   const rights = rightsNote(row).toLowerCase();
   const source = `${row?.source || ""} ${row?.url || ""}`.toLowerCase();
@@ -528,7 +552,7 @@ function renderProofVisual(productRow, version, row) {
     return `
       <figure class="proof-photo">
         <img src="${escapeHtml(image)}" alt="${escapeHtml(`${productRow.name} ${version.label} source photo proof`)}" loading="lazy" />
-        <figcaption>${escapeHtml(row.source || "Source image")} · ${escapeHtml(rightsNote(row))}</figcaption>
+        <figcaption>${escapeHtml(imageAttribution(row))} · ${escapeHtml(rightsNote(row))}</figcaption>
       </figure>
     `;
   }
@@ -541,7 +565,7 @@ function renderProofVisual(productRow, version, row) {
       </div>
       <span>${escapeHtml(row.kind || "source receipt")}</span>
       <strong>${escapeHtml(title || "Photo proof needed")}</strong>
-      <p>${escapeHtml(row.image_display_policy === "embed_rights_cleared" ? "Rights-cleared image is ready to display." : image ? "Image reference is present, but this page keeps it link-only until rights are reviewed." : "Photo proof is source-attributed, but no rights-cleared embeddable image URL is stored yet.")}</p>
+      <p>${escapeHtml(imageDisplayPolicy(row) === "embed_rights_cleared" ? "Rights-cleared image is ready to display." : image ? "Image reference is present, but this page keeps it link-only until rights are reviewed." : "Photo proof is source-attributed, but no rights-cleared embeddable image URL is stored yet.")}</p>
       <dl>
         <div>
           <dt>Photo role</dt>
@@ -557,7 +581,7 @@ function renderProofVisual(productRow, version, row) {
         </div>
         <div>
           <dt>Display policy</dt>
-          <dd>${escapeHtml(row.image_display_policy || "source_link_only_no_public_image")}</dd>
+          <dd>${escapeHtml(imageDisplayPolicy(row))}</dd>
         </div>
       </dl>
       ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">Open source photo/document</a>` : ""}
@@ -937,15 +961,19 @@ function attachEvents() {
 
 async function init() {
   try {
-    const [response, summary] = await Promise.all([
+    const [response, summary, photoProofManifest] = await Promise.all([
       fetch("../data/product-evidence/navigator_data.json"),
       fetch("../data/product-evidence/summary.json")
         .then((summaryResponse) => (summaryResponse.ok ? summaryResponse.json() : {}))
+        .catch(() => ({})),
+      fetch("../data/product-evidence/public_photo_proof_manifest.json")
+        .then((manifestResponse) => (manifestResponse.ok ? manifestResponse.json() : {}))
         .catch(() => ({})),
     ]);
     if (!response.ok) throw new Error(`Navigator data returned ${response.status}`);
     state.data = await response.json();
     state.summary = summary;
+    applyPhotoProofManifest(photoProofManifest);
     state.productId = state.data.default_product;
     state.maxYear = Number(els.timeRange.value || 2026);
     attachEvents();
