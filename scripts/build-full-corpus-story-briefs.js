@@ -16,6 +16,7 @@ const defaultJsonPath = path.join(root, "docs/data/product-evidence/exports/full
 const defaultCsvPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_story_briefs.csv");
 const defaultMarkdownPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_story_briefs.md");
 const defaultSummaryPath = path.join(root, "docs/data/product-evidence/full_corpus_story_briefs_summary.json");
+const defaultPublicPhotoManifestPath = path.join(root, "docs/data/product-evidence/public_photo_proof_manifest.json");
 const generatedAt = "2026-06-07T20:45:00Z";
 
 function numeric(value) {
@@ -31,7 +32,27 @@ function sourceUrl(row = {}) {
   return normalizeText(row.source_photo_url || row.url || row.source_url || row.archive_url);
 }
 
-function displayPolicy(row = {}) {
+function publishedImageIndex(manifest = {}) {
+  const rows = Array.isArray(manifest.published_images) ? manifest.published_images : [];
+  return {
+    rows,
+    byEvidenceId: new Map(rows.filter((row) => row.evidence_id).map((row) => [row.evidence_id, row])),
+    byProductEvidenceId: new Map(rows
+      .filter((row) => row.product_id && row.evidence_id)
+      .map((row) => [`${row.product_id}:${row.evidence_id}`, row])),
+  };
+}
+
+function publishedPhotoFor(photoIndex, productId, evidenceId) {
+  if (!photoIndex || !evidenceId) return null;
+  return photoIndex.byProductEvidenceId?.get(`${productId}:${evidenceId}`)
+    || photoIndex.byEvidenceId?.get(evidenceId)
+    || null;
+}
+
+function displayPolicy(row = {}, product = {}, photoIndex = null) {
+  const published = publishedPhotoFor(photoIndex, product.id, row.id);
+  if (published) return normalizeText(published.image_display_policy || "embed_rights_cleared");
   return normalizeText(row.image_display_policy || (sourceUrl(row) ? "source_link_only_no_public_image" : "missing_source_image"));
 }
 
@@ -70,11 +91,11 @@ function nextProof(version, evidenceRows) {
   return "Find or review source-attributable package, document, archive, menu, or catalog evidence.";
 }
 
-function chapterFromVersion(product, version) {
+function chapterFromVersion(product, version, photoIndex = null) {
   const evidenceRows = versionEvidence(product, version);
   const sourceRows = evidenceRows.filter((row) => sourceUrl(row));
-  const embedRows = evidenceRows.filter((row) => displayPolicy(row) === "embed_rights_cleared");
-  const linkOnlyRows = evidenceRows.filter((row) => /link_only|source_link/.test(displayPolicy(row)));
+  const embedRows = evidenceRows.filter((row) => displayPolicy(row, product, photoIndex) === "embed_rights_cleared");
+  const linkOnlyRows = evidenceRows.filter((row) => /link_only|source_link/.test(displayPolicy(row, product, photoIndex)));
   const candidateText = Boolean(version.label_extract) || evidenceRows.some((row) => row.visible_extract);
   return {
     id: version.id,
@@ -100,12 +121,12 @@ function chapterFromVersion(product, version) {
   };
 }
 
-function productStory(product) {
+function productStory(product, photoIndex = null) {
   const evidenceRows = product.evidence || [];
-  const chapters = (product.versions || []).map((version) => chapterFromVersion(product, version));
-  const publicEmbeds = evidenceRows.filter((row) => displayPolicy(row) === "embed_rights_cleared").length;
+  const chapters = (product.versions || []).map((version) => chapterFromVersion(product, version, photoIndex));
+  const publicEmbeds = evidenceRows.filter((row) => displayPolicy(row, product, photoIndex) === "embed_rights_cleared").length;
   const sourceReceipts = evidenceRows.filter((row) => sourceUrl(row)).length;
-  const linkOnlyReceipts = evidenceRows.filter((row) => /link_only|source_link/.test(displayPolicy(row))).length;
+  const linkOnlyReceipts = evidenceRows.filter((row) => /link_only|source_link/.test(displayPolicy(row, product, photoIndex))).length;
   const candidateTextChapters = chapters.filter((row) => row.candidate_text).length;
   const sourceGaps = chapters.filter((row) => row.status === "source_discovery_needed" || row.status === "gap_publishable").length;
   return {
@@ -222,7 +243,7 @@ function markdownDocument(stories) {
   ].join("\n");
 }
 
-function buildSummary({ stories, jsonPath, csvPath, markdownPath }) {
+function buildSummary({ stories, jsonPath, csvPath, markdownPath, publicPhotoManifestPath, photoIndex }) {
   const publicEmbeds = stories.reduce((sum, story) => sum + story.public_embeds, 0);
   const linkOnlyReceipts = stories.reduce((sum, story) => sum + story.link_only_receipts, 0);
   return {
@@ -245,6 +266,8 @@ function buildSummary({ stories, jsonPath, csvPath, markdownPath }) {
       private_paths_committed: false,
     },
     public_policy: "Story briefs can show source receipts and candidate text state. Ingredient claims still require manual verification; external photos remain link-only unless marked embed_rights_cleared.",
+    public_photo_manifest: publicArtifactRef(publicPhotoManifestPath),
+    public_photo_manifest_published_images: photoIndex?.rows?.length || 0,
     public_artifacts: {
       story_briefs_json: publicArtifactRef(jsonPath),
       story_briefs_csv: publicArtifactRef(csvPath),
@@ -265,10 +288,13 @@ function buildFullCorpusStoryBriefs({
   publicCsvPath = defaultCsvPath,
   publicMarkdownPath = defaultMarkdownPath,
   publicSummaryPath = defaultSummaryPath,
+  publicPhotoManifestPath = defaultPublicPhotoManifestPath,
   updateSiteData = true,
 } = {}) {
   const navigator = readJson(navigatorDataPath, {});
-  const stories = (navigator.products || []).map(productStory);
+  const publicPhotoManifest = readJson(publicPhotoManifestPath, {});
+  const photoIndex = publishedImageIndex(publicPhotoManifest);
+  const stories = (navigator.products || []).map((product) => productStory(product, photoIndex));
   const payload = {
     schema_version: "full_corpus_story_briefs.v1",
     generated_at: generatedAt,
@@ -278,7 +304,14 @@ function buildFullCorpusStoryBriefs({
   writeCsv(publicCsvPath, csvHeaders(), csvRows(stories));
   require("fs").mkdirSync(path.dirname(publicMarkdownPath), { recursive: true });
   require("fs").writeFileSync(publicMarkdownPath, `${markdownDocument(stories)}\n`);
-  const summary = buildSummary({ stories, jsonPath: publicJsonPath, csvPath: publicCsvPath, markdownPath: publicMarkdownPath });
+  const summary = buildSummary({
+    stories,
+    jsonPath: publicJsonPath,
+    csvPath: publicCsvPath,
+    markdownPath: publicMarkdownPath,
+    publicPhotoManifestPath,
+    photoIndex,
+  });
   writeJson(publicSummaryPath, summary);
 
   if (updateSiteData) {
@@ -299,6 +332,7 @@ function main() {
     publicCsvPath: pathFromArg("csv", defaultCsvPath),
     publicMarkdownPath: pathFromArg("markdown", defaultMarkdownPath),
     publicSummaryPath: pathFromArg("summary", defaultSummaryPath),
+    publicPhotoManifestPath: pathFromArg("public-photo-manifest", defaultPublicPhotoManifestPath),
     updateSiteData: argValue("update-site-data", "1") !== "0",
   });
   console.log(JSON.stringify({
@@ -315,4 +349,5 @@ module.exports = {
   buildFullCorpusStoryBriefs,
   productStory,
   chapterFromVersion,
+  publishedImageIndex,
 };

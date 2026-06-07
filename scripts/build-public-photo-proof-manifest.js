@@ -63,7 +63,7 @@ function publicImageUrlOk(value) {
 
 function rightsClear(value) {
   const text = normalizeText(value).toLowerCase();
-  return /public domain|cc[- ]?by|creative commons|wikimedia commons|owned image|rights cleared|permission granted/.test(text)
+  return /public domain|no known copyright restrictions|no restrictions|cc[- ]?by|creative commons|wikimedia commons|owned image|rights cleared|permission granted/.test(text)
     && !/inspect|unclear|needed|pending|before reuse|external source only|collector photo/.test(text);
 }
 
