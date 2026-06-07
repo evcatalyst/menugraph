@@ -11,9 +11,10 @@
     "build:data:sample": "node scripts/build-static-data.js --text=25 --prices=180",
     "build:data:full": "node scripts/build-static-data.js --text=all --prices=all",
     "build:product-evidence": "node scripts/build-product-evidence-summary.js",
+    "build:ingredient-ocr": "node scripts/build-ingredient-ocr-queue.js",
     "build:graph": "node scripts/build-graph-overlay.js",
     "test:e2e": "playwright test",
-    "test": "node --check server.js && node --check docs/multisource.js && node --check docs/ontology.js && node --check docs/price-utils.js && node --check docs/date-estimates.js && node --check docs/chat-utils.js && node --check docs/graph-contract.js && node --check docs/archive-client.js && node --check docs/app.js && node --check docs/product-evidence/ingredient-navigator.js && node --check netlify/functions/chat.js && node --check scripts/nypl-source.js && node --check scripts/prepare-nypl-cache.js && node --check scripts/build-graph-overlay.js && node --check scripts/harden-product-evidence-gaps.js && node scripts/test-multisource.js && node scripts/test-price-utils.js && node scripts/test-date-estimates.js && node scripts/test-chat-utils.js && node scripts/test-graph-overlay.js && node scripts/test-netlify-chat.js && node scripts/test-ingredient-navigator-pilot.js"
+    "test": "node --check server.js && node --check docs/multisource.js && node --check docs/ontology.js && node --check docs/price-utils.js && node --check docs/date-estimates.js && node --check docs/chat-utils.js && node --check docs/graph-contract.js && node --check docs/archive-client.js && node --check docs/app.js && node --check docs/product-evidence/ingredient-navigator.js && node --check netlify/functions/chat.js && node --check scripts/nypl-source.js && node --check scripts/prepare-nypl-cache.js && node --check scripts/build-graph-overlay.js && node --check scripts/harden-product-evidence-gaps.js && node --check scripts/build-ingredient-ocr-queue.js && node scripts/test-multisource.js && node scripts/test-price-utils.js && node scripts/test-date-estimates.js && node scripts/test-chat-utils.js && node scripts/test-graph-overlay.js && node scripts/test-netlify-chat.js && node scripts/test-ingredient-navigator-pilot.js && node scripts/test-ingredient-ocr-queue.js"
   },
   "engines": {
     "node": ">=20"
