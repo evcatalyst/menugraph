@@ -1,0 +1,19 @@
+{
+  "schema_version": "commons_photo_proof_import_summary.v1",
+  "generated_at": "2026-06-07T21:25:00Z",
+  "commons_candidate_count": 33,
+  "publishable_import_count": 31,
+  "not_publishable_count": 2,
+  "registry_rows_after_merge": 31,
+  "public_safety": {
+    "source": "Wikimedia Commons API imageinfo extmetadata",
+    "ingredient_claims_verified": false,
+    "requires_registry_manifest_validation": true,
+    "rights_gate": "Only rows with public-safe image URLs, clear Commons rights metadata, and attribution are promoted."
+  },
+  "public_artifacts": {
+    "candidate_csv": "docs/data/product-evidence/exports/commons_photo_proof_import_candidates.csv",
+    "summary_json": "docs/data/product-evidence/commons_photo_proof_import_summary.json",
+    "registry_csv": "docs/data/product-evidence/exports/public_photo_proof_registry.csv"
+  }
+}

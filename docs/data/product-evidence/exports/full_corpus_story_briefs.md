@@ -452,10 +452,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 5/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 14
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -587,10 +587,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 10
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -641,10 +641,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 8
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -884,10 +884,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 5/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 16
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1208,10 +1208,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 14
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1235,10 +1235,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 6
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1532,10 +1532,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 18
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1586,10 +1586,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 12
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 2
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1694,10 +1694,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 15
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 2
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1775,10 +1775,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 3/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 9
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 2
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1829,10 +1829,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 13
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 2
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1883,10 +1883,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 7
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 2
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -1964,10 +1964,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 5/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 10
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -2666,10 +2666,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 3/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 15
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -2747,10 +2747,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 11
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 2
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -2936,10 +2936,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 3/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 15
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 1
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -2963,10 +2963,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 3/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 22
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 2
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 
@@ -2990,10 +2990,10 @@ Blocked lanes:
 - Story status: full_corpus_selectable
 - Claim status: needs_manual_verification
 - Source-backed slots: 4/6
-- Public photo mode: source_receipts_only
+- Public photo mode: mixed_embed_and_source_receipts
 - Source receipts: 21
 - Candidate text chapters: 0
-- Public image embeds: 0
+- Public image embeds: 4
 - Boundary: Do not publish definitive formulation diffs until source-attributable label text is manually verified.
 - Next unlock: Open best source URLs, classify visible panels, archive URLs, and attach verified label text where readable.
 

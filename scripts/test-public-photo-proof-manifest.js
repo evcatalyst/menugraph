@@ -87,7 +87,7 @@ const manifestPath = path.join(root, "docs/data/product-evidence/public_photo_pr
 const registryPath = path.join(root, "docs/data/product-evidence/exports/public_photo_proof_registry.csv");
 assert(fs.existsSync(manifestPath), "real public photo proof manifest should be written");
 assert(fs.existsSync(registryPath), "real public photo proof registry CSV should exist");
-assert(realManifest.published_image_count >= 3, "real manifest should publish reviewed Commons image rows");
+assert.strictEqual(realManifest.published_image_count, 31, "real manifest should publish reviewed Commons image rows");
 assert(
   realManifest.published_images.some((row) => row.evidence_id === "doritos_nacho_cheese_evidence_6"),
   "real manifest should publish the reviewed Doritos Commons proof row",
