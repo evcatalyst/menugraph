@@ -98,6 +98,7 @@ function renderProductPicker() {
 }
 
 function renderSummary(productRow) {
+  const resolution = productRow.story_resolution || {};
   els.productSummary.innerHTML = `
     <article class="summary-card">
       <p class="eyebrow">${escapeHtml(productRow.category)}</p>
@@ -108,6 +109,7 @@ function renderSummary(productRow) {
         <span><strong>${escapeHtml(`${productRow.coverage}%`)}</strong>Coverage</span>
         <span><strong>${escapeHtml(productRow.candidate_count)}</strong>Candidates</span>
         <span><strong>${escapeHtml(productRow.verified_labels)}</strong>Verified labels</span>
+        <span><strong>${escapeHtml(resolution.outstanding_gap_count ?? 0)}</strong>Raw gaps</span>
       </div>
     </article>
   `;
@@ -115,7 +117,7 @@ function renderSummary(productRow) {
     <article class="gap-card">
       <strong>Original Label</strong>
       <p>${escapeHtml(productRow.claim_boundary)}</p>
-      ${statusBadge("gap")}
+      ${statusBadge("gap_publishable")}
     </article>
     <article class="gap-card">
       <strong>Next Unlock</strong>
@@ -126,6 +128,7 @@ function renderSummary(productRow) {
 }
 
 function renderStoryReadiness(productRow) {
+  const resolution = productRow.story_resolution || {};
   els.storyReadiness.innerHTML = `
     <article class="readiness-card">
       <div class="readiness-pair">
@@ -135,6 +138,18 @@ function renderStoryReadiness(productRow) {
       <div class="readiness-pair">
         <span>Claims</span>
         ${statusBadge(productRow.claim_rollup_status || "needs_manual_verification")}
+      </div>
+      <div class="readiness-pair">
+        <span>Resolved Slots</span>
+        <strong>${escapeHtml(`${resolution.resolved_slots ?? productRow.total_slots}/${productRow.total_slots}`)}</strong>
+      </div>
+      <div class="readiness-pair">
+        <span>Publishable Gaps</span>
+        <strong>${escapeHtml(resolution.publishable_gap_slots ?? 0)}</strong>
+      </div>
+      <div class="readiness-pair">
+        <span>Outstanding Raw Gaps</span>
+        <strong>${escapeHtml(resolution.outstanding_gap_count ?? 0)}</strong>
       </div>
       <dl class="photo-summary-list">
         <div>
@@ -148,6 +163,10 @@ function renderStoryReadiness(productRow) {
         <div>
           <dt>Grok / xAI</dt>
           <dd>${escapeHtml(productRow.grok_research_assist?.recommended_use || "Optional research assist only; not evidence.")}</dd>
+        </div>
+        <div>
+          <dt>Claim Gate</dt>
+          <dd>${escapeHtml(resolution.claim_gate || "No formulation claim is promoted without manual verification metadata.")}</dd>
         </div>
       </dl>
     </article>
@@ -169,12 +188,13 @@ function renderHero(productRow) {
         <span><strong>${escapeHtml(productRow.label_text_candidates || 0)}</strong>Text candidates</span>
         <span><strong>${escapeHtml(productRow.verified_labels)}</strong>Verified ingredient labels</span>
         <span><strong>${escapeHtml(productRow.source_domains.length)}</strong>Source venues</span>
+        <span><strong>${escapeHtml(productRow.story_resolution?.publishable_gap_slots ?? 0)}</strong>Bounded gaps</span>
       </div>
     <div class="lead-meta reader-tags">
       ${statusBadge(productRow.pilot_rollup_status || "story_ready")}
       ${statusBadge(productRow.claim_rollup_status || "needs_manual_verification")}
       ${statusBadge("source_review")}
-      ${statusBadge("gap")}
+      ${statusBadge("gap_publishable")}
       ${productRow.source_domains.slice(0, 4).map((source) => `<span class="source-chip">${escapeHtml(source)}</span>`).join("")}
     </div>
   `;
@@ -246,7 +266,7 @@ function renderFlow(productRow) {
         <strong>${escapeHtml(facet.label)}</strong>
         <div class="flow-line" style="grid-template-columns:repeat(${Math.max(1, versions.length)}, minmax(0, 1fr))" aria-label="${escapeHtml(facet.label)} readiness by vintage">
           ${versions.map((version) => {
-            const className = ["manual_verified", "ocr_extracted", "label_visible", "label_text_candidate"].includes(version.status) ? "is-ready" : version.status === "usable_photo" || version.status === "source_review" ? "is-photo" : version.status === "gap" ? "is-gap" : "";
+            const className = ["manual_verified", "ocr_extracted", "label_visible", "label_text_candidate"].includes(version.status) ? "is-ready" : version.status === "usable_photo" || version.status === "source_review" ? "is-photo" : version.status === "gap_publishable" ? "is-gap" : "";
             return `<span class="${className}" title="${escapeHtml(version.label)}: ${escapeHtml(labelFor(version.status))}"></span>`;
           }).join("")}
         </div>
@@ -300,6 +320,47 @@ function renderLabelExtract(extract, compact = false) {
   `;
 }
 
+function renderSourceTargets(targets = []) {
+  if (!targets.length) return "";
+  return `
+    <div class="source-targets">
+      <strong>Queued Source Targets</strong>
+      ${targets.slice(0, 4).map((target) => `
+        <article>
+          <span>${escapeHtml(target.source_name || "Source target")}</span>
+          <p>${escapeHtml(target.expected_evidence || target.import_hint || "Review for attributable product, date, and panel evidence.")}</p>
+          ${target.search_url ? `<a href="${escapeHtml(target.search_url)}" target="_blank" rel="noreferrer">Open search</a>` : ""}
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderGapResolution(version) {
+  const resolution = version.gap_resolution;
+  if (!resolution) return "";
+  return `
+    <div class="gap-resolution">
+      <span>${escapeHtml(resolution.state || "resolved_publishable_gap")}</span>
+      <dl>
+        <div>
+          <dt>Can Say</dt>
+          <dd>${escapeHtml(resolution.can_say)}</dd>
+        </div>
+        <div>
+          <dt>Cannot Say</dt>
+          <dd>${escapeHtml(resolution.cannot_say)}</dd>
+        </div>
+        <div>
+          <dt>Confidence Scope</dt>
+          <dd>${escapeHtml(resolution.confidence_scope)}</dd>
+        </div>
+      </dl>
+      ${renderSourceTargets(resolution.source_targets || [])}
+    </div>
+  `;
+}
+
 function renderDetail(productRow, version) {
   const evidenceRows = versionEvidence(productRow, version);
   els.versionDetail.innerHTML = `
@@ -315,6 +376,10 @@ function renderDetail(productRow, version) {
         <span><strong>${escapeHtml(evidenceRows.length)}</strong>Shown evidence</span>
       </div>
       <dl class="detail-list">
+        <div>
+          <dt>Validation State</dt>
+          <dd>${escapeHtml(version.validation_state?.note || "Candidate evidence needs review before claim promotion.")}</dd>
+        </div>
         <div>
           <dt>Photo Role</dt>
           <dd>${escapeHtml(version.photo_quality?.role || "Not classified")}</dd>
@@ -340,6 +405,7 @@ function renderDetail(productRow, version) {
           <dd>${escapeHtml(version.next_step)}</dd>
         </div>
       </dl>
+      ${renderGapResolution(version)}
       ${renderLabelExtract(version.label_extract)}
     </article>
   `;
@@ -368,7 +434,7 @@ function renderDetail(productRow, version) {
         <a href="${escapeHtml(row.url)}" target="_blank" rel="noreferrer">${escapeHtml(row.source)}</a>
       </article>
     `).join("")
-    : `<article class="evidence-card"><strong>No verified source object shown</strong><p>This slot is intentionally held as an explicit gap.</p>${statusBadge("gap")}</article>`;
+    : `<article class="evidence-card"><strong>No verified source object shown</strong><p>This slot is intentionally held as a publishable evidence gap. The gap can be shown, but no ingredient fact can be claimed.</p>${statusBadge("gap_publishable")}</article>`;
   els.priceWeight.innerHTML = `
     <span><strong>${escapeHtml(version.price_weight_context.includes("candidate") ? "Candidate" : "Deferred")}</strong>Price/oz</span>
     <span><strong>${escapeHtml(version.package_context.includes("serving") ? "Candidate" : "Deferred")}</strong>Price/100g</span>
@@ -383,6 +449,7 @@ function renderReviewQueue(productRow) {
         <span>${escapeHtml(row.vintage)}</span>
         <strong>${escapeHtml(row.label)}</strong>
         <p>${escapeHtml(row.missing_fields)}</p>
+        ${row.gap_resolution_state ? `<small>${escapeHtml(`${row.gap_resolution_state} · ${row.source_target_count || 0} source targets`)}</small>` : ""}
         <em>${escapeHtml(row.next_action)}</em>
         ${statusBadge(row.status)}
       </article>
@@ -396,6 +463,7 @@ function renderExports(productRow) {
     ["Timeline JSON", exports.timeline_json],
     ["Evidence CSV", exports.evidence_csv],
     ["Visible Extracts CSV", exports.extracts_csv],
+    ["Gap Closure CSV", exports.gap_closure_csv],
     ["Story Briefs", exports.story_markdown],
   ].filter(([, href]) => href);
   els.exportLinks.innerHTML = rows.length
