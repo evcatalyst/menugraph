@@ -712,6 +712,60 @@ function renderConfectionWrapperPriorityStatus() {
   `;
 }
 
+function renderConfectionWrapperReviewQueueStatus() {
+  const summary = state.summary?.confection_wrapper_review_queue_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.review_tasks) return "";
+  const artifacts = summary.artifacts || {};
+  const tasks = summary.first_tasks || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-needs_source_review">
+      <span>Confection Wrapper Review Queue</span>
+      <strong>${escapeHtml(`${totals.review_tasks || 0} wrapper review tasks · ${totals.products || 0} candy products`)}</strong>
+      <p>Prioritize Candy Wrapper Archive pages before broad hunting. Each task asks reviewers to identify item-level wrapper photos, visible panels, weight/maker cues, and rights notes before any OCR or ingredient claim.</p>
+      <dl>
+        <div>
+          <dt>Existing source tasks</dt>
+          <dd>${escapeHtml(totals.existing_source_tasks || 0)}</dd>
+        </div>
+        <div>
+          <dt>Item pages</dt>
+          <dd>${escapeHtml(totals.item_page_tasks || 0)}</dd>
+        </div>
+        <div>
+          <dt>Collection pages</dt>
+          <dd>${escapeHtml(totals.collection_page_tasks || 0)}</dd>
+        </div>
+        <div>
+          <dt>Search tasks</dt>
+          <dd>${escapeHtml(totals.search_tasks || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Confection wrapper review tasks">
+        ${tasks.slice(0, 4).map((task) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(labelFor(task.task_type || "source review"))}</span>
+            <strong>${escapeHtml(task.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${task.observed_source_rows || 0} observed rows · ${task.linked_vintage_slots || "new source lead"}`)}</p>
+            <em>${escapeHtml(task.review_goal || "Review source before capture/OCR.")}</em>
+            ${task.source_url ? `<a href="${escapeHtml(task.source_url)}" target="_blank" rel="noopener">Open source</a>` : `<em>${escapeHtml(task.search_queries || "Targeted archive search")}</em>`}
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Confection wrapper review guardrails">
+        <span>Wrapper fronts support package lineage</span>
+        <span>Ingredient claims require readable panels</span>
+        <span>External images stay link-only unless rights are clear</span>
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.review_queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.review_queue_csv))}">Review Queue CSV</a>` : ""}
+        ${artifacts.runbook_markdown ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.runbook_markdown))}">Runbook</a>` : ""}
+        ${artifacts.review_queue_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.review_queue_json))}">Review JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
@@ -764,6 +818,7 @@ function renderCorpusHandoff() {
     ${renderPanelCaptureBatchStatus()}
     ${renderPanelCapturePipelineStatus()}
     ${renderConfectionWrapperPriorityStatus()}
+    ${renderConfectionWrapperReviewQueueStatus()}
     ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">
