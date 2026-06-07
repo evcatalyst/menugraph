@@ -10,25 +10,304 @@
     <main class="evidence-shell">
       <header class="evidence-topbar">
         <div>
-          <p class="eyebrow">MenuGraph Product Evidence</p>
-          <h1>Evidence-Backed Product Stories</h1>
+          <p class="eyebrow">MenuGraph Story Studio</p>
+          <h1>Product Histories, Told From Evidence</h1>
           <p class="summary">Reader-first product histories for ingredient, package, manufacturer, and price/weight changes, with every claim tied to source provenance or left visible as an unresolved gap.</p>
         </div>
         <nav class="topnav" aria-label="MenuGraph navigation">
           <a href="../">MenuGraph</a>
-          <a href="#story-desk">Story Desk</a>
-          <a href="#stories">Stories</a>
-          <a href="#products">Products</a>
-          <a href="#evidence-registry">Evidence Registry</a>
-          <a href="#gaps">Gaps</a>
-          <a href="#scale">Collection Plan</a>
-          <a href="#common-crawl">Common Crawl</a>
+          <a href="#story-cover">Story</a>
+          <a href="#corpus-atlas">Atlas</a>
+          <a href="#story-desk">Canvas</a>
+          <a href="#stories">Proof</a>
+          <a href="#products">Product Map</a>
+          <a href="#evidence-registry">Registry</a>
+          <a href="#scale">Research</a>
         </nav>
       </header>
 
       <section id="status" class="status-panel" aria-live="polite">
         <strong>Loading product evidence snapshot</strong>
         <span>Preparing collection queue, product coverage, and source-review views.</span>
+      </section>
+
+      <section class="story-mode-bar" id="story-mode">
+        <div>
+          <p class="eyebrow">Story Mode</p>
+          <h2 id="story-mode-title">Loading story workspace</h2>
+          <p id="story-mode-summary">Building the reader, proof, and research views from the current evidence snapshot.</p>
+        </div>
+        <div>
+          <div id="story-mode-tabs" class="story-mode-tabs" aria-label="View mode controls"></div>
+          <p id="story-mode-hint" class="story-mode-hint"></p>
+        </div>
+      </section>
+
+      <section class="story-path-shell" id="story-path" aria-label="Reader story path">
+        <p class="empty-note">Loading reader path.</p>
+      </section>
+
+      <section class="story-gate-shell" id="story-gate" aria-label="Publication gate and claim rules">
+        <p class="empty-note">Loading publication gate.</p>
+      </section>
+
+      <section class="story-packet-shell" id="story-packet" aria-label="Publish-ready story packet">
+        <p class="empty-note">Loading publish packet.</p>
+      </section>
+
+      <section class="story-review-shell" id="story-review" aria-label="Editorial review board">
+        <p class="empty-note">Loading editorial review board.</p>
+      </section>
+
+      <section class="story-cover" id="story-cover" aria-label="Selected product story">
+        <article class="story-cover-main">
+          <p class="empty-note">Loading selected story.</p>
+        </article>
+      </section>
+
+      <section class="story-filmstrip-shell" id="story-filmstrip" aria-label="Public story filmstrip">
+        <p class="empty-note">Loading story filmstrip.</p>
+      </section>
+
+      <section class="story-article-shell" id="story-article" aria-label="Publishable product story treatment">
+        <p class="empty-note">Loading story article.</p>
+      </section>
+
+      <section class="story-chapter-board-shell" id="story-chapter-board" aria-label="Narrative chapter board">
+        <p class="empty-note">Loading chapter board.</p>
+      </section>
+
+      <section class="story-trace-shell" id="story-trace" aria-label="Claim trace board">
+        <p class="empty-note">Loading claim trace board.</p>
+      </section>
+
+      <section class="story-photo-shell" id="story-photo-board" aria-label="Package photo and label visibility board">
+        <p class="empty-note">Loading photo proof board.</p>
+      </section>
+
+      <section class="story-caption-shell" id="story-caption-board" aria-label="Source caption and attribution board">
+        <p class="empty-note">Loading caption board.</p>
+      </section>
+
+      <section class="story-compare-shell" id="story-compare-stage" aria-label="Then and now product evidence comparison">
+        <p class="empty-note">Loading story comparison.</p>
+      </section>
+
+      <section class="story-map-shell" id="story-map" aria-label="Evidence-backed narrative map">
+        <p class="empty-note">Loading story map.</p>
+      </section>
+
+      <section class="story-facets-shell" id="story-facets" aria-label="Ingredient facet story board">
+        <p class="empty-note">Loading ingredient facet board.</p>
+      </section>
+
+      <section class="story-receipts-shell" id="story-receipts" aria-label="Chapter source receipt ledger">
+        <p class="empty-note">Loading story receipts.</p>
+      </section>
+
+      <section class="panel corpus-atlas" id="corpus-atlas">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Corpus Atlas</p>
+            <h2>100-Product Story Map</h2>
+          </div>
+          <span id="corpus-atlas-count" class="count-pill">0 products</span>
+        </div>
+        <section class="corpus-guide-shell" aria-label="Corpus story guide">
+          <div class="subsection-title">
+            <strong>Story Guide</strong>
+            <span>Use the Atlas as a reader journey from public story to proof map, timeline, and next collection move</span>
+          </div>
+          <div id="corpus-story-guide" class="corpus-story-guide"></div>
+        </section>
+        <section class="corpus-issue-shell" aria-label="Editorial story issue preview">
+          <div class="subsection-title">
+            <strong>Story Issue Preview</strong>
+            <span>A reader-facing issue built from evidence-backed story packages, receipts, caveats, and proof moves</span>
+          </div>
+          <div id="corpus-story-issue" class="corpus-story-issue"></div>
+        </section>
+        <section class="corpus-arc-preview-shell" aria-label="Corpus arc preview">
+          <div class="subsection-title">
+            <strong>Arc Preview</strong>
+            <span>The 100-product corpus as reader-facing narrative families before source lanes and collection work</span>
+          </div>
+          <div id="corpus-story-arc-preview" class="corpus-story-arc-preview"></div>
+        </section>
+        <div class="corpus-atlas-grid">
+          <section>
+            <div class="subsection-title">
+              <strong>Story Clusters</strong>
+              <span>What kind of story each product can tell today</span>
+            </div>
+            <div id="corpus-cluster-rows" class="corpus-clusters"></div>
+          </section>
+          <section>
+            <div class="subsection-title">
+              <strong>Collection Engines</strong>
+              <span>Current web, Common Crawl, collectors, and price/weight lanes</span>
+            </div>
+            <div id="corpus-lane-rows" class="corpus-lanes"></div>
+          </section>
+        </div>
+        <section class="corpus-missions-shell" aria-label="Collection source mission board">
+          <div class="subsection-title atlas-product-title">
+            <strong>Collection Missions</strong>
+            <span>Future source lanes for collectors, current web, Common Crawl, fast food, and price/weight work</span>
+          </div>
+          <div id="corpus-source-missions" class="corpus-source-missions"></div>
+        </section>
+        <section class="corpus-waves-shell" aria-label="Collection wave planner">
+          <div class="subsection-title atlas-product-title">
+            <strong>Collection Waves</strong>
+            <span>Sequenced batches, acceptance gates, and no-claim boundaries before collection resumes</span>
+          </div>
+          <div id="corpus-collection-waves" class="corpus-collection-waves"></div>
+        </section>
+        <section class="corpus-network-shell" aria-label="Corpus story network">
+          <div class="subsection-title atlas-product-title">
+            <strong>Corpus Story Network</strong>
+            <span>How product leads become reader-facing ingredient, package, maker, and price stories</span>
+          </div>
+          <div id="corpus-story-network" class="corpus-story-network"></div>
+        </section>
+        <section class="corpus-routes-shell" aria-label="Product story route matrix">
+          <div class="subsection-title atlas-product-title">
+            <strong>Story Route Matrix</strong>
+            <span>Product-by-product view of which narrative lanes are ready, blocked, or out of scope</span>
+          </div>
+          <div id="corpus-story-routes" class="corpus-story-routes"></div>
+        </section>
+        <section class="corpus-visual-shell" aria-label="Visual evidence proof board">
+          <div class="subsection-title atlas-product-title">
+            <strong>Visual Evidence Board</strong>
+            <span>Source-attributable photo, label-panel, package, and maker proof behind the story routes</span>
+          </div>
+          <div id="corpus-visual-evidence" class="corpus-visual-evidence"></div>
+        </section>
+        <section class="corpus-arcs-shell" aria-label="Corpus story arcs">
+          <div class="subsection-title atlas-product-title">
+            <strong>Corpus Story Arcs</strong>
+            <span>Reader-facing narrative families built from evidence gates, not unsupported formulation claims</span>
+          </div>
+          <div id="corpus-story-arcs" class="corpus-story-arcs"></div>
+        </section>
+        <section class="corpus-beats-shell" aria-label="Corpus story beat explorer">
+          <div class="subsection-title atlas-product-title">
+            <strong>Story Beat Explorer</strong>
+            <span>How each narrative arc becomes a reader sequence: hook, evidence, tension, boundary, and unlock</span>
+          </div>
+          <div id="corpus-story-beats" class="corpus-story-beats"></div>
+        </section>
+        <section class="corpus-deck-shell" aria-label="Public story deck">
+          <div class="subsection-title atlas-product-title">
+            <strong>Public Story Deck</strong>
+            <span>Draftable story pitches that foreground the object, source receipt, claim boundary, and next proof step</span>
+          </div>
+          <div id="corpus-story-deck" class="corpus-story-deck"></div>
+        </section>
+        <section class="corpus-boundary-shell" aria-label="Claim boundary board">
+          <div class="subsection-title atlas-product-title">
+            <strong>Claim Boundary Board</strong>
+            <span>Side-by-side public language, locked claims, receipts, and the proof step that unlocks each story</span>
+          </div>
+          <div id="corpus-claim-boundaries" class="corpus-claim-boundaries"></div>
+        </section>
+        <section class="corpus-publish-shell" aria-label="Story publication queue">
+          <div class="subsection-title atlas-product-title">
+            <strong>Publication Queue</strong>
+            <span>Editorial decisions for evidence-status stories, locked formulation claims, receipts, and next proof gates</span>
+          </div>
+          <div id="corpus-publication-queue" class="corpus-publication-queue"></div>
+        </section>
+        <section class="corpus-risk-shell" aria-label="Story risk board">
+          <div class="subsection-title atlas-product-title">
+            <strong>Story Risk Board</strong>
+            <span>Claim caveats grouped by transcription, formulation, identity, origin, document scope, and visual proof risk</span>
+          </div>
+          <div id="corpus-story-risks" class="corpus-story-risks"></div>
+        </section>
+        <section class="corpus-dashboard-shell" aria-label="Corpus narrative dashboard">
+          <div class="subsection-title atlas-product-title">
+            <strong>Narrative Dashboard</strong>
+            <span>One-page synthesis of publishable story language, locked claims, next proof moves, and risk density</span>
+          </div>
+          <div id="corpus-narrative-dashboard" class="corpus-narrative-dashboard"></div>
+        </section>
+        <section class="corpus-frontpage-shell" aria-label="Reader story front page">
+          <div class="subsection-title atlas-product-title">
+            <strong>Reader Front Page</strong>
+            <span>Public-first story packages with lede, evidence object, receipt, boundary, and next chapter</span>
+          </div>
+          <div id="corpus-reader-frontpage" class="corpus-reader-frontpage"></div>
+        </section>
+        <section class="corpus-library-shell" aria-label="Reader story library">
+          <div class="subsection-title atlas-product-title">
+            <strong>Story Library</strong>
+            <span>Browse every packaged story with evidence status, source receipt, caveat, and next proof step</span>
+          </div>
+          <div id="corpus-story-library" class="corpus-story-library"></div>
+        </section>
+        <section class="corpus-flow-shell" aria-label="Reader story flow map">
+          <div class="subsection-title atlas-product-title">
+            <strong>Story Flow Map</strong>
+            <span>Follow each story from evidence object to receipt, claim boundary, and next proof move</span>
+          </div>
+          <div id="corpus-story-flow" class="corpus-story-flow"></div>
+        </section>
+        <section class="corpus-timeline-shell" aria-label="Vintage story timeline">
+          <div class="subsection-title atlas-product-title">
+            <strong>Vintage Story Timeline</strong>
+            <span>See where each product story has evidence, readable labels, claim-ready text, and explicit gaps over time</span>
+          </div>
+          <div id="corpus-story-timeline" class="corpus-story-timeline"></div>
+        </section>
+        <section class="corpus-pilot-shell" aria-label="100-product pilot story visualization">
+          <div class="subsection-title atlas-product-title">
+            <strong>Pilot Storyboard</strong>
+            <span>Reader-facing view of the 100-product corpus, proof stages, and vintage gaps</span>
+          </div>
+          <div id="corpus-pilot-storyboard" class="corpus-pilot-storyboard"></div>
+        </section>
+        <section class="corpus-heatmap-shell" aria-label="100-product vintage evidence heatmap">
+          <div class="subsection-title atlas-product-title">
+            <strong>Evidence Heatmap</strong>
+            <span>Top 100 products by vintage slot, proof state, and next claim boundary</span>
+          </div>
+          <div id="corpus-evidence-heatmap" class="corpus-evidence-heatmap"></div>
+        </section>
+        <div class="subsection-title atlas-product-title">
+          <strong>Product Constellation</strong>
+          <span>Highest-value story candidates, with proof gaps kept visible</span>
+        </div>
+        <div id="corpus-product-constellation" class="corpus-product-constellation"></div>
+        <div class="subsection-title atlas-product-title">
+          <strong>Collection Workbench</strong>
+          <span>Assignment-sized task groups and starts for high-volume collection</span>
+        </div>
+        <div id="corpus-collection-workbench" class="corpus-workbench-grid">
+          <section>
+            <div class="subsection-title">
+              <strong>Task Groups</strong>
+              <span id="corpus-task-group-count">0 groups</span>
+            </div>
+            <div id="corpus-task-group-rows" class="corpus-task-groups"></div>
+          </section>
+          <section>
+            <div class="subsection-title">
+              <strong>Search Starts</strong>
+              <span>Open, review, import</span>
+            </div>
+            <div id="corpus-search-start-rows" class="corpus-search-starts"></div>
+          </section>
+          <section>
+            <div class="subsection-title">
+              <strong>Archive Commands</strong>
+              <span>CDX and exact-candidate archive sweeps</span>
+            </div>
+            <div id="corpus-archive-command-rows" class="corpus-archive-commands"></div>
+          </section>
+        </div>
       </section>
 
       <section class="panel story-desk" id="story-desk">
@@ -44,6 +323,84 @@
           <div id="reader-readiness" class="reader-readiness"></div>
         </div>
         <div id="reader-pillars" class="reader-pillars"></div>
+        <div id="reader-lensbar" class="reader-lensbar" aria-label="Story lens controls"></div>
+        <section class="reader-clusters-shell" aria-label="Reader-facing story clusters">
+          <div class="subsection-title">
+            <strong>Story Clusters</strong>
+            <span>What kinds of product histories are ready to tell</span>
+          </div>
+          <div id="reader-clusters" class="reader-clusters"></div>
+        </section>
+        <section class="reader-gallery-shell" aria-label="Reader-facing product story gallery">
+          <div class="subsection-title">
+            <strong>Story Gallery</strong>
+            <span>Browse product histories by story readiness</span>
+          </div>
+          <div id="reader-gallery" class="reader-gallery"></div>
+        </section>
+        <section class="reader-compare-shell" aria-label="Reader-facing related story comparison">
+          <div class="subsection-title">
+            <strong>Compare Stories</strong>
+            <span>Related products with different proof states</span>
+          </div>
+          <div id="reader-compare" class="reader-compare"></div>
+        </section>
+        <section class="reader-sources-shell" aria-label="Reader-facing source provenance map">
+          <div class="subsection-title">
+            <strong>Source Provenance</strong>
+            <span>Brand pages, collector photos, retailers, archives, and gaps</span>
+          </div>
+          <div id="reader-sources" class="reader-sources"></div>
+        </section>
+        <section class="reader-matrix-shell" aria-label="Reader-facing evidence matrix">
+          <div class="subsection-title">
+            <strong>Evidence Matrix</strong>
+            <span>Ingredients, package, maker, economics, and provenance by vintage</span>
+          </div>
+          <div id="reader-matrix" class="reader-matrix"></div>
+        </section>
+        <section class="reader-visual-shell" aria-label="Reader-facing story visualization">
+          <div class="subsection-title">
+            <strong>Story Timeline</strong>
+            <span>Chapters, proof states, and analytical overlays</span>
+          </div>
+          <div id="reader-visual" class="reader-visual"></div>
+        </section>
+        <section class="reader-script-shell" aria-label="Reader-facing story script">
+          <div class="subsection-title">
+            <strong>Story Script</strong>
+            <span>A readable arc before the proof grid</span>
+          </div>
+          <div id="reader-script" class="reader-script"></div>
+        </section>
+        <section class="reader-chapters-shell" aria-label="Reader-facing article chapters">
+          <div class="subsection-title">
+            <strong>Article Chapters</strong>
+            <span>How the story would read with proof limits intact</span>
+          </div>
+          <div id="reader-chapters" class="reader-chapters"></div>
+        </section>
+        <section class="reader-scenes-shell" aria-label="Reader-facing narrative scenes">
+          <div class="subsection-title">
+            <strong>Story Scenes</strong>
+            <span>The public narrative, with proof and uncertainty attached to each beat</span>
+          </div>
+          <div id="reader-scenes" class="reader-scenes"></div>
+        </section>
+        <section class="reader-preview-shell" aria-label="Reader-facing story preview">
+          <div class="subsection-title">
+            <strong>Reader Preview</strong>
+            <span>Lead, claim boundary, and proof receipts</span>
+          </div>
+          <div id="reader-preview" class="reader-preview"></div>
+        </section>
+        <section class="reader-board" aria-label="Selected story narrative board">
+          <div class="subsection-title">
+            <strong>Story Board</strong>
+            <span>Narrative, proof, boundary, unlock</span>
+          </div>
+          <div id="reader-storyboard" class="reader-storyboard"></div>
+        </section>
         <div class="reader-story-grid">
           <section>
             <div class="subsection-title">
@@ -82,7 +439,7 @@
         <div class="panel-heading">
           <div>
             <p class="eyebrow">Evidence Stories</p>
-            <h2>Focused Story And Proof Trail</h2>
+            <h2>Selected Story And Proof Trail</h2>
           </div>
           <span id="story-count" class="count-pill">0 stories</span>
         </div>

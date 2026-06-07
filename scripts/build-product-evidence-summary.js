@@ -65,6 +65,76 @@ async function firstExistingPath(candidates) {
   return "";
 }
 
+async function readJsonlRowsIfExists(filePath) {
+  try {
+    const text = await fs.readFile(filePath, "utf8");
+    return text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => JSON.parse(line));
+  } catch (error) {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  }
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let value = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+    if (inQuotes) {
+      if (char === '"' && next === '"') {
+        value += '"';
+        index += 1;
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        value += char;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inQuotes = true;
+    } else if (char === ",") {
+      row.push(value);
+      value = "";
+    } else if (char === "\n") {
+      row.push(value);
+      rows.push(row);
+      row = [];
+      value = "";
+    } else if (char !== "\r") {
+      value += char;
+    }
+  }
+
+  if (value || row.length) {
+    row.push(value);
+    rows.push(row);
+  }
+
+  const headers = rows.shift() || [];
+  return rows
+    .filter((cells) => cells.some((cell) => cell !== ""))
+    .map((cells) => Object.fromEntries(headers.map((header, index) => [header, cells[index] ?? ""])));
+}
+
+async function readCsvRowsIfExists(filePath) {
+  try {
+    return parseCsv(await fs.readFile(filePath, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  }
+}
+
 function buildProducts(board) {
   return (board.collection_opportunities || []).map((row) => ({
     ...row,
@@ -107,6 +177,100 @@ function buildSourceBatches(rows) {
   return [...groups.values()].sort((a, b) => b.priority - a.priority || a.source.localeCompare(b.source));
 }
 
+function splitParts(value, limit = 20) {
+  return String(value || "")
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, limit);
+}
+
+function appendUnique(list, value, limit = 8) {
+  for (const part of splitParts(value, limit * 2)) {
+    if (!list.includes(part)) list.push(part);
+    if (list.length >= limit) return;
+  }
+}
+
+function joinUnique(values, limit = 8) {
+  const list = [];
+  for (const value of values || []) appendUnique(list, value, limit);
+  return list.slice(0, limit).join(";");
+}
+
+function numberValue(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function buildCollectionTaskGroups(rows) {
+  const groups = new Map();
+  for (const row of rows || []) {
+    const key = [
+      row.search_surface || "",
+      row.source_key || "",
+      row.category || "",
+      row.review_stage || "",
+    ].join("\u001f");
+    if (!groups.has(key)) {
+      groups.set(key, {
+        group_id: `task-group-${groups.size + 1}`,
+        search_surface: row.search_surface || "",
+        source_key: row.source_key || "",
+        source_name: row.source_name || row.source_key || "",
+        source_kind: row.source_kind || "",
+        category: row.category || "",
+        review_stage: row.review_stage || "",
+        task_count: 0,
+        product_names: [],
+        canonical_names: [],
+        vintages: [],
+        review_stages: [],
+        query_texts: [],
+        search_urls: [],
+        image_search_urls: [],
+        common_crawl_patterns: [],
+        cli_hints: [],
+        best_candidate_urls: [],
+        expected_evidence: row.expected_evidence || "",
+        required_next_action: row.required_next_action || row.import_hint || "",
+        source_attribution_grade: row.source_attribution_grade || "",
+        max_priority: 0,
+      });
+    }
+    const group = groups.get(key);
+    group.task_count += 1;
+    group.max_priority = Math.max(group.max_priority, numberValue(row.task_priority));
+    appendUnique(group.product_names, row.display_name || row.canonical_name, 8);
+    appendUnique(group.canonical_names, row.canonical_name, 1000);
+    appendUnique(group.vintages, row.vintage_label, 8);
+    appendUnique(group.review_stages, row.review_stage, 8);
+    appendUnique(group.query_texts, row.query_text, 5);
+    appendUnique(group.search_urls, row.search_url, 4);
+    appendUnique(group.image_search_urls, row.image_search_url, 4);
+    appendUnique(group.common_crawl_patterns, row.common_crawl_patterns, 8);
+    appendUnique(group.cli_hints, row.cli_hint, 4);
+    appendUnique(group.best_candidate_urls, row.best_candidate_url, 4);
+  }
+
+  return [...groups.values()]
+    .map((group) => ({
+      ...group,
+      product_count: group.canonical_names.length,
+      top_products: group.product_names.join(";"),
+      vintages: group.vintages.join(";"),
+      review_stages: group.review_stages.join(";"),
+      sample_queries: group.query_texts.join(";"),
+      search_urls_to_start: group.search_urls.join(";"),
+      image_urls_to_start: group.image_search_urls.join(";"),
+      common_crawl_patterns: group.common_crawl_patterns.join(";"),
+      cli_hints: group.cli_hints.join(";"),
+      best_candidate_urls: group.best_candidate_urls.join(";"),
+    }))
+    .sort((a, b) => b.max_priority - a.max_priority || b.task_count - a.task_count || a.source_name.localeCompare(b.source_name))
+    .slice(0, 120);
+}
+
 async function main() {
   const sourcePath = argValue("source", "") || await firstExistingPath(SOURCE_CANDIDATES);
   const destPath = argValue("dest", DEFAULT_DEST);
@@ -114,10 +278,14 @@ async function main() {
     throw new Error("Missing product discovery board. Pass --source=/path/to/product_discovery_board.json or set PRODUCT_EVIDENCE_SOURCE.");
   }
   const board = JSON.parse(await fs.readFile(sourcePath, "utf8"));
+  const sourceDir = path.dirname(sourcePath);
+  const fullEvidenceRegistry = await readJsonlRowsIfExists(path.join(sourceDir, "evidence_registry.jsonl"));
+  const csvEvidenceRegistry = await readCsvRowsIfExists(path.join(sourceDir, "evidence_registry.csv"));
 
   const products = buildProducts(board);
   const acquisition = board.evidence_acquisition_queue || [];
-  const registry = board.evidence_registry || [];
+  const registry = [fullEvidenceRegistry, csvEvidenceRegistry, board.evidence_registry || []]
+    .sort((a, b) => b.length - a.length)[0];
   const photo = board.photo_evidence_matrix || [];
   const sweeps = board.common_crawl_sweep_plan || [];
   const runLogs = board.common_crawl_run_logs || [];
@@ -282,6 +450,7 @@ async function main() {
     source_batches: buildSourceBatches(board.source_collection_batches || []),
     collection_campaigns: compactRows(campaigns, campaignFields, 80),
     collection_campaign_packets: compactRows(campaignPackets, packetFields, 80),
+    collection_task_groups: buildCollectionTaskGroups(massSearch),
     mass_search_tasks: compactRows(massSearch, taskFields, 300),
     current_web_harvest_manifest: compactRows(currentWebManifests, [
       "manifest_id",
