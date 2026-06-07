@@ -15082,6 +15082,14 @@ function productRecipeJourneySummary(product, evidenceRows, rows) {
   };
 }
 
+function recipeJourneyStitchLine(summary, rows) {
+  const current = rows[0] || {};
+  const earliest = rows[rows.length - 1] || {};
+  const currentLabel = current.recipeState?.label || "Current evidence";
+  const earliestLabel = earliest.recipeState?.label || "Earliest evidence";
+  return `${currentLabel} flows through ${formatNumber(rows.length)} dated chapters toward ${earliestLabel}; each break keeps its source object, claim boundary, and next proof visible. ${summary.boundary}`;
+}
+
 function renderProductRecipeJourney(card, evidenceRows) {
   const product = card.product;
   if (!product) return "";
@@ -15105,6 +15113,38 @@ function renderProductRecipeJourney(card, evidenceRows) {
         ${statusTag(summary.status)}
         <strong>${escapeHtml(summary.verdict)}</strong>
         <span>${escapeHtml(summary.boundary)}</span>
+      </div>
+      <div class="recipe-stitch" aria-label="Stitched recipe story route">
+        <aside class="recipe-stitch-copy">
+          <span>Story Stitch</span>
+          <strong>${escapeHtml(summary.name)}</strong>
+          <p>${escapeHtml(recipeJourneyStitchLine(summary, rows))}</p>
+        </aside>
+        <div class="recipe-stitch-route">
+          ${rows
+            .map((row) => `
+              <article class="recipe-stitch-node status-${escapeHtml(row.status)}">
+                <header>
+                  <span>${escapeHtml(row.number)}</span>
+                  <strong>${escapeHtml(row.label)}</strong>
+                  <em>${escapeHtml(row.dateBasis)}</em>
+                </header>
+                <section>
+                  <span>${escapeHtml(row.recipeState.label)}</span>
+                  <p>${escapeHtml(clipped(row.sourceTitle, 92))}</p>
+                </section>
+                <footer>
+                  <b>${escapeHtml(`${formatNumber(row.sourceCount)} source${row.sourceCount === 1 ? "" : "s"}`)}</b>
+                  <p>${escapeHtml(clipped(row.nextProof, 118))}</p>
+                  <div class="lead-meta">
+                    ${statusTag(row.status)}
+                    ${row.source ? linkOrText(row.source, row.sourceLabel) : `<span class="gap-label">No source link</span>`}
+                  </div>
+                </footer>
+              </article>
+            `)
+            .join("")}
+        </div>
       </div>
       <div class="recipe-journey-track">
         ${rows

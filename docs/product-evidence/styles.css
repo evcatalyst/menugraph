@@ -15247,6 +15247,134 @@ body[data-story-mode="proof"] .lower-grid {
   overflow-wrap: anywhere;
 }
 
+.recipe-stitch {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.28fr) minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid rgba(49, 111, 115, 0.26);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.72);
+  padding: 10px;
+}
+
+.recipe-stitch-copy {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+  border-right: 1px solid var(--line);
+  padding-right: 10px;
+}
+
+.recipe-stitch-copy span,
+.recipe-stitch-node header strong,
+.recipe-stitch-node section span,
+.recipe-stitch-node footer b {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.18;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch-copy strong {
+  color: var(--ink);
+  font-size: 20px;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch-route {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.recipe-stitch-route::before {
+  content: "";
+  position: absolute;
+  top: 23px;
+  left: 18px;
+  right: 18px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(49, 111, 115, 0.52), rgba(170, 127, 46, 0.48), rgba(162, 79, 57, 0.48));
+}
+
+.recipe-stitch-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(76px, auto) auto;
+  gap: 8px;
+  min-width: 0;
+  min-height: 260px;
+  border: 1px solid rgba(49, 111, 115, 0.26);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.92);
+  padding: 8px;
+}
+
+.recipe-stitch-node header {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.recipe-stitch-node header span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid rgba(49, 111, 115, 0.36);
+  border-radius: 7px;
+  background: var(--paper-warm);
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.recipe-stitch-node header em,
+.recipe-stitch-node section p,
+.recipe-stitch-node footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1.32;
+  overflow-wrap: anywhere;
+}
+
+.recipe-stitch-node section {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+
+.recipe-stitch-node footer {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+
 .recipe-journey-track {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -17066,6 +17194,25 @@ td {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .recipe-stitch {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-stitch-copy {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding-right: 0;
+    padding-bottom: 9px;
+  }
+
+  .recipe-stitch-route {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .recipe-stitch-route::before {
+    display: none;
+  }
+
   .story-featured {
     grid-column: auto;
   }
@@ -18220,12 +18367,42 @@ td {
   .story-beat > p,
   .story-chapter p,
   .story-timeline-row p,
+  .recipe-stitch-node,
   .recipe-journey-card,
   .reader-script-beat > p,
   .reader-visual-node > p,
   .reader-claim > p,
   .reader-era > p {
     min-height: 0;
+  }
+
+  .recipe-stitch-route {
+    grid-template-columns: 1fr;
+    padding-left: 36px;
+  }
+
+  .recipe-stitch-route::before {
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 14px;
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+
+  .recipe-stitch-node header {
+    grid-template-columns: 32px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .recipe-stitch-node header span {
+    margin-left: -38px;
+  }
+
+  .recipe-stitch-node header strong,
+  .recipe-stitch-node header em {
+    grid-column: 2;
   }
 
   .reader-lineup {
