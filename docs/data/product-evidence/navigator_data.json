@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-07T10:45:00Z",
+  "generated_at_utc": "2026-06-07T12:02:04Z",
   "schema_version": "ingredient_navigator_v1",
   "default_product": "oreo_original_chocolate_sandwich_cookies",
   "status_legend": [
@@ -48,15 +48,15 @@
       "coverage": 100,
       "source_backed_slots": 6,
       "total_slots": 6,
-      "candidate_count": 16,
+      "candidate_count": 18,
       "verified_labels": 0,
-      "label_visible_leads": 7,
+      "label_visible_leads": 9,
       "photo_enriched_eras": 5,
-      "label_text_candidates": 3,
-      "summary": "Oreo has a complete source-backed package journey across the vintage slots, but the recipe journey is still locked because no comparable ingredient statement has been manually verified.",
-      "story_thesis": "The visible story is the proof chase: package and label leads exist, but the original-to-current ingredient comparison cannot publish until readable panels become reviewed text.",
+      "label_text_candidates": 5,
+      "summary": "Oreo has a complete source-backed package journey across the vintage slots, with two photo-derived vintage text extracts now visible. The recipe journey is still locked because no comparable ingredient statement has been manually verified.",
+      "story_thesis": "The visible story is now the proof chase plus the first extraction layer: early and 1993 photos reveal candidate label text, but original-to-current ingredient comparison cannot publish until those extracts become reviewed text.",
       "claim_boundary": "1912 original ingredient label not verified. Do not imply a verified original recipe or a full original-to-current formulation diff.",
-      "next_unlock": "Start with label-visible current and 2010s records, transcribe against source images/pages, then attach reviewer attribution before comparing ingredients.",
+      "next_unlock": "Review the supplied Flickr screenshots against the source pages, capture higher-resolution label panels where possible, and attach reviewer attribution before comparing ingredients.",
       "source_domains": [
         "smartlabel.mondelez.info",
         "www.flickr.com",
@@ -66,10 +66,10 @@
         "www.packagingdigest.com"
       ],
       "photo_quality_summary": {
-        "headline": "Photo evidence now strengthens the package map, not the ingredient claims.",
-        "can_prove": "Era/package presence, source owner, some date-basis clues, and candidate SKU/package context.",
-        "cannot_prove": "Ingredient substitutions, oil/sweetener changes, original 1912 recipe, or package weight normalization without readable reviewed panels.",
-        "highest_value_next": "Prioritize back-panel or full-package photos for 1990s, 2000s, and 1950s-1960s objects; current and 2010s label-text candidates can move into manual verification first."
+        "headline": "User-supplied photo review unlocked two vintage text extracts.",
+        "can_prove": "Era/package presence, source owner, visible candidate terms on the 1950s-1960s wrapper, and a readable 1993 ingredient/nutrition panel candidate.",
+        "cannot_prove": "A verified original recipe, a verified formulation diff, package weight normalization, or ingredient claims beyond the legible extract text.",
+        "highest_value_next": "Confirm the 1993 panel against the Flickr source image, find higher-resolution early wrapper/back-panel photos, then run manual review before comparing oil or sweetener changes."
       },
       "versions": [
         {
@@ -101,47 +101,61 @@
           "year": 1960,
           "label": "1950s-1960s package lead",
           "vintage": "1980s_or_earlier",
-          "status": "usable_photo",
+          "status": "label_text_candidate",
           "source_count": 4,
-          "confidence": 0.44,
-          "headline": "Vintage package object, not recipe text",
-          "ingredient_summary": "Package-photo and article leads can anchor the era visually, but ingredient panel text is not verified.",
-          "facet_summary": ["package lead", "panel needed", "date basis review"],
+          "confidence": 0.58,
+          "headline": "Partial wrapper text is visible",
+          "ingredient_summary": "A user-supplied source screenshot exposes a partial ingredient-like wrapper line with sugar, flour, coconut oil, shortening, cocoa, corn flour, non-fat milk solids, chocolate, salt, leavening, and artificial flavor. This is not a complete verified ingredient panel.",
+          "facet_summary": ["partial label text", "front wrapper", "manual review needed"],
           "photo_quality": {
-            "role": "front/package-object evidence",
+            "role": "front/package-object evidence plus partial wrapper text",
             "package_front": "source-attributable",
-            "label_panel": "not readable in current record",
+            "label_panel": "partial package text visible; no complete ingredient panel",
             "date_basis": "source title and publication context",
-            "quality_score": 0.44,
-            "blocker": "The photo improves era confidence but does not expose a verified ingredient statement."
+            "quality_score": 0.58,
+            "blocker": "The text is partial and appears as wrapper/package copy, so it cannot stand in for a complete ingredient statement."
+          },
+          "label_extract": {
+            "status": "partial label-text candidate",
+            "source_note": "User-supplied screenshot of the Flickr package photo; source URL remains the collector page.",
+            "observed_text": "A delicious creamy sandwich made with sugar, flour, coconut oil, shortening, cocoa, corn flour, non-fat milk solids, chocolate, salt, leavening, and artificial flavor.",
+            "confidence_note": "Visible terms are useful for review, but this is partial package copy with damaged/clipped text and no complete ingredient panel.",
+            "legible_terms": ["sugar", "flour", "coconut oil", "shortening", "cocoa", "corn flour", "non-fat milk solids", "chocolate", "salt", "leavening", "artificial flavor"]
           },
           "package_context": "Candidate package history exists; net weight and serving fields are not captured.",
           "price_weight_context": "Price/weight alignment deferred until package fields are reviewed.",
-          "next_step": "Review the source object for readable ingredient panel, net weight, manufacturer/distributor text, and rights.",
+          "next_step": "Confirm the extract against the source image, search for a higher-resolution wrapper/back-panel, and record reviewer attribution.",
           "evidence_ids": ["flickr_oreo_1960s", "flickr_oreo_1960s_box", "packaging_digest_century", "seattlepi_century"]
         },
         {
           "id": "package_1993",
           "year": 1993,
-          "label": "1990s package object",
+          "label": "1993 label candidate",
           "vintage": "1990s",
-          "status": "usable_photo",
+          "status": "label_text_candidate",
           "source_count": 1,
-          "confidence": 0.34,
-          "headline": "1993 package lead",
-          "ingredient_summary": "A source-attributable package object exists, but no reviewed ingredient text is attached.",
-          "facet_summary": ["photo lead", "panel needed", "recipe locked"],
+          "confidence": 0.72,
+          "headline": "Readable 1993 panel candidate",
+          "ingredient_summary": "A user-supplied source screenshot shows a readable 1993 ingredient panel candidate including sugar, enriched wheat flour, partially hydrogenated soybean oil, cocoa processed with alkali, high fructose corn syrup, corn flour, whey, chocolate, baking soda, salt, soy lecithin, and vanillin/artificial flavor.",
+          "facet_summary": ["label text candidate", "partially hydrogenated oil", "HFCS", "manual review needed"],
           "photo_quality": {
-            "role": "dated package object",
+            "role": "dated package object plus readable ingredient panel",
             "package_front": "source-attributable",
-            "label_panel": "not readable in current record",
+            "label_panel": "ingredient/nutrition panel visible in supplied screenshot",
             "date_basis": "source title identifies 1993 package",
-            "quality_score": 0.38,
-            "blocker": "Useful as a 1990s visual anchor; ingredient/oil/sweetener claims remain blocked."
+            "quality_score": 0.72,
+            "blocker": "The panel is screenshot-compressed and still needs source-image confirmation plus reviewer correction before manual verification."
           },
-          "package_context": "Package format visible in source title; panel fields still uncaptured.",
+          "label_extract": {
+            "status": "label-text candidate",
+            "source_note": "User-supplied screenshot of the Flickr 1993 package photo; source URL remains the collector page.",
+            "observed_text": "INGREDIENTS: SUGAR, ENRICHED WHEAT FLOUR (CONTAINS NIACIN, REDUCED IRON, THIAMINE MONONITRATE (VITAMIN B1), RIBOFLAVIN (VITAMIN B2)), VEGETABLE SHORTENING (PARTIALLY HYDROGENATED SOYBEAN OIL), COCOA (PROCESSED WITH ALKALI), HIGH FRUCTOSE CORN SYRUP, CORN FLOUR, WHEY, CHOCOLATE, BAKING SODA, SALT, SOY LECITHIN (EMULSIFIER), AND VANILLIN--AN ARTIFICIAL FLAVOR.",
+            "confidence_note": "High-value candidate because the ingredient panel is visible, but the screenshot is compressed and must be checked against the source image before verification.",
+            "legible_terms": ["sugar", "enriched wheat flour", "niacin", "reduced iron", "thiamine mononitrate", "riboflavin", "partially hydrogenated soybean oil", "cocoa processed with alkali", "high fructose corn syrup", "corn flour", "whey", "chocolate", "baking soda", "salt", "soy lecithin", "vanillin", "artificial flavor"]
+          },
+          "package_context": "1993 6-pack package object visible in source title; ingredient/nutrition panel is visible in the supplied screenshot.",
           "price_weight_context": "No price link attached.",
-          "next_step": "Confirm label-panel readability and date basis, then transcribe if readable.",
+          "next_step": "Verify the transcription against the source image, capture panel crop, and mark reviewer attribution before comparing formulation changes.",
           "evidence_ids": ["flickr_oreo_1993"]
         },
         {
@@ -222,29 +236,29 @@
           "id": "fat_oil",
           "label": "Fat/Oil System",
           "status": "blocked",
-          "detail": "High-interest story lane. Current and 2010s label-text candidates can seed review, but no oil-system change can be asserted until older package photos yield readable ingredient panels.",
-          "photo_unlock": "Back-panel photos or verified transcriptions for 1990s, 2000s, and 1950s-1960s packages."
+          "detail": "High-interest story lane. The 1993 candidate visibly includes partially hydrogenated soybean oil and the early wrapper candidate includes coconut oil/shortening, but no oil-system change can be asserted until extracts are manually verified.",
+          "photo_unlock": "Verify the 1993 panel, find a higher-resolution early wrapper or back panel, then compare against current reviewed labels."
         },
         {
           "id": "sweetener",
           "label": "Sweeteners",
           "status": "blocked",
-          "detail": "Ingredient text is required before sugar/HFCS/invert-sugar comparisons can be made. EWG/current records provide candidates, not timeline proof.",
-          "photo_unlock": "Comparable ingredient panels across at least two eras, preferably current plus 2010s plus one pre-2000 package."
+          "detail": "The early wrapper candidate includes sugar and the 1993 panel candidate includes high fructose corn syrup, but screenshot-derived text is not timeline proof until reviewed.",
+          "photo_unlock": "Comparable reviewed ingredient panels across current, 2010s, 1993, and one earlier package."
         },
         {
           "id": "flour_grain",
           "label": "Flour/Grain",
           "status": "blocked",
-          "detail": "Needs parsed ingredient statements to compare enriched flour and subingredients. Package fronts do not prove nested flour terms.",
-          "photo_unlock": "Readable ingredient statement photos or package-derived text with reviewer correction."
+          "detail": "The 1993 candidate exposes enriched wheat flour with enrichment subingredients, but parser-ready comparison waits for reviewer correction.",
+          "photo_unlock": "Correct the 1993 transcription and capture comparable current and vintage ingredient statements."
         },
         {
           "id": "cocoa_chocolate",
           "label": "Cocoa/Chocolate",
           "status": "blocked",
-          "detail": "Cocoa/chocolate terms must come from reviewed labels, not product names or product photos.",
-          "photo_unlock": "Full ingredient panel for each compared package/SKU."
+          "detail": "The early and 1993 candidates expose cocoa/chocolate terms, but the lane remains a candidate until panel text is reviewed.",
+          "photo_unlock": "Full ingredient panel for each compared package/SKU, with text corrected against the image."
         },
         {
           "id": "package_weight",
@@ -257,7 +271,7 @@
           "id": "evidence_quality",
           "label": "Evidence Quality",
           "status": "active",
-          "detail": "This is the current publishable story: photo sources improve the package map while blocked ingredient lanes remain explicit.",
+          "detail": "This is the current publishable story: photo sources now expose vintage text candidates while blocked ingredient lanes remain explicit.",
           "photo_unlock": "Promote each source through visible package, readable panel, OCR/manual correction, and reviewer verification."
         }
       ],
@@ -265,13 +279,13 @@
         {
           "lane": "Fat/Oil System",
           "status": "blocked",
-          "why": "Current and 2010s candidates mention oil terms, but older eras lack reviewed ingredient panels.",
-          "photo_target": "Find readable back panels for 1990s, 2000s, and 1950s-1960s package objects."
+          "why": "The early wrapper and 1993 panel now show oil/fat terms, but neither has manual verification.",
+          "photo_target": "Verify the 1993 panel and find higher-resolution 1950s-1960s label/back-panel evidence."
         },
         {
           "lane": "Sweetener Transitions",
           "status": "blocked",
-          "why": "Candidate ingredient text is not enough to compare sugar/HFCS across decades.",
+          "why": "The 1993 candidate shows HFCS and the early wrapper shows sugar, but screenshot text is not enough for a claim.",
           "photo_target": "Attach corrected transcriptions from source-attributable label photos."
         },
         {
@@ -296,9 +310,15 @@
         },
         {
           "year": 1960,
-          "label": "Vintage package lead",
-          "status": "usable_photo",
-          "detail": "Package object can anchor visual history, not ingredient claims."
+          "label": "Partial early wrapper text",
+          "status": "label_text_candidate",
+          "detail": "User-supplied source screenshot exposes partial package text with ingredient-like terms; not a complete verified label."
+        },
+        {
+          "year": 1993,
+          "label": "Readable 1993 panel candidate",
+          "status": "label_text_candidate",
+          "detail": "User-supplied source screenshot exposes a readable ingredient panel candidate including partially hydrogenated soybean oil and HFCS."
         },
         {
           "year": 2010,
@@ -436,12 +456,19 @@
           "title": "Nabisco - Oreo - 6-pack cookie pack - 1993 - Flickr",
           "source": "www.flickr.com",
           "url": "https://www.flickr.com/photos/jasonliebigstuff/6823914204",
-          "status": "usable_photo",
+          "status": "label_text_candidate",
           "kind": "collector_package_photo",
-          "photo_role": "front/package object",
-          "label_panel_state": "panel not verified readable",
+          "photo_role": "front/package object plus ingredient panel",
+          "label_panel_state": "ingredient/nutrition panel visible in supplied screenshot",
           "date_basis_state": "source title identifies 1993 package",
-          "quality_note": "Good 1990s visual anchor; back-panel proof still needed.",
+          "quality_note": "High-value 1990s label candidate; source image confirmation and reviewer correction still required.",
+          "visible_extract": {
+            "status": "label-text candidate",
+            "source_note": "User-supplied screenshot of the Flickr page exposed the ingredient panel.",
+            "observed_text": "INGREDIENTS: SUGAR, ENRICHED WHEAT FLOUR (CONTAINS NIACIN, REDUCED IRON, THIAMINE MONONITRATE (VITAMIN B1), RIBOFLAVIN (VITAMIN B2)), VEGETABLE SHORTENING (PARTIALLY HYDROGENATED SOYBEAN OIL), COCOA (PROCESSED WITH ALKALI), HIGH FRUCTOSE CORN SYRUP, CORN FLOUR, WHEY, CHOCOLATE, BAKING SODA, SALT, SOY LECITHIN (EMULSIFIER), AND VANILLIN--AN ARTIFICIAL FLAVOR.",
+            "confidence_note": "Readable but screenshot-compressed; verify against the source image before manual verification.",
+            "legible_terms": ["sugar", "enriched wheat flour", "partially hydrogenated soybean oil", "cocoa processed with alkali", "high fructose corn syrup", "soy lecithin", "vanillin"]
+          },
           "rights": "Collector photo; inspect license/rights before reuse."
         },
         {
@@ -449,12 +476,19 @@
           "title": "Nabisco Oreo Creme Sandwich cello package, 1950s-1960s - Flickr",
           "source": "www.flickr.com",
           "url": "https://www.flickr.com/photos/jasonliebigstuff/4635007453",
-          "status": "usable_photo",
+          "status": "label_text_candidate",
           "kind": "collector_package_photo",
-          "photo_role": "front/package object",
-          "label_panel_state": "panel not verified readable",
+          "photo_role": "front/package object plus partial wrapper text",
+          "label_panel_state": "partial package text visible in supplied screenshot",
           "date_basis_state": "source title identifies 1950s-1960s package",
-          "quality_note": "Strong early package object; no ingredient panel attached.",
+          "quality_note": "Strong early package object with partial ingredient-like copy; not a complete ingredient panel.",
+          "visible_extract": {
+            "status": "partial label-text candidate",
+            "source_note": "User-supplied screenshot of the Flickr page exposed partial wrapper text.",
+            "observed_text": "A delicious creamy sandwich made with sugar, flour, coconut oil, shortening, cocoa, corn flour, non-fat milk solids, chocolate, salt, leavening, and artificial flavor.",
+            "confidence_note": "Partial package copy, not a complete ingredient statement; higher-resolution image or back-panel evidence needed.",
+            "legible_terms": ["sugar", "flour", "coconut oil", "shortening", "cocoa", "corn flour", "non-fat milk solids", "chocolate", "salt", "leavening", "artificial flavor"]
+          },
           "rights": "Collector photo; inspect license/rights before reuse."
         },
         {
