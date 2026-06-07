@@ -44,8 +44,13 @@ assert(js.includes('corpusMode: "full"'), "navigator should default to full-corp
 assert(js.includes('data-corpus-mode="${escapeHtml(definition.id)}"'), "navigator should render selectable corpus modes");
 assert(js.includes("renderProductProofRail"), "navigator should render a source-linked photo proof rail");
 assert(js.includes("No product photos are embedded yet"), "navigator should explain why photos are source-linked instead of embedded");
+assert(js.includes("-product corpus loaded"), "navigator should make the product corpus visible in the product strip");
+assert(js.includes("Current public photo mode"), "navigator should expose the current public photo display mode");
+assert(js.includes("Source receipts can sit beside ingredient candidates today"), "navigator should explain source receipts beside ingredient candidates");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
 assert(css.includes(".proof-source-rail"), "photo proof rail should be styled");
+assert(css.includes(".product-strip-ledger"), "corpus ledger should be styled");
+assert(css.includes(".proof-display-gate"), "photo display gate should be styled");
 
 const requiredStatuses = new Set([
   "story_ready",

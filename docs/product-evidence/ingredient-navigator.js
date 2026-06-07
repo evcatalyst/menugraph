@@ -194,8 +194,14 @@ function renderProductPicker() {
   els.productStrip.innerHTML = `
     <article class="product-strip-summary" aria-label="Corpus selector summary">
       <span>${escapeHtml(searchLabel)}</span>
-      <strong>${escapeHtml(modeLabel)} · ${escapeHtml(storyRich)} pilot stories + ${escapeHtml(proofShells)} proof shells</strong>
-      <p>Switch modes to reveal the full evidence workbench. Story pilots are stitched narratives; proof shells expose source-linked photo and OCR work.</p>
+      <strong>${escapeHtml(`${allRows.length}-product corpus loaded`)}</strong>
+      <p>${escapeHtml(`${modeLabel} is showing ${rows.length} products. The first 10 are stitched pilots; the remaining ${proofShells} are source-linked proof shells for photo/OCR work.`)}</p>
+      <div class="product-strip-ledger" aria-label="Corpus counts">
+        <span><strong>${escapeHtml(allRows.length)}</strong>All products</span>
+        <span><strong>${escapeHtml(storyRich)}</strong>Story pilots</span>
+        <span><strong>${escapeHtml(proofShells)}</strong>Proof shells</span>
+        <span><strong>${escapeHtml(rows.length)}</strong>Shown now</span>
+      </div>
     </article>
     ${rows
     .map((row) => `
@@ -277,8 +283,8 @@ function renderCorpusHandoff() {
   els.corpusHandoff.innerHTML = `
     <article class="corpus-handoff-card">
       <span>Corpus Loaded</span>
-      <strong>${escapeHtml(stats.productCount)} products</strong>
-      <p>The dropdown and search cover the full corpus. The horizontal strip starts with the 10 story-rich pilots, then continues into proof shells.</p>
+      <strong>${escapeHtml(`${stats.productCount}-product corpus`)}</strong>
+      <p>The dropdown, search, and Full Corpus mode expose every product. The 10 pilots are narrative examples; the 110 proof shells are active source/photo/OCR workspaces.</p>
       <dl>
         <div>
           <dt>Story-rich pilots</dt>
@@ -292,8 +298,8 @@ function renderCorpusHandoff() {
     </article>
     <article class="corpus-handoff-card status-source_review">
       <span>Photo Display Gate</span>
-      <strong>${escapeHtml(stats.embedReadyEvidence)} public embeds</strong>
-      <p>Photo proof is present as source-attributed receipts. Images appear only after a row has a public image URL and <code>embed_rights_cleared</code>.</p>
+      <strong>${escapeHtml(stats.embedReadyEvidence ? `${stats.embedReadyEvidence} public embeds` : "Link-only photo proof mode")}</strong>
+      <p>Source receipts can sit beside ingredient candidates today. Actual package photos render inline only when a row has a public image URL and <code>embed_rights_cleared</code>.</p>
       <dl>
         <div>
           <dt>Source-linked evidence</dt>
@@ -780,6 +786,29 @@ function sourceProofStats(productRow) {
   };
 }
 
+function renderProofDisplayGate(stats) {
+  const mode = stats.embedReady ? "mixed image/source mode" : "source receipts only";
+  return `
+    <div class="proof-display-gate" aria-label="Photo proof display mode">
+      <article>
+        <span>Current public photo mode</span>
+        <strong>${escapeHtml(mode)}</strong>
+        <p>${escapeHtml(stats.embedReady ? "Rights-cleared package photos can render inline; uncleared sources remain link-only." : "No rights-cleared package images are stored for this product yet, so source cards render beside ingredient text candidates instead of reproducing photos.")}</p>
+      </article>
+      <article>
+        <span>Source receipts</span>
+        <strong>${escapeHtml(stats.sourceLinked)}</strong>
+        <p>Attributable photo, document, retailer, archive, or menu sources available for review.</p>
+      </article>
+      <article>
+        <span>Candidate text</span>
+        <strong>${escapeHtml(stats.candidateText)}</strong>
+        <p>Visible extracts remain candidate-only until OCR/manual correction and reviewer metadata are recorded.</p>
+      </article>
+    </div>
+  `;
+}
+
 function renderProductProofRail(productRow) {
   const stats = sourceProofStats(productRow);
   const rows = stats.rows.slice(0, 8);
@@ -790,7 +819,7 @@ function renderProductProofRail(productRow) {
           <span>Photo Proof Inventory</span>
           <strong>${escapeHtml(stats.sourceLinked)} source-linked receipts · ${escapeHtml(stats.embedReady)} public embeds</strong>
         </div>
-        <p>${escapeHtml(stats.embedReady ? "Rights-cleared images can render inline; other source objects remain link-only." : "No product photos are embedded yet. The page shows source-linked proof receipts until image reuse is reviewed and cleared.")}</p>
+        <p>${escapeHtml(stats.embedReady ? "Rights-cleared images can render inline; other source objects remain link-only." : "No product photos are embedded yet. The page shows source-linked proof receipts beside ingredient candidates until image reuse is reviewed and cleared.")}</p>
       </header>
       <div class="proof-source-metrics">
         <span><strong>${escapeHtml(stats.linkOnly)}</strong>Link-only proof</span>
@@ -798,6 +827,7 @@ function renderProductProofRail(productRow) {
         <span><strong>${escapeHtml(productRow.ingredient_ocr_summary?.local_image_ready_count || 0)}</strong>Private image-ready</span>
         <span><strong>${escapeHtml(productRow.ingredient_ocr_summary?.source_page_capture_needed_count || 0)}</strong>Capture needed</span>
       </div>
+      ${renderProofDisplayGate(stats)}
       <div class="proof-source-list">
         ${rows.length ? rows.map((row) => {
           const source = proofSourceUrl(row);
@@ -849,8 +879,8 @@ function renderProofReader(productRow, version) {
     : [{ version: displayVersion, label: "Selected era" }];
   const filterRows = [
     ["all", "All eras"],
-    ["photo", "Photo-backed"],
-    ["ingredient", "Ingredient-backed"],
+    ["photo", "Photo/source-backed"],
+    ["ingredient", "Ingredient text candidates"],
     ["verified", "Verified only"],
   ];
   els.proofReader.innerHTML = `
