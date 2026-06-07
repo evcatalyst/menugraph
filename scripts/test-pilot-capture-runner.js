@@ -6,6 +6,7 @@ const root = path.join(__dirname, "..");
 const pipelineSummaryPath = path.join(root, "docs/data/product-evidence/pilot_capture_pipeline_summary.json");
 const runSummaryCsvPath = path.join(root, "docs/data/product-evidence/exports/pilot_capture_dry_run_summary.csv");
 const modelSummaryCsvPath = path.join(root, "docs/data/product-evidence/exports/pilot_capture_model_assist_summary.csv");
+const imageMapTemplateCsvPath = path.join(root, "docs/data/product-evidence/exports/pilot_capture_image_map_template.csv");
 const ocrSummaryCsvPath = path.join(root, "docs/data/product-evidence/exports/pilot_capture_native_ocr_summary.csv");
 const reviewQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/pilot_capture_review_queue.csv");
 const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
@@ -55,6 +56,7 @@ const pipelineSummary = JSON.parse(fs.readFileSync(pipelineSummaryPath, "utf8"))
 const siteSummary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 const runRows = parseCsv(fs.readFileSync(runSummaryCsvPath, "utf8"));
 const modelRows = parseCsv(fs.readFileSync(modelSummaryCsvPath, "utf8"));
+const imageMapTemplateRows = parseCsv(fs.readFileSync(imageMapTemplateCsvPath, "utf8"));
 const ocrRows = parseCsv(fs.readFileSync(ocrSummaryCsvPath, "utf8"));
 const reviewRows = parseCsv(fs.readFileSync(reviewQueueCsvPath, "utf8"));
 
@@ -64,6 +66,8 @@ assert.strictEqual(pipelineSummary.capture.selected_rows, 101, "dry run should c
 assert.strictEqual(pipelineSummary.capture.rows_captured, 101, "dry run should emit public capture rows");
 assert.strictEqual(pipelineSummary.capture.ready_for_ocr, 0, "no-network dry run should not mark rows OCR-ready");
 assert.strictEqual(pipelineSummary.capture.blocked_no_network, 101, "no-network dry run should preserve source capture blocker");
+assert.strictEqual(pipelineSummary.capture.image_map_template_rows, 101, "dry run should emit image-map starter rows");
+assert(pipelineSummary.capture.image_map_key_count >= 303, "dry run should expose multiple map keys per row");
 assert.strictEqual(pipelineSummary.review_queue.rows, 101, "review queue should cover pilot capture rows");
 assert.strictEqual(pipelineSummary.review_queue.needs_source_review, 101, "dry run rows should need source review");
 assert.strictEqual(pipelineSummary.ocr.ocr_result_rows, 101, "native OCR dry run should cover pilot capture rows");
@@ -81,11 +85,15 @@ assert.strictEqual(pipelineSummary.public_safety.manual_verified_created, false,
 assert.strictEqual(pipelineSummary.public_safety.candidate_only, true, "dry run must be candidate-only");
 
 assert.strictEqual(runRows.length, 101, "capture run CSV should contain 101 rows");
+assert.strictEqual(imageMapTemplateRows.length, 101, "image-map template CSV should contain 101 rows");
 assert.strictEqual(ocrRows.length, 101, "native OCR CSV should contain 101 rows");
 assert.strictEqual(reviewRows.length, 101, "review queue CSV should contain 101 rows");
 assert(modelRows.some((row) => row.route_type === "spark_packet"), "model CSV should include Spark packet rows");
 assert(modelRows.some((row) => row.route_type === "gpt55_review_batch"), "model CSV should include GPT-5.5 review batches");
 assert(runRows.every((row) => Number(row.candidate_only) === 1), "run rows must be candidate-only");
+assert(imageMapTemplateRows.every((row) => Number(row.candidate_only) === 1), "image-map template rows must be candidate-only");
+assert(imageMapTemplateRows.every((row) => Number(row.manual_verified) === 0), "image-map template rows cannot be manually verified");
+assert(imageMapTemplateRows.every((row) => row.local_private_image_path === "" && row.processed_private_image_path === ""), "image-map template must leave private paths blank");
 assert(reviewRows.every((row) => Number(row.candidate_only) === 1), "review rows must be candidate-only");
 assert(reviewRows.every((row) => Number(row.manual_verified) === 0), "review rows cannot be manually verified by models");
 assert(ocrRows.every((row) => row.ocr_status === "ocr_skipped_no_image"), "pilot dry-run OCR rows should be skipped without image-map entries");
@@ -103,6 +111,11 @@ assert.strictEqual(
   "site summary should link review queue artifact",
 );
 assert.strictEqual(
+  siteSummary.pilot_capture_pipeline_summary.public_artifacts.image_map_template_csv,
+  "docs/data/product-evidence/exports/pilot_capture_image_map_template.csv",
+  "site summary should link image-map template artifact",
+);
+assert.strictEqual(
   siteSummary.pilot_capture_pipeline_summary.public_artifacts.ocr_summary_csv,
   "docs/data/product-evidence/exports/pilot_capture_native_ocr_summary.csv",
   "site summary should link native OCR artifact",
@@ -112,6 +125,7 @@ assertNoPrivatePaths(JSON.stringify(pipelineSummary), "pilot capture pipeline su
 assertNoPrivatePaths(JSON.stringify(siteSummary.pilot_capture_pipeline_summary), "site summary pilot capture rollup");
 assertNoPrivatePaths(fs.readFileSync(runSummaryCsvPath, "utf8"), "pilot capture run CSV");
 assertNoPrivatePaths(fs.readFileSync(modelSummaryCsvPath, "utf8"), "pilot capture model CSV");
+assertNoPrivatePaths(fs.readFileSync(imageMapTemplateCsvPath, "utf8"), "pilot capture image-map template CSV");
 assertNoPrivatePaths(fs.readFileSync(ocrSummaryCsvPath, "utf8"), "pilot capture native OCR CSV");
 assertNoPrivatePaths(fs.readFileSync(reviewQueueCsvPath, "utf8"), "pilot capture review CSV");
 

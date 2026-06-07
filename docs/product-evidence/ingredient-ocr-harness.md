@@ -109,9 +109,14 @@ node scripts/model-assist-router.js --run-id=hybrid-ocr-v1 --limit=250 --no-netw
 node scripts/summarize-ingredient-ocr-run.js --run-id=hybrid-ocr-v1
 ```
 
+The capture dry run writes a public-safe image-map starter CSV. It contains evidence IDs, source URLs, crop targets, rights/publication policy, and accepted image-map keys, but leaves private path fields blank. Fill those paths in a private copy only.
+
 Private image-map run:
 
 ```sh
+cp docs/data/product-evidence/exports/hybrid_ocr_image_map_template.csv .cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-template.private.csv
+# Fill local_private_image_path or processed_private_image_path in the private copy.
+node scripts/build-image-map-from-template.js --run-id=hybrid-ocr-v1 --template=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-template.private.csv --output=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-input.json
 node scripts/capture-ingredient-ocr-assets.js --run-id=hybrid-ocr-v1 --limit=250 --image-map=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-input.json
 node scripts/run-ingredient-ocr.js --run-id=hybrid-ocr-v1 --limit=250
 node scripts/summarize-ingredient-ocr-run.js --run-id=hybrid-ocr-v1

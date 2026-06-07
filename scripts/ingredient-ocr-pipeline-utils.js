@@ -9,6 +9,7 @@ const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
 const publicHybridSummaryPath = path.join(root, "docs/data/product-evidence/hybrid_ocr_pipeline_summary.json");
 const publicModelSummaryCsvPath = path.join(root, "docs/data/product-evidence/exports/hybrid_ocr_model_assist_summary.csv");
 const publicRunSummaryCsvPath = path.join(root, "docs/data/product-evidence/exports/hybrid_ocr_run_summary.csv");
+const publicImageMapTemplateCsvPath = path.join(root, "docs/data/product-evidence/exports/hybrid_ocr_image_map_template.csv");
 const publicOcrSummaryCsvPath = path.join(root, "docs/data/product-evidence/exports/hybrid_ocr_native_ocr_summary.csv");
 const publicReviewQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/hybrid_ocr_review_queue.csv");
 const defaultRunRoot = path.join(root, ".cache/ingredient-ocr/runs");
@@ -373,6 +374,7 @@ module.exports = {
   publicArtifactRef,
   publicEvidenceRow,
   publicHybridSummaryPath,
+  publicImageMapTemplateCsvPath,
   publicModelSummaryCsvPath,
   publicOcrSummaryCsvPath,
   publicReviewQueueCsvPath,
