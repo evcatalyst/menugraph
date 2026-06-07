@@ -17333,6 +17333,43 @@ td {
   overflow-wrap: anywhere;
 }
 
+.photo-proof-capture-title {
+  margin-top: 14px;
+}
+
+.pilot-photo-capture-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+  gap: 10px;
+  margin: 10px 0 12px;
+}
+
+.pilot-capture-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+  gap: 8px;
+}
+
+.pilot-photo-capture-batches {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pilot-capture-batch {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.pilot-capture-batch p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .registry-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
@@ -17523,6 +17560,7 @@ td {
   .corpus-ocr-layout,
   .photo-proof-upgrade-summary,
   .photo-proof-upgrade-layout,
+  .pilot-photo-capture-summary,
   .story-focus,
   .story-reader,
   .story-toolbar,
@@ -18130,6 +18168,8 @@ td {
   .photo-proof-stat-grid,
   .photo-proof-product-grid,
   .photo-proof-row-fields,
+  .pilot-capture-stat-grid,
+  .pilot-photo-capture-batches,
   .story-beats,
   .reader-storyline-metrics,
   .reader-storyline-grid,
@@ -18171,7 +18211,9 @@ td {
 
   .photo-proof-stat-grid,
   .photo-proof-product-grid,
-  .photo-proof-row-fields {
+  .photo-proof-row-fields,
+  .pilot-capture-stat-grid,
+  .pilot-photo-capture-batches {
     grid-template-columns: 1fr;
   }
 

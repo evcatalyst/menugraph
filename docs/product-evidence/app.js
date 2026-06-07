@@ -108,6 +108,8 @@ const els = {
   photoProofUpgradeSummary: document.querySelector("#photo-proof-upgrade-summary"),
   photoProofUpgradeProducts: document.querySelector("#photo-proof-upgrade-products"),
   photoProofUpgradeQueue: document.querySelector("#photo-proof-upgrade-queue"),
+  pilotPhotoCaptureSummary: document.querySelector("#pilot-photo-capture-summary"),
+  pilotPhotoCaptureBatches: document.querySelector("#pilot-photo-capture-batches"),
   registrySummary: document.querySelector("#registry-summary"),
   registryRows: document.querySelector("#registry-rows"),
   registryCount: document.querySelector("#registry-count"),
@@ -16086,6 +16088,67 @@ function renderPhotoProofUpgrades() {
       </article>
     `).join("")
     : `<p class="empty-note">No photo proof evidence rows match the current filters.</p>`;
+
+  const capture = state.data.pilot_photo_capture_summary || {};
+  const captureArtifacts = capture.artifacts || {};
+  const captureStats = [
+    ["Pilot products", capture.product_count],
+    ["Selected rows", capture.selected_row_count],
+    ["Capture batches", capture.batch_count],
+    ["Panel captures", capture.panel_capture_needed_count],
+    ["Source pages", capture.source_page_capture_needed_count],
+    ["Ingredient signals", capture.ingredient_signal_row_count],
+  ];
+  els.pilotPhotoCaptureSummary.innerHTML = capture.selected_row_count ? `
+    <div class="pilot-capture-stat-grid">
+      ${captureStats.map(([label, value]) => `
+        <article class="photo-proof-stat">
+          <strong>${formatNumber(value)}</strong>
+          <span>${escapeHtml(label)}</span>
+        </article>
+      `).join("")}
+    </div>
+    <article class="photo-proof-policy">
+      <strong>Private capture handoff</strong>
+      <p>${escapeHtml(capture.selection_policy?.private_capture_policy || "Write captures and image-map paths only to the private OCR cache.")}</p>
+      <p>${escapeHtml(capture.selection_policy?.public_output_policy || "Public artifacts expose source URLs, hashes/statuses, and candidate-only OCR state only.")}</p>
+      <div class="lead-meta">
+        ${artifactLink(captureArtifacts.manifest_json, "Batch JSON")}
+        ${artifactLink(captureArtifacts.batch_csv, "Batch CSV")}
+        ${artifactLink(captureArtifacts.row_csv, "Row CSV")}
+        ${artifactLink(captureArtifacts.runbook_markdown, "Runbook")}
+      </div>
+    </article>
+  ` : `<p class="empty-note">No pilot capture batches have been generated yet.</p>`;
+
+  const captureBatches = (capture.top_batches || [])
+    .filter((batch) => {
+      const query = state.search.trim().toLowerCase();
+      return !query || `${batch.product_name} ${batch.product_id} ${batch.first_evidence_ids?.join(" ")}`.toLowerCase().includes(query);
+    })
+    .slice(0, 12);
+  els.pilotPhotoCaptureBatches.innerHTML = captureBatches.length
+    ? captureBatches.map((batch) => `
+      <article class="pilot-capture-batch">
+        <div class="lead-title">
+          <strong>${escapeHtml(batch.product_name || batch.product_id)}</strong>
+          <span>${escapeHtml(batch.batch_id)}</span>
+        </div>
+        <div class="photo-proof-product-grid">
+          <span><strong>${formatNumber(batch.row_count)}</strong> rows</span>
+          <span><strong>${formatNumber(batch.ingredient_signal_count)}</strong> signals</span>
+          <span><strong>${formatNumber(batch.max_priority)}</strong> priority</span>
+          <span><strong>${escapeHtml(labelFor(batch.display_lane || ""))}</strong></span>
+        </div>
+        <p>${escapeHtml(batch.capture_goal || "Create private captures/crops for OCR review.")}</p>
+        <div class="lead-meta">
+          ${statusTag(batch.display_lane)}
+          ${batch.source_owner ? `<span class="status-tag">${escapeHtml(clipped(batch.source_owner, 96))}</span>` : ""}
+          ${(batch.first_evidence_ids || []).slice(0, 4).map((id) => `<code>${escapeHtml(id)}</code>`).join("")}
+        </div>
+      </article>
+    `).join("")
+    : `<p class="empty-note">No pilot capture batches match the current filters.</p>`;
 }
 
 function renderRegistrySummary() {
