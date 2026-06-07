@@ -1,0 +1,210 @@
+{
+  "schema_version": "hybrid_ingredient_ocr_image_map_audit.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "pilot-photo-capture-dry-run",
+  "template_rows": 101,
+  "image_map_key_count": 303,
+  "private_paths_supplied": 0,
+  "private_paths_existing": 0,
+  "ready_for_capture": 0,
+  "no_private_path_supplied": 101,
+  "private_path_missing": 0,
+  "unsupported_image_extension": 0,
+  "by_status": [
+    {
+      "key": "no_private_path_supplied",
+      "count": 101
+    }
+  ],
+  "by_product": [
+    {
+      "key": "Oreo Original Chocolate Sandwich Cookies",
+      "rows": 14,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 14,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Kraft Macaroni & Cheese Original",
+      "rows": 12,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 12,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Campbell's Condensed Tomato Soup",
+      "rows": 11,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 11,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Doritos Nacho Cheese",
+      "rows": 11,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 11,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Pop-Tarts Frosted Strawberry",
+      "rows": 11,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 11,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Heinz Tomato Ketchup",
+      "rows": 10,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 10,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Cheerios Original",
+      "rows": 9,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 9,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "McDonald's Chicken McNuggets",
+      "rows": 9,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 9,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Coca-Cola Classic",
+      "rows": 7,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 7,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "McDonald's Big Mac",
+      "rows": 7,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 7,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    }
+  ],
+  "by_source_domain": [
+    {
+      "key": "www.flickr.com",
+      "rows": 45,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 45,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "www.walmart.com",
+      "rows": 5,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 5,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "commons.wikimedia.org",
+      "rows": 4,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 4,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "www.mcdonalds.com",
+      "rows": 4,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 4,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "americanhistory.si.edu",
+      "rows": 3,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 3,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "www.campbells.com",
+      "rows": 3,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 3,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "grist.org",
+      "rows": 2,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 2,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "www.canceredinstitute.org",
+      "rows": 2,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 2,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "www.ewg.org",
+      "rows": 2,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 2,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "www.kroger.com",
+      "rows": 2,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 2,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "www.poptarts.com",
+      "rows": 2,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 2,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "antiqueadvertising.com",
+      "rows": 1,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 1,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    }
+  ],
+  "next_action": "Capture private panel crops and fill the image-map template before OCR.",
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "images_committed": false,
+    "manual_verified_created": false
+  },
+  "public_artifacts": {
+    "audit_summary_csv": "docs/data/product-evidence/exports/pilot_capture_image_map_audit.csv",
+    "audit_summary_json": "docs/data/product-evidence/pilot_capture_image_map_audit.json"
+  }
+}

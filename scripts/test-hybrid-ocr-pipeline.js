@@ -11,6 +11,7 @@ const {
   selectQueueRows,
 } = require("./ingredient-ocr-pipeline-utils");
 const { packetRows } = require("./build-spark-ocr-packets");
+const { publicAuditRows, summarizeAudit } = require("./audit-image-map-template");
 const { providerRegistry, reviewBatchPlan } = require("./model-assist-router");
 const { buildImageMap, buildImageMapTemplateRows, publicCaptureRow } = require("./capture-ingredient-ocr-assets");
 const { buildReviewQueue } = require("./summarize-ingredient-ocr-run");
@@ -65,6 +66,12 @@ assert.strictEqual(templateRows.length, 3, "expected image map starter rows");
 assert(templateRows.every((row) => row.local_private_image_path === ""), "starter rows must not include private local paths");
 assert(templateRows.every((row) => row.image_map_keys.includes(row.evidence_id)), "starter rows should include evidence-id map keys");
 assertNoPrivatePaths(JSON.stringify(templateRows), "image map starter rows");
+const auditRows = publicAuditRows(templateRows);
+const auditSummary = summarizeAudit("test-run", auditRows);
+assert.strictEqual(auditSummary.ready_for_capture, 0, "blank template should not be capture-ready");
+assert.strictEqual(auditSummary.no_private_path_supplied, 3, "blank template should need private paths");
+assertNoPrivatePaths(JSON.stringify(auditRows), "image map audit rows");
+assertNoPrivatePaths(JSON.stringify(auditSummary), "image map audit summary");
 
 const reviewQueue = buildReviewQueue(rows.slice(0, 5), [publicCapture], []);
 assert.strictEqual(reviewQueue.length, 5, "expected review queue rows");
@@ -87,5 +94,7 @@ assert.strictEqual(publicSummary.public_safety.images_committed, false, "public 
 assert.strictEqual(publicSummary.public_safety.manual_verified_created, false, "manual verification should not be model-created");
 assert(publicSummary.model_routes.spark_packets_generated > 0, "expected spark packet count");
 assert(publicSummary.model_routes.gpt55_review_batches_planned > 0, "expected GPT-5.5 batch count");
+assert.strictEqual(publicSummary.image_map_audit.template_rows, 250, "hybrid summary should expose image-map audit rows");
+assert.strictEqual(publicSummary.image_map_audit.ready_for_capture, 0, "default public template should not be capture-ready yet");
 
 console.log("hybrid OCR pipeline tests passed");

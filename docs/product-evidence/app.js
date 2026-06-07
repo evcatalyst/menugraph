@@ -15881,6 +15881,7 @@ function renderCorpusOcrScale() {
   if (!els.corpusOcrSummary) return;
   const summary = state.data.ingredient_ocr_summary || {};
   const hybrid = summary.hybrid_pipeline || state.data.hybrid_ocr_pipeline_summary || {};
+  const imageMapAudit = hybrid.image_map_audit || state.data.hybrid_ocr_image_map_audit || {};
   const candidateCount = numeric(summary.ocr_candidate_count);
   els.corpusOcrCount.textContent = `${formatNumber(candidateCount)} rows`;
 
@@ -15898,6 +15899,8 @@ function renderCorpusOcrScale() {
     ["Grok assists", hybrid.model_routes?.grok_assist_batches_created],
     ["Captured", hybrid.capture?.rows_captured],
     ["Image-map rows", hybrid.capture?.image_map_template_rows],
+    ["Capture-ready crops", imageMapAudit.ready_for_capture],
+    ["Paths needed", imageMapAudit.no_private_path_supplied],
     ["OCR planned", hybrid.ocr?.ocr_planned],
     ["OCR attempted", hybrid.ocr?.ocr_attempted],
     ["OCR skipped", hybrid.ocr?.ocr_skipped_no_image],
@@ -15930,6 +15933,7 @@ function renderCorpusOcrScale() {
         ${artifactLink(summary.manifest_path, "Manifest")}
         ${artifactLink(hybrid.public_artifacts?.run_summary_csv, "Capture CSV")}
         ${artifactLink(hybrid.public_artifacts?.image_map_template_csv, "Image-map CSV")}
+        ${artifactLink(hybrid.public_artifacts?.image_map_audit_csv || imageMapAudit.public_artifacts?.audit_summary_csv, "Image-map Audit")}
         ${artifactLink(hybrid.public_artifacts?.ocr_summary_csv, "OCR CSV")}
         ${artifactLink(hybrid.public_artifacts?.model_assist_summary_csv, "Model CSV")}
         ${artifactLink(hybrid.public_artifacts?.review_queue_csv, "Review CSV")}
@@ -16158,6 +16162,7 @@ function renderPhotoProofUpgrades() {
 
   if (els.pilotCaptureDryRunSummary) {
     const dryRun = state.data.pilot_capture_pipeline_summary || {};
+    const dryAudit = dryRun.image_map_audit || state.data.pilot_capture_image_map_audit || {};
     const dryArtifacts = dryRun.public_artifacts || {};
     const dryStats = [
       ["Selected rows", dryRun.capture?.selected_rows],
@@ -16166,6 +16171,8 @@ function renderPhotoProofUpgrades() {
       ["Blocked no-network", dryRun.capture?.blocked_no_network],
       ["Image-map rows", dryRun.capture?.image_map_template_rows],
       ["Image-map keys", dryRun.capture?.image_map_key_count],
+      ["Capture-ready crops", dryAudit.ready_for_capture],
+      ["Paths needed", dryAudit.no_private_path_supplied],
       ["OCR planned", dryRun.ocr?.ocr_planned],
       ["OCR skipped", dryRun.ocr?.ocr_skipped_no_image],
       ["Review rows", dryRun.review_queue?.rows],
@@ -16198,6 +16205,7 @@ function renderPhotoProofUpgrades() {
           ${artifactLink(dryArtifacts.pipeline_summary_json, "Pipeline JSON")}
           ${artifactLink(dryArtifacts.run_summary_csv, "Run CSV")}
           ${artifactLink(dryArtifacts.image_map_template_csv, "Image-map CSV")}
+          ${artifactLink(dryArtifacts.image_map_audit_csv || dryAudit.public_artifacts?.audit_summary_csv, "Image-map Audit")}
           ${artifactLink(dryArtifacts.ocr_summary_csv, "OCR CSV")}
           ${artifactLink(dryArtifacts.model_assist_summary_csv, "Model CSV")}
           ${artifactLink(dryArtifacts.review_queue_csv, "Review CSV")}
