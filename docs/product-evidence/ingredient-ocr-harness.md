@@ -34,6 +34,34 @@ Full-corpus access states are intentionally conservative:
 - `source_page_capture_needed`: the public record has a source URL, but the repo does not contain a reproducible image crop.
 - `source_discovery_needed`: the product/vintage slot still lacks source-attributable evidence.
 
+## Build The Panel-First Capture Queue
+
+The product-story page treats ingredient, nutrition, allergen, SmartLabel, menu-disclosure, and other readable recipe/document panels as primary proof. Product-front photos and package beauty shots remain secondary identity context unless the label text is visible.
+
+Build the acquisition board and the top capture batch:
+
+```sh
+npm run build:panel-acquisition
+npm run build:panel-capture
+```
+
+Outputs:
+
+- `docs/data/product-evidence/ingredient_panel_acquisition_board.json`
+- `docs/data/product-evidence/panel_capture_batches.json`
+- `docs/data/product-evidence/exports/panel_capture_ocr_queue.csv`
+- `docs/data/product-evidence/exports/panel_capture_batches.csv`
+- `docs/data/product-evidence/exports/panel_capture_runbook.md`
+
+The default capture queue selects the top 250 panel-acquisition slots and packs them into Spark-sized batches. Rows stay candidate-only, with `manual_verified=0`; they are capture/OCR instructions, not formulation evidence.
+
+Use the panel-first queue for the next hybrid model run:
+
+```sh
+node scripts/build-spark-ocr-packets.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --packet-size=20
+node scripts/capture-ingredient-ocr-assets.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --no-network --dry-run
+```
+
 ## Run Native OCR Locally
 
 Create a private image map outside git:

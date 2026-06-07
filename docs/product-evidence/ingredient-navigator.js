@@ -29,6 +29,8 @@ const els = {
   clusterList: document.querySelector("#cluster-list"),
 };
 
+const DATA_VERSION = new URLSearchParams(window.location.search).get("v") || "panel-capture-batches";
+
 const state = {
   data: null,
   summary: null,
@@ -52,6 +54,11 @@ function escapeHtml(value) {
     '"': "&quot;",
     "'": "&#39;",
   })[char]);
+}
+
+function dataHref(path) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}v=${encodeURIComponent(DATA_VERSION)}`;
 }
 
 function labelFor(value) {
@@ -553,6 +560,61 @@ function renderIngredientPanelAcquisitionStatus() {
   `;
 }
 
+function renderPanelCaptureBatchStatus() {
+  const summary = state.summary?.panel_capture_batch_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.selected_rows) return "";
+  const artifacts = summary.artifacts || {};
+  const batches = summary.first_batches || [];
+  const rows = summary.first_rows || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-source_review">
+      <span>Panel Capture / OCR Batch</span>
+      <strong>${escapeHtml(`${totals.selected_rows || 0} panel-first tasks · ${totals.batch_count || 0} capture batches`)}</strong>
+      <p>Next run prioritizes ingredient, nutrition, allergen, SmartLabel, and disclosure panels. Product/front photos stay secondary unless they expose readable label text.</p>
+      <dl>
+        <div>
+          <dt>Pilot rows</dt>
+          <dd>${escapeHtml(totals.story_rich_pilot_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>High priority</dt>
+          <dd>${escapeHtml(totals.high_priority_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Panel crops</dt>
+          <dd>${escapeHtml(totals.panel_capture_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Context-only</dt>
+          <dd>${escapeHtml(totals.readable_panel_photo_rows || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Panel capture batch preview">
+        ${batches.slice(0, 3).map((batch) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`Batch ${batch.batch_rank || "?"} · ${batch.ocr_gap_category || "panel task"}`)}</span>
+            <strong>${escapeHtml(`${batch.row_count || 0} rows · ${batch.source_domain || "mixed sources"}`)}</strong>
+            <p>${escapeHtml(batch.product_names || "Products queued")}</p>
+            <em>${escapeHtml(batch.capture_goal || "Capture private panel/document crops, then run OCR.")}</em>
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="First panel capture rows">
+        ${rows.slice(0, 5).map((row) => `
+          <span>${escapeHtml(`${row.product_name || "Product"} · ${row.vintage_label || "Vintage"} · ${row.ocr_expected_surface || row.capture_strategy || "panel"}`)}</span>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.queue_csv))}">OCR Queue CSV</a>` : ""}
+        ${artifacts.batch_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.batch_csv))}">Batch CSV</a>` : ""}
+        ${artifacts.runbook_markdown ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.runbook_markdown))}">Runbook</a>` : ""}
+        ${artifacts.manifest_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.manifest_json))}">Manifest JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
@@ -602,6 +664,7 @@ function renderCorpusHandoff() {
     </article>
     ${renderPublicPhotoProofStrip()}
     ${renderIngredientPanelAcquisitionStatus()}
+    ${renderPanelCaptureBatchStatus()}
     ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">
@@ -1758,11 +1821,11 @@ function attachEvents() {
 async function init() {
   try {
     const [response, summary, photoProofManifest] = await Promise.all([
-      fetch("../data/product-evidence/navigator_data.json"),
-      fetch("../data/product-evidence/summary.json")
+      fetch(dataHref("../data/product-evidence/navigator_data.json")),
+      fetch(dataHref("../data/product-evidence/summary.json"))
         .then((summaryResponse) => (summaryResponse.ok ? summaryResponse.json() : {}))
         .catch(() => ({})),
-      fetch("../data/product-evidence/public_photo_proof_manifest.json")
+      fetch(dataHref("../data/product-evidence/public_photo_proof_manifest.json"))
         .then((manifestResponse) => (manifestResponse.ok ? manifestResponse.json() : {}))
         .catch(() => ({})),
     ]);
