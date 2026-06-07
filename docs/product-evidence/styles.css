@@ -17356,6 +17356,50 @@ td {
   gap: 8px;
 }
 
+.pilot-capture-dry-run-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr) minmax(260px, 0.72fr);
+  gap: 10px;
+  margin: 10px 0 0;
+}
+
+.pilot-capture-dry-grid,
+.pilot-capture-route-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.pilot-capture-dry-grid {
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+}
+
+.pilot-capture-route-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 8px 0;
+}
+
+.pilot-capture-route-grid span {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.32;
+  padding: 6px 7px;
+}
+
+.pilot-capture-route-grid strong {
+  display: block;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.05;
+}
+
+.pilot-capture-dry-policy {
+  align-content: start;
+}
+
 .pilot-capture-batch {
   min-width: 0;
   border: 1px solid var(--line);
@@ -18169,6 +18213,9 @@ td {
   .photo-proof-product-grid,
   .photo-proof-row-fields,
   .pilot-capture-stat-grid,
+  .pilot-capture-dry-run-summary,
+  .pilot-capture-dry-grid,
+  .pilot-capture-route-grid,
   .pilot-photo-capture-batches,
   .story-beats,
   .reader-storyline-metrics,
@@ -18213,6 +18260,9 @@ td {
   .photo-proof-product-grid,
   .photo-proof-row-fields,
   .pilot-capture-stat-grid,
+  .pilot-capture-dry-run-summary,
+  .pilot-capture-dry-grid,
+  .pilot-capture-route-grid,
   .pilot-photo-capture-batches {
     grid-template-columns: 1fr;
   }

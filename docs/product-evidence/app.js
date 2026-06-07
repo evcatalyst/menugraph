@@ -110,6 +110,7 @@ const els = {
   photoProofUpgradeQueue: document.querySelector("#photo-proof-upgrade-queue"),
   pilotPhotoCaptureSummary: document.querySelector("#pilot-photo-capture-summary"),
   pilotPhotoCaptureBatches: document.querySelector("#pilot-photo-capture-batches"),
+  pilotCaptureDryRunSummary: document.querySelector("#pilot-capture-dry-run-summary"),
   registrySummary: document.querySelector("#registry-summary"),
   registryRows: document.querySelector("#registry-rows"),
   registryCount: document.querySelector("#registry-count"),
@@ -16149,6 +16150,59 @@ function renderPhotoProofUpgrades() {
       </article>
     `).join("")
     : `<p class="empty-note">No pilot capture batches match the current filters.</p>`;
+
+  if (els.pilotCaptureDryRunSummary) {
+    const dryRun = state.data.pilot_capture_pipeline_summary || {};
+    const dryArtifacts = dryRun.public_artifacts || {};
+    const dryStats = [
+      ["Selected rows", dryRun.capture?.selected_rows],
+      ["Capture rows", dryRun.capture?.rows_captured],
+      ["Ready for OCR", dryRun.capture?.ready_for_ocr],
+      ["Blocked no-network", dryRun.capture?.blocked_no_network],
+      ["Review rows", dryRun.review_queue?.rows],
+      ["Needs source review", dryRun.review_queue?.needs_source_review],
+    ];
+    const routeStats = [
+      ["Spark packets", dryRun.model_routes?.spark_packets_generated],
+      ["GPT-5.5 batches", dryRun.model_routes?.gpt55_review_batches_planned],
+      ["Grok assists", dryRun.model_routes?.grok_assist_batches_created],
+    ];
+    els.pilotCaptureDryRunSummary.innerHTML = dryRun.run_id ? `
+      <div class="pilot-capture-dry-grid">
+        ${dryStats.map(([label, value]) => `
+          <article class="photo-proof-stat">
+            <strong>${formatNumber(value)}</strong>
+            <span>${escapeHtml(label)}</span>
+          </article>
+        `).join("")}
+      </div>
+      <article class="photo-proof-policy pilot-capture-dry-policy">
+        <strong>${escapeHtml(dryRun.run_id)}</strong>
+        <p>${escapeHtml(dryRun.run_policy?.mode || "Dry run; no network capture or external model call has been executed.")}</p>
+        <p>${escapeHtml(dryRun.run_policy?.public_safety || "No private images, local paths, prompts, secrets, or verified ingredient claims are published.")}</p>
+        <div class="pilot-capture-route-grid">
+          ${routeStats.map(([label, value]) => `
+            <span><strong>${formatNumber(value)}</strong>${escapeHtml(label)}</span>
+          `).join("")}
+        </div>
+        <div class="lead-meta">
+          ${artifactLink(dryArtifacts.pipeline_summary_json, "Pipeline JSON")}
+          ${artifactLink(dryArtifacts.run_summary_csv, "Run CSV")}
+          ${artifactLink(dryArtifacts.model_assist_summary_csv, "Model CSV")}
+          ${artifactLink(dryArtifacts.review_queue_csv, "Review CSV")}
+        </div>
+      </article>
+      <article class="photo-proof-policy pilot-capture-dry-policy">
+        <strong>Current blocker</strong>
+        <p>${escapeHtml("The pilot rows are source-linked but not image-map ready. Private captures/crops must be created before the Swift/Vision OCR harness can attempt ingredient extraction.")}</p>
+        <div class="lead-meta">
+          ${statusTag("candidate_only")}
+          ${statusTag("needs_source_review")}
+          ${statusTag("source_link_only_no_public_image")}
+        </div>
+      </article>
+    ` : `<p class="empty-note">No pilot dry-run capture summary has been generated yet.</p>`;
+  }
 }
 
 function renderRegistrySummary() {

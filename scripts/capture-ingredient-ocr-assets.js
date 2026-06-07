@@ -7,7 +7,9 @@ const {
   hasFlag,
   hashFile,
   numberArg,
+  pathFromArg,
   publicRunSummaryCsvPath,
+  queuePathFromArgs,
   readFullQueue,
   readJson,
   redactPrivate,
@@ -19,6 +21,8 @@ const {
   writeCsv,
   writeJson,
 } = require("./ingredient-ocr-pipeline-utils");
+
+const root = path.join(__dirname, "..");
 
 function imageMapValue(imageMap, row) {
   if (!imageMap) return "";
@@ -187,7 +191,7 @@ function summarize(runId, selectedRows, publicRows, options) {
       local_image_ready: publicRows.filter((row) => /local_image/.test(row.capture_status)).length,
     },
     public_artifacts: {
-      run_summary_csv: "docs/data/product-evidence/exports/hybrid_ocr_run_summary.csv",
+      run_summary_csv: options.publicRunSummaryRef,
     },
   };
 }
@@ -201,7 +205,9 @@ async function main() {
   const dirs = ensureRunDirs(runDir);
   const imageMapPath = argValue("image-map");
   const imageMap = readJson(imageMapPath, {});
-  const rows = readFullQueue();
+  const queuePath = queuePathFromArgs();
+  const publicRunSummaryPath = pathFromArg("public-run-summary", publicRunSummaryCsvPath);
+  const rows = readFullQueue(queuePath);
   const selectedRows = selectQueueRows(rows, {
     limit,
     product: argValue("product"),
@@ -221,7 +227,10 @@ async function main() {
 
   writeJson(path.join(runDir, "capture_manifest.private.json"), privateRows);
   writeJson(path.join(runDir, "image-map.json"), buildImageMap(privateRows));
-  const summary = redactPrivate(summarize(runId, selectedRows, publicRows, { dryRun }));
+  const summary = redactPrivate(summarize(runId, selectedRows, publicRows, {
+    dryRun,
+    publicRunSummaryRef: path.relative(root, publicRunSummaryPath),
+  }));
   writeJson(path.join(runDir, "capture_summary.public.json"), summary);
   writeCsv(path.join(runDir, "capture_summary.public.csv"), [
     "evidence_id",
@@ -240,7 +249,7 @@ async function main() {
     "ready_for_ocr",
     "candidate_only",
   ], publicRows);
-  writeCsv(publicRunSummaryCsvPath, [
+  writeCsv(publicRunSummaryPath, [
     "run_id",
     "evidence_id",
     "product_id",

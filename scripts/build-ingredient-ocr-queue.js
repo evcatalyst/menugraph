@@ -190,9 +190,15 @@ function localImageFor(map, row) {
   return "";
 }
 
+function pilotProductsForNavigator(data) {
+  const products = data.products || [];
+  const storyRich = products.filter((product) => product.corpus_scope === "story_rich_pilot");
+  return storyRich.length ? storyRich : products;
+}
+
 function buildQueue(data, imageMap = {}) {
   const rows = [];
-  for (const product of data.products || []) {
+  for (const product of pilotProductsForNavigator(data)) {
     const versionIndex = versionIndexFor(product);
     for (const evidence of product.evidence || []) {
       if (!isPhotoLike(evidence) && !isLikelyIngredientSurface(evidence)) continue;
@@ -270,7 +276,7 @@ function buildManifest(data, queue) {
       output_policy: "OCR candidates are review inputs only; manual verification is required before formulation claims.",
     },
     totals: {
-      products: data.products.length,
+      products: byProduct.size,
       ocr_candidates: queue.length,
       high_priority: queue.filter((row) => row.ocr_priority === "high").length,
       medium_priority: queue.filter((row) => row.ocr_priority === "medium").length,
@@ -297,14 +303,40 @@ function updateNavigatorData(data, manifest) {
   for (const product of data.products || []) {
     const summary = productSummary.get(product.id) || {};
     product.ingredient_ocr_summary = {
-      ocr_candidate_count: summary.ocr_candidate_count || 0,
-      high_priority_count: summary.high_priority_count || 0,
-      local_image_ready_count: summary.local_image_ready_count || 0,
-      needs_panel_review_count: summary.needs_panel_review_count || 0,
+      ...(product.ingredient_ocr_summary || {}),
+      ocr_candidate_count: summary.ocr_candidate_count || product.ingredient_ocr_summary?.ocr_candidate_count || 0,
+      high_priority_count: summary.high_priority_count || product.ingredient_ocr_summary?.high_priority_count || 0,
+      local_image_ready_count: summary.local_image_ready_count || product.ingredient_ocr_summary?.local_image_ready_count || 0,
+      needs_panel_review_count: summary.needs_panel_review_count || product.ingredient_ocr_summary?.needs_panel_review_count || 0,
     };
     product.export_paths = {
       ...(product.export_paths || {}),
-      ocr_queue_csv: ocrQueueHref,
+      ocr_queue_csv: product.corpus_scope === "story_rich_pilot"
+        ? ocrQueueHref
+        : product.export_paths?.ocr_queue_csv || fullCorpusOcrQueueHref,
+    };
+  }
+}
+
+function applyFullCorpusOcrToNavigatorData(data, manifest) {
+  const productSummary = new Map((manifest.products || []).map((product) => [product.id, product]));
+  for (const product of data.products || []) {
+    const summary = productSummary.get(product.id) || {};
+    product.ingredient_ocr_summary = {
+      ocr_candidate_count: summary.ocr_candidate_count || 0,
+      high_priority_count: summary.high_priority_count || 0,
+      local_image_ready_count: summary.local_image_ready_count || 0,
+      source_page_capture_needed_count: summary.source_page_capture_needed_count || 0,
+      source_discovery_needed_count: summary.source_discovery_needed_count || 0,
+      not_easily_accessible_count: summary.not_easily_accessible_count || 0,
+      label_visible_count: summary.label_visible_count || 0,
+      ingredient_text_candidate_count: summary.ingredient_text_candidate_count || 0,
+    };
+    product.export_paths = {
+      ...(product.export_paths || {}),
+      ocr_queue_csv: fullCorpusOcrQueueHref,
+      full_corpus_ocr_queue_csv: fullCorpusOcrQueueHref,
+      full_corpus_ocr_gap_csv: fullCorpusOcrGapHref,
     };
   }
 }
@@ -680,6 +712,7 @@ function writeGapMarkdown(filePath, manifest) {
 }
 
 function updateSummaryData(summary, manifest) {
+  const existingHybridPipeline = summary.ingredient_ocr_summary?.hybrid_pipeline || summary.hybrid_ocr_pipeline_summary;
   summary.ingredient_ocr_summary = {
     generated_at_utc: generatedAt,
     corpus_product_count: manifest.totals.products,
@@ -699,6 +732,7 @@ function updateSummaryData(summary, manifest) {
     public_image_policy: "External photos are not reproduced in public artifacts; source links and private local image-map paths drive OCR.",
     top_gap_groups: manifest.gap_report.slice(0, 8),
   };
+  if (existingHybridPipeline) summary.ingredient_ocr_summary.hybrid_pipeline = existingHybridPipeline;
   const productSummary = new Map(manifest.products.map((product) => [product.id, product]));
   for (const product of summary.products || []) {
     const id = firstNonEmpty(product.canonical_name, slugPart(product.display_name));
@@ -821,6 +855,7 @@ function main() {
     fullCorpusGapReport = buildGapReport(fullCorpusQueue);
     fullCorpusManifest = buildFullCorpusManifest(summary, fullCorpusQueue, fullCorpusGapReport);
     updateSummaryData(summary, fullCorpusManifest);
+    applyFullCorpusOcrToNavigatorData(data, fullCorpusManifest);
     writeJson(fullCorpusManifestPath, fullCorpusManifest);
     writeCsv(fullCorpusQueueCsvPath, [
       "product_id",
@@ -883,6 +918,7 @@ function main() {
       "example_source_urls",
     ], fullCorpusGapReport);
     writeGapMarkdown(fullCorpusGapMarkdownPath, fullCorpusManifest);
+    writeJson(navigatorPath, data);
     writeJson(summaryPath, summary);
   }
 
