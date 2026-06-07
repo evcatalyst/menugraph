@@ -245,7 +245,7 @@
       "search_queries": "site:candywrapperarchive.com/candy-collection \"M&M's Milk Chocolate Candies\";site:candywrapperarchive.com/candy-collector \"M&M's Milk Chocolate Candies\" wrapper;site:candywrapperarchive.com \"M&M's Milk Chocolate Candies\" \"Candy Wrapper Archive\""
     },
     {
-      "task_id": "cwa_reeses_peanut_butter_cups_2dea5e879c",
+      "task_id": "cwa_reeses_peanut_butter_cups_c0e8fa4fab",
       "product_id": "reeses_peanut_butter_cups",
       "product_name": "Reese's Peanut Butter Cups",
       "category": "candy",
@@ -253,7 +253,7 @@
       "task_type": "collection_page_likely_lead",
       "priority_score": 95,
       "source_domain": "www.candywrapperarchive.com",
-      "source_url": "https://www.candywrapperarchive.com/candy-collection/reeses/",
+      "source_url": "https://www.candywrapperarchive.com/candy-collection/resses/",
       "source_title": "Reese's Peanut Butter Cups Candy Wrapper Archive collection lead",
       "observed_source_rows": 0,
       "linked_vintage_slots": "",
@@ -525,7 +525,7 @@
       "search_queries": "site:candywrapperarchive.com/candy-collection \"M&M's Milk Chocolate Candies\";site:candywrapperarchive.com/candy-collector \"M&M's Milk Chocolate Candies\" wrapper;site:candywrapperarchive.com \"M&M's Milk Chocolate Candies\" \"Candy Wrapper Archive\""
     },
     {
-      "task_id": "cwa_reeses_peanut_butter_cups_2dea5e879c",
+      "task_id": "cwa_reeses_peanut_butter_cups_c0e8fa4fab",
       "product_id": "reeses_peanut_butter_cups",
       "product_name": "Reese's Peanut Butter Cups",
       "category": "candy",
@@ -533,7 +533,7 @@
       "task_type": "collection_page_likely_lead",
       "priority_score": 95,
       "source_domain": "www.candywrapperarchive.com",
-      "source_url": "https://www.candywrapperarchive.com/candy-collection/reeses/",
+      "source_url": "https://www.candywrapperarchive.com/candy-collection/resses/",
       "source_title": "Reese's Peanut Butter Cups Candy Wrapper Archive collection lead",
       "observed_source_rows": 0,
       "linked_vintage_slots": "",

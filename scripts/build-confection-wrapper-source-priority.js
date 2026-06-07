@@ -31,7 +31,7 @@ const knownArchiveCollectionSlugs = {
   "M&M": "mms",
   "Milky Way": "milky-way",
   PayDay: "payday",
-  Reese: "reeses",
+  Reese: "resses",
   Snickers: "snickers",
   "Tootsie Roll": "tootsie-roll",
   Twix: "twix",

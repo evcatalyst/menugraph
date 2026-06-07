@@ -821,6 +821,62 @@ function renderConfectionWrapperCaptureHandoffStatus() {
   `;
 }
 
+function renderConfectionWrapperItemCandidateStatus() {
+  const summary = state.summary?.confection_wrapper_item_candidate_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.item_candidates) return "";
+  const artifacts = summary.artifacts || {};
+  const rows = summary.first_candidates || [];
+  const gaps = summary.source_hunt_gaps || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-needs_source_review">
+      <span>Confection Item-Level Candidates</span>
+      <strong>${escapeHtml(`${totals.item_candidates || 0} item pages · ${totals.products_with_item_candidates || 0} products`)}</strong>
+      <p>Collection pages are now reduced into concrete item-page review targets. These are source links and thumbnail references only; every row still needs private panel readability review before OCR or ingredient claims.</p>
+      <dl>
+        <div>
+          <dt>Collection items</dt>
+          <dd>${escapeHtml(totals.collection_item_candidates || 0)}</dd>
+        </div>
+        <div>
+          <dt>Existing item pages</dt>
+          <dd>${escapeHtml(totals.existing_item_page_candidates || 0)}</dd>
+        </div>
+        <div>
+          <dt>High priority</dt>
+          <dd>${escapeHtml(totals.high_priority_candidates || 0)}</dd>
+        </div>
+        <div>
+          <dt>Source gaps</dt>
+          <dd>${escapeHtml(totals.source_hunt_gaps || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Confection item-level candidates">
+        ${rows.slice(0, 4).map((row) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(labelFor(row.candidate_type || "item candidate"))}</span>
+            <strong>${escapeHtml(row.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${row.item_title || "Item page"} · ${row.claimed_date_text || "date review"}`)}</p>
+            <em>${escapeHtml(row.next_action || "Open item page before capture/OCR.")}</em>
+            ${row.item_url ? `<a href="${escapeHtml(row.item_url)}" target="_blank" rel="noopener">Open item</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
+      ${gaps.length ? `
+        <div class="panel-capture-row-strip" aria-label="Confection item candidate gaps">
+          ${gaps.slice(0, 3).map((gap) => `<span>${escapeHtml(`${gap.product_name}: source hunt`)}</span>`).join("")}
+        </div>
+      ` : ""}
+      <div class="corpus-handoff-links">
+        ${artifacts.item_candidates_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.item_candidates_csv))}">Item Candidates CSV</a>` : ""}
+        ${artifacts.item_candidate_gaps_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.item_candidate_gaps_csv))}">Gaps CSV</a>` : ""}
+        ${artifacts.runbook_markdown ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.runbook_markdown))}">Runbook</a>` : ""}
+        ${artifacts.item_candidates_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.item_candidates_json))}">Candidates JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
@@ -875,6 +931,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperPriorityStatus()}
     ${renderConfectionWrapperReviewQueueStatus()}
     ${renderConfectionWrapperCaptureHandoffStatus()}
+    ${renderConfectionWrapperItemCandidateStatus()}
     ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">

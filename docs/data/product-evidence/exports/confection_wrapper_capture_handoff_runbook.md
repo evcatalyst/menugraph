@@ -97,8 +97,8 @@ This handoff converts Candy Wrapper Archive source-review tasks into private cap
 
 ### Reese's Peanut Butter Cups / collection_index_to_item_page_triage
 
-- Evidence: `cwa_capture_reeses_peanut_butter_cups_102988c7de`
-- Source: https://www.candywrapperarchive.com/candy-collection/reeses/
+- Evidence: `cwa_capture_reeses_peanut_butter_cups_c3b45584fa`
+- Source: https://www.candywrapperarchive.com/candy-collection/resses/
 - Crop target: Review the collection index for item-level wrapper pages by decade; capture only item-level pages or images, not the collection index as a label.
 - Next action: Open the collection page, choose item-level wrapper records by decade, then create source-attributable capture rows for those item pages.
 

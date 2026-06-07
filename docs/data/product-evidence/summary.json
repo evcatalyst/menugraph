@@ -189542,5 +189542,368 @@
       "image_map_template_csv": "docs/data/product-evidence/exports/confection_wrapper_capture_image_map_template.csv",
       "runbook_markdown": "docs/data/product-evidence/exports/confection_wrapper_capture_handoff_runbook.md"
     }
+  },
+  "confection_wrapper_item_candidate_summary": {
+    "generated_at": "2026-06-08T01:50:00Z",
+    "source_domain": "www.candywrapperarchive.com",
+    "source_capture_handoff": "docs/data/product-evidence/confection_wrapper_capture_handoff.json",
+    "selection_policy": {
+      "scope": "Item-level Candy Wrapper Archive candidates for confection products with collection or item-page leads.",
+      "source_policy": "Use item links as source-attributable review targets; do not republish archive images unless rights are clear.",
+      "ingredient_gate": "Candidates do not support ingredient claims until a readable ingredient/nutrition panel is reviewed, OCRed, corrected, and manually verified.",
+      "network_policy": "This v1 artifact is generated from curated source-page observations; live fetching can refresh candidates in a future private run."
+    },
+    "public_safety": {
+      "candidate_only": true,
+      "private_paths_committed": false,
+      "external_images_committed": false,
+      "thumbnail_urls_are_link_references_only": true,
+      "manual_verified_created": false
+    },
+    "totals": {
+      "item_candidates": 49,
+      "products_with_item_candidates": 9,
+      "collection_item_candidates": 47,
+      "existing_item_page_candidates": 2,
+      "source_hunt_gaps": 3,
+      "high_priority_candidates": 23
+    },
+    "candidate_types": [
+      {
+        "key": "collection_item_candidate",
+        "count": 47
+      },
+      {
+        "key": "existing_item_page_candidate",
+        "count": 2
+      }
+    ],
+    "product_counts": [
+      {
+        "key": "Butterfinger Bar",
+        "count": 8
+      },
+      {
+        "key": "Reese's Peanut Butter Cups",
+        "count": 7
+      },
+      {
+        "key": "Hershey's Milk Chocolate Bar",
+        "count": 6
+      },
+      {
+        "key": "Kit Kat Bar",
+        "count": 6
+      },
+      {
+        "key": "Snickers Bar",
+        "count": 6
+      },
+      {
+        "key": "M&M's Milk Chocolate Candies",
+        "count": 5
+      },
+      {
+        "key": "Twix Bar",
+        "count": 5
+      },
+      {
+        "key": "Milky Way Bar",
+        "count": 4
+      },
+      {
+        "key": "Tootsie Roll",
+        "count": 2
+      }
+    ],
+    "gap_product_counts": [
+      {
+        "key": "Skittles Original",
+        "count": 1
+      },
+      {
+        "key": "Starburst Original",
+        "count": 1
+      },
+      {
+        "key": "Twizzlers Strawberry Twists",
+        "count": 1
+      }
+    ],
+    "first_candidates": [
+      {
+        "candidate_id": "cwa_item_tootsie_roll_7ed1e97a54",
+        "parent_capture_evidence_id": "cwa_capture_tootsie_roll_d200029915",
+        "parent_source_review_task_id": "cwa_tootsie_roll_c3653b2d6e",
+        "product_id": "tootsie_roll",
+        "product_name": "Tootsie Roll",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_collection_url": "",
+        "item_url": "https://www.candywrapperarchive.com/candy-collector/1940s-tootsie-roll/",
+        "item_title": "1940s Tootsie Roll",
+        "claimed_date_text": "1940s",
+        "claimed_year": "",
+        "claimed_decade": "1940s",
+        "thumbnail_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image209_th.jpg",
+        "source_image_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image209.jpg",
+        "candidate_type": "existing_item_page_candidate",
+        "candidate_rank": 1,
+        "candidate_priority_score": 128,
+        "panel_review_state": "needs_panel_readability_review",
+        "photo_role_expected": "wrapper_item_page_with_possible_package_text",
+        "capture_strategy": "private_item_page_screenshot_then_panel_triage",
+        "ingredient_claim_status": "blocked_pending_readable_panel",
+        "next_action": "Capture private screenshot/crop and classify visible wrapper text, net weight, maker, date cue, and panel readability.",
+        "publication_image_policy": "source_link_only_no_public_image",
+        "rights_review_status": "rights_review_needed",
+        "source_note": "Item page states: 1940s, Tootsie Roll, Sweets Company of America Inc, USA, 1 1/2oz.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "candidate_id": "cwa_item_tootsie_roll_b5e8a99946",
+        "parent_capture_evidence_id": "cwa_capture_tootsie_roll_b225c9d1ee",
+        "parent_source_review_task_id": "cwa_tootsie_roll_38029af7c2",
+        "product_id": "tootsie_roll",
+        "product_name": "Tootsie Roll",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_collection_url": "",
+        "item_url": "https://www.candywrapperarchive.com/candy-collector/1960s-tootsie-roll-2/",
+        "item_title": "1960s Tootsie Roll",
+        "claimed_date_text": "1960s",
+        "claimed_year": "",
+        "claimed_decade": "1960s",
+        "thumbnail_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image997_th.jpg",
+        "source_image_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image997.jpg",
+        "candidate_type": "existing_item_page_candidate",
+        "candidate_rank": 1,
+        "candidate_priority_score": 128,
+        "panel_review_state": "needs_panel_readability_review",
+        "photo_role_expected": "wrapper_item_page_with_possible_package_text",
+        "capture_strategy": "private_item_page_screenshot_then_panel_triage",
+        "ingredient_claim_status": "blocked_pending_readable_panel",
+        "next_action": "Capture private screenshot/crop and classify visible wrapper text, net weight, maker, date cue, and panel readability.",
+        "publication_image_policy": "source_link_only_no_public_image",
+        "rights_review_status": "rights_review_needed",
+        "source_note": "Item page states: 1960s, Tootsie Roll, Tootsie Roll Industries Inc, USA, 1 3/4oz.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "candidate_id": "cwa_item_kit_kat_bar_bd63e20e01",
+        "parent_capture_evidence_id": "cwa_capture_kit_kat_bar_8d46703922",
+        "parent_source_review_task_id": "cwa_kit_kat_bar_e6d313c911",
+        "product_id": "kit_kat_bar",
+        "product_name": "Kit Kat Bar",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_collection_url": "https://www.candywrapperarchive.com/candy-collection/kit-kat/",
+        "item_url": "https://www.candywrapperarchive.com/candy-collector/1960s-kit-kat/",
+        "item_title": "1960s Kit Kat",
+        "claimed_date_text": "1960s",
+        "claimed_year": "",
+        "claimed_decade": "1960s",
+        "thumbnail_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image25_th.jpg",
+        "source_image_url": "",
+        "candidate_type": "collection_item_candidate",
+        "candidate_rank": 1,
+        "candidate_priority_score": 108,
+        "panel_review_state": "needs_panel_readability_review",
+        "photo_role_expected": "wrapper_front_or_package_context_first",
+        "capture_strategy": "open_item_page_then_private_screenshot_panel_triage",
+        "ingredient_claim_status": "blocked_pending_readable_panel",
+        "next_action": "Open item page, capture private page/wrapper crop, classify whether any ingredient or nutrition panel is readable.",
+        "publication_image_policy": "source_link_only_no_public_image",
+        "rights_review_status": "rights_review_needed",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "candidate_id": "cwa_item_kit_kat_bar_72bb08021d",
+        "parent_capture_evidence_id": "cwa_capture_kit_kat_bar_8d46703922",
+        "parent_source_review_task_id": "cwa_kit_kat_bar_e6d313c911",
+        "product_id": "kit_kat_bar",
+        "product_name": "Kit Kat Bar",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_collection_url": "https://www.candywrapperarchive.com/candy-collection/kit-kat/",
+        "item_url": "https://www.candywrapperarchive.com/candy-collector/1970s-kit-kat/",
+        "item_title": "1970s Kit Kat",
+        "claimed_date_text": "1970s",
+        "claimed_year": "",
+        "claimed_decade": "1970s",
+        "thumbnail_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image29_th.jpg",
+        "source_image_url": "",
+        "candidate_type": "collection_item_candidate",
+        "candidate_rank": 2,
+        "candidate_priority_score": 108,
+        "panel_review_state": "needs_panel_readability_review",
+        "photo_role_expected": "wrapper_front_or_package_context_first",
+        "capture_strategy": "open_item_page_then_private_screenshot_panel_triage",
+        "ingredient_claim_status": "blocked_pending_readable_panel",
+        "next_action": "Open item page, capture private page/wrapper crop, classify whether any ingredient or nutrition panel is readable.",
+        "publication_image_policy": "source_link_only_no_public_image",
+        "rights_review_status": "rights_review_needed",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "candidate_id": "cwa_item_milky_way_bar_0c56536fd5",
+        "parent_capture_evidence_id": "cwa_capture_milky_way_bar_07951f26df",
+        "parent_source_review_task_id": "cwa_milky_way_bar_3cfb33623b",
+        "product_id": "milky_way_bar",
+        "product_name": "Milky Way Bar",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_collection_url": "https://www.candywrapperarchive.com/candy-collection/milky-way/",
+        "item_url": "https://www.candywrapperarchive.com/candy-collector/1939-milky-way/",
+        "item_title": "1939 Milky Way",
+        "claimed_date_text": "1939",
+        "claimed_year": "1939",
+        "claimed_decade": "1930s",
+        "thumbnail_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image403_th.jpg",
+        "source_image_url": "",
+        "candidate_type": "collection_item_candidate",
+        "candidate_rank": 1,
+        "candidate_priority_score": 108,
+        "panel_review_state": "needs_panel_readability_review",
+        "photo_role_expected": "wrapper_front_or_package_context_first",
+        "capture_strategy": "open_item_page_then_private_screenshot_panel_triage",
+        "ingredient_claim_status": "blocked_pending_readable_panel",
+        "next_action": "Open item page, capture private page/wrapper crop, classify whether any ingredient or nutrition panel is readable.",
+        "publication_image_policy": "source_link_only_no_public_image",
+        "rights_review_status": "rights_review_needed",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "candidate_id": "cwa_item_milky_way_bar_096dd709da",
+        "parent_capture_evidence_id": "cwa_capture_milky_way_bar_07951f26df",
+        "parent_source_review_task_id": "cwa_milky_way_bar_3cfb33623b",
+        "product_id": "milky_way_bar",
+        "product_name": "Milky Way Bar",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_collection_url": "https://www.candywrapperarchive.com/candy-collection/milky-way/",
+        "item_url": "https://www.candywrapperarchive.com/candy-collector/1940s-milky-way/",
+        "item_title": "1940s Milky Way",
+        "claimed_date_text": "1940s",
+        "claimed_year": "",
+        "claimed_decade": "1940s",
+        "thumbnail_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image722_th.jpg",
+        "source_image_url": "",
+        "candidate_type": "collection_item_candidate",
+        "candidate_rank": 2,
+        "candidate_priority_score": 108,
+        "panel_review_state": "needs_panel_readability_review",
+        "photo_role_expected": "wrapper_front_or_package_context_first",
+        "capture_strategy": "open_item_page_then_private_screenshot_panel_triage",
+        "ingredient_claim_status": "blocked_pending_readable_panel",
+        "next_action": "Open item page, capture private page/wrapper crop, classify whether any ingredient or nutrition panel is readable.",
+        "publication_image_policy": "source_link_only_no_public_image",
+        "rights_review_status": "rights_review_needed",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "candidate_id": "cwa_item_snickers_bar_55b6c9b7cd",
+        "parent_capture_evidence_id": "cwa_capture_snickers_bar_93cbad5c91",
+        "parent_source_review_task_id": "cwa_snickers_bar_3a5b272b95",
+        "product_id": "snickers_bar",
+        "product_name": "Snickers Bar",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_collection_url": "https://www.candywrapperarchive.com/candy-collection/snickers/",
+        "item_url": "https://www.candywrapperarchive.com/candy-collector/1940s-snickers-2/",
+        "item_title": "1940s Snickers",
+        "claimed_date_text": "1940s",
+        "claimed_year": "",
+        "claimed_decade": "1940s",
+        "thumbnail_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image363_th.jpg",
+        "source_image_url": "",
+        "candidate_type": "collection_item_candidate",
+        "candidate_rank": 2,
+        "candidate_priority_score": 108,
+        "panel_review_state": "needs_panel_readability_review",
+        "photo_role_expected": "wrapper_front_or_package_context_first",
+        "capture_strategy": "open_item_page_then_private_screenshot_panel_triage",
+        "ingredient_claim_status": "blocked_pending_readable_panel",
+        "next_action": "Open item page, capture private page/wrapper crop, classify whether any ingredient or nutrition panel is readable.",
+        "publication_image_policy": "source_link_only_no_public_image",
+        "rights_review_status": "rights_review_needed",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "candidate_id": "cwa_item_snickers_bar_03dea8d8c5",
+        "parent_capture_evidence_id": "cwa_capture_snickers_bar_93cbad5c91",
+        "parent_source_review_task_id": "cwa_snickers_bar_3a5b272b95",
+        "product_id": "snickers_bar",
+        "product_name": "Snickers Bar",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_collection_url": "https://www.candywrapperarchive.com/candy-collection/snickers/",
+        "item_url": "https://www.candywrapperarchive.com/candy-collector/1940s-snickers/",
+        "item_title": "1939 Snickers",
+        "claimed_date_text": "1939",
+        "claimed_year": "1939",
+        "claimed_decade": "1930s",
+        "thumbnail_url": "https://www.candywrapperarchive.com/wp-content/uploads/2013/02/Image167_th.jpg",
+        "source_image_url": "",
+        "candidate_type": "collection_item_candidate",
+        "candidate_rank": 1,
+        "candidate_priority_score": 108,
+        "panel_review_state": "needs_panel_readability_review",
+        "photo_role_expected": "wrapper_front_or_package_context_first",
+        "capture_strategy": "open_item_page_then_private_screenshot_panel_triage",
+        "ingredient_claim_status": "blocked_pending_readable_panel",
+        "next_action": "Open item page, capture private page/wrapper crop, classify whether any ingredient or nutrition panel is readable.",
+        "publication_image_policy": "source_link_only_no_public_image",
+        "rights_review_status": "rights_review_needed",
+        "candidate_only": 1,
+        "manual_verified": 0
+      }
+    ],
+    "source_hunt_gaps": [
+      {
+        "gap_id": "cwa_item_gap_skittles_original_c709c2ae",
+        "parent_capture_evidence_id": "cwa_capture_skittles_original_4270c4207c",
+        "product_id": "skittles_original",
+        "product_name": "Skittles Original",
+        "gap_type": "source_hunt_before_item_candidate",
+        "source_domain": "www.candywrapperarchive.com",
+        "search_queries": "site:candywrapperarchive.com/candy-collection \"Skittles Original\";site:candywrapperarchive.com/candy-collector \"Skittles Original\" wrapper;site:candywrapperarchive.com \"Skittles Original\" \"Candy Wrapper Archive\"",
+        "reason": "No Candy Wrapper Archive item or collection URL has been attached yet.",
+        "next_action": "Run constrained archive search, attach a source URL, then regenerate item candidates.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "gap_id": "cwa_item_gap_starburst_original_19e02758",
+        "parent_capture_evidence_id": "cwa_capture_starburst_original_57b7d936d3",
+        "product_id": "starburst_original",
+        "product_name": "Starburst Original",
+        "gap_type": "source_hunt_before_item_candidate",
+        "source_domain": "www.candywrapperarchive.com",
+        "search_queries": "site:candywrapperarchive.com/candy-collection \"Starburst Original\";site:candywrapperarchive.com/candy-collector \"Starburst Original\" wrapper;site:candywrapperarchive.com \"Starburst Original\" \"Candy Wrapper Archive\"",
+        "reason": "No Candy Wrapper Archive item or collection URL has been attached yet.",
+        "next_action": "Run constrained archive search, attach a source URL, then regenerate item candidates.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "gap_id": "cwa_item_gap_twizzlers_strawberry_59a5ad9e",
+        "parent_capture_evidence_id": "cwa_capture_twizzlers_strawberry_c7b7f683cd",
+        "product_id": "twizzlers_strawberry",
+        "product_name": "Twizzlers Strawberry Twists",
+        "gap_type": "source_hunt_before_item_candidate",
+        "source_domain": "www.candywrapperarchive.com",
+        "search_queries": "site:candywrapperarchive.com/candy-collection \"Twizzlers Strawberry Twists\";site:candywrapperarchive.com/candy-collector \"Twizzlers Strawberry Twists\" wrapper;site:candywrapperarchive.com \"Twizzlers Strawberry Twists\" \"Candy Wrapper Archive\"",
+        "reason": "No Candy Wrapper Archive item or collection URL has been attached yet.",
+        "next_action": "Run constrained archive search, attach a source URL, then regenerate item candidates.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      }
+    ],
+    "artifacts": {
+      "item_candidates_json": "docs/data/product-evidence/confection_wrapper_item_candidates.json",
+      "item_candidates_csv": "docs/data/product-evidence/exports/confection_wrapper_item_candidates.csv",
+      "item_candidate_gaps_csv": "docs/data/product-evidence/exports/confection_wrapper_item_candidate_gaps.csv",
+      "runbook_markdown": "docs/data/product-evidence/exports/confection_wrapper_item_candidate_runbook.md"
+    }
   }
 }
