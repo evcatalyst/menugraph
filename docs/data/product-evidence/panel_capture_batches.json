@@ -7,7 +7,7 @@
     "limit": 250,
     "packet_size_target": 20,
     "primary_visual_rule": "Ingredient/document panels are first-class OCR targets; product photos remain secondary context.",
-    "compatible_with": "scripts/build-spark-ocr-packets.js via --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv"
+    "compatible_with": "scripts/build-spark-ocr-packets.js via --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --group-mode=compact"
   },
   "public_safety": {
     "candidate_only": true,

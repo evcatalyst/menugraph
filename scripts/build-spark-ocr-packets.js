@@ -69,10 +69,22 @@ function outputSchemaFor(taskType) {
   return base;
 }
 
-function packetRows(rows, packetSize = 20) {
+function packetGroupKey(row, groupMode = "source_domain") {
+  if (groupMode === "compact") {
+    return [
+      row.corpus_scope === "story_rich_pilot" ? "pilot" : "corpus",
+      row.ocr_gap_category || "unknown_gap",
+    ].join("__");
+  }
+  if (groupMode === "lane") return row.ocr_gap_category || "unknown_gap";
+  return groupKeyForRow(row);
+}
+
+function packetRows(rows, packetSize = 20, options = {}) {
+  const groupMode = typeof options === "string" ? options : options.groupMode || "source_domain";
   const grouped = new Map();
   for (const row of rows) {
-    const key = groupKeyForRow(row);
+    const key = packetGroupKey(row, groupMode);
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key).push(row);
   }
@@ -89,6 +101,7 @@ function packetRows(rows, packetSize = 20) {
         packet_id: `spark_${shortHash(hashInput, 14)}`,
         packet_type: packetType,
         generated_at: generatedAt,
+        grouping_policy: groupMode,
         model_route: {
           primary_provider: "codex",
           primary_model: models.spark_model,
@@ -155,6 +168,7 @@ function buildSummary(runId, runDir, selectedRows, packets, options) {
       packets_generated: packets.length,
       packet_size_target: options.packetSize,
       source_rows_in_packets: packetRowsFlat.length,
+      grouping_policy: options.groupMode,
     },
     packet_types: countBy(packets, "packet_type"),
     gap_categories: countBy(selectedRows, "ocr_gap_category"),
@@ -196,6 +210,7 @@ function main() {
   const runDir = runDirFromArgs(runId);
   const limit = numberArg("limit", 250);
   const packetSize = Math.min(Math.max(numberArg("packet-size", 20), 1), 50);
+  const groupMode = argValue("group-mode", "source_domain");
   const dryRun = hasFlag("dry-run");
   const queuePath = queuePathFromArgs();
   const publicModelSummaryPath = pathFromArg("public-model-summary", publicModelSummaryCsvPath);
@@ -208,12 +223,13 @@ function main() {
     gapCategory: argValue("gap-category"),
     priority: argValue("priority"),
   });
-  const packets = packetRows(selectedRows, packetSize);
+  const packets = packetRows(selectedRows, packetSize, { groupMode });
   const dirs = dryRun ? { sparkPacketsDir: path.join(runDir, "spark-packets") } : ensureRunDirs(runDir);
   if (!dryRun) writePackets(dirs.sparkPacketsDir, packets);
 
   const summary = redactPrivate(buildSummary(runId, runDir, selectedRows, packets, {
     packetSize,
+    groupMode,
     dryRun,
     publicModelSummaryRef: publicArtifactRef(publicModelSummaryPath),
   }));
@@ -226,6 +242,7 @@ function main() {
     "model",
     "status",
     "source_row_count",
+    "grouping_policy",
     "evidence_ids",
     "candidate_only",
   ], packets.map((packet) => ({
@@ -236,6 +253,7 @@ function main() {
     model: packet.model_route.primary_model,
     status: "packet_ready",
     source_row_count: packet.source_rows.length,
+    grouping_policy: packet.grouping_policy,
     evidence_ids: packet.source_rows.map((row) => row.evidence_id).join(";"),
     candidate_only: true,
   })));
@@ -244,6 +262,7 @@ function main() {
     run_id: runId,
     selected_rows: selectedRows.length,
     packets_generated: packets.length,
+    group_mode: groupMode,
     dry_run: dryRun,
   }, null, 2));
 }
@@ -251,6 +270,7 @@ function main() {
 if (require.main === module) main();
 
 module.exports = {
+  packetGroupKey,
   packetRows,
   taskTypeFor,
 };

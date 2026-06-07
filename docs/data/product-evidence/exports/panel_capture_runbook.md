@@ -14,7 +14,7 @@ This queue is built from the ingredient-panel acquisition board. It prioritizes 
 
 ## Operator Flow
 
-1. Run `node scripts/build-spark-ocr-packets.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --packet-size=20` to create private Spark packets.
+1. Run `node scripts/build-spark-ocr-packets.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --packet-size=20 --group-mode=compact --public-model-summary=docs/data/product-evidence/exports/panel_capture_model_assist_summary.csv` to create private Spark packets.
 2. Use Spark output only for crop/source-review notes. It cannot verify ingredients or create `manual_verified`.
 3. Capture or crop source pages into `.cache/ingredient-ocr/runs/<run-id>/` only.
 4. Run native OCR, then batch-review compact OCR candidates before publishing any candidate text.

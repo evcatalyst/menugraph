@@ -58,8 +58,16 @@ The default capture queue selects the top 250 panel-acquisition slots and packs 
 Use the panel-first queue for the next hybrid model run:
 
 ```sh
-node scripts/build-spark-ocr-packets.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --packet-size=20
-node scripts/capture-ingredient-ocr-assets.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --no-network --dry-run
+npm run build:panel-capture-pipeline
+```
+
+Expanded form:
+
+```sh
+node scripts/build-spark-ocr-packets.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --packet-size=20 --group-mode=compact --public-model-summary=docs/data/product-evidence/exports/panel_capture_model_assist_summary.csv
+node scripts/capture-ingredient-ocr-assets.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --no-network --dry-run --public-run-summary=docs/data/product-evidence/exports/panel_capture_dry_run_summary.csv --public-image-map-template=docs/data/product-evidence/exports/panel_capture_image_map_template.csv
+node scripts/run-ingredient-ocr.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --public-ocr-summary=docs/data/product-evidence/exports/panel_capture_native_ocr_summary.csv
+node scripts/summarize-ingredient-ocr-run.js --queue=docs/data/product-evidence/exports/panel_capture_ocr_queue.csv --run-id=panel-capture-v1 --limit=250 --public-run-summary=docs/data/product-evidence/exports/panel_capture_dry_run_summary.csv --public-model-summary=docs/data/product-evidence/exports/panel_capture_model_assist_summary.csv --public-ocr-summary=docs/data/product-evidence/exports/panel_capture_native_ocr_summary.csv --public-review-queue=docs/data/product-evidence/exports/panel_capture_review_queue.csv --public-hybrid-summary=docs/data/product-evidence/panel_capture_pipeline_summary.json --summary-field=panel_capture_pipeline_summary
 ```
 
 ## Run Native OCR Locally

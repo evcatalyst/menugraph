@@ -1,0 +1,124 @@
+{
+  "schema_version": "hybrid_ingredient_ocr_public_rollup.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "panel-capture-v1",
+  "public_safety": {
+    "images_committed": false,
+    "private_paths_committed": false,
+    "prompts_with_private_paths_committed": false,
+    "api_keys_committed": false,
+    "unverified_ingredient_claims_published": false,
+    "manual_verified_created": false,
+    "candidate_only": true
+  },
+  "model_routes": {
+    "spark_model": "gpt-5.3-codex-spark",
+    "gpt55_review_model": "gpt-5.5",
+    "grok_research_model": "grok-4.3",
+    "spark_packets_generated": 14,
+    "gpt55_review_batches_planned": 0,
+    "grok_assist_batches_created": 0
+  },
+  "capture": {
+    "selected_rows": 250,
+    "rows_captured": 250,
+    "ready_for_ocr": 0,
+    "blocked_no_network": 250,
+    "image_map_template_rows": 250,
+    "image_map_key_count": 750
+  },
+  "ocr": {
+    "ocr_result_rows": 250,
+    "ocr_planned": 0,
+    "ocr_attempted": 0,
+    "ocr_succeeded": 0,
+    "ocr_failed": 0,
+    "ocr_skipped_no_image": 250,
+    "ingredient_signal_found": 0,
+    "needs_human_correction": 0
+  },
+  "review_queue": {
+    "rows": 250,
+    "by_status": [
+      {
+        "key": "needs_source_review",
+        "count": 250
+      }
+    ],
+    "candidate_review_ready": 0,
+    "needs_better_crop": 0,
+    "needs_source_review": 250,
+    "needs_manual_transcription": 0
+  },
+  "blockers": {
+    "top_gap_categories": [
+      {
+        "key": "panel_capture_needed",
+        "count": 225
+      },
+      {
+        "key": "readable_panel_photo_needed",
+        "count": 25
+      }
+    ],
+    "top_source_domains": [
+      {
+        "key": "flickr.com",
+        "count": 54
+      },
+      {
+        "key": "upcfoodsearch.com",
+        "count": 16
+      },
+      {
+        "key": "walmart.com",
+        "count": 14
+      },
+      {
+        "key": "smartlabel.pepsico.info",
+        "count": 11
+      },
+      {
+        "key": "smartlabel.kelloggs.com",
+        "count": 7
+      },
+      {
+        "key": "upcitemdb.com",
+        "count": 6
+      },
+      {
+        "key": "district.schoolnutritionandfitness.com",
+        "count": 5
+      },
+      {
+        "key": "kroger.com",
+        "count": 5
+      },
+      {
+        "key": "smartlabel.mondelez.info",
+        "count": 5
+      },
+      {
+        "key": "canceredinstitute.org",
+        "count": 4
+      },
+      {
+        "key": "docslib.org",
+        "count": 4
+      },
+      {
+        "key": "smartlabel.hersheys.com",
+        "count": 4
+      }
+    ],
+    "top_products": "Coca-Cola Classic (6); Doritos Nacho Cheese (6); McDonald's Big Mac (6); Cheerios Original (5); Kraft Macaroni & Cheese Original (5); McDonald's Chicken McNuggets (5); Oreo Original Chocolate Sandwich Cookies (5); Pop-Tarts Frosted Strawberry (5); Campbell's Condensed Tomato Soup (4); Cap'n Crunch Original (4); Heinz Tomato Ketchup (4); Hidden Valley Original Ranch (4)"
+  },
+  "public_artifacts": {
+    "pipeline_summary_json": "docs/data/product-evidence/panel_capture_pipeline_summary.json",
+    "run_summary_csv": "docs/data/product-evidence/exports/panel_capture_dry_run_summary.csv",
+    "image_map_template_csv": "docs/data/product-evidence/exports/panel_capture_image_map_template.csv",
+    "ocr_summary_csv": "docs/data/product-evidence/exports/panel_capture_native_ocr_summary.csv",
+    "model_assist_summary_csv": "docs/data/product-evidence/exports/panel_capture_model_assist_summary.csv",
+    "review_queue_csv": "docs/data/product-evidence/exports/panel_capture_review_queue.csv"
+  }
+}

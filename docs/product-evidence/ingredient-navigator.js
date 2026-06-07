@@ -615,6 +615,103 @@ function renderPanelCaptureBatchStatus() {
   `;
 }
 
+function renderPanelCapturePipelineStatus() {
+  const summary = state.summary?.panel_capture_pipeline_summary || {};
+  if (!summary.run_id) return "";
+  const model = summary.model_routes || {};
+  const capture = summary.capture || {};
+  const ocr = summary.ocr || {};
+  const review = summary.review_queue || {};
+  const artifacts = summary.public_artifacts || {};
+  const blockers = summary.blockers || {};
+  const gapCounts = blockers.top_gap_categories || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-needs_source_review">
+      <span>Panel Model / Capture Handoff</span>
+      <strong>${escapeHtml(`${model.spark_packets_generated || 0} Spark packets · ${review.rows || 0} review rows`)}</strong>
+      <p>Compact Spark packets are ready for crop/source instructions. The capture run is still public-safe dry-run only: no images, OCR text, or ingredient claims are published until private crops are supplied and reviewed.</p>
+      <dl>
+        <div>
+          <dt>Dry-run rows</dt>
+          <dd>${escapeHtml(capture.selected_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Ready for OCR</dt>
+          <dd>${escapeHtml(capture.ready_for_ocr || 0)}</dd>
+        </div>
+        <div>
+          <dt>Image-map keys</dt>
+          <dd>${escapeHtml(capture.image_map_key_count || 0)}</dd>
+        </div>
+        <div>
+          <dt>OCR skipped</dt>
+          <dd>${escapeHtml(ocr.ocr_skipped_no_image || 0)}</dd>
+        </div>
+        <div>
+          <dt>Needs source review</dt>
+          <dd>${escapeHtml(review.needs_source_review || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-row-strip" aria-label="Panel capture blockers">
+        ${gapCounts.slice(0, 4).map((row) => `
+          <span>${escapeHtml(`${labelFor(row.key)} · ${row.count}`)}</span>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.model_assist_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.model_assist_summary_csv))}">Spark Packets CSV</a>` : ""}
+        ${artifacts.run_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.run_summary_csv))}">Capture Dry Run CSV</a>` : ""}
+        ${artifacts.image_map_template_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_template_csv))}">Image Map Template</a>` : ""}
+        ${artifacts.review_queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.review_queue_csv))}">Review Queue CSV</a>` : ""}
+        ${artifacts.pipeline_summary_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.pipeline_summary_json))}">Pipeline JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
+function renderConfectionWrapperPriorityStatus() {
+  const summary = state.summary?.confection_wrapper_source_priority_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.confection_products) return "";
+  const artifacts = summary.artifacts || {};
+  const targets = summary.top_targets || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-source_review">
+      <span>Confection Wrapper Lineage Priority</span>
+      <strong>${escapeHtml(`${totals.products_with_existing_candy_wrapper_archive_leads || 0}/${totals.confection_products || 0} candy products have Candy Wrapper Archive leads`)}</strong>
+      <p>Candy Wrapper Archive becomes the first source lane for candy wrapper history: use it for decade, package format, weight, and maker context, but keep ingredient claims blocked until a readable panel is captured and reviewed.</p>
+      <dl>
+        <div>
+          <dt>Existing rows</dt>
+          <dd>${escapeHtml(totals.existing_candy_wrapper_archive_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Likely pages</dt>
+          <dd>${escapeHtml(totals.products_with_likely_collection_pages || 0)}</dd>
+        </div>
+        <div>
+          <dt>Search targets</dt>
+          <dd>${escapeHtml(totals.products_requiring_targeted_search || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Confection wrapper source targets">
+        ${targets.slice(0, 4).map((target) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(labelFor(target.priority_tier || "source target"))}</span>
+            <strong>${escapeHtml(target.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${target.candy_wrapper_archive_rows || 0} existing rows · ${target.known_candy_wrapper_archive_urls ? sourceHost(target.known_candy_wrapper_archive_urls.split(";")[0]) : "targeted search"}`)}</p>
+            <em>${escapeHtml(target.recommended_action || "Review wrapper-lineage source before broader search.")}</em>
+          </article>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.priority_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.priority_csv))}">Priority CSV</a>` : ""}
+        ${artifacts.report_markdown ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.report_markdown))}">Report</a>` : ""}
+        ${artifacts.priority_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.priority_json))}">Priority JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
@@ -665,6 +762,8 @@ function renderCorpusHandoff() {
     ${renderPublicPhotoProofStrip()}
     ${renderIngredientPanelAcquisitionStatus()}
     ${renderPanelCaptureBatchStatus()}
+    ${renderPanelCapturePipelineStatus()}
+    ${renderConfectionWrapperPriorityStatus()}
     ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">
