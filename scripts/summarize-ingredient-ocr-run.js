@@ -1,14 +1,17 @@
 const fs = require("fs");
 const path = require("path");
 const {
+  argValue,
   countBy,
   generatedAt,
   modelDefaults,
   parseCsv,
+  pathFromArg,
   publicHybridSummaryPath,
   publicModelSummaryCsvPath,
   publicReviewQueueCsvPath,
   publicRunSummaryCsvPath,
+  queuePathFromArgs,
   readFullQueue,
   readJson,
   redactPrivate,
@@ -102,12 +105,19 @@ function buildReviewQueue(queueRows, captureRows, modelRows) {
 function main() {
   const runId = runIdFromArgs("hybrid-ocr");
   const runDir = runDirFromArgs(runId);
-  const queueRows = selectQueueRows(readFullQueue(), { limit: 250 });
+  const queuePath = queuePathFromArgs();
+  const publicRunSummaryPath = pathFromArg("public-run-summary", publicRunSummaryCsvPath);
+  const publicModelSummaryPath = pathFromArg("public-model-summary", publicModelSummaryCsvPath);
+  const publicReviewQueuePath = pathFromArg("public-review-queue", publicReviewQueueCsvPath);
+  const publicHybridSummaryJsonPath = pathFromArg("public-hybrid-summary", publicHybridSummaryPath);
+  const summaryField = argValue("summary-field", "hybrid_ocr_pipeline_summary");
+  const limit = Number(argValue("limit", 250));
+  const queueRows = selectQueueRows(readFullQueue(queuePath), { limit: Number.isFinite(limit) ? limit : 250 });
   const sparkSummary = readJson(path.join(runDir, "spark_packet_summary.public.json"), {});
   const captureSummary = readJson(path.join(runDir, "capture_summary.public.json"), {});
   const modelSummary = readJson(path.join(runDir, "model_assist_summary.public.json"), {});
-  const captureRows = readCsv(publicRunSummaryCsvPath).filter((row) => row.run_id === runId);
-  const modelRows = readCsv(publicModelSummaryCsvPath).filter((row) => row.run_id === runId);
+  const captureRows = readCsv(publicRunSummaryPath).filter((row) => row.run_id === runId);
+  const modelRows = readCsv(publicModelSummaryPath).filter((row) => row.run_id === runId);
   const reviewQueue = buildReviewQueue(queueRows, captureRows, modelRows);
   const ocr = summarizeOcrResults(runDir);
   const defaults = modelDefaults();
@@ -153,15 +163,15 @@ function main() {
       top_products: topList(queueRows, "product_name", 12),
     },
     public_artifacts: {
-      pipeline_summary_json: "docs/data/product-evidence/hybrid_ocr_pipeline_summary.json",
-      run_summary_csv: "docs/data/product-evidence/exports/hybrid_ocr_run_summary.csv",
-      model_assist_summary_csv: "docs/data/product-evidence/exports/hybrid_ocr_model_assist_summary.csv",
-      review_queue_csv: "docs/data/product-evidence/exports/hybrid_ocr_review_queue.csv",
+      pipeline_summary_json: path.relative(path.join(__dirname, ".."), publicHybridSummaryJsonPath),
+      run_summary_csv: path.relative(path.join(__dirname, ".."), publicRunSummaryPath),
+      model_assist_summary_csv: path.relative(path.join(__dirname, ".."), publicModelSummaryPath),
+      review_queue_csv: path.relative(path.join(__dirname, ".."), publicReviewQueuePath),
     },
   });
 
-  writeJson(publicHybridSummaryPath, hybridSummary);
-  writeCsv(publicReviewQueueCsvPath, [
+  writeJson(publicHybridSummaryJsonPath, hybridSummary);
+  writeCsv(publicReviewQueuePath, [
     "product_id",
     "product_name",
     "vintage_label",
@@ -183,9 +193,11 @@ function main() {
   ], reviewQueue);
 
   const siteSummary = readJson(summaryPath, {});
-  siteSummary.hybrid_ocr_pipeline_summary = hybridSummary;
+  siteSummary[summaryField] = hybridSummary;
   siteSummary.ingredient_ocr_summary = siteSummary.ingredient_ocr_summary || {};
-  siteSummary.ingredient_ocr_summary.hybrid_pipeline = hybridSummary;
+  if (summaryField === "hybrid_ocr_pipeline_summary") {
+    siteSummary.ingredient_ocr_summary.hybrid_pipeline = hybridSummary;
+  }
   writeJson(summaryPath, siteSummary);
 
   console.log(JSON.stringify({

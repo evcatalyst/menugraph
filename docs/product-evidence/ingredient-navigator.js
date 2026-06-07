@@ -2,6 +2,7 @@ const els = {
   productSelect: document.querySelector("#product-select"),
   productSearch: document.querySelector("#product-search"),
   productStrip: document.querySelector("#product-strip"),
+  corpusHandoff: document.querySelector("#corpus-handoff"),
   timeRange: document.querySelector("#time-range"),
   compareToggle: document.querySelector("#compare-toggle"),
   status: document.querySelector("#journey-status"),
@@ -97,6 +98,78 @@ function renderProductPicker() {
       </button>
     `)
     .join("");
+}
+
+function corpusHandoffStats() {
+  const products = state.data.products || [];
+  const indexRows = state.data.product_index || [];
+  const evidenceRows = products.flatMap((row) => row.evidence || []);
+  const versionRows = products.flatMap((row) => row.versions || []);
+  const storyRich = indexRows.filter((row) => row.scope === "story_rich_pilot").length;
+  const proofShells = Math.max(0, products.length - storyRich);
+  const sourceLinkedEvidence = evidenceRows.filter((row) => proofSourceUrl(row)).length;
+  const embedReadyEvidence = evidenceRows.filter((row) => canEmbedProofImage(row)).length;
+  const candidateExtracts = evidenceRows.filter((row) => row.visible_extract).length
+    + versionRows.filter((row) => row.label_extract).length;
+  const sourceLinkOnly = evidenceRows.filter((row) => (
+    row.image_display_policy === "source_link_only_no_public_image"
+    || (proofSourceUrl(row) && !canEmbedProofImage(row))
+  )).length;
+  return {
+    productCount: products.length,
+    storyRich,
+    proofShells,
+    sourceLinkedEvidence,
+    embedReadyEvidence,
+    candidateExtracts,
+    sourceLinkOnly,
+  };
+}
+
+function renderCorpusHandoff() {
+  if (!els.corpusHandoff) return;
+  const stats = corpusHandoffStats();
+  els.corpusHandoff.innerHTML = `
+    <article class="corpus-handoff-card">
+      <span>Corpus Loaded</span>
+      <strong>${escapeHtml(stats.productCount)} products</strong>
+      <p>The dropdown and search cover the full corpus. The horizontal strip starts with the 10 story-rich pilots, then continues into proof shells.</p>
+      <dl>
+        <div>
+          <dt>Story-rich pilots</dt>
+          <dd>${escapeHtml(stats.storyRich)}</dd>
+        </div>
+        <div>
+          <dt>Proof shells</dt>
+          <dd>${escapeHtml(stats.proofShells)}</dd>
+        </div>
+      </dl>
+    </article>
+    <article class="corpus-handoff-card status-source_review">
+      <span>Photo Display Gate</span>
+      <strong>${escapeHtml(stats.embedReadyEvidence)} public embeds</strong>
+      <p>Photo proof is present as source-attributed receipts. Images appear only after a row has a public image URL and <code>embed_rights_cleared</code>.</p>
+      <dl>
+        <div>
+          <dt>Source-linked evidence</dt>
+          <dd>${escapeHtml(stats.sourceLinkedEvidence)}</dd>
+        </div>
+        <div>
+          <dt>Link-only receipts</dt>
+          <dd>${escapeHtml(stats.sourceLinkOnly)}</dd>
+        </div>
+        <div>
+          <dt>Text candidates</dt>
+          <dd>${escapeHtml(stats.candidateExtracts)}</dd>
+        </div>
+      </dl>
+    </article>
+    <article class="corpus-handoff-card status-needs_source_review">
+      <span>Next Unlock</span>
+      <strong>Private capture then review</strong>
+      <p>Capture/crop source pages privately, run native OCR, batch-review candidate text, then publish only rights-cleared images or link-only proof cards.</p>
+    </article>
+  `;
 }
 
 function renderSummary(productRow) {
@@ -719,6 +792,7 @@ function render() {
   }
   const version = selectedVersion(productRow);
   renderProductPicker();
+  renderCorpusHandoff();
   renderStatus(productRow);
   renderSummary(productRow);
   renderStoryReadiness(productRow);

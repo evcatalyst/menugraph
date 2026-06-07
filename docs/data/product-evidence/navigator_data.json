@@ -924,7 +924,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -1002,10 +1002,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 14,
-        "high_priority_count": 10,
+        "ocr_candidate_count": 24,
+        "high_priority_count": 7,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 5
+        "source_page_capture_needed_count": 24,
+        "source_discovery_needed_count": 0,
+        "not_easily_accessible_count": 24,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 100
@@ -1051,7 +1055,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -1725,10 +1729,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 11,
-        "high_priority_count": 4,
+        "ocr_candidate_count": 22,
+        "high_priority_count": 5,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 4
+        "source_page_capture_needed_count": 22,
+        "source_discovery_needed_count": 0,
+        "not_easily_accessible_count": 22,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 3
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 98
@@ -1775,7 +1783,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -2482,10 +2490,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 9,
-        "high_priority_count": 2,
+        "ocr_candidate_count": 26,
+        "high_priority_count": 4,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 7
+        "source_page_capture_needed_count": 25,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 26,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 96
@@ -2528,7 +2540,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -3106,10 +3118,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 7,
-        "high_priority_count": 2,
+        "ocr_candidate_count": 15,
+        "high_priority_count": 3,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 5
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 0,
+        "not_easily_accessible_count": 15,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 98
@@ -3156,7 +3172,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -3958,10 +3974,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 11,
-        "high_priority_count": 5,
+        "ocr_candidate_count": 28,
+        "high_priority_count": 14,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 6
+        "source_page_capture_needed_count": 26,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 28,
+        "label_visible_count": 10,
+        "ingredient_text_candidate_count": 1
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 94
@@ -4008,7 +4028,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -4783,10 +4803,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 10,
-        "high_priority_count": 4,
+        "ocr_candidate_count": 18,
+        "high_priority_count": 7,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 5
+        "source_page_capture_needed_count": 16,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 18,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 94
@@ -4831,7 +4855,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -5567,10 +5591,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 11,
-        "high_priority_count": 5,
+        "ocr_candidate_count": 21,
+        "high_priority_count": 7,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 6
+        "source_page_capture_needed_count": 20,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 21,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 96
@@ -5616,7 +5644,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -6409,10 +6437,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 12,
-        "high_priority_count": 4,
+        "ocr_candidate_count": 22,
+        "high_priority_count": 5,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 8
+        "source_page_capture_needed_count": 21,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 22,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 3
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 98
@@ -6455,7 +6487,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -7041,10 +7073,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 7,
-        "high_priority_count": 4,
+        "ocr_candidate_count": 12,
+        "high_priority_count": 12,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 4
+        "source_page_capture_needed_count": 12,
+        "source_discovery_needed_count": 0,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 2
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 98
@@ -7089,7 +7125,7 @@
         "extracts_csv": "../data/product-evidence/exports/ten_product_pilot_visible_extracts.csv",
         "story_markdown": "../data/product-evidence/exports/ten_product_pilot_story_briefs.md",
         "gap_closure_csv": "../data/product-evidence/exports/ten_product_pilot_gap_closure.csv",
-        "ocr_queue_csv": "../data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
+        "ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
         "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       },
@@ -7787,10 +7823,14 @@
       "resolved_story_slots": 6,
       "story_resolution_coverage": 100,
       "ingredient_ocr_summary": {
-        "ocr_candidate_count": 9,
-        "high_priority_count": 6,
+        "ocr_candidate_count": 16,
+        "high_priority_count": 15,
         "local_image_ready_count": 0,
-        "needs_panel_review_count": 4
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 16,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
       },
       "corpus_scope": "story_rich_pilot",
       "full_corpus_rank": 94

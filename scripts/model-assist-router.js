@@ -9,8 +9,10 @@ const {
   modelDefaults,
   numberArg,
   parseCsv,
+  pathFromArg,
   promptHash,
   publicModelSummaryCsvPath,
+  queuePathFromArgs,
   readFullQueue,
   redactPrivate,
   responseHash,
@@ -25,6 +27,8 @@ const {
   xaiApiKey,
   xaiBaseUrl,
 } = require("./ingredient-ocr-pipeline-utils");
+
+const root = path.join(__dirname, "..");
 
 const allowedCaptureStrategies = [
   "source_page_screenshot",
@@ -247,7 +251,7 @@ function reviewBatchPlan(rows, batchSize = 40) {
   return batches;
 }
 
-function writeMergedModelSummary(runId, summaryRows) {
+function writeMergedModelSummary(runId, summaryRows, outputPath = publicModelSummaryCsvPath) {
   const headers = [
     "run_id",
     "route_type",
@@ -259,15 +263,15 @@ function writeMergedModelSummary(runId, summaryRows) {
     "evidence_ids",
     "candidate_only",
   ];
-  const existingRows = fs.existsSync(publicModelSummaryCsvPath)
-    ? parseCsv(fs.readFileSync(publicModelSummaryCsvPath, "utf8"))
+  const existingRows = fs.existsSync(outputPath)
+    ? parseCsv(fs.readFileSync(outputPath, "utf8"))
     : [];
   const retained = existingRows.filter((row) => row.run_id !== runId || row.route_type === "spark_packet");
   const deduped = new Map();
   for (const row of [...retained, ...summaryRows]) {
     deduped.set(`${row.run_id}:${row.route_type}:${row.route_id}`, row);
   }
-  writeCsv(publicModelSummaryCsvPath, headers, [...deduped.values()]);
+  writeCsv(outputPath, headers, [...deduped.values()]);
 }
 
 async function main() {
@@ -281,7 +285,9 @@ async function main() {
   const batchSize = Math.min(Math.max(numberArg("batch-size", 15), 1), 50);
   const maxGrokCalls = Math.max(numberArg("max-grok-calls", 3), 0);
   const maxGpt55Batches = Math.max(numberArg("max-gpt55-batches", 5), 0);
-  const rows = selectQueueRows(readFullQueue(), {
+  const queuePath = queuePathFromArgs();
+  const publicModelSummaryPath = pathFromArg("public-model-summary", publicModelSummaryCsvPath);
+  const rows = selectQueueRows(readFullQueue(queuePath), {
     limit,
     product: argValue("product"),
     category: argValue("category"),
@@ -345,7 +351,7 @@ async function main() {
       candidate_only: true,
     })),
   ];
-  writeMergedModelSummary(runId, summaryRows);
+  writeMergedModelSummary(runId, summaryRows, publicModelSummaryPath);
 
   const summary = redactPrivate({
     schema_version: "hybrid_ingredient_ocr_model_assist_summary.v1",
@@ -370,7 +376,7 @@ async function main() {
     allowed_capture_strategies: allowedCaptureStrategies,
     allowed_gpt55_review_statuses: reviewStatuses,
     public_artifacts: {
-      model_assist_summary_csv: "docs/data/product-evidence/exports/hybrid_ocr_model_assist_summary.csv",
+      model_assist_summary_csv: path.relative(root, publicModelSummaryPath),
     },
   });
   writeJson(path.join(runDir, "model_assist_summary.public.json"), summary);

@@ -10,8 +10,10 @@ const {
   hasFlag,
   modelDefaults,
   numberArg,
+  pathFromArg,
   publicEvidenceRow,
   publicModelSummaryCsvPath,
+  queuePathFromArgs,
   readFullQueue,
   redactPrivate,
   runDirFromArgs,
@@ -23,11 +25,13 @@ const {
   writeJson,
 } = require("./ingredient-ocr-pipeline-utils");
 
+const root = path.join(__dirname, "..");
+
 function taskTypeFor(groupRows) {
   const categories = new Set(groupRows.map((row) => row.ocr_gap_category));
   if (categories.has("source_discovery_needed")) return "domain_failure_packet";
   if (categories.has("document_text_pipeline_needed")) return "selector_hint_packet";
-  if (categories.has("panel_capture_needed") || categories.has("readable_panel_photo_needed")) {
+  if (categories.has("panel_capture_needed") || categories.has("readable_panel_photo_needed") || categories.has("source_page_capture_needed")) {
     return "capture_strategy_packet";
   }
   return "review_queue_packet";
@@ -163,7 +167,7 @@ function buildSummary(runId, runDir, selectedRows, packets, options) {
         spark_packets_dir: path.join(runDir, "spark-packets"),
       },
     public_artifacts: {
-      model_assist_summary_csv: "docs/data/product-evidence/exports/hybrid_ocr_model_assist_summary.csv",
+      model_assist_summary_csv: options.publicModelSummaryRef,
     },
   };
 }
@@ -192,7 +196,9 @@ function main() {
   const limit = numberArg("limit", 250);
   const packetSize = Math.min(Math.max(numberArg("packet-size", 20), 1), 50);
   const dryRun = hasFlag("dry-run");
-  const rows = readFullQueue();
+  const queuePath = queuePathFromArgs();
+  const publicModelSummaryPath = pathFromArg("public-model-summary", publicModelSummaryCsvPath);
+  const rows = readFullQueue(queuePath);
   const selectedRows = selectQueueRows(rows, {
     limit,
     product: argValue("product"),
@@ -205,9 +211,13 @@ function main() {
   const dirs = dryRun ? { sparkPacketsDir: path.join(runDir, "spark-packets") } : ensureRunDirs(runDir);
   if (!dryRun) writePackets(dirs.sparkPacketsDir, packets);
 
-  const summary = redactPrivate(buildSummary(runId, runDir, selectedRows, packets, { packetSize, dryRun }));
+  const summary = redactPrivate(buildSummary(runId, runDir, selectedRows, packets, {
+    packetSize,
+    dryRun,
+    publicModelSummaryRef: path.relative(root, publicModelSummaryPath),
+  }));
   writeJson(path.join(runDir, "spark_packet_summary.public.json"), summary);
-  writeCsv(publicModelSummaryCsvPath, [
+  writeCsv(publicModelSummaryPath, [
     "run_id",
     "route_type",
     "route_id",

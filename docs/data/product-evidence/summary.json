@@ -183573,5 +183573,123 @@
         ]
       }
     ]
+  },
+  "pilot_capture_pipeline_summary": {
+    "schema_version": "hybrid_ingredient_ocr_public_rollup.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "run_id": "pilot-photo-capture-dry-run",
+    "public_safety": {
+      "images_committed": false,
+      "private_paths_committed": false,
+      "prompts_with_private_paths_committed": false,
+      "api_keys_committed": false,
+      "unverified_ingredient_claims_published": false,
+      "manual_verified_created": false,
+      "candidate_only": true
+    },
+    "model_routes": {
+      "spark_model": "gpt-5.3-codex-spark",
+      "gpt55_review_model": "gpt-5.5",
+      "grok_research_model": "grok-4.3",
+      "spark_packets_generated": 42,
+      "gpt55_review_batches_planned": 5,
+      "grok_assist_batches_created": 0
+    },
+    "capture": {
+      "selected_rows": 101,
+      "rows_captured": 101,
+      "ready_for_ocr": 0,
+      "blocked_no_network": 101
+    },
+    "ocr": {
+      "ocr_result_rows": 0,
+      "ocr_attempted": 0,
+      "ocr_succeeded": 0,
+      "ocr_failed": 0,
+      "ingredient_signal_found": 0,
+      "needs_human_correction": 0
+    },
+    "review_queue": {
+      "rows": 101,
+      "by_status": [
+        {
+          "key": "needs_source_review",
+          "count": 101
+        }
+      ],
+      "candidate_review_ready": 0,
+      "needs_better_crop": 0,
+      "needs_source_review": 101,
+      "needs_manual_transcription": 0
+    },
+    "blockers": {
+      "top_gap_categories": [
+        {
+          "key": "panel_capture_needed",
+          "count": 94
+        },
+        {
+          "key": "source_page_capture_needed",
+          "count": 7
+        }
+      ],
+      "top_source_domains": [
+        {
+          "key": "www.flickr.com",
+          "count": 45
+        },
+        {
+          "key": "www.walmart.com",
+          "count": 5
+        },
+        {
+          "key": "commons.wikimedia.org",
+          "count": 4
+        },
+        {
+          "key": "www.mcdonalds.com",
+          "count": 4
+        },
+        {
+          "key": "americanhistory.si.edu",
+          "count": 3
+        },
+        {
+          "key": "www.campbells.com",
+          "count": 3
+        },
+        {
+          "key": "grist.org",
+          "count": 2
+        },
+        {
+          "key": "www.canceredinstitute.org",
+          "count": 2
+        },
+        {
+          "key": "www.ewg.org",
+          "count": 2
+        },
+        {
+          "key": "www.kroger.com",
+          "count": 2
+        },
+        {
+          "key": "www.poptarts.com",
+          "count": 2
+        },
+        {
+          "key": "antiqueadvertising.com",
+          "count": 1
+        }
+      ],
+      "top_products": "Oreo Original Chocolate Sandwich Cookies (14); Kraft Macaroni & Cheese Original (12); Campbell's Condensed Tomato Soup (11); Doritos Nacho Cheese (11); Pop-Tarts Frosted Strawberry (11); Heinz Tomato Ketchup (10); Cheerios Original (9); McDonald's Chicken McNuggets (9); Coca-Cola Classic (7); McDonald's Big Mac (7)"
+    },
+    "public_artifacts": {
+      "pipeline_summary_json": "docs/data/product-evidence/pilot_capture_pipeline_summary.json",
+      "run_summary_csv": "docs/data/product-evidence/exports/pilot_capture_dry_run_summary.csv",
+      "model_assist_summary_csv": "docs/data/product-evidence/exports/pilot_capture_model_assist_summary.csv",
+      "review_queue_csv": "docs/data/product-evidence/exports/pilot_capture_review_queue.csv"
+    }
   }
 }
