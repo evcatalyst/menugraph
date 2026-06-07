@@ -11,8 +11,10 @@ const els = {
   timelineTrack: document.querySelector("#timeline-track"),
   facetList: document.querySelector("#facet-list"),
   clearFacet: document.querySelector("#clear-facet"),
+  photoSummary: document.querySelector("#photo-summary"),
   gapList: document.querySelector("#gap-list"),
   flowView: document.querySelector("#flow-view"),
+  blockedMap: document.querySelector("#blocked-map"),
   eventList: document.querySelector("#event-list"),
   versionDetail: document.querySelector("#version-detail"),
   evidenceGallery: document.querySelector("#evidence-gallery"),
@@ -48,6 +50,10 @@ function labelFor(value) {
 
 function statusBadge(status) {
   return `<span class="status-badge status-${escapeHtml(status || "unknown")}">${escapeHtml(labelFor(status || "unknown"))}</span>`;
+}
+
+function qualityLabel(value) {
+  return Number.isFinite(Number(value)) ? formatPct(value) : "Pending";
 }
 
 function formatPct(value) {
@@ -121,18 +127,43 @@ function renderHero(productRow) {
     <p class="eyebrow">Reader Story</p>
     <h2>${escapeHtml(productRow.name)}: package journey first, recipe comparison later</h2>
     <p>${escapeHtml(productRow.story_thesis)}</p>
-    <div class="hero-metrics">
-      <span><strong>${escapeHtml(productRow.source_backed_slots)}</strong>Source-backed chapters</span>
-      <span><strong>${escapeHtml(productRow.label_visible_leads)}</strong>Label-visible leads</span>
-      <span><strong>${escapeHtml(productRow.verified_labels)}</strong>Verified ingredient labels</span>
-      <span><strong>${escapeHtml(productRow.source_domains.length)}</strong>Source venues</span>
-    </div>
+      <div class="hero-metrics">
+        <span><strong>${escapeHtml(productRow.source_backed_slots)}</strong>Source-backed chapters</span>
+        <span><strong>${escapeHtml(productRow.photo_enriched_eras || 0)}</strong>Photo-enriched eras</span>
+        <span><strong>${escapeHtml(productRow.label_visible_leads)}</strong>Label-visible leads</span>
+        <span><strong>${escapeHtml(productRow.label_text_candidates || 0)}</strong>Text candidates</span>
+        <span><strong>${escapeHtml(productRow.verified_labels)}</strong>Verified ingredient labels</span>
+        <span><strong>${escapeHtml(productRow.source_domains.length)}</strong>Source venues</span>
+      </div>
     <div class="lead-meta reader-tags">
       ${statusBadge("source_review")}
       ${statusBadge("label_visible")}
       ${statusBadge("gap")}
       ${productRow.source_domains.slice(0, 4).map((source) => `<span class="source-chip">${escapeHtml(source)}</span>`).join("")}
     </div>
+  `;
+}
+
+function renderPhotoSummary(productRow) {
+  const summary = productRow.photo_quality_summary || {};
+  els.photoSummary.innerHTML = `
+    <article class="photo-summary-card">
+      <strong>${escapeHtml(summary.headline || "Photo quality summary pending")}</strong>
+      <dl class="photo-summary-list">
+        <div>
+          <dt>Can prove</dt>
+          <dd>${escapeHtml(summary.can_prove || "Source and package context after review.")}</dd>
+        </div>
+        <div>
+          <dt>Cannot prove</dt>
+          <dd>${escapeHtml(summary.cannot_prove || "Ingredient changes without reviewed label text.")}</dd>
+        </div>
+        <div>
+          <dt>Next photo target</dt>
+          <dd>${escapeHtml(summary.highest_value_next || "Find readable panels and verified transcriptions.")}</dd>
+        </div>
+      </dl>
+    </article>
   `;
 }
 
@@ -162,6 +193,7 @@ function renderFacets(productRow) {
         <span>${escapeHtml(facet.status)}</span>
         <strong>${escapeHtml(facet.label)}</strong>
         <p>${escapeHtml(facet.detail)}</p>
+        ${facet.photo_unlock ? `<em>${escapeHtml(facet.photo_unlock)}</em>` : ""}
       </button>
     `)
     .join("");
@@ -178,11 +210,25 @@ function renderFlow(productRow) {
         <strong>${escapeHtml(facet.label)}</strong>
         <div class="flow-line" style="grid-template-columns:repeat(${Math.max(1, versions.length)}, minmax(0, 1fr))" aria-label="${escapeHtml(facet.label)} readiness by vintage">
           ${versions.map((version) => {
-            const className = version.status === "label_visible" ? "is-ready" : version.status === "usable_photo" ? "is-photo" : version.status === "gap" ? "is-gap" : "";
+            const className = ["label_visible", "label_text_candidate"].includes(version.status) ? "is-ready" : version.status === "usable_photo" ? "is-photo" : version.status === "gap" ? "is-gap" : "";
             return `<span class="${className}" title="${escapeHtml(version.label)}: ${escapeHtml(labelFor(version.status))}"></span>`;
           }).join("")}
         </div>
         ${statusBadge(facet.status)}
+      </article>
+    `)
+    .join("");
+}
+
+function renderBlockedMap(productRow) {
+  els.blockedMap.innerHTML = (productRow.blocked_map || [])
+    .map((row) => `
+      <article class="blocked-card status-${escapeHtml(row.status)}">
+        <span>${escapeHtml(row.status)}</span>
+        <strong>${escapeHtml(row.lane)}</strong>
+        <p>${escapeHtml(row.why)}</p>
+        <em>${escapeHtml(row.photo_target)}</em>
+        ${statusBadge(row.status)}
       </article>
     `)
     .join("");
@@ -212,10 +258,23 @@ function renderDetail(productRow, version) {
       <div class="detail-grid">
         <span><strong>${escapeHtml(version.year)}</strong>Year marker</span>
         <span><strong>${escapeHtml(formatPct(version.confidence))}</strong>Confidence</span>
+        <span><strong>${escapeHtml(qualityLabel(version.photo_quality?.quality_score))}</strong>Photo quality</span>
         <span><strong>${escapeHtml(version.source_count)}</strong>Sources</span>
         <span><strong>${escapeHtml(evidenceRows.length)}</strong>Shown evidence</span>
       </div>
       <dl class="detail-list">
+        <div>
+          <dt>Photo Role</dt>
+          <dd>${escapeHtml(version.photo_quality?.role || "Not classified")}</dd>
+        </div>
+        <div>
+          <dt>Label Panel</dt>
+          <dd>${escapeHtml(version.photo_quality?.label_panel || "Not reviewed")}</dd>
+        </div>
+        <div>
+          <dt>Photo Blocker</dt>
+          <dd>${escapeHtml(version.photo_quality?.blocker || "Needs source-attributable readable panel.")}</dd>
+        </div>
         <div>
           <dt>Package</dt>
           <dd>${escapeHtml(version.package_context)}</dd>
@@ -237,6 +296,20 @@ function renderDetail(productRow, version) {
         <span>${escapeHtml(row.kind)}</span>
         <strong>${escapeHtml(row.title)}</strong>
         <p>${escapeHtml(row.rights)}</p>
+        <dl class="evidence-quality">
+          <div>
+            <dt>Photo role</dt>
+            <dd>${escapeHtml(row.photo_role || "not classified")}</dd>
+          </div>
+          <div>
+            <dt>Panel state</dt>
+            <dd>${escapeHtml(row.label_panel_state || "not reviewed")}</dd>
+          </div>
+          <div>
+            <dt>Quality note</dt>
+            <dd>${escapeHtml(row.quality_note || "review needed")}</dd>
+          </div>
+        </dl>
         ${statusBadge(row.status)}
         <a href="${escapeHtml(row.url)}" target="_blank" rel="noreferrer">${escapeHtml(row.source)}</a>
       </article>
@@ -280,9 +353,11 @@ function render() {
   renderStatus(productRow);
   renderSummary(productRow);
   renderHero(productRow);
+  renderPhotoSummary(productRow);
   renderTimeline(productRow);
   renderFacets(productRow);
   renderFlow(productRow);
+  renderBlockedMap(productRow);
   renderEvents(productRow);
   renderDetail(productRow, version);
   renderClusters(productRow);
