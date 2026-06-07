@@ -175,6 +175,8 @@ function main() {
       rows_captured: captureSummary.totals?.rows_captured || captureRows.length,
       ready_for_ocr: captureSummary.totals?.ready_for_ocr || 0,
       blocked_no_network: captureSummary.totals?.source_page_capture_blocked_no_network || 0,
+      image_map_template_rows: captureSummary.totals?.image_map_template_rows || 0,
+      image_map_key_count: captureSummary.totals?.image_map_key_count || 0,
     },
     ocr,
     review_queue: {
@@ -193,6 +195,7 @@ function main() {
     public_artifacts: {
       pipeline_summary_json: publicArtifactRef(publicHybridSummaryJsonPath),
       run_summary_csv: publicArtifactRef(publicRunSummaryPath),
+      image_map_template_csv: captureSummary.public_artifacts?.image_map_template_csv || "",
       ocr_summary_csv: publicArtifactRef(publicOcrSummaryPath),
       model_assist_summary_csv: publicArtifactRef(publicModelSummaryPath),
       review_queue_csv: publicArtifactRef(publicReviewQueuePath),

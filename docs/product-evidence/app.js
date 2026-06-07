@@ -15897,6 +15897,7 @@ function renderCorpusOcrScale() {
     ["GPT-5.5 batches", hybrid.model_routes?.gpt55_review_batches_planned],
     ["Grok assists", hybrid.model_routes?.grok_assist_batches_created],
     ["Captured", hybrid.capture?.rows_captured],
+    ["Image-map rows", hybrid.capture?.image_map_template_rows],
     ["OCR planned", hybrid.ocr?.ocr_planned],
     ["OCR attempted", hybrid.ocr?.ocr_attempted],
     ["OCR skipped", hybrid.ocr?.ocr_skipped_no_image],
@@ -15928,6 +15929,7 @@ function renderCorpusOcrScale() {
         ${artifactLink(summary.gap_report_csv, "Gap CSV")}
         ${artifactLink(summary.manifest_path, "Manifest")}
         ${artifactLink(hybrid.public_artifacts?.run_summary_csv, "Capture CSV")}
+        ${artifactLink(hybrid.public_artifacts?.image_map_template_csv, "Image-map CSV")}
         ${artifactLink(hybrid.public_artifacts?.ocr_summary_csv, "OCR CSV")}
         ${artifactLink(hybrid.public_artifacts?.model_assist_summary_csv, "Model CSV")}
         ${artifactLink(hybrid.public_artifacts?.review_queue_csv, "Review CSV")}
@@ -16162,6 +16164,8 @@ function renderPhotoProofUpgrades() {
       ["Capture rows", dryRun.capture?.rows_captured],
       ["Ready for OCR", dryRun.capture?.ready_for_ocr],
       ["Blocked no-network", dryRun.capture?.blocked_no_network],
+      ["Image-map rows", dryRun.capture?.image_map_template_rows],
+      ["Image-map keys", dryRun.capture?.image_map_key_count],
       ["OCR planned", dryRun.ocr?.ocr_planned],
       ["OCR skipped", dryRun.ocr?.ocr_skipped_no_image],
       ["Review rows", dryRun.review_queue?.rows],
@@ -16193,6 +16197,7 @@ function renderPhotoProofUpgrades() {
         <div class="lead-meta">
           ${artifactLink(dryArtifacts.pipeline_summary_json, "Pipeline JSON")}
           ${artifactLink(dryArtifacts.run_summary_csv, "Run CSV")}
+          ${artifactLink(dryArtifacts.image_map_template_csv, "Image-map CSV")}
           ${artifactLink(dryArtifacts.ocr_summary_csv, "OCR CSV")}
           ${artifactLink(dryArtifacts.model_assist_summary_csv, "Model CSV")}
           ${artifactLink(dryArtifacts.review_queue_csv, "Review CSV")}

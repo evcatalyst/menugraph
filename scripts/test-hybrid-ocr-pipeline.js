@@ -3,6 +3,7 @@ const fs = require("fs");
 const {
   approvedSparkTaskTypes,
   publicHybridSummaryPath,
+  publicImageMapTemplateCsvPath,
   publicModelSummaryCsvPath,
   publicReviewQueueCsvPath,
   publicRunSummaryCsvPath,
@@ -11,7 +12,7 @@ const {
 } = require("./ingredient-ocr-pipeline-utils");
 const { packetRows } = require("./build-spark-ocr-packets");
 const { providerRegistry, reviewBatchPlan } = require("./model-assist-router");
-const { buildImageMap, publicCaptureRow } = require("./capture-ingredient-ocr-assets");
+const { buildImageMap, buildImageMapTemplateRows, publicCaptureRow } = require("./capture-ingredient-ocr-assets");
 const { buildReviewQueue } = require("./summarize-ingredient-ocr-run");
 
 function assertNoPrivatePaths(text, label) {
@@ -59,6 +60,11 @@ assert.strictEqual(publicCapture.ready_for_ocr, 1, "expected ready_for_ocr publi
 assertNoPrivatePaths(JSON.stringify(publicCapture), "public capture row");
 const privateMap = buildImageMap([{ evidence_id: rows[0].evidence_id, image_map_value: "/private/tmp/secret-processed.jpg" }]);
 assert.strictEqual(privateMap[rows[0].evidence_id], "/private/tmp/secret-processed.jpg", "private image map should retain paths");
+const templateRows = buildImageMapTemplateRows("test-run", rows.slice(0, 3));
+assert.strictEqual(templateRows.length, 3, "expected image map starter rows");
+assert(templateRows.every((row) => row.local_private_image_path === ""), "starter rows must not include private local paths");
+assert(templateRows.every((row) => row.image_map_keys.includes(row.evidence_id)), "starter rows should include evidence-id map keys");
+assertNoPrivatePaths(JSON.stringify(templateRows), "image map starter rows");
 
 const reviewQueue = buildReviewQueue(rows.slice(0, 5), [publicCapture], []);
 assert.strictEqual(reviewQueue.length, 5, "expected review queue rows");
@@ -67,6 +73,7 @@ assert(reviewQueue.every((row) => Number(row.manual_verified) === 0), "review ro
 
 for (const filePath of [
   publicHybridSummaryPath,
+  publicImageMapTemplateCsvPath,
   publicModelSummaryCsvPath,
   publicRunSummaryCsvPath,
   publicReviewQueueCsvPath,

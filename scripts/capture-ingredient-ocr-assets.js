@@ -9,6 +9,7 @@ const {
   numberArg,
   pathFromArg,
   publicArtifactRef,
+  publicImageMapTemplateCsvPath,
   publicRunSummaryCsvPath,
   queuePathFromArgs,
   readFullQueue,
@@ -170,8 +171,57 @@ function buildImageMap(captureRows) {
   return map;
 }
 
+function imageMapKeysForRow(row) {
+  const explicit = String(row.private_image_map_keys || "")
+    .split(";")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const fallback = [
+    row.evidence_id,
+    `${row.product_id}:${row.evidence_id}`,
+    row.source_url,
+  ].filter(Boolean);
+  return [...new Set([...explicit, ...fallback])];
+}
+
+function imageMapTemplateRow(runId, row) {
+  const keys = imageMapKeysForRow(row);
+  return {
+    run_id: runId,
+    evidence_id: row.evidence_id,
+    product_id: row.product_id,
+    product_name: row.product_name,
+    vintage_label: row.vintage_label,
+    source_domain: row.source_domain,
+    source_url: row.source_url,
+    source_title: row.source_title,
+    source_type: row.evidence_kind,
+    ocr_gap_category: row.ocr_gap_category,
+    ocr_priority: row.ocr_priority,
+    capture_strategy: row.capture_strategy || row.ocr_recommended_action || "",
+    crop_target: row.crop_target || row.ground_truth_fields_missing || "",
+    ocr_expected_surface: row.ocr_expected_surface || "",
+    image_map_keys: keys.join(";"),
+    local_private_image_path: "",
+    processed_private_image_path: "",
+    panel_crop_note: "",
+    rights_review_status: row.rights_status || "rights_review_needed",
+    publication_image_policy: row.image_display_policy || "source_link_only_no_public_image",
+    candidate_only: 1,
+    manual_verified: 0,
+  };
+}
+
+function buildImageMapTemplateRows(runId, rows) {
+  return rows.map((row) => imageMapTemplateRow(runId, row));
+}
+
 function summarize(runId, selectedRows, publicRows, options) {
   const count = (field, value) => publicRows.filter((row) => row[field] === value).length;
+  const templateRows = options.imageMapTemplateRows || [];
+  const imageMapKeyCount = templateRows.reduce((sum, row) => (
+    sum + String(row.image_map_keys || "").split(";").filter(Boolean).length
+  ), 0);
   return {
     schema_version: "hybrid_ingredient_ocr_capture_summary.v1",
     generated_at: generatedAt,
@@ -190,9 +240,12 @@ function summarize(runId, selectedRows, publicRows, options) {
       source_page_capture_blocked_no_network: count("capture_status", "source_page_capture_blocked_no_network"),
       direct_image_download_planned: count("capture_status", "direct_image_download_planned"),
       local_image_ready: publicRows.filter((row) => /local_image/.test(row.capture_status)).length,
+      image_map_template_rows: templateRows.length,
+      image_map_key_count: imageMapKeyCount,
     },
     public_artifacts: {
       run_summary_csv: options.publicRunSummaryRef,
+      image_map_template_csv: options.publicImageMapTemplateRef,
     },
   };
 }
@@ -208,6 +261,7 @@ async function main() {
   const imageMap = readJson(imageMapPath, {});
   const queuePath = queuePathFromArgs();
   const publicRunSummaryPath = pathFromArg("public-run-summary", publicRunSummaryCsvPath);
+  const publicImageMapTemplatePath = pathFromArg("public-image-map-template", publicImageMapTemplateCsvPath);
   const rows = readFullQueue(queuePath);
   const selectedRows = selectQueueRows(rows, {
     limit,
@@ -220,6 +274,7 @@ async function main() {
 
   const privateRows = [];
   const publicRows = [];
+  const imageMapTemplateRows = buildImageMapTemplateRows(runId, selectedRows);
   for (const row of selectedRows) {
     const capture = await captureRow(row, imageMap, dirs, { dryRun, noNetwork });
     privateRows.push({ ...row, ...capture });
@@ -231,6 +286,8 @@ async function main() {
   const summary = redactPrivate(summarize(runId, selectedRows, publicRows, {
     dryRun,
     publicRunSummaryRef: publicArtifactRef(publicRunSummaryPath),
+    publicImageMapTemplateRef: publicArtifactRef(publicImageMapTemplatePath),
+    imageMapTemplateRows,
   }));
   writeJson(path.join(runDir, "capture_summary.public.json"), summary);
   writeCsv(path.join(runDir, "capture_summary.public.csv"), [
@@ -268,6 +325,30 @@ async function main() {
     "ready_for_ocr",
     "candidate_only",
   ], publicRows.map((row) => ({ run_id: runId, ...row })));
+  writeCsv(publicImageMapTemplatePath, [
+    "run_id",
+    "evidence_id",
+    "product_id",
+    "product_name",
+    "vintage_label",
+    "source_domain",
+    "source_url",
+    "source_title",
+    "source_type",
+    "ocr_gap_category",
+    "ocr_priority",
+    "capture_strategy",
+    "crop_target",
+    "ocr_expected_surface",
+    "image_map_keys",
+    "local_private_image_path",
+    "processed_private_image_path",
+    "panel_crop_note",
+    "rights_review_status",
+    "publication_image_policy",
+    "candidate_only",
+    "manual_verified",
+  ], imageMapTemplateRows);
 
   console.log(JSON.stringify({
     run_id: runId,
@@ -286,7 +367,9 @@ if (require.main === module) {
 }
 
 module.exports = {
+  buildImageMapTemplateRows,
   buildImageMap,
   captureFromLocalImage,
+  imageMapKeysForRow,
   publicCaptureRow,
 };
