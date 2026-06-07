@@ -15931,6 +15931,7 @@ function renderCorpusOcrScale() {
   const ocrStructuring = summary.ocr_structuring_summary || state.data.ocr_structuring_summary || {};
   const candidateExtracts = summary.ocr_candidate_extract_summary || state.data.ocr_candidate_extract_summary || {};
   const manualVerification = summary.ocr_manual_verification_summary || state.data.ocr_manual_verification_summary || {};
+  const storyBriefs = state.data.full_corpus_story_briefs_summary || {};
   const candidateCount = numeric(summary.ocr_candidate_count);
   els.corpusOcrCount.textContent = `${formatNumber(candidateCount)} rows`;
 
@@ -15960,6 +15961,7 @@ function renderCorpusOcrScale() {
     ["Manual review rows", manualVerification.verification_queue_rows],
     ["Extract reviews", manualVerification.candidate_extract_review_rows],
     ["Source reviews", manualVerification.needs_source_review_rows],
+    ["Story briefs", storyBriefs.product_count],
     ["Review queue", hybrid.review_queue?.rows],
   ];
   els.corpusOcrSummary.innerHTML = `
@@ -15985,6 +15987,7 @@ function renderCorpusOcrScale() {
       ${hybrid.model_routes ? `<p>${escapeHtml(`Hybrid routing: ${hybrid.model_routes.spark_model || "Spark"} for bounded packets, ${hybrid.model_routes.gpt55_review_model || "GPT-5.5"} for batch review, ${hybrid.model_routes.grok_research_model || "Grok"} for research assists.`)}</p>` : ""}
       ${candidateExtracts.public_safety ? `<p>${escapeHtml(`Candidate extract import: ${formatNumber(candidateExtracts.accepted_candidate_count)} accepted, ${formatNumber(candidateExtracts.rejected_candidate_count)} rejected. Public text included: ${candidateExtracts.public_safety.public_text_included ? "yes" : "no"}.`)}</p>` : ""}
       ${manualVerification.public_safety ? `<p>${escapeHtml(`Manual verification queue: ${formatNumber(manualVerification.verification_queue_rows)} rows, ${formatNumber(manualVerification.candidate_extract_review_rows)} candidate extract reviews, ${formatNumber(manualVerification.needs_source_review_rows)} source reviews. Claim promotion allowed: ${manualVerification.public_safety.claim_promotion_allowed ? "yes" : "no"}.`)}</p>` : ""}
+      ${storyBriefs.public_policy ? `<p>${escapeHtml(`Story briefs: ${formatNumber(storyBriefs.product_count)} products, ${formatNumber(storyBriefs.source_receipts)} source receipts, ${formatNumber(storyBriefs.public_embeds)} public image embeds. ${storyBriefs.public_policy}`)}</p>` : ""}
       <div class="lead-meta">
         ${artifactLink(summary.queue_csv, "Queue CSV")}
         ${artifactLink(summary.gap_report_csv, "Gap CSV")}
@@ -15998,6 +16001,8 @@ function renderCorpusOcrScale() {
         ${artifactLink(ocrStructuring.public_artifacts?.packet_summary_csv, "OCR Structuring CSV")}
         ${artifactLink(candidateExtracts.public_artifacts?.candidate_extracts_csv, "Candidate Extracts CSV")}
         ${artifactLink(manualVerification.public_artifacts?.manual_verification_queue_csv, "Manual Verification CSV")}
+        ${artifactLink(storyBriefs.public_artifacts?.story_briefs_markdown, "Story Briefs MD")}
+        ${artifactLink(storyBriefs.public_artifacts?.story_briefs_csv, "Story Briefs CSV")}
         ${artifactLink(hybrid.public_artifacts?.model_assist_summary_csv, "Model CSV")}
         ${artifactLink(hybrid.public_artifacts?.review_queue_csv, "Review CSV")}
       </div>

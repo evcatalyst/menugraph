@@ -39,6 +39,9 @@ assert.strictEqual(data.corpus_summary.story_rich_pilot_count, 10, "corpus summa
 assert.strictEqual(data.corpus_summary.full_corpus_shell_count, 110, "corpus summary should add 110 proof shells");
 assert.strictEqual(data.corpus_summary.embedded_public_images, 0, "public build should not embed uncleared photos");
 assert(data.corpus_summary.link_only_photo_receipts >= 1000, "expected broad source-linked photo/evidence receipts");
+assert(data.full_corpus_story_briefs_summary, "navigator should expose full-corpus story brief summary");
+assert.strictEqual(data.full_corpus_story_briefs_summary.product_count, 120, "story brief summary should cover 120 products");
+assert(data.full_corpus_story_briefs_summary.site_artifacts?.story_briefs_markdown, "story brief markdown link should be exposed");
 assert(html.includes('id="corpus-mode"'), "navigator should expose corpus mode controls");
 assert(js.includes('corpusMode: "full"'), "navigator should default to full-corpus mode");
 assert(js.includes('data-corpus-mode="${escapeHtml(definition.id)}"'), "navigator should render selectable corpus modes");
@@ -47,10 +50,12 @@ assert(js.includes("No product photos are embedded yet"), "navigator should expl
 assert(js.includes("-product corpus loaded"), "navigator should make the product corpus visible in the product strip");
 assert(js.includes("Current public photo mode"), "navigator should expose the current public photo display mode");
 assert(js.includes("Source receipts can sit beside ingredient candidates today"), "navigator should explain source receipts beside ingredient candidates");
+assert(js.includes("Story Brief Exports"), "navigator should render full-corpus story brief exports");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
 assert(css.includes(".proof-source-rail"), "photo proof rail should be styled");
 assert(css.includes(".product-strip-ledger"), "corpus ledger should be styled");
 assert(css.includes(".proof-display-gate"), "photo display gate should be styled");
+assert(css.includes(".corpus-handoff-links"), "story export links should be styled");
 
 const requiredStatuses = new Set([
   "story_ready",
