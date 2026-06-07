@@ -1,6 +1,7 @@
 const els = {
   productSelect: document.querySelector("#product-select"),
   productSearch: document.querySelector("#product-search"),
+  corpusMode: document.querySelector("#corpus-mode"),
   productStrip: document.querySelector("#product-strip"),
   corpusHandoff: document.querySelector("#corpus-handoff"),
   timeRange: document.querySelector("#time-range"),
@@ -36,6 +37,7 @@ const state = {
   versionId: "",
   facetId: "",
   proofFilter: "all",
+  corpusMode: "full",
   search: "",
   compare: false,
   maxYear: 2026,
@@ -77,6 +79,10 @@ function selectedVersion(productRow) {
   return productRow.versions.find((row) => row.id === state.versionId) || productRow.versions[productRow.versions.length - 1];
 }
 
+function productById(id) {
+  return state.data.products.find((row) => row.id === id);
+}
+
 function versionEvidence(productRow, version) {
   const ids = new Set(version.evidence_ids || []);
   return productRow.evidence.filter((row) => ids.has(row.id));
@@ -86,24 +92,110 @@ function visibleVersions(productRow) {
   return productRow.versions.filter((row) => Number(row.year) <= Number(state.maxYear || 2026));
 }
 
+function productNeedsPhotoCapture(productRow) {
+  const summary = productRow?.ingredient_ocr_summary || {};
+  return Number(summary.source_page_capture_needed_count || 0) > 0
+    || Number(summary.source_discovery_needed_count || 0) > 0
+    || (productRow?.evidence || []).some((row) => proofSourceUrl(row) && !canEmbedProofImage(row));
+}
+
+function productNeedsOcr(productRow) {
+  const summary = productRow?.ingredient_ocr_summary || {};
+  return Number(summary.label_visible_count || 0) > 0
+    || (productRow?.versions || []).some((row) => /label_visible|usable_photo|source_review/.test(String(row.status || "")));
+}
+
+function productReviewReady(productRow) {
+  const summary = productRow?.ingredient_ocr_summary || {};
+  return Number(summary.ingredient_text_candidate_count || 0) > 0
+    || Number(productRow?.label_text_candidates || 0) > 0
+    || (productRow?.evidence || []).some((row) => row.visible_extract);
+}
+
+function corpusModeDefinitions() {
+  return [
+    {
+      id: "full",
+      label: "Full Corpus",
+      detail: "All 120 product shells",
+      matches: () => true,
+    },
+    {
+      id: "pilot",
+      label: "Story Pilot",
+      detail: "10 stitched narratives",
+      matches: (productRow) => productRow?.corpus_scope === "story_rich_pilot",
+    },
+    {
+      id: "needs_photo",
+      label: "Needs Photo",
+      detail: "Capture/source review lanes",
+      matches: productNeedsPhotoCapture,
+    },
+    {
+      id: "needs_ocr",
+      label: "Needs OCR",
+      detail: "Readable-panel or document-text leads",
+      matches: productNeedsOcr,
+    },
+    {
+      id: "review_ready",
+      label: "Review Ready",
+      detail: "Candidate text exists",
+      matches: productReviewReady,
+    },
+  ];
+}
+
+function productRowsForMode(mode = state.corpusMode) {
+  const definition = corpusModeDefinitions().find((row) => row.id === mode) || corpusModeDefinitions()[0];
+  return (state.data.product_index || []).filter((row) => definition.matches(productById(row.id)));
+}
+
+function searchedProductRows(rows) {
+  const search = state.search.trim().toLowerCase();
+  if (!search) return rows;
+  return rows.filter((row) => `${row.label} ${row.id}`.toLowerCase().includes(search));
+}
+
+function renderCorpusMode() {
+  if (!els.corpusMode) return;
+  const allRows = state.data.product_index || [];
+  const definitions = corpusModeDefinitions();
+  els.corpusMode.innerHTML = definitions
+    .map((definition) => {
+      const count = allRows.filter((row) => definition.matches(productById(row.id))).length;
+      return `
+        <button type="button" data-corpus-mode="${escapeHtml(definition.id)}" class="${definition.id === state.corpusMode ? "is-selected" : ""}">
+          <span>${escapeHtml(definition.label)}</span>
+          <strong>${escapeHtml(count)}</strong>
+          <em>${escapeHtml(definition.detail)}</em>
+        </button>
+      `;
+    })
+    .join("");
+}
+
 function renderProductPicker() {
-  const rows = state.data.product_index.filter((row) => (
-    !state.search.trim() || `${row.label} ${row.id}`.toLowerCase().includes(state.search.trim().toLowerCase())
-  ));
+  const modeRows = productRowsForMode();
+  const rows = searchedProductRows(modeRows);
   const allRows = state.data.product_index || [];
   const storyRich = allRows.filter((row) => row.scope === "story_rich_pilot").length;
   const proofShells = Math.max(0, allRows.length - storyRich);
   const searchLabel = state.search.trim()
     ? `${rows.length} matching products`
-    : `${allRows.length} total products`;
+    : `${modeRows.length} products in view`;
+  const modeLabel = corpusModeDefinitions().find((row) => row.id === state.corpusMode)?.label || "Full Corpus";
+  renderCorpusMode();
   els.productSelect.innerHTML = rows
     .map((row) => `<option value="${escapeHtml(row.id)}" ${row.id === state.productId ? "selected" : ""} ${row.status !== "loaded" ? "disabled" : ""}>${escapeHtml(row.label)}${row.scope === "full_corpus_shell" ? " (corpus)" : ""}</option>`)
     .join("");
+  els.productStrip.className = `product-strip mode-${escapeHtml(state.corpusMode)}`;
   els.productStrip.innerHTML = `
     <article class="product-strip-summary" aria-label="Corpus selector summary">
       <span>${escapeHtml(searchLabel)}</span>
-      <strong>${escapeHtml(storyRich)} pilot stories + ${escapeHtml(proofShells)} proof shells</strong>
-      <p>Scroll or search to open any corpus product. Only the first ten are stitched story pilots; the rest are evidence-first shells.</p>
+      <strong>${escapeHtml(modeLabel)} · ${escapeHtml(storyRich)} pilot stories + ${escapeHtml(proofShells)} proof shells</strong>
+      <p>Switch modes to reveal the full evidence workbench. Story pilots are stitched narratives; proof shells expose source-linked photo and OCR work.</p>
     </article>
     ${rows
     .map((row) => `
@@ -652,6 +744,98 @@ function renderProofCard(productRow, version, modeLabel) {
   `;
 }
 
+function evidenceVersionLabels(productRow, evidenceId) {
+  return (productRow.versions || [])
+    .filter((version) => (version.evidence_ids || []).includes(evidenceId))
+    .map((version) => version.label)
+    .join(", ");
+}
+
+function sourceProofRows(productRow) {
+  return [...(productRow.evidence || [])]
+    .filter((row) => proofSourceUrl(row) || proofImageUrl(row))
+    .sort((a, b) => {
+      const score = (row) => (
+        (canEmbedProofImage(row) ? 50 : 0) +
+        (row.visible_extract ? 35 : 0) +
+        (/ingredient|label/i.test(`${row.label_panel_state || ""} ${row.photo_role || ""}`) ? 20 : 0) +
+        (proofSourceUrl(row) ? 10 : 0) +
+        (Number(row.confidence || 0) * 10)
+      );
+      return score(b) - score(a);
+    });
+}
+
+function sourceProofStats(productRow) {
+  const rows = sourceProofRows(productRow);
+  const embedReady = rows.filter((row) => canEmbedProofImage(row)).length;
+  const candidateText = rows.filter((row) => row.visible_extract).length
+    + (productRow.versions || []).filter((row) => row.label_extract).length;
+  return {
+    rows,
+    sourceLinked: rows.filter((row) => proofSourceUrl(row)).length,
+    embedReady,
+    linkOnly: rows.filter((row) => proofSourceUrl(row) && !canEmbedProofImage(row)).length,
+    candidateText,
+  };
+}
+
+function renderProductProofRail(productRow) {
+  const stats = sourceProofStats(productRow);
+  const rows = stats.rows.slice(0, 8);
+  return `
+    <section class="proof-source-rail" aria-label="Source-linked photo proof inventory">
+      <header>
+        <div>
+          <span>Photo Proof Inventory</span>
+          <strong>${escapeHtml(stats.sourceLinked)} source-linked receipts · ${escapeHtml(stats.embedReady)} public embeds</strong>
+        </div>
+        <p>${escapeHtml(stats.embedReady ? "Rights-cleared images can render inline; other source objects remain link-only." : "No product photos are embedded yet. The page shows source-linked proof receipts until image reuse is reviewed and cleared.")}</p>
+      </header>
+      <div class="proof-source-metrics">
+        <span><strong>${escapeHtml(stats.linkOnly)}</strong>Link-only proof</span>
+        <span><strong>${escapeHtml(stats.candidateText)}</strong>Candidate text</span>
+        <span><strong>${escapeHtml(productRow.ingredient_ocr_summary?.local_image_ready_count || 0)}</strong>Private image-ready</span>
+        <span><strong>${escapeHtml(productRow.ingredient_ocr_summary?.source_page_capture_needed_count || 0)}</strong>Capture needed</span>
+      </div>
+      <div class="proof-source-list">
+        ${rows.length ? rows.map((row) => {
+          const source = proofSourceUrl(row);
+          return `
+            <article class="proof-source-card status-${escapeHtml(row.status || "source_review")}">
+              <span>${escapeHtml(evidenceVersionLabels(productRow, row.id) || row.date_basis_state || "source receipt")}</span>
+              <strong>${escapeHtml(row.title || "Source proof")}</strong>
+              <p>${escapeHtml(row.quality_note || row.rights || "Review source, visible panels, date cues, and rights before promotion.")}</p>
+              <dl>
+                <div>
+                  <dt>Host</dt>
+                  <dd>${escapeHtml(sourceHost(source))}</dd>
+                </div>
+                <div>
+                  <dt>Photo role</dt>
+                  <dd>${escapeHtml(row.photo_role || "not classified")}</dd>
+                </div>
+                <div>
+                  <dt>Panel</dt>
+                  <dd>${escapeHtml(row.label_panel_state || "not reviewed")}</dd>
+                </div>
+                <div>
+                  <dt>Policy</dt>
+                  <dd>${escapeHtml(imageDisplayPolicy(row))}</dd>
+                </div>
+              </dl>
+              <div class="lead-meta">
+                ${statusBadge(canEmbedProofImage(row) ? "embed_rights_cleared" : "source_link_only_rights_unclear")}
+                ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">Open source</a>` : ""}
+              </div>
+            </article>
+          `;
+        }).join("") : `<article class="proof-source-card"><strong>No source proof recorded</strong><p>This product needs source discovery before a photo or ingredient story can be shown.</p>${statusBadge("source_discovery_needed")}</article>`}
+      </div>
+    </section>
+  `;
+}
+
 function renderProofReader(productRow, version) {
   if (!els.proofReader) return;
   const versions = proofFilteredVersions(productRow);
@@ -681,6 +865,7 @@ function renderProofReader(productRow, version) {
         <p>This page is not legal advice. It cites source pages and avoids reproducing external package photos unless rights are recorded as clear. Ingredient extracts are evidence candidates, not verified formulation claims.</p>
       </aside>
     </header>
+    ${renderProductProofRail(productRow)}
     <div class="proof-era-toggle" aria-label="Recipe history era toggle">
       ${versions.map((row) => `
         <button type="button" data-version-id="${escapeHtml(row.id)}" class="${row.id === displayVersion.id ? "is-selected" : ""}">
@@ -911,6 +1096,17 @@ function attachEvents() {
   els.productSearch.addEventListener("input", () => {
     state.search = els.productSearch.value;
     renderProductPicker();
+  });
+  els.corpusMode?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-corpus-mode]");
+    if (!button) return;
+    state.corpusMode = button.dataset.corpusMode || "full";
+    const modeRows = productRowsForMode();
+    if (modeRows.length && !modeRows.some((row) => row.id === state.productId)) {
+      state.productId = modeRows[0].id;
+      state.versionId = "";
+    }
+    render();
   });
   els.productStrip.addEventListener("click", (event) => {
     const button = event.target.closest("[data-product-id]");
