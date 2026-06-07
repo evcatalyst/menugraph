@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ingredient Journey Navigator | MenuGraph</title>
+    <link rel="stylesheet" href="./ingredient-navigator.css" />
+  </head>
+  <body>
+    <main class="navigator-shell">
+      <header class="navigator-topbar">
+        <div>
+          <p class="eyebrow">MenuGraph Ingredient Journey Navigator</p>
+          <h1>See a product recipe journey without losing the evidence.</h1>
+          <p>Oreo opens as the default journey: a complete source-backed package route, explicit label gaps, and the proof steps that unlock real ingredient comparison.</p>
+        </div>
+        <nav class="navigator-links" aria-label="MenuGraph navigation">
+          <a href="./">Evidence Studio</a>
+          <a href="../">MenuGraph</a>
+        </nav>
+      </header>
+
+      <section class="navigator-controls" aria-label="Product and timeline controls">
+        <label>
+          <span>Product</span>
+          <select id="product-select"></select>
+        </label>
+        <label>
+          <span>Search products</span>
+          <input id="product-search" type="search" placeholder="Try Oreo, Doritos, Big Mac..." />
+        </label>
+        <label>
+          <span>Time window</span>
+          <input id="time-range" type="range" min="1912" max="2026" value="2026" />
+        </label>
+        <button id="compare-toggle" type="button" aria-pressed="false">Compare Mode</button>
+      </section>
+
+      <section id="product-strip" class="product-strip" aria-label="Popular products"></section>
+
+      <section id="journey-status" class="journey-status" aria-live="polite">
+        <strong>Loading navigator data</strong>
+        <span>Preparing product journey, evidence states, and facet filters.</span>
+      </section>
+
+      <section class="navigator-grid" aria-label="Ingredient journey workspace">
+        <aside class="navigator-sidebar" aria-label="Product summary and filters">
+          <section id="product-summary" class="panel"></section>
+          <section class="panel">
+            <div class="panel-title">
+              <span>Facet Filters</span>
+              <button id="clear-facet" type="button">Clear</button>
+            </div>
+            <div id="facet-list" class="facet-list"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">
+              <span>Explicit Gaps</span>
+            </div>
+            <div id="gap-list" class="gap-list"></div>
+          </section>
+        </aside>
+
+        <section class="timeline-stage" aria-label="Timeline and ingredient journey">
+          <section id="story-hero" class="story-hero"></section>
+          <section class="panel timeline-panel">
+            <div class="panel-title">
+              <span>Timeline</span>
+              <small>1912 to current source state</small>
+            </div>
+            <div id="timeline-axis" class="timeline-axis"></div>
+            <div id="timeline-track" class="timeline-track"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">
+              <span>Ingredient Flow Readiness</span>
+              <small>Facet lanes are locked until labels are verified</small>
+            </div>
+            <div id="flow-view" class="flow-view"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">
+              <span>Change Markers</span>
+              <small>Events are evidence states, not ingredient claims</small>
+            </div>
+            <div id="event-list" class="event-list"></div>
+          </section>
+        </section>
+
+        <aside class="context-panel" aria-label="Selected version details">
+          <section id="version-detail" class="panel selected-panel"></section>
+          <section class="panel">
+            <div class="panel-title">
+              <span>Evidence Gallery</span>
+              <small>Source links only; no image reuse without rights review</small>
+            </div>
+            <div id="evidence-gallery" class="evidence-gallery"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">
+              <span>Price + Weight Alignment</span>
+              <small>Deferred until package fields are verified</small>
+            </div>
+            <div id="price-weight" class="price-weight"></div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="panel cluster-panel" aria-label="Cross-product trigger groups">
+        <div class="panel-title">
+          <span>Cross-Product Story Triggers</span>
+          <small>Future grouping lanes for the 100-product corpus</small>
+        </div>
+        <div id="cluster-list" class="cluster-list"></div>
+      </section>
+    </main>
+
+    <script src="./ingredient-navigator.js"></script>
+  </body>
+</html>
