@@ -1,0 +1,279 @@
+{
+  "schema_version": "hybrid_ingredient_ocr_capture_task_summary.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "confection-wrapper-item-panel-v1",
+  "task_count": 49,
+  "high_priority_tasks": 23,
+  "ready_for_capture": 0,
+  "paths_needed": 49,
+  "source_discovery_tasks": 0,
+  "by_status": [
+    {
+      "key": "no_private_path_supplied",
+      "count": 49
+    }
+  ],
+  "by_product": [
+    {
+      "key": "Kit Kat Bar",
+      "tasks": 6,
+      "high_priority": 6,
+      "ready_for_capture": 0,
+      "paths_needed": 6,
+      "top_task_id": "capture_c74332b2f3b93d",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Snickers Bar",
+      "tasks": 6,
+      "high_priority": 6,
+      "ready_for_capture": 0,
+      "paths_needed": 6,
+      "top_task_id": "capture_7a106f1fa5b3fe",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Twix Bar",
+      "tasks": 5,
+      "high_priority": 5,
+      "ready_for_capture": 0,
+      "paths_needed": 5,
+      "top_task_id": "capture_1402483745faf2",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Milky Way Bar",
+      "tasks": 4,
+      "high_priority": 4,
+      "ready_for_capture": 0,
+      "paths_needed": 4,
+      "top_task_id": "capture_185b856da719c8",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Tootsie Roll",
+      "tasks": 2,
+      "high_priority": 2,
+      "ready_for_capture": 0,
+      "paths_needed": 2,
+      "top_task_id": "capture_134a9e9fc09fc3",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Butterfinger Bar",
+      "tasks": 8,
+      "high_priority": 0,
+      "ready_for_capture": 0,
+      "paths_needed": 8,
+      "top_task_id": "capture_52cd3b41b1f3ed",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Reese's Peanut Butter Cups",
+      "tasks": 7,
+      "high_priority": 0,
+      "ready_for_capture": 0,
+      "paths_needed": 7,
+      "top_task_id": "capture_7d58ee8615e452",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Hershey's Milk Chocolate Bar",
+      "tasks": 6,
+      "high_priority": 0,
+      "ready_for_capture": 0,
+      "paths_needed": 6,
+      "top_task_id": "capture_643e2882836024",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "M&M's Milk Chocolate Candies",
+      "tasks": 5,
+      "high_priority": 0,
+      "ready_for_capture": 0,
+      "paths_needed": 5,
+      "top_task_id": "capture_bffd206a132e52",
+      "top_source_domain": "www.candywrapperarchive.com"
+    }
+  ],
+  "by_source_domain": [
+    {
+      "key": "www.candywrapperarchive.com",
+      "tasks": 49,
+      "high_priority": 23,
+      "ready_for_capture": 0,
+      "paths_needed": 49,
+      "top_task_id": "capture_c74332b2f3b93d",
+      "top_source_domain": "www.candywrapperarchive.com"
+    }
+  ],
+  "first_tasks": [
+    {
+      "task_id": "capture_c74332b2f3b93d",
+      "rank": 1,
+      "product_name": "Kit Kat Bar",
+      "vintage_label": "2002",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2002-kit-kat/",
+      "source_title": "2002 Kit Kat",
+      "evidence_id": "cwa_item_triage_kit_kat_bar_048074b72f",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_38add86bba751c",
+      "rank": 2,
+      "product_name": "Kit Kat Bar",
+      "vintage_label": "1970s",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-kit-kat/",
+      "source_title": "1970s Kit Kat",
+      "evidence_id": "cwa_item_triage_kit_kat_bar_2a96c86c14",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_65e6c12a431ee9",
+      "rank": 3,
+      "product_name": "Kit Kat Bar",
+      "vintage_label": "2007",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2007-kit-kat/",
+      "source_title": "2007 Kit Kat",
+      "evidence_id": "cwa_item_triage_kit_kat_bar_7d8d5f75c1",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_c642b5e45ef4da",
+      "rank": 4,
+      "product_name": "Kit Kat Bar",
+      "vintage_label": "2000",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2000-kit-kat/",
+      "source_title": "2000 Kit Kat",
+      "evidence_id": "cwa_item_triage_kit_kat_bar_b6403000eb",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_65627b3d8ecafb",
+      "rank": 5,
+      "product_name": "Kit Kat Bar",
+      "vintage_label": "2006",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2006-kit-kat/",
+      "source_title": "2006 Kit Kat",
+      "evidence_id": "cwa_item_triage_kit_kat_bar_c130111192",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_cca74a2ddda27a",
+      "rank": 6,
+      "product_name": "Kit Kat Bar",
+      "vintage_label": "1960s",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1960s-kit-kat/",
+      "source_title": "1960s Kit Kat",
+      "evidence_id": "cwa_item_triage_kit_kat_bar_cc86c0713b",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_185b856da719c8",
+      "rank": 7,
+      "product_name": "Milky Way Bar",
+      "vintage_label": "1950s",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1950s-milky-way-2/",
+      "source_title": "1950s Milky Way",
+      "evidence_id": "cwa_item_triage_milky_way_bar_522c99a44a",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_0ca309a96fce90",
+      "rank": 8,
+      "product_name": "Milky Way Bar",
+      "vintage_label": "1939",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1939-milky-way/",
+      "source_title": "1939 Milky Way",
+      "evidence_id": "cwa_item_triage_milky_way_bar_5b9a6ac660",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_153a17559d5431",
+      "rank": 9,
+      "product_name": "Milky Way Bar",
+      "vintage_label": "1940s",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-milky-way/",
+      "source_title": "1940s Milky Way",
+      "evidence_id": "cwa_item_triage_milky_way_bar_95738b0020",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_d9df42963905f1",
+      "rank": 10,
+      "product_name": "Milky Way Bar",
+      "vintage_label": "1958",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1958-milky-way/",
+      "source_title": "1958 Milky Way",
+      "evidence_id": "cwa_item_triage_milky_way_bar_e949e52021",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_7a106f1fa5b3fe",
+      "rank": 11,
+      "product_name": "Snickers Bar",
+      "vintage_label": "1983",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1983-snickers/",
+      "source_title": "1983 Snickers",
+      "evidence_id": "cwa_item_triage_snickers_bar_08d83cf3a3",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_4ec67d9e4ad96c",
+      "rank": 12,
+      "product_name": "Snickers Bar",
+      "vintage_label": "1950s",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1950s-snickers/",
+      "source_title": "1950s Snickers",
+      "evidence_id": "cwa_item_triage_snickers_bar_0c0135e509",
+      "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+      "priority_score": 144,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    }
+  ],
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "images_committed": false,
+    "manual_verified_created": false
+  },
+  "public_artifacts": {
+    "capture_task_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_tasks.csv",
+    "capture_task_json": "docs/data/product-evidence/confection_wrapper_item_panel_capture_tasks.json",
+    "capture_task_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_task_runbook.md"
+  }
+}

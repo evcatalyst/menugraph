@@ -8,8 +8,13 @@ const queueCsvPath = path.join(root, "docs/data/product-evidence/exports/confect
 const modelAssistCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_model_assist_summary.csv");
 const dryRunCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_dry_run_summary.csv");
 const imageMapTemplateCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_image_map_template.csv");
+const imageMapAuditCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_image_map_audit.csv");
+const imageMapAuditJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_item_panel_image_map_audit.json");
 const nativeOcrCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_native_ocr_summary.csv");
 const reviewQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_review_queue.csv");
+const captureTaskCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_tasks.csv");
+const captureTaskJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_item_panel_capture_tasks.json");
+const captureTaskRunbookPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_task_runbook.md");
 const pipelineSummaryPath = path.join(root, "docs/data/product-evidence/confection_wrapper_item_panel_pipeline_summary.json");
 const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
 
@@ -22,8 +27,13 @@ const queueRows = parseCsv(fs.readFileSync(queueCsvPath, "utf8"));
 const modelRows = parseCsv(fs.readFileSync(modelAssistCsvPath, "utf8"));
 const dryRunRows = parseCsv(fs.readFileSync(dryRunCsvPath, "utf8"));
 const imageMapRows = parseCsv(fs.readFileSync(imageMapTemplateCsvPath, "utf8"));
+const imageMapAuditRows = parseCsv(fs.readFileSync(imageMapAuditCsvPath, "utf8"));
+const imageMapAudit = JSON.parse(fs.readFileSync(imageMapAuditJsonPath, "utf8"));
 const nativeOcrRows = parseCsv(fs.readFileSync(nativeOcrCsvPath, "utf8")).filter((row) => row.run_id === runId);
 const reviewRows = parseCsv(fs.readFileSync(reviewQueueCsvPath, "utf8"));
+const captureTaskRows = parseCsv(fs.readFileSync(captureTaskCsvPath, "utf8"));
+const captureTaskSummary = JSON.parse(fs.readFileSync(captureTaskJsonPath, "utf8"));
+const captureTaskRunbook = fs.readFileSync(captureTaskRunbookPath, "utf8");
 const pipelineSummary = JSON.parse(fs.readFileSync(pipelineSummaryPath, "utf8"));
 const siteSummary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 
@@ -46,30 +56,52 @@ assert.strictEqual(
 
 assert.strictEqual(dryRunRows.length, queueRows.length, "capture dry-run CSV should cover every CWA row");
 assert.strictEqual(imageMapRows.length, queueRows.length, "image-map template should cover every CWA row");
+assert.strictEqual(imageMapAuditRows.length, queueRows.length, "image-map audit should cover every CWA row");
 assert.strictEqual(nativeOcrRows.length, queueRows.length, "native OCR summary should cover every CWA row");
 assert.strictEqual(reviewRows.length, queueRows.length, "review queue should cover every CWA row");
+assert.strictEqual(captureTaskRows.length, queueRows.length, "capture tasks should cover every CWA row");
 assert(dryRunRows.every((row) => row.capture_status === "source_page_capture_blocked_no_network"), "dry run should not claim public image capture");
 assert(dryRunRows.every((row) => row.ready_for_ocr === "0"), "dry-run rows should not be OCR-ready");
 assert(imageMapRows.every((row) => row.local_private_image_path === "" && row.processed_private_image_path === ""), "image-map template should keep private paths blank");
+assert(imageMapAuditRows.every((row) => row.audit_status === "no_private_path_supplied"), "audit should require private paths");
 assert(nativeOcrRows.every((row) => row.ocr_status === "ocr_skipped_no_image"), "OCR rows should be skipped until private images exist");
 assert(reviewRows.every((row) => row.review_status === "needs_source_review"), "review queue should wait on source/image review");
 assert(reviewRows.every((row) => row.candidate_only === "1" && row.manual_verified === "0"), "review queue must stay candidate-only");
+assert(captureTaskRows.every((row) => row.audit_status === "no_private_path_supplied"), "capture tasks should wait on private paths");
+assert(captureTaskRows.every((row) => row.candidate_only === "1" && row.manual_verified === "0"), "capture tasks must stay candidate-only");
 
 assert.strictEqual(pipelineSummary.model_routes.spark_packets_generated, 3, "pipeline should expose Spark packet count");
 assert.strictEqual(pipelineSummary.capture.selected_rows, queueRows.length, "pipeline capture rows should match queue rows");
 assert.strictEqual(pipelineSummary.capture.ready_for_ocr, 0, "pipeline should not be OCR-ready without private crops");
 assert.strictEqual(pipelineSummary.capture.blocked_no_network, queueRows.length, "pipeline should expose no-network blockers");
 assert.strictEqual(pipelineSummary.capture.image_map_template_rows, queueRows.length, "pipeline should expose image-map rows");
+assert.strictEqual(pipelineSummary.image_map_audit.template_rows, queueRows.length, "pipeline should expose image-map audit rows");
+assert.strictEqual(pipelineSummary.image_map_audit.no_private_path_supplied, queueRows.length, "pipeline audit should expose paths-needed rows");
 assert.strictEqual(pipelineSummary.ocr.ocr_skipped_no_image, queueRows.length, "pipeline should expose skipped OCR rows");
 assert.strictEqual(pipelineSummary.review_queue.rows, queueRows.length, "pipeline should expose review rows");
 assert.strictEqual(pipelineSummary.review_queue.needs_source_review, queueRows.length, "pipeline should require source review");
+assert.strictEqual(pipelineSummary.capture_task_summary.task_count, queueRows.length, "pipeline should expose capture tasks");
+assert.strictEqual(pipelineSummary.capture_task_summary.paths_needed, queueRows.length, "pipeline capture tasks should need paths");
+assert.strictEqual(imageMapAudit.template_rows, queueRows.length, "audit JSON should cover all CWA rows");
+assert.strictEqual(imageMapAudit.no_private_path_supplied, queueRows.length, "audit JSON should require private paths");
+assert.strictEqual(captureTaskSummary.task_count, queueRows.length, "capture task JSON should cover all CWA rows");
+assert.strictEqual(captureTaskSummary.paths_needed, queueRows.length, "capture task JSON should need paths");
+assert(siteSummary.confection_wrapper_item_panel_image_map_audit, "site summary should expose CWA image-map audit");
+assert(siteSummary.confection_wrapper_item_panel_capture_task_summary, "site summary should expose CWA capture tasks");
+assert(captureTaskRunbook.includes("Ingredient OCR Capture Task Runbook"), "capture task runbook should be generated");
+assert(captureTaskRunbook.includes("Image-map keys"), "capture task runbook should list image-map keys");
 
 [
   modelAssistCsvPath,
   dryRunCsvPath,
   imageMapTemplateCsvPath,
+  imageMapAuditCsvPath,
+  imageMapAuditJsonPath,
   nativeOcrCsvPath,
   reviewQueueCsvPath,
+  captureTaskCsvPath,
+  captureTaskJsonPath,
+  captureTaskRunbookPath,
   pipelineSummaryPath,
 ].forEach(assertNoPrivatePaths);
 

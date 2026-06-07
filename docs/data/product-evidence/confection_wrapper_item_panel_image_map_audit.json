@@ -1,0 +1,114 @@
+{
+  "schema_version": "hybrid_ingredient_ocr_image_map_audit.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "confection-wrapper-item-panel-v1",
+  "template_rows": 49,
+  "image_map_key_count": 149,
+  "private_paths_supplied": 0,
+  "private_paths_existing": 0,
+  "ready_for_capture": 0,
+  "no_private_path_supplied": 49,
+  "private_path_missing": 0,
+  "unsupported_image_extension": 0,
+  "by_status": [
+    {
+      "key": "no_private_path_supplied",
+      "count": 49
+    }
+  ],
+  "by_product": [
+    {
+      "key": "Butterfinger Bar",
+      "rows": 8,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 8,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Reese's Peanut Butter Cups",
+      "rows": 7,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 7,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Hershey's Milk Chocolate Bar",
+      "rows": 6,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 6,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Kit Kat Bar",
+      "rows": 6,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 6,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Snickers Bar",
+      "rows": 6,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 6,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "M&M's Milk Chocolate Candies",
+      "rows": 5,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 5,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Twix Bar",
+      "rows": 5,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 5,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Milky Way Bar",
+      "rows": 4,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 4,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Tootsie Roll",
+      "rows": 2,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 2,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    }
+  ],
+  "by_source_domain": [
+    {
+      "key": "www.candywrapperarchive.com",
+      "rows": 49,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 49,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    }
+  ],
+  "next_action": "Capture private panel crops and fill the image-map template before OCR.",
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "images_committed": false,
+    "manual_verified_created": false
+  },
+  "public_artifacts": {
+    "audit_summary_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_image_map_audit.csv",
+    "audit_summary_json": "docs/data/product-evidence/confection_wrapper_item_panel_image_map_audit.json"
+  }
+}

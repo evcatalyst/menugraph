@@ -941,6 +941,8 @@ function renderConfectionWrapperItemPanelPipelineStatus() {
   const review = summary.review_queue || {};
   const artifacts = summary.public_artifacts || {};
   const blockers = summary.blockers || {};
+  const audit = summary.image_map_audit || {};
+  const tasks = summary.capture_task_summary || {};
   const products = Array.isArray(blockers.top_products)
     ? blockers.top_products.map((row) => `${row.key || "Product"} · ${row.count || 0}`)
     : String(blockers.top_products || "").split(";").map((value) => value.trim()).filter(Boolean);
@@ -970,6 +972,14 @@ function renderConfectionWrapperItemPanelPipelineStatus() {
           <dt>Source review</dt>
           <dd>${escapeHtml(review.needs_source_review || 0)}</dd>
         </div>
+        <div>
+          <dt>Paths needed</dt>
+          <dd>${escapeHtml(audit.no_private_path_supplied || tasks.paths_needed || 0)}</dd>
+        </div>
+        <div>
+          <dt>Capture tasks</dt>
+          <dd>${escapeHtml(tasks.task_count || 0)}</dd>
+        </div>
       </dl>
       <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive pipeline product blockers">
         ${products.slice(0, 5).map((row) => `<span>${escapeHtml(row)}</span>`).join("")}
@@ -978,8 +988,11 @@ function renderConfectionWrapperItemPanelPipelineStatus() {
         ${artifacts.model_assist_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.model_assist_summary_csv))}">Spark Packets CSV</a>` : ""}
         ${artifacts.run_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.run_summary_csv))}">Capture Dry Run CSV</a>` : ""}
         ${artifacts.image_map_template_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_template_csv))}">Image Map Template</a>` : ""}
+        ${artifacts.image_map_audit_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_audit_csv))}">Image Map Audit</a>` : ""}
         ${artifacts.ocr_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ocr_summary_csv))}">OCR Summary CSV</a>` : ""}
         ${artifacts.review_queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.review_queue_csv))}">Review Queue CSV</a>` : ""}
+        ${artifacts.capture_task_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_csv))}">Capture Tasks CSV</a>` : ""}
+        ${artifacts.capture_task_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_runbook_md))}">Capture Runbook</a>` : ""}
         ${artifacts.pipeline_summary_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.pipeline_summary_json))}">Pipeline JSON</a>` : ""}
       </div>
     </article>

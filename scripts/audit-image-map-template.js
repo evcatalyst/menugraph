@@ -181,9 +181,11 @@ function writeAudit({ runId, templatePath, publicAuditCsvPath, publicAuditJsonPa
     siteSummary[summaryField] = auditSummary;
     if (pipelineSummaryPath) {
       const pipelineSummary = readJson(pipelineSummaryPath, {});
-      const pipelineField = path.basename(pipelineSummaryPath) === "pilot_capture_pipeline_summary.json"
-        ? "pilot_capture_pipeline_summary"
-        : "hybrid_ocr_pipeline_summary";
+      const pipelineField = argValue("pipeline-summary-field") || (
+        path.basename(pipelineSummaryPath) === "pilot_capture_pipeline_summary.json"
+          ? "pilot_capture_pipeline_summary"
+          : "hybrid_ocr_pipeline_summary"
+      );
       siteSummary[pipelineField] = pipelineSummary;
       if (pipelineField === "hybrid_ocr_pipeline_summary") {
         siteSummary.ingredient_ocr_summary = siteSummary.ingredient_ocr_summary || {};
