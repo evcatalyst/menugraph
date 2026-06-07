@@ -183234,5 +183234,344 @@
         "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
       }
     ]
+  },
+  "pilot_photo_capture_summary": {
+    "generated_at_utc": "2026-06-07T23:00:00Z",
+    "product_count": 10,
+    "selected_row_count": 101,
+    "batch_count": 16,
+    "panel_capture_needed_count": 94,
+    "source_page_capture_needed_count": 7,
+    "source_discovery_needed_count": 0,
+    "ingredient_signal_row_count": 94,
+    "embed_ready_count": 0,
+    "selection_policy": {
+      "products": "The ten story-rich pilot products are included before scaling the same workflow across full-corpus proof shells.",
+      "row_source": "docs/data/product-evidence/exports/photo_proof_upgrade_queue.json",
+      "private_capture_policy": "Write captures, crops, OCR JSON, and image-map paths only under the private OCR run directory.",
+      "public_output_policy": "Public artifacts contain source URLs, action labels, hashes/statuses, and candidate-only OCR status. They do not contain private paths or reproduced external photos."
+    },
+    "artifacts": {
+      "manifest_json": "docs/data/product-evidence/pilot_photo_capture_batches.json",
+      "batch_csv": "docs/data/product-evidence/exports/pilot_photo_capture_batches.csv",
+      "row_csv": "docs/data/product-evidence/exports/pilot_photo_capture_rows.csv",
+      "runbook_markdown": "docs/data/product-evidence/exports/pilot_photo_capture_runbook.md"
+    },
+    "product_rollups": [
+      {
+        "product_id": "oreo_original_chocolate_sandwich_cookies",
+        "product_name": "Oreo Original Chocolate Sandwich Cookies",
+        "row_count": 14,
+        "panel_capture_needed": 13,
+        "source_page_capture_needed": 1,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 13,
+        "top_priority": 140,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "doritos_nacho_cheese",
+        "product_name": "Doritos Nacho Cheese",
+        "row_count": 11,
+        "panel_capture_needed": 11,
+        "source_page_capture_needed": 0,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 11,
+        "top_priority": 110,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "cheerios_original",
+        "product_name": "Cheerios Original",
+        "row_count": 9,
+        "panel_capture_needed": 9,
+        "source_page_capture_needed": 0,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 9,
+        "top_priority": 118,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "coca_cola_classic",
+        "product_name": "Coca-Cola Classic",
+        "row_count": 7,
+        "panel_capture_needed": 7,
+        "source_page_capture_needed": 0,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 7,
+        "top_priority": 118,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "campbells_tomato_soup",
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "row_count": 11,
+        "panel_capture_needed": 10,
+        "source_page_capture_needed": 1,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 10,
+        "top_priority": 118,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "heinz_tomato_ketchup",
+        "product_name": "Heinz Tomato Ketchup",
+        "row_count": 10,
+        "panel_capture_needed": 7,
+        "source_page_capture_needed": 3,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 7,
+        "top_priority": 110,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "poptarts_frosted_strawberry",
+        "product_name": "Pop-Tarts Frosted Strawberry",
+        "row_count": 11,
+        "panel_capture_needed": 11,
+        "source_page_capture_needed": 0,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 11,
+        "top_priority": 110,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "kraft_macaroni_and_cheese_original",
+        "product_name": "Kraft Macaroni & Cheese Original",
+        "row_count": 12,
+        "panel_capture_needed": 12,
+        "source_page_capture_needed": 0,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 12,
+        "top_priority": 110,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "mcdonalds_big_mac",
+        "product_name": "McDonald's Big Mac",
+        "row_count": 7,
+        "panel_capture_needed": 6,
+        "source_page_capture_needed": 1,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 6,
+        "top_priority": 110,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      },
+      {
+        "product_id": "mcdonalds_chicken_mcnuggets",
+        "product_name": "McDonald's Chicken McNuggets",
+        "row_count": 9,
+        "panel_capture_needed": 8,
+        "source_page_capture_needed": 1,
+        "source_discovery_needed": 0,
+        "ingredient_signal_count": 8,
+        "top_priority": 110,
+        "next_action": "Capture a private ingredient/nutrition panel crop, run native OCR, and keep the public page link-only until rights are clear."
+      }
+    ],
+    "top_batches": [
+      {
+        "batch_id": "pilot_capture_baaf233cff47b2",
+        "product_id": "oreo_original_chocolate_sandwich_cookies",
+        "product_name": "Oreo Original Chocolate Sandwich Cookies",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "www.flickr.com; www.packagingdigest.com; www.seattlepi.com; www.ewg.org; www.kroger.com",
+        "row_count": 12,
+        "ingredient_signal_count": 12,
+        "max_priority": 140,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "flickr_oreo_1960s",
+          "flickr_oreo_1993",
+          "flickr_oreo_1960s_box",
+          "packaging_digest_century",
+          "seattlepi_century"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_46b8464314eee9",
+        "product_id": "oreo_original_chocolate_sandwich_cookies",
+        "product_name": "Oreo Original Chocolate Sandwich Cookies",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "www.flickr.com",
+        "row_count": 1,
+        "ingredient_signal_count": 1,
+        "max_priority": 96,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "flickr_oreo_uhoh_2002"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_3f3514ad61bab2",
+        "product_id": "oreo_original_chocolate_sandwich_cookies",
+        "product_name": "Oreo Original Chocolate Sandwich Cookies",
+        "display_lane": "source_page_capture_needed",
+        "source_owner": "www.flickr.com",
+        "row_count": 1,
+        "ingredient_signal_count": 0,
+        "max_priority": 60,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "flickr_oreo_harley_2000"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_39101575279870",
+        "product_id": "doritos_nacho_cheese",
+        "product_name": "Doritos Nacho Cheese",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "smartlabel.pepsico.info; www.heb.com; wvww.gardengrocer.com; www.kroger.com; www.flickr.com",
+        "row_count": 11,
+        "ingredient_signal_count": 11,
+        "max_priority": 110,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "doritos_nacho_cheese_evidence_10",
+          "doritos_nacho_cheese_evidence_7",
+          "doritos_nacho_cheese_evidence_8",
+          "doritos_nacho_cheese_evidence_9",
+          "doritos_nacho_cheese_evidence_0"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_20b19a9528d311",
+        "product_id": "cheerios_original",
+        "product_name": "Cheerios Original",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "www.flickr.com; www.cheerios.com; theimaginaryworld.com; americanhistory.si.edu",
+        "row_count": 9,
+        "ingredient_signal_count": 9,
+        "max_priority": 118,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "cheerios_original_evidence_1",
+          "cheerios_original_evidence_8",
+          "cheerios_original_evidence_0",
+          "cheerios_original_evidence_2",
+          "cheerios_original_evidence_3"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_42290c8779ecdd",
+        "product_id": "coca_cola_classic",
+        "product_name": "Coca-Cola Classic",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "www.flickr.com; www.coca-cola.com; commons.wikimedia.org",
+        "row_count": 7,
+        "ingredient_signal_count": 7,
+        "max_priority": 118,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "coca_cola_classic_evidence_1",
+          "coca_cola_classic_evidence_6",
+          "coca_cola_classic_evidence_0",
+          "coca_cola_classic_evidence_2",
+          "coca_cola_classic_evidence_3"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_4fe5d7c6cadd15",
+        "product_id": "campbells_tomato_soup",
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "www.ingredientinspector.org; www.campbellsfoodservice.com; www.campbells.com; www.flickr.com; commons.wikimedia.org",
+        "row_count": 10,
+        "ingredient_signal_count": 10,
+        "max_priority": 118,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "campbells_tomato_soup_evidence_5",
+          "campbells_tomato_soup_evidence_10",
+          "campbells_tomato_soup_evidence_7",
+          "campbells_tomato_soup_evidence_8",
+          "campbells_tomato_soup_evidence_9"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_b59de1269c103c",
+        "product_id": "campbells_tomato_soup",
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "display_lane": "source_page_capture_needed",
+        "source_owner": "www.artsbma.org",
+        "row_count": 1,
+        "ingredient_signal_count": 0,
+        "max_priority": 68,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "campbells_tomato_soup_evidence_4"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_bd08fd5c948ebc",
+        "product_id": "heinz_tomato_ketchup",
+        "product_name": "Heinz Tomato Ketchup",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "www.walmart.com; www.heinz.com; www.henderson-foodservice.com; laurelleaffarm.com; antiqueadvertising.com",
+        "row_count": 7,
+        "ingredient_signal_count": 7,
+        "max_priority": 110,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "heinz_tomato_ketchup_evidence_6",
+          "heinz_tomato_ketchup_evidence_7",
+          "heinz_tomato_ketchup_evidence_8",
+          "heinz_tomato_ketchup_evidence_9",
+          "heinz_tomato_ketchup_evidence_0"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_a25841e458dd1c",
+        "product_id": "heinz_tomato_ketchup",
+        "product_name": "Heinz Tomato Ketchup",
+        "display_lane": "source_page_capture_needed",
+        "source_owner": "www.flickr.com; en.wikipedia.org",
+        "row_count": 3,
+        "ingredient_signal_count": 0,
+        "max_priority": 68,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "heinz_tomato_ketchup_evidence_1",
+          "heinz_tomato_ketchup_evidence_3",
+          "heinz_tomato_ketchup_evidence_4"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_be953f8f61736b",
+        "product_id": "poptarts_frosted_strawberry",
+        "product_name": "Pop-Tarts Frosted Strawberry",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "www.poptarts.com; www.foodrepo.org; smartlabel.kelloggs.com; www.walmart.com; www.flickr.com",
+        "row_count": 11,
+        "ingredient_signal_count": 11,
+        "max_priority": 110,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "poptarts_frosted_strawberry_evidence_10",
+          "poptarts_frosted_strawberry_evidence_6",
+          "poptarts_frosted_strawberry_evidence_7",
+          "poptarts_frosted_strawberry_evidence_8",
+          "poptarts_frosted_strawberry_evidence_9"
+        ]
+      },
+      {
+        "batch_id": "pilot_capture_361c2525c714f6",
+        "product_id": "kraft_macaroni_and_cheese_original",
+        "product_name": "Kraft Macaroni & Cheese Original",
+        "display_lane": "panel_capture_needed",
+        "source_owner": "giantfood.com; www.super99.com; www.walmart.com; www.flickr.com; www.ebay.com",
+        "row_count": 12,
+        "ingredient_signal_count": 12,
+        "max_priority": 110,
+        "capture_goal": "Create private captures/crops that can feed native Vision OCR while keeping public pages link-only.",
+        "first_evidence_ids": [
+          "kraft_macaroni_and_cheese_original_evidence_10",
+          "kraft_macaroni_and_cheese_original_evidence_11",
+          "kraft_macaroni_and_cheese_original_evidence_8",
+          "kraft_macaroni_and_cheese_original_evidence_9",
+          "kraft_macaroni_and_cheese_original_evidence_0"
+        ]
+      }
+    ]
   }
 }
