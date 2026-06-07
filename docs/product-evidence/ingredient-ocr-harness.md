@@ -123,7 +123,10 @@ node scripts/build-image-map-from-template.js --run-id=hybrid-ocr-v1 --template=
 node scripts/capture-ingredient-ocr-assets.js --run-id=hybrid-ocr-v1 --limit=250 --image-map=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-input.json
 node scripts/run-ingredient-ocr.js --run-id=hybrid-ocr-v1 --limit=250
 node scripts/summarize-ingredient-ocr-run.js --run-id=hybrid-ocr-v1
+node scripts/build-ocr-structuring-packets.js --run-id=hybrid-ocr-v1 --packet-size=10
 ```
+
+`build-ocr-structuring-packets.js` writes OCR text only to private packet JSON files under `.cache/ingredient-ocr/runs/<run-id>/spark-packets/ocr-structuring/`. The public CSV/JSON expose packet counts, evidence IDs, model route, and signal counts only.
 
 Grok-assisted source hunting, when explicitly enabled:
 

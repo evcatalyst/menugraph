@@ -15928,6 +15928,7 @@ function renderCorpusOcrScale() {
   const hybrid = summary.hybrid_pipeline || state.data.hybrid_ocr_pipeline_summary || {};
   const imageMapAudit = hybrid.image_map_audit || state.data.hybrid_ocr_image_map_audit || {};
   const captureTasks = hybrid.capture_task_summary || state.data.hybrid_ocr_capture_task_summary || {};
+  const ocrStructuring = summary.ocr_structuring_summary || state.data.ocr_structuring_summary || {};
   const candidateCount = numeric(summary.ocr_candidate_count);
   els.corpusOcrCount.textContent = `${formatNumber(candidateCount)} rows`;
 
@@ -15951,6 +15952,7 @@ function renderCorpusOcrScale() {
     ["OCR planned", hybrid.ocr?.ocr_planned],
     ["OCR attempted", hybrid.ocr?.ocr_attempted],
     ["OCR skipped", hybrid.ocr?.ocr_skipped_no_image],
+    ["OCR structuring packets", ocrStructuring.packet_count],
     ["Review queue", hybrid.review_queue?.rows],
   ];
   els.corpusOcrSummary.innerHTML = `
@@ -15984,6 +15986,7 @@ function renderCorpusOcrScale() {
         ${artifactLink(hybrid.public_artifacts?.capture_task_csv || captureTasks.public_artifacts?.capture_task_csv, "Capture Tasks")}
         ${artifactLink(hybrid.public_artifacts?.capture_task_runbook_md || captureTasks.public_artifacts?.capture_task_runbook_md, "Capture Runbook")}
         ${artifactLink(hybrid.public_artifacts?.ocr_summary_csv, "OCR CSV")}
+        ${artifactLink(ocrStructuring.public_artifacts?.packet_summary_csv, "OCR Structuring CSV")}
         ${artifactLink(hybrid.public_artifacts?.model_assist_summary_csv, "Model CSV")}
         ${artifactLink(hybrid.public_artifacts?.review_queue_csv, "Review CSV")}
       </div>

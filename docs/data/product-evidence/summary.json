@@ -182721,6 +182721,28 @@
           "capture_task_runbook_md": "docs/data/product-evidence/exports/hybrid_ocr_capture_task_runbook.md"
         }
       }
+    },
+    "ocr_structuring_summary": {
+      "schema_version": "ingredient_ocr_structuring_summary.v1",
+      "generated_at": "2026-06-07T20:30:00Z",
+      "run_id": "hybrid-ocr-v1",
+      "selected_ocr_rows": 0,
+      "packet_count": 0,
+      "public_safety": {
+        "private_packet_dir": "[private_path_redacted]",
+        "ocr_text_committed": false,
+        "private_paths_committed": false,
+        "candidate_only": true,
+        "manual_verified_created": false
+      },
+      "route": {
+        "primary_model": "gpt-5.3-codex-spark",
+        "quality_gate_model": "gpt-5.5",
+        "packet_dir_hint": "ocr-structuring"
+      },
+      "public_artifacts": {
+        "packet_summary_csv": "docs/data/product-evidence/exports/hybrid_ocr_structuring_packets.csv"
+      }
     }
   },
   "hybrid_ocr_pipeline_summary": {
@@ -186826,6 +186848,28 @@
       "requires_reviewer": true,
       "requires_rights_clear_status": true,
       "source_link_only_default": true
+    }
+  },
+  "ocr_structuring_summary": {
+    "schema_version": "ingredient_ocr_structuring_summary.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "run_id": "hybrid-ocr-v1",
+    "selected_ocr_rows": 0,
+    "packet_count": 0,
+    "public_safety": {
+      "private_packet_dir": "[private_path_redacted]",
+      "ocr_text_committed": false,
+      "private_paths_committed": false,
+      "candidate_only": true,
+      "manual_verified_created": false
+    },
+    "route": {
+      "primary_model": "gpt-5.3-codex-spark",
+      "quality_gate_model": "gpt-5.5",
+      "packet_dir_hint": "ocr-structuring"
+    },
+    "public_artifacts": {
+      "packet_summary_csv": "docs/data/product-evidence/exports/hybrid_ocr_structuring_packets.csv"
     }
   }
 }
