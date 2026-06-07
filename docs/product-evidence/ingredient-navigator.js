@@ -138,10 +138,16 @@ function allPublicPhotoRows() {
   const productNames = new Map((state.data?.products || []).map((row) => [row.id, row.name]));
   return (state.photoProofManifest?.published_images || [])
     .filter((row) => row.image_display_policy === "embed_rights_cleared" && (row.public_image_url || row.thumbnail_url))
-    .map((row) => ({
-      ...row,
-      product_name: row.product_name || productNames.get(row.product_id) || row.product_id || "Product photo proof",
-    }));
+    .map((row) => {
+      const productRow = productById(row.product_id);
+      const evidenceRow = (productRow?.evidence || []).find((evidence) => evidence.id === row.evidence_id) || {};
+      const proofLane = isIngredientPanelProof(evidenceRow) ? "primary_ingredient_panel" : "secondary_product_context";
+      return {
+        ...row,
+        proof_lane: proofLane,
+        product_name: row.product_name || productNames.get(row.product_id) || row.product_id || "Product photo proof",
+      };
+    });
 }
 
 function productHasPublicPhoto(productRow) {
@@ -164,8 +170,8 @@ function corpusModeDefinitions() {
     },
     {
       id: "public_photos",
-      label: "Public Photos",
-      detail: "Rights-cleared embeds",
+      label: "Photo Worklist",
+      detail: "Panel-first, context second",
       matches: productHasPublicPhoto,
     },
     {
@@ -308,12 +314,22 @@ function productCandidateTextCount(productRow) {
     + (productRow?.versions || []).filter((row) => row.label_extract).length;
 }
 
+function productPanelProofCount(productRow) {
+  return ingredientPanelProofRows(productRow).length;
+}
+
+function productPanelEmbedCount(productRow) {
+  return ingredientPanelProofRows(productRow).filter((row) => canEmbedProofImage(row)).length;
+}
+
 function renderCorpusDirectory() {
   if (!els.corpusDirectory) return;
   const modeRows = productRowsForMode();
   const rows = searchedProductRows(modeRows);
   const modeLabel = corpusModeDefinitions().find((row) => row.id === state.corpusMode)?.label || "Full Corpus";
   const publicEmbeds = rows.reduce((sum, row) => sum + productPublicEmbedCount(productById(row.id)), 0);
+  const panelLeads = rows.reduce((sum, row) => sum + productPanelProofCount(productById(row.id)), 0);
+  const panelEmbeds = rows.reduce((sum, row) => sum + productPanelEmbedCount(productById(row.id)), 0);
   const candidateTexts = rows.reduce((sum, row) => sum + productCandidateTextCount(productById(row.id)), 0);
   const sourceSlots = rows.reduce((sum, row) => sum + Number(row.source_backed_slots || 0), 0);
   els.corpusDirectory.innerHTML = `
@@ -321,7 +337,7 @@ function renderCorpusDirectory() {
       <div>
         <span>All Product Story Directory</span>
         <strong>${escapeHtml(`${rows.length} products shown from ${modeLabel}`)}</strong>
-        <p>Use this as the working map for the corpus. Every card is selectable; image counts mean rights-cleared public embeds, while source slots mean attributable evidence receipts that may still be link-only.</p>
+        <p>Use this as the working map for the corpus. Ingredient-panel leads are the recipe-history target; product/package images are secondary context unless the label panel is readable.</p>
       </div>
       <dl>
         <div>
@@ -333,8 +349,12 @@ function renderCorpusDirectory() {
           <dd>${escapeHtml(sourceSlots)}</dd>
         </div>
         <div>
-          <dt>Public photos</dt>
-          <dd>${escapeHtml(publicEmbeds)}</dd>
+          <dt>Panel leads</dt>
+          <dd>${escapeHtml(panelLeads)}</dd>
+        </div>
+        <div>
+          <dt>Panel embeds</dt>
+          <dd>${escapeHtml(panelEmbeds)}</dd>
         </div>
         <div>
           <dt>Text candidates</dt>
@@ -346,6 +366,8 @@ function renderCorpusDirectory() {
       ${rows.map((row, index) => {
         const productRow = productById(row.id);
         const embedCount = productPublicEmbedCount(productRow);
+        const panelCount = productPanelProofCount(productRow);
+        const panelEmbedCount = productPanelEmbedCount(productRow);
         const textCount = productCandidateTextCount(productRow);
         return `
           <button type="button" class="corpus-directory-card ${row.id === state.productId ? "is-selected" : ""}" data-product-id="${escapeHtml(row.id)}">
@@ -353,7 +375,8 @@ function renderCorpusDirectory() {
             <strong>${escapeHtml(row.label)}</strong>
             <em>${escapeHtml(productRow?.category || row.scope || "product")}</em>
             <small>${escapeHtml(row.scope === "story_rich_pilot" ? "Story pilot" : "Proof shell")} · ${escapeHtml(row.source_backed_slots || 0)}/${escapeHtml(row.total_slots || 6)} source slots</small>
-            <b>${escapeHtml(embedCount)} photos · ${escapeHtml(textCount)} extracts</b>
+            <b>${escapeHtml(panelCount)} panel leads · ${escapeHtml(panelEmbedCount)} panel embeds</b>
+            <small>${escapeHtml(embedCount)} secondary/photo embeds · ${escapeHtml(textCount)} text extracts</small>
           </button>
         `;
       }).join("")}
@@ -400,25 +423,27 @@ function renderCaptureTaskPreview(taskSummary = {}) {
 function renderPublicPhotoProofStrip() {
   const rows = allPublicPhotoRows();
   if (!rows.length) return "";
-  const productCount = new Set(rows.map((row) => row.product_id).filter(Boolean)).size;
+  const panelRows = rows.filter((row) => row.proof_lane === "primary_ingredient_panel");
+  const secondaryRows = rows.filter((row) => row.proof_lane !== "primary_ingredient_panel");
+  const previewRows = [...panelRows, ...secondaryRows].slice(0, 12);
   return `
     <article class="corpus-handoff-card public-photo-strip-card">
       <header class="public-photo-strip-head">
         <div>
-          <span>Secondary Context: Product Photos</span>
-          <strong>${escapeHtml(`${rows.length} public product images across ${productCount} products`)}</strong>
-          <p>These rights-cleared images help identify packages, eras, and variants. They are secondary to ingredient-panel photos and do not prove recipe history unless a readable ingredient or nutrition panel is visible.</p>
+          <span>Photo Proof Priority</span>
+          <strong>${escapeHtml(`${panelRows.length} ingredient-panel images/documents · ${secondaryRows.length} secondary product images`)}</strong>
+          <p>Ingredient or nutrition panels are the primary visual proof. Product/package photos are shown after panel leads and exist to identify era, SKU, format, or maker context.</p>
         </div>
-        <button type="button" data-corpus-mode-jump="public_photos">Show photo products</button>
+        <button type="button" data-corpus-mode-jump="public_photos">Show photo worklist</button>
       </header>
-      <div class="public-photo-strip" aria-label="Rights-cleared product photo proof examples">
-        ${rows.slice(0, 12).map((row) => {
+      <div class="public-photo-strip" aria-label="Panel-first photo proof examples">
+        ${previewRows.map((row) => {
           const image = row.thumbnail_url || row.public_image_url;
           return `
-            <article class="public-photo-card">
+            <article class="public-photo-card ${row.proof_lane === "primary_ingredient_panel" ? "is-primary-panel" : "is-secondary-context"}">
               <button type="button" data-product-id="${escapeHtml(row.product_id || "")}">
                 <img src="${escapeHtml(image)}" alt="${escapeHtml(`${row.product_name} public photo proof`)}" loading="lazy" />
-                <span>${escapeHtml(row.product_name || "Product")}</span>
+                <span>${escapeHtml(row.proof_lane === "primary_ingredient_panel" ? "Primary ingredient/document proof" : "Secondary product context")}</span>
                 <strong>${escapeHtml(row.evidence_title || row.source_title || "Public photo proof")}</strong>
               </button>
               <p>${escapeHtml(row.attribution_text || row.source_owner || "Attribution recorded in manifest.")}</p>
@@ -839,18 +864,36 @@ function canEmbedProofImage(row) {
   return clearLicense && !blocked && !/flickr\.com/.test(source);
 }
 
-function bestProofEvidence(productRow, version) {
-  const evidenceRows = versionEvidence(productRow, version);
-  const ranked = [...evidenceRows].sort((a, b) => {
-    const rank = (row) => (
-      (row.visible_extract ? 40 : 0) +
-      (/ingredient|label/i.test(`${row.label_panel_state || ""} ${row.photo_role || ""}`) ? 25 : 0) +
-      (proofImageUrl(row) ? 15 : 0) +
-      (proofSourceUrl(row) ? 10 : 0) +
-      (row.status === "manual_verified" ? 10 : row.status === "label_text_candidate" ? 8 : row.status === "usable_photo" ? 5 : 0)
-    );
-    return rank(b) - rank(a);
-  });
+function bestIngredientProofEvidence(productRow, version) {
+  const ranked = versionEvidence(productRow, version)
+    .filter(isIngredientPanelProof)
+    .sort((a, b) => {
+      const rank = (row) => (
+        (row.visible_extract ? 45 : 0) +
+        (canEmbedProofImage(row) ? 30 : proofImageUrl(row) ? 18 : 0) +
+        (/ingredient/i.test(`${row.label_panel_state || ""} ${row.photo_role || ""} ${row.ocr_expected_surface || ""}`) ? 18 : 0) +
+        (/nutrition|allergen|document|pdf/i.test(`${row.label_panel_state || ""} ${row.photo_role || ""} ${row.ocr_expected_surface || ""} ${row.kind || ""}`) ? 12 : 0) +
+        (proofSourceUrl(row) ? 10 : 0) +
+        (row.status === "manual_verified" ? 16 : row.status === "label_text_candidate" ? 10 : row.status === "usable_photo" ? 6 : 0)
+      );
+      return rank(b) - rank(a);
+    });
+  return ranked[0] || {};
+}
+
+function bestSecondaryContextEvidence(productRow, version, primaryRow = {}) {
+  const primaryId = primaryRow?.id || "";
+  const ranked = versionEvidence(productRow, version)
+    .filter((row) => row.id !== primaryId && !isIngredientPanelProof(row))
+    .sort((a, b) => {
+      const rank = (row) => (
+        (canEmbedProofImage(row) ? 35 : proofImageUrl(row) ? 20 : 0) +
+        (proofSourceUrl(row) ? 10 : 0) +
+        (Number(row.confidence || 0) * 10) +
+        (row.status === "usable_photo" ? 6 : row.status === "source_review" ? 4 : 0)
+      );
+      return rank(b) - rank(a);
+    });
   return ranked[0] || {};
 }
 
@@ -864,7 +907,7 @@ function versionHasPhotoProof(productRow, version) {
 }
 
 function versionHasIngredientProof(productRow, version) {
-  return Boolean(proofExtractFor(version, bestProofEvidence(productRow, version)))
+  return Boolean(proofExtractFor(version, bestIngredientProofEvidence(productRow, version)))
     || /label|transcription|manual_verified|text_candidate/.test(String(version.status || ""));
 }
 
@@ -883,11 +926,35 @@ function renderProofVisual(productRow, version, row) {
   const image = proofImageUrl(row);
   const source = proofSourceUrl(row);
   const embedImage = canEmbedProofImage(row);
-  const title = row.title || `${version.label} photo proof`;
+  const title = row.title || `${version.label} ingredient-panel proof`;
+  if (!image && !source) {
+    return `
+      <div class="proof-photo proof-photo-receipt proof-panel-needed status-needs_label_transcription">
+        <div class="proof-receipt-visual" aria-hidden="true">
+          <span>primary image missing</span>
+          <strong>Ingredient panel needed</strong>
+          <em>${escapeHtml(version.label || "selected era")}</em>
+        </div>
+        <span>Primary proof slot</span>
+        <strong>${escapeHtml("No readable ingredient-panel photo linked yet")}</strong>
+        <p>Recipe history needs a readable ingredient, nutrition, allergen, or disclosure panel first. Product-front or package-object photos are useful only as secondary identity context.</p>
+        <dl>
+          <div>
+            <dt>Required photo</dt>
+            <dd>Back/side ingredient panel, nutrition panel, menu ingredient PDF, or disclosure document</dd>
+          </div>
+          <div>
+            <dt>Current blocker</dt>
+            <dd>${escapeHtml(version.photo_quality?.blocker || version.next_step || "Find a source-attributable readable panel and run OCR/manual review.")}</dd>
+          </div>
+        </dl>
+      </div>
+    `;
+  }
   if (embedImage) {
     return `
       <figure class="proof-photo">
-        <img src="${escapeHtml(image)}" alt="${escapeHtml(`${productRow.name} ${version.label} source photo proof`)}" loading="lazy" />
+        <img src="${escapeHtml(image)}" alt="${escapeHtml(`${productRow.name} ${version.label} ingredient panel or document proof`)}" loading="lazy" />
         <figcaption>${escapeHtml(imageAttribution(row))} · ${escapeHtml(rightsNote(row))}</figcaption>
       </figure>
     `;
@@ -899,9 +966,9 @@ function renderProofVisual(productRow, version, row) {
         <strong>${escapeHtml(sourceHost(source))}</strong>
         <em>${escapeHtml(row.photo_role || version.photo_quality?.role || "photo proof")}</em>
       </div>
-      <span>${escapeHtml(row.kind || "source receipt")}</span>
+      <span>${escapeHtml(row.kind || "ingredient panel source receipt")}</span>
       <strong>${escapeHtml(title || "Photo proof needed")}</strong>
-      <p>${escapeHtml(imageDisplayPolicy(row) === "embed_rights_cleared" ? "Rights-cleared image is ready to display." : image ? "Image reference is present, but this page keeps it link-only until rights are reviewed." : "Photo proof is source-attributed, but no rights-cleared embeddable image URL is stored yet.")}</p>
+      <p>${escapeHtml(imageDisplayPolicy(row) === "embed_rights_cleared" ? "Rights-cleared panel/document image is ready to display." : image ? "Panel/document image reference is present, but this page keeps it link-only until rights are reviewed." : "Ingredient-panel proof is source-attributed, but no rights-cleared embeddable image URL is stored yet.")}</p>
       <dl>
         <div>
           <dt>Photo role</dt>
@@ -920,8 +987,39 @@ function renderProofVisual(productRow, version, row) {
           <dd>${escapeHtml(imageDisplayPolicy(row))}</dd>
         </div>
       </dl>
-      ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">Open source photo/document</a>` : ""}
+      ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">Open ingredient-panel source</a>` : ""}
     </div>
+  `;
+}
+
+function renderSecondaryContextCallout(productRow, version, row) {
+  const source = proofSourceUrl(row);
+  const image = proofImageUrl(row);
+  if (!source && !image) return "";
+  const embedImage = canEmbedProofImage(row);
+  return `
+    <aside class="proof-secondary-context" aria-label="Secondary product or package context">
+      <div>
+        <span>Secondary product context</span>
+        <strong>${escapeHtml(row.title || `${version.label} package/source context`)}</strong>
+        <p>Useful for product identity, era, package format, or maker cues. It is not ingredient proof unless a readable panel is visible.</p>
+      </div>
+      ${embedImage ? `
+        <figure>
+          <img src="${escapeHtml(image)}" alt="${escapeHtml(`${productRow.name} secondary package context`)}" loading="lazy" />
+          <figcaption>${escapeHtml(imageAttribution(row))}</figcaption>
+        </figure>
+      ` : `
+        <div class="proof-secondary-receipt">
+          <span>${escapeHtml(sourceHost(source))}</span>
+          <strong>${escapeHtml(row.photo_role || "package context")}</strong>
+        </div>
+      `}
+      <div class="lead-meta">
+        ${statusBadge("secondary_context")}
+        ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">Open context source</a>` : ""}
+      </div>
+    </aside>
   `;
 }
 
@@ -956,8 +1054,9 @@ function renderProofIngredients(version, row) {
 }
 
 function renderProofCard(productRow, version, modeLabel) {
-  const row = bestProofEvidence(productRow, version);
-  const source = proofSourceUrl(row);
+  const row = bestIngredientProofEvidence(productRow, version);
+  const secondaryRow = bestSecondaryContextEvidence(productRow, version, row);
+  const source = proofSourceUrl(row) || proofSourceUrl(secondaryRow);
   const extract = proofExtractFor(version, row);
   return `
     <article class="proof-card status-${escapeHtml(version.status || "unknown")}">
@@ -976,6 +1075,7 @@ function renderProofCard(productRow, version, modeLabel) {
         ${renderProofVisual(productRow, version, row)}
         ${renderProofIngredients(version, row)}
       </div>
+      ${renderSecondaryContextCallout(productRow, version, secondaryRow)}
       <footer class="proof-card-foot">
         <span>${escapeHtml(version.validation_state?.public_label || labelFor(version.status))}</span>
         <p>${escapeHtml(version.validation_state?.note || "Candidate evidence remains separate from verified formulation claims.")}</p>
@@ -1011,15 +1111,22 @@ function sourceProofRows(productRow) {
 }
 
 function isIngredientPanelProof(row) {
-  const text = [
+  const documentText = [
+    row?.title,
+    row?.url,
+    row?.source_url,
+    row?.archive_url,
+    row?.source_photo_url,
+  ].join(" ").toLowerCase();
+  const panelText = [
     row?.photo_role,
     row?.label_panel_state,
     row?.ocr_expected_surface,
-    row?.title,
-    row?.kind,
   ].join(" ").toLowerCase();
   return Boolean(row?.visible_extract)
-    || /ingredient|nutrition|allergen|label panel|back panel|readable panel|panel visible|partial package text|wrapper text|document text/.test(text);
+    || /ingredient guide|product ingredient|nutrition guide|nutrition facts|allergen|smartlabel|\.pdf\b|pdf$/.test(documentText)
+    || (!/not verified|not reviewed|not readable|front package|object visible/.test(panelText)
+      && /ingredient panel visible|nutrition panel visible|label text candidate|readable ingredient|readable nutrition|partial package text|wrapper text|ingredient text candidate|current label source|document text/.test(panelText));
 }
 
 function ingredientPanelProofRows(productRow) {
