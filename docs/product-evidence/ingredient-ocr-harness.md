@@ -14,14 +14,25 @@ Outputs:
 
 - `docs/data/product-evidence/ingredient_ocr_manifest.json`
 - `docs/data/product-evidence/exports/ten_product_pilot_ocr_queue.csv`
+- `docs/data/product-evidence/full_corpus_ingredient_ocr_manifest.json`
+- `docs/data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv`
+- `docs/data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv`
+- `docs/data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.md`
 
-The queue identifies every OCR-relevant photo/page candidate across the 10-product pilot and records:
+The pilot queue identifies every OCR-relevant photo/page candidate across the 10-product pilot. The full-corpus queue scales the same model to every evidence-registry row across the 100+ product corpus and records:
 
 - product and evidence IDs;
 - source URL, title, owner, and rights note;
 - photo role and label-panel state;
 - detected roles such as ingredient panel, nutrition panel, net weight, and panel-review need;
-- OCR priority and the next action.
+- OCR priority, access state, blocker category, and the next action.
+
+Full-corpus access states are intentionally conservative:
+
+- `local_image_ready`: a private local image/crop path was supplied through an image map and can be processed by Swift/Vision.
+- `external_image_reference_ready`: a direct image reference exists, but it should be downloaded only into a private cache unless rights are clear.
+- `source_page_capture_needed`: the public record has a source URL, but the repo does not contain a reproducible image crop.
+- `source_discovery_needed`: the product/vintage slot still lacks source-attributable evidence.
 
 ## Run Native OCR Locally
 
@@ -40,6 +51,13 @@ Run OCR:
 node scripts/build-ingredient-ocr-queue.js --run --image-map=/private/path/ingredient-ocr-image-map.json
 ```
 
+To limit a private OCR execution:
+
+```sh
+node scripts/build-ingredient-ocr-queue.js --run --scope=pilot --image-map=/private/path/ingredient-ocr-image-map.json
+node scripts/build-ingredient-ocr-queue.js --run --scope=full --image-map=/private/path/ingredient-ocr-image-map.json
+```
+
 By default OCR results are written to `.cache/ingredient-ocr/`, which is ignored by git.
 
 Direct single-image usage:
@@ -51,3 +69,13 @@ swift scripts/vision-ocr.swift /private/path/to/panel.jpg
 ## Claim Policy
 
 OCR output is only a review candidate. It can move evidence from `label_visible` toward `ocr_extracted`, but no formulation claim is verified until a reviewer corrects the text, records attribution, and marks the label `manual_verified`.
+
+## Future Run Playbook
+
+The public full-corpus gap report is the handoff queue for future collection runs:
+
+- `panel_capture_needed`: use the source URL to create a private crop of the visible ingredient or nutrition panel, then rerun the Swift harness.
+- `readable_panel_photo_needed`: find a back-panel, side-panel, or higher-resolution package photo before OCR.
+- `document_text_pipeline_needed`: for fast food and foodservice records, extract text from official PDFs, allergen pages, archived menus, or screenshots before treating them as package labels.
+- `source_discovery_needed`: run targeted source discovery before OCR; there is no source object to process yet.
+- `package_identity_review_needed`: confirm product identity, SKU, date cues, and package size before spending OCR effort.

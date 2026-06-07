@@ -101,6 +101,10 @@ const els = {
   gapRows: document.querySelector("#gap-rows"),
   gapCount: document.querySelector("#gap-count"),
   coverageSummary: document.querySelector("#coverage-summary"),
+  corpusOcrCount: document.querySelector("#corpus-ocr-count"),
+  corpusOcrSummary: document.querySelector("#corpus-ocr-summary"),
+  corpusOcrGaps: document.querySelector("#corpus-ocr-gaps"),
+  corpusOcrProducts: document.querySelector("#corpus-ocr-products"),
   registrySummary: document.querySelector("#registry-summary"),
   registryRows: document.querySelector("#registry-rows"),
   registryCount: document.querySelector("#registry-count"),
@@ -15853,6 +15857,108 @@ function renderGaps() {
     .join("");
 }
 
+function evidenceDataHref(value) {
+  const text = String(value || "");
+  if (!text) return "";
+  return text
+    .replace(/^docs\/data\//, "../data/")
+    .replace(/^docs\/product-evidence\//, "./");
+}
+
+function artifactLink(value, label) {
+  const href = evidenceDataHref(value);
+  if (!href) return "";
+  return `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
+}
+
+function renderCorpusOcrScale() {
+  if (!els.corpusOcrSummary) return;
+  const summary = state.data.ingredient_ocr_summary || {};
+  const candidateCount = numeric(summary.ocr_candidate_count);
+  els.corpusOcrCount.textContent = `${formatNumber(candidateCount)} rows`;
+
+  const summaryCards = [
+    ["Products", summary.corpus_product_count],
+    ["Registry rows", summary.corpus_registry_record_count],
+    ["High priority", summary.high_priority_count],
+    ["Local image ready", summary.local_image_ready_count],
+    ["Needs capture/discovery", summary.not_easily_accessible_count],
+    ["Visible panels", summary.ingredient_panel_visible_count],
+  ];
+  els.corpusOcrSummary.innerHTML = `
+    <div class="corpus-ocr-stat-grid">
+      ${summaryCards.map(([label, value]) => `
+        <article class="corpus-ocr-stat">
+          <strong>${formatNumber(value)}</strong>
+          <span>${escapeHtml(label)}</span>
+        </article>
+      `).join("")}
+    </div>
+    <div class="corpus-ocr-policy">
+      <p>${escapeHtml(summary.claim_policy || "OCR output remains candidate evidence until reviewer verified.")}</p>
+      <p>${escapeHtml(summary.public_image_policy || "External photos stay link-only; private image maps drive OCR execution.")}</p>
+      <div class="lead-meta">
+        ${artifactLink(summary.queue_csv, "Queue CSV")}
+        ${artifactLink(summary.gap_report_csv, "Gap CSV")}
+        ${artifactLink(summary.manifest_path, "Manifest")}
+      </div>
+    </div>
+  `;
+
+  const gapRows = summary.top_gap_groups || [];
+  els.corpusOcrGaps.innerHTML = gapRows.length
+    ? gapRows.map((row) => `
+      <article class="corpus-ocr-gap">
+        <div class="lead-title">
+          <strong>${escapeHtml(labelFor(row.gap_category))}</strong>
+          <span>${formatNumber(row.row_count)} rows · ${formatNumber(row.product_count)} products</span>
+        </div>
+        <p>${escapeHtml(row.suggested_future_run || row.why_not_easy || "")}</p>
+        <div class="small">${escapeHtml(row.top_products || "")}</div>
+        <div class="lead-meta">
+          ${statusTag(row.gap_category)}
+          ${row.top_domains ? `<span class="status-tag">${escapeHtml(clipped(row.top_domains, 70))}</span>` : ""}
+        </div>
+      </article>
+    `).join("")
+    : `<p class="empty-note">No OCR gap report has been generated yet.</p>`;
+
+  const products = (state.data.products || [])
+    .filter(passesProduct)
+    .filter((product) => product.ingredient_ocr_summary)
+    .sort((a, b) => numeric(b.ingredient_ocr_summary.high_priority_count) - numeric(a.ingredient_ocr_summary.high_priority_count)
+      || numeric(b.ingredient_ocr_summary.not_easily_accessible_count) - numeric(a.ingredient_ocr_summary.not_easily_accessible_count)
+      || String(a.display_name || a.canonical_name).localeCompare(String(b.display_name || b.canonical_name)))
+    .slice(0, 14);
+  els.corpusOcrProducts.innerHTML = products.length
+    ? products.map((product) => {
+      const ocr = product.ingredient_ocr_summary || {};
+      const next = numeric(ocr.source_discovery_needed_count)
+        ? "Attach source-attributable records before OCR."
+        : numeric(ocr.panel_capture_needed_count)
+          ? "Capture panel crops, then run Vision OCR."
+          : numeric(ocr.source_page_capture_needed_count)
+            ? "Capture source pages privately, then classify panels."
+            : "Review candidate evidence and verification state.";
+      return `
+        <article class="corpus-ocr-product">
+          <div class="lead-title">
+            <strong>${escapeHtml(product.display_name || product.canonical_name)}</strong>
+            <span>${escapeHtml(product.category || "")}</span>
+          </div>
+          <div class="corpus-ocr-product-grid">
+            <span><strong>${formatNumber(ocr.high_priority_count)}</strong> high</span>
+            <span><strong>${formatNumber(ocr.label_visible_count)}</strong> panels</span>
+            <span><strong>${formatNumber(ocr.source_discovery_needed_count)}</strong> discovery</span>
+            <span><strong>${formatNumber(ocr.not_easily_accessible_count)}</strong> blocked</span>
+          </div>
+          <p>${escapeHtml(next)}</p>
+        </article>
+      `;
+    }).join("")
+    : `<p class="empty-note">No product OCR summaries match the current filters.</p>`;
+}
+
 function renderRegistrySummary() {
   const rows = state.data.evidence_registry || [];
   const workflow = state.data.evidence_registry_status_workflow || [
@@ -16112,6 +16218,7 @@ function render() {
   renderSourceBars();
   renderCoverageSummary();
   renderGaps();
+  renderCorpusOcrScale();
   renderCampaigns();
   renderSearchTasks();
   renderRegistrySummary();

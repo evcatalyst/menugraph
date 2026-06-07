@@ -6598,6 +6598,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 12
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 26,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 25,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 26,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -6673,6 +6687,20 @@
           "status": "candidate_needs_panel",
           "source_count": 9
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 24,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 24,
+        "source_discovery_needed_count": 0,
+        "not_easily_accessible_count": 24,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -6748,6 +6776,20 @@
           "status": "candidate_needs_panel",
           "source_count": 9
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 23,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 20,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 23,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -6823,6 +6865,20 @@
           "status": "candidate_needs_panel",
           "source_count": 8
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 22,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 22,
+        "source_discovery_needed_count": 0,
+        "not_easily_accessible_count": 22,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 3
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -6898,6 +6954,20 @@
           "status": "candidate_needs_panel",
           "source_count": 8
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 22,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 21,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 22,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 3
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -6973,6 +7043,20 @@
           "status": "candidate_needs_panel",
           "source_count": 7
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 28,
+        "high_priority_count": 14,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 26,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 28,
+        "label_visible_count": 10,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7048,6 +7132,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 20,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 18,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 20,
+        "label_visible_count": 10,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7123,6 +7221,20 @@
           "status": "candidate_needs_panel",
           "source_count": 6
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 21,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 20,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 21,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7198,6 +7310,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 18,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 16,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 18,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7273,6 +7399,20 @@
           "status": "candidate_needs_panel",
           "source_count": 9
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 23,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 21,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 23,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7348,6 +7488,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 8
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 20,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 19,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 20,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7423,6 +7577,20 @@
           "status": "no_source",
           "source_count": 0
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 25,
+        "high_priority_count": 18,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 22,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 25,
+        "label_visible_count": 16,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7498,6 +7666,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 18,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 16,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 18,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7573,6 +7755,20 @@
           "status": "candidate_needs_panel",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 19,
+        "high_priority_count": 12,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 18,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 19,
+        "label_visible_count": 12,
+        "ingredient_text_candidate_count": 6
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7648,6 +7844,20 @@
           "status": "candidate_needs_panel",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 21,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 20,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 21,
+        "label_visible_count": 8,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7723,6 +7933,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 23,
+        "high_priority_count": 17,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 21,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 23,
+        "label_visible_count": 14,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7798,6 +8022,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 17,
+        "high_priority_count": 11,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 17,
+        "label_visible_count": 11,
+        "ingredient_text_candidate_count": 8
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7873,6 +8111,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 18,
+        "high_priority_count": 9,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 18,
+        "label_visible_count": 9,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -7948,6 +8200,20 @@
           "status": "candidate_needs_panel",
           "source_count": 7
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 19,
+        "high_priority_count": 9,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 17,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 19,
+        "label_visible_count": 9,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8023,6 +8289,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 16,
+        "high_priority_count": 15,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 16,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8098,6 +8378,20 @@
           "status": "candidate_needs_panel",
           "source_count": 6
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 18,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 16,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 18,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8173,6 +8467,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 17,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 17,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8248,6 +8556,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 17,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 16,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 17,
+        "label_visible_count": 8,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8323,6 +8645,20 @@
           "status": "candidate_needs_panel",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 18,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 18,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8398,6 +8734,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 20,
+        "high_priority_count": 16,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 18,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 20,
+        "label_visible_count": 16,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8473,6 +8823,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 17,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 17,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8548,6 +8912,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 6
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 18,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 18,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8623,6 +9001,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 16,
+        "high_priority_count": 11,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 16,
+        "label_visible_count": 11,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8698,6 +9090,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 15,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 15,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8773,6 +9179,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 16,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 16,
+        "label_visible_count": 8,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8848,6 +9268,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 17,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 17,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8923,6 +9357,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 17,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 17,
+        "label_visible_count": 10,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -8998,6 +9446,20 @@
           "status": "candidate_needs_panel",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 19,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 16,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 19,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9073,6 +9535,20 @@
           "status": "candidate_needs_panel",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 15,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 15,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9148,6 +9624,20 @@
           "status": "candidate_needs_panel",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 16,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 16,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9223,6 +9713,20 @@
           "status": "no_source",
           "source_count": 0
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 19,
+        "high_priority_count": 12,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 17,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 19,
+        "label_visible_count": 11,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9298,6 +9802,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 16,
+        "high_priority_count": 9,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 16,
+        "label_visible_count": 8,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9373,6 +9891,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 17,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 17,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9448,6 +9980,20 @@
           "status": "candidate_found",
           "source_count": 8
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 15,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 15,
+        "source_discovery_needed_count": 0,
+        "not_easily_accessible_count": 15,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9523,6 +10069,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9598,6 +10158,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 15,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 13,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 15,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9673,6 +10247,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 16,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 16,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9748,6 +10336,20 @@
           "status": "candidate_needs_panel",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 15,
+        "high_priority_count": 2,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 15,
+        "label_visible_count": 2,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9823,6 +10425,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 12,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 12,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 14,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9898,6 +10514,20 @@
           "status": "no_source",
           "source_count": 0
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 19,
+        "high_priority_count": 9,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 17,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 19,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -9973,6 +10603,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10048,6 +10692,20 @@
           "status": "no_source",
           "source_count": 0
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 18,
+        "high_priority_count": 14,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 4,
+        "not_easily_accessible_count": 18,
+        "label_visible_count": 8,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10123,6 +10781,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 12,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 14,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10198,6 +10870,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 12,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 14,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10273,6 +10959,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 12,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 14,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10348,6 +11048,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 2,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 12,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 2,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10423,6 +11137,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 13,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 14,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10498,6 +11226,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10573,6 +11315,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 12,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 12,
+        "source_discovery_needed_count": 0,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10648,6 +11404,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10723,6 +11493,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 5
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10798,6 +11582,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 15,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 13,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 15,
+        "label_visible_count": 10,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10873,6 +11671,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 15,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 13,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 15,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -10948,6 +11760,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 14,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11023,6 +11849,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11098,6 +11938,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11173,6 +12027,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11248,6 +12116,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11323,6 +12205,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11398,6 +12294,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11473,6 +12383,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11548,6 +12472,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11623,6 +12561,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 14,
+        "label_visible_count": 8,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11698,6 +12650,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11773,6 +12739,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11848,6 +12828,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11923,6 +12917,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -11998,6 +13006,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12073,6 +13095,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12148,6 +13184,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12223,6 +13273,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12298,6 +13362,20 @@
           "status": "candidate_needs_transcription",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12373,6 +13451,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 9,
+        "label_visible_count": 2,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12448,6 +13540,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12523,6 +13629,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 1,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12598,6 +13718,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 9,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12673,6 +13807,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12748,6 +13896,20 @@
           "status": "candidate_needs_panel",
           "source_count": 4
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12823,6 +13985,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 2,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 9,
+        "label_visible_count": 2,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12898,6 +14074,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -12973,6 +14163,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13048,6 +14252,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 17,
+        "high_priority_count": 14,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 14,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 17,
+        "label_visible_count": 1,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13123,6 +14341,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13198,6 +14430,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 8,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 6,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 8,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13273,6 +14519,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13348,6 +14608,20 @@
           "status": "candidate_needs_panel",
           "source_count": 3
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 14,
+        "high_priority_count": 11,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 14,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13423,6 +14697,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13498,6 +14786,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 9,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13573,6 +14875,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 7,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13648,6 +14964,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 10,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13723,6 +15053,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13798,6 +15142,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 11,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 8,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13873,6 +15231,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -13948,6 +15320,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14023,6 +15409,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 7,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14098,6 +15498,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 9,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 2,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14173,6 +15587,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14248,6 +15676,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14323,6 +15765,20 @@
           "status": "candidate_needs_panel",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 9,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 3
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14398,6 +15854,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 6,
+        "high_priority_count": 4,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 4,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 6,
+        "label_visible_count": 0,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14473,6 +15943,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 5,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14548,6 +16032,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14623,6 +16121,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 9,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 9,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 9,
+        "ingredient_text_candidate_count": 2
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14698,6 +16210,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 8,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 6,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 8,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14773,6 +16299,20 @@
           "status": "no_source",
           "source_count": 0
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 7,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14848,6 +16388,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 1,
+        "not_easily_accessible_count": 9,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14923,6 +16477,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 7,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 9,
+        "label_visible_count": 5,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -14998,6 +16566,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 13,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 13,
+        "label_visible_count": 2,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -15073,6 +16655,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 7,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 9,
+        "label_visible_count": 4,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -15148,6 +16744,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 9,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 6,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 9,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -15223,6 +16833,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 10,
+        "high_priority_count": 7,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 7,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 10,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -15298,6 +16922,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 8,
+        "high_priority_count": 6,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 6,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 8,
+        "label_visible_count": 6,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -15373,6 +17011,20 @@
           "status": "candidate_found",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 11,
+        "high_priority_count": 8,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 8,
+        "source_discovery_needed_count": 3,
+        "not_easily_accessible_count": 11,
+        "label_visible_count": 7,
+        "ingredient_text_candidate_count": 1
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -15448,6 +17100,20 @@
           "status": "candidate_found",
           "source_count": 2
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 12,
+        "high_priority_count": 10,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 10,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 12,
+        "label_visible_count": 8,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     },
     {
@@ -15523,6 +17189,20 @@
           "status": "candidate_needs_panel",
           "source_count": 1
         }
+      },
+      "ingredient_ocr_summary": {
+        "ocr_candidate_count": 7,
+        "high_priority_count": 3,
+        "local_image_ready_count": 0,
+        "source_page_capture_needed_count": 5,
+        "source_discovery_needed_count": 2,
+        "not_easily_accessible_count": 7,
+        "label_visible_count": 3,
+        "ingredient_text_candidate_count": 0
+      },
+      "export_paths": {
+        "full_corpus_ocr_queue_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+        "full_corpus_ocr_gap_csv": "../data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv"
       }
     }
   ],
@@ -180206,5 +181886,85 @@
       "candidate_status": "candidate",
       "discovery_candidate_id": "912"
     }
-  ]
+  ],
+  "ingredient_ocr_summary": {
+    "generated_at_utc": "2026-06-07T19:00:00Z",
+    "corpus_product_count": 120,
+    "corpus_registry_record_count": 1701,
+    "ocr_candidate_count": 1701,
+    "high_priority_count": 818,
+    "local_image_ready_count": 0,
+    "not_easily_accessible_count": 1701,
+    "source_page_capture_needed_count": 1464,
+    "source_discovery_needed_count": 237,
+    "ingredient_panel_visible_count": 671,
+    "ingredient_text_candidate_count": 77,
+    "manifest_path": "docs/data/product-evidence/full_corpus_ingredient_ocr_manifest.json",
+    "queue_csv": "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv",
+    "gap_report_csv": "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv",
+    "claim_policy": "Native OCR output is candidate evidence only until reviewer corrected and manually verified.",
+    "public_image_policy": "External photos are not reproduced in public artifacts; source links and private local image-map paths drive OCR.",
+    "top_gap_groups": [
+      {
+        "gap_category": "readable_panel_photo_needed",
+        "row_count": 586,
+        "product_count": 96,
+        "top_products": "Cheerios Original (19); Fritos Original Corn Chips (18); Doritos Nacho Cheese (17); Oreo Original Chocolate Sandwich Cookies (17); Kraft Macaroni & Cheese Original (16); Reese's Peanut Butter Cups (16); Kellogg's Frosted Flakes (13); Pop-Tarts Frosted Strawberry (13)",
+        "top_domains": "www.flickr.com (456); commons.wikimedia.org (37); flickr.com (17); www.candywrapperarchive.com (16); americanhistory.si.edu (6); www.ebay.com (5); www.flickriver.com (5); dewcollectors.fandom.com (3)",
+        "top_blockers": "find_readable_ingredient_panel_photo (586)",
+        "evidence_kinds": "collector_package_photo; marketplace_listing; licensed_package_photo; retailer_page; current_web_page; museum_or_archive_page; brand_label_page",
+        "why_not_easy": "Search the same source family for back-panel, side-panel, or higher-resolution photos; front-only package photos should remain visual context.",
+        "suggested_future_run": "Search the same source family for back-panel, side-panel, or higher-resolution photos; front-only package photos should remain visual context.",
+        "example_source_urls": "https://www.flickr.com/photos/jasonliebigstuff/6823914204; https://www.flickr.com/photos/jasonliebigstuff/6823913378; https://www.flickr.com/photos/jasonliebigstuff/3496903865; https://www.ebay.com/itm/358501292533; https://www.flickr.com/photos/jasonliebigstuff/4359618633"
+      },
+      {
+        "gap_category": "panel_capture_needed",
+        "row_count": 547,
+        "product_count": 100,
+        "top_products": "SPAM Classic (15); Ritz Original Crackers (12); Ball Park Franks (11); Chips Ahoy! Original Cookies (11); Lean Cuisine Salisbury Steak (11); Pillsbury Crescent Rolls (11); SunChips Harvest Cheddar (11); Kraft Singles American Cheese (10)",
+        "top_domains": "www.walmart.com (161); www.flickr.com (38); www.kroger.com (33); smartlabel.pepsico.info (29); upcfoodsearch.com (22); www.target.com (20); smartlabel.mondelez.info (15); smartlabel.kelloggs.com (11)",
+        "top_blockers": "capture_manufacturer_or_distributor_text (253); verify_package_front_or_primary_image (236); transcribe_visible_ingredient_label (38); capture_package_weight_or_size (18); archive_source_or_record_capture_coordinates (2)",
+        "evidence_kinds": "brand_label_page; retailer_page; label_database_record; common_crawl_capture; current_web_page; collector_package_photo; ad_or_trade_catalog; marketplace_listing",
+        "why_not_easy": "Use the source URL to capture a rights-safe private screenshot or crop of the visible ingredient/nutrition panel, then run native OCR.",
+        "suggested_future_run": "Use the source URL to capture a rights-safe private screenshot or crop of the visible ingredient/nutrition panel, then run native OCR.",
+        "example_source_urls": "https://www.coca-cola.com/us/en/brands/coca-cola/products/original?redirect=true; https://smartlabel.mondelez.info/00044000033262-0001-en-US/index.html; https://smartlabel.pepsico.info/028400017305-0007-en-US/index.html; https://www.kroger.com/p/hostess-twinkies-single-serve-chocolate-cakes/0088810901090; https://www.walmart.com/ip/10295759"
+      },
+      {
+        "gap_category": "document_text_pipeline_needed",
+        "row_count": 271,
+        "product_count": 62,
+        "top_products": "McDonald's Chicken McNuggets (15); Panera Broccoli Cheddar Soup (14); Starbucks Pumpkin Spice Latte (14); McDonald's Big Mac (12); Wendy's Chili (12); Chick-fil-A Chicken Sandwich (11); Chipotle Chicken Burrito (10); Domino's Hand Tossed Pepperoni Pizza (10)",
+        "top_domains": "www.flickr.com (31); www.webstaurantstore.com (12); www.wendys.com (12); www.tacobell.com (10); grist.org (9); www.chick-fil-a.com (9); district.schoolnutritionandfitness.com (8); global.kfc.com (6)",
+        "top_blockers": "verify_package_front_or_primary_image (229); find_readable_ingredient_panel_photo (32); capture_manufacturer_or_distributor_text (5); capture_package_weight_or_size (5)",
+        "evidence_kinds": "menu_or_nutrition_document; current_web_page; retailer_page; brand_label_page",
+        "why_not_easy": "For fast-food and foodservice records, prefer PDF/text extraction and archived document capture, then use image OCR only for screenshots or package inserts.",
+        "suggested_future_run": "For fast-food and foodservice records, prefer PDF/text extraction and archived document capture, then use image OCR only for screenshots or package inserts.",
+        "example_source_urls": "https://www.mcdonalds.com/us/es-us/product/big-mac.html; https://www.mcdonalds.com/us/en-us/product/small-french-fries.html; https://help.bk.com/hc/en-us/articles/36913083446935-Where-can-I-view-the-nutrition-and-allergen-information-for-Burger-King-menu-items; https://www.canceredinstitute.org/uploads/2/3/8/8/23883109/mcdonalds_ingredientslist.pdf; https://www.flickr.com/photos/jasonliebigstuff/4714969880"
+      },
+      {
+        "gap_category": "source_discovery_needed",
+        "row_count": 237,
+        "product_count": 116,
+        "top_products": "Panera Broccoli Cheddar Soup (4); 7UP Original (3); Banquet Chicken Pot Pie (3); Betty Crocker Super Moist Yellow Cake Mix (3); Bisquick Original Pancake and Baking Mix (3); Chick-fil-A Chicken Sandwich (3); Chipotle Chicken Burrito (3); Cool Whip Original (3)",
+        "top_domains": "",
+        "top_blockers": "find_source_attributable_package_evidence (237)",
+        "evidence_kinds": "evidence_gap",
+        "why_not_easy": "Use targeted current-web, collector, museum, marketplace, Common Crawl, and Wayback discovery to attach a source-attributable product record before OCR.",
+        "suggested_future_run": "Use targeted current-web, collector, museum, marketplace, Common Crawl, and Wayback discovery to attach a source-attributable product record before OCR.",
+        "example_source_urls": ""
+      },
+      {
+        "gap_category": "package_identity_review_needed",
+        "row_count": 60,
+        "product_count": 32,
+        "top_products": "Chef Boyardee Beefaroni (4); Heinz Tomato Ketchup (4); Pillsbury Crescent Rolls (4); Campbell's Condensed Tomato Soup (3); Kool-Aid Cherry Drink Mix (3); Kraft Singles American Cheese (3); Campbell's Chicken Noodle Soup (2); Cheerios Original (2)",
+        "top_domains": "en.wikipedia.org (5); commons.wikimedia.org (4); www.reddit.com (4); longreads.com (3); pprd.commissaries.com (3); www.flickr.com (3); www.littledebbie.com (3); digitalcommons.risd.edu (2)",
+        "top_blockers": "verify_package_front_or_primary_image (60)",
+        "evidence_kinds": "collector_package_photo; licensed_package_photo; current_web_page; ad_or_trade_catalog; brand_label_page; retailer_page; marketplace_listing",
+        "why_not_easy": "Review the source photo for front panel, SKU, package size, and date cues before spending OCR effort on an ingredient crop.",
+        "suggested_future_run": "Review the source photo for front panel, SKU, package size, and date cues before spending OCR effort on an ingredient crop.",
+        "example_source_urls": "https://www.flickr.com/photos/36878773%40N07/3782511003; https://commons.wikimedia.org/wiki/File%3ACampbell%27s_Chicken_Noodle_Soup%2C_1910.jpg; https://en.wikipedia.org/wiki/Heinz_Tomato_Ketchup; https://digitalcommons.risd.edu/picturecollection_vintageadvertisements/2/; https://www.upcitemdb.com/upc/040000000327"
+      }
+    ]
+  }
 }

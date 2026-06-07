@@ -17106,6 +17106,91 @@ td {
   color: var(--ink);
 }
 
+.corpus-ocr-panel {
+  margin-top: 16px;
+}
+
+.corpus-ocr-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.corpus-ocr-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(92px, 1fr));
+  gap: 8px;
+}
+
+.corpus-ocr-stat,
+.corpus-ocr-policy,
+.corpus-ocr-gap,
+.corpus-ocr-product {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  padding: 10px;
+}
+
+.corpus-ocr-stat strong {
+  display: block;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.corpus-ocr-stat span,
+.corpus-ocr-policy p,
+.corpus-ocr-gap p,
+.corpus-ocr-product p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.corpus-ocr-stat span {
+  display: block;
+  margin-top: 7px;
+  font-weight: 750;
+}
+
+.corpus-ocr-policy p {
+  margin: 0 0 8px;
+}
+
+.corpus-ocr-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 14px;
+}
+
+.corpus-ocr-gaps,
+.corpus-ocr-products {
+  display: grid;
+  gap: 8px;
+}
+
+.corpus-ocr-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.corpus-ocr-product-grid span {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  padding: 6px 7px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.corpus-ocr-product-grid strong {
+  color: var(--ink);
+}
+
 .registry-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
@@ -17292,6 +17377,8 @@ td {
   .corpus-pilot-grid,
   .corpus-heatmap-head,
   .corpus-workbench-grid,
+  .corpus-ocr-summary,
+  .corpus-ocr-layout,
   .story-focus,
   .story-reader,
   .story-toolbar,
@@ -17894,6 +17981,8 @@ td {
   .corpus-pilot-vintage-list,
   .corpus-pilot-lineup,
   .corpus-heatmap-summary,
+  .corpus-ocr-stat-grid,
+  .corpus-ocr-product-grid,
   .story-beats,
   .reader-storyline-metrics,
   .reader-storyline-grid,
