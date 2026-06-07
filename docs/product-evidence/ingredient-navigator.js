@@ -248,6 +248,22 @@ function renderEvents(productRow) {
     .join("");
 }
 
+function renderLabelExtract(extract, compact = false) {
+  if (!extract) return "";
+  const terms = (extract.legible_terms || [])
+    .map((term) => `<span>${escapeHtml(term)}</span>`)
+    .join("");
+  return `
+    <div class="visible-extract ${compact ? "is-compact" : ""}">
+      <span>${escapeHtml(extract.status || "label-text candidate")}</span>
+      <p>${escapeHtml(extract.observed_text || "Visible extract pending transcription.")}</p>
+      ${extract.source_note ? `<small>${escapeHtml(extract.source_note)}</small>` : ""}
+      <small>${escapeHtml(extract.confidence_note || "Manual verification needed.")}</small>
+      ${terms ? `<div class="extract-terms">${terms}</div>` : ""}
+    </div>
+  `;
+}
+
 function renderDetail(productRow, version) {
   const evidenceRows = versionEvidence(productRow, version);
   els.versionDetail.innerHTML = `
@@ -288,6 +304,7 @@ function renderDetail(productRow, version) {
           <dd>${escapeHtml(version.next_step)}</dd>
         </div>
       </dl>
+      ${renderLabelExtract(version.label_extract)}
     </article>
   `;
   els.evidenceGallery.innerHTML = evidenceRows.length
@@ -310,6 +327,7 @@ function renderDetail(productRow, version) {
             <dd>${escapeHtml(row.quality_note || "review needed")}</dd>
           </div>
         </dl>
+        ${renderLabelExtract(row.visible_extract, true)}
         ${statusBadge(row.status)}
         <a href="${escapeHtml(row.url)}" target="_blank" rel="noreferrer">${escapeHtml(row.source)}</a>
       </article>
