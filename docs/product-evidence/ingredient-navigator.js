@@ -31,6 +31,7 @@ const state = {
   productId: "",
   versionId: "",
   facetId: "",
+  proofFilter: "all",
   search: "",
   compare: false,
   maxYear: 2026,
@@ -86,13 +87,13 @@ function renderProductPicker() {
     !state.search.trim() || `${row.label} ${row.id}`.toLowerCase().includes(state.search.trim().toLowerCase())
   ));
   els.productSelect.innerHTML = rows
-    .map((row) => `<option value="${escapeHtml(row.id)}" ${row.id === state.productId ? "selected" : ""} ${row.status !== "loaded" ? "disabled" : ""}>${escapeHtml(row.label)}${row.status !== "loaded" ? " (planned)" : ""}</option>`)
+    .map((row) => `<option value="${escapeHtml(row.id)}" ${row.id === state.productId ? "selected" : ""} ${row.status !== "loaded" ? "disabled" : ""}>${escapeHtml(row.label)}${row.scope === "full_corpus_shell" ? " (corpus)" : ""}</option>`)
     .join("");
   els.productStrip.innerHTML = rows
     .map((row) => `
       <button class="product-card ${row.id === state.productId ? "is-selected" : ""}" type="button" data-product-id="${escapeHtml(row.id)}" ${row.status !== "loaded" ? "disabled" : ""}>
         <strong>${escapeHtml(row.label)}</strong>
-        <span>${escapeHtml(row.status === "loaded" ? "Pilot story loaded" : "Planned corpus target")}</span>
+        <span>${escapeHtml(row.scope === "story_rich_pilot" ? "Story-rich pilot" : "Full-corpus proof shell")}</span>
       </button>
     `)
     .join("");
@@ -322,20 +323,21 @@ function renderLabelExtract(extract, compact = false) {
 }
 
 function proofSourceUrl(row) {
-  return row?.url || row?.source_url || row?.archive_url || "";
+  return row?.source_photo_url || row?.url || row?.source_url || row?.archive_url || "";
 }
 
 function proofImageUrl(row) {
-  return row?.image_url || row?.image_path_or_url || row?.package_image_url || row?.screenshot_image_path || "";
+  return row?.public_image_url || row?.thumbnail_url || row?.image_url || row?.image_path_or_url || row?.package_image_url || row?.screenshot_image_path || "";
 }
 
 function rightsNote(row) {
-  return row?.rights || row?.license_rights_note || "External source; rights note needed before reproducing imagery.";
+  return row?.rights_status || row?.rights || row?.license_rights_note || "External source; rights note needed before reproducing imagery.";
 }
 
 function canEmbedProofImage(row) {
   const image = proofImageUrl(row);
   if (!image) return false;
+  if (row?.image_display_policy) return row.image_display_policy === "embed_rights_cleared";
   const rights = rightsNote(row).toLowerCase();
   const source = `${row?.source || ""} ${row?.url || ""}`.toLowerCase();
   const clearLicense = /public domain|cc[- ]?by|creative commons|wikimedia commons|owned image|rights cleared/.test(rights);
@@ -362,6 +364,27 @@ function proofExtractFor(version, row) {
   return version.label_extract || row.visible_extract || null;
 }
 
+function versionHasPhotoProof(productRow, version) {
+  return versionEvidence(productRow, version).some((row) => proofSourceUrl(row) || proofImageUrl(row))
+    || Number(version.source_count || 0) > 0;
+}
+
+function versionHasIngredientProof(productRow, version) {
+  return Boolean(proofExtractFor(version, bestProofEvidence(productRow, version)))
+    || /label|transcription|manual_verified|text_candidate/.test(String(version.status || ""));
+}
+
+function proofFilteredVersions(productRow) {
+  const versions = visibleVersions(productRow);
+  const filtered = versions.filter((version) => {
+    if (state.proofFilter === "photo") return versionHasPhotoProof(productRow, version);
+    if (state.proofFilter === "ingredient") return versionHasIngredientProof(productRow, version);
+    if (state.proofFilter === "verified") return version.status === "manual_verified" || version.validation_state?.state === "manual_verified";
+    return true;
+  });
+  return filtered.length ? filtered : versions;
+}
+
 function renderProofVisual(productRow, version, row) {
   const image = proofImageUrl(row);
   const source = proofSourceUrl(row);
@@ -379,7 +402,7 @@ function renderProofVisual(productRow, version, row) {
     <div class="proof-photo proof-photo-receipt status-${escapeHtml(row.status || version.status || "unknown")}">
       <span>${escapeHtml(row.kind || "source receipt")}</span>
       <strong>${escapeHtml(title || "Photo proof needed")}</strong>
-      <p>${escapeHtml(image ? "Image reference is present, but this page keeps it link-only until rights are reviewed." : "Photo proof is source-attributed, but no rights-cleared embeddable image URL is stored yet.")}</p>
+      <p>${escapeHtml(row.image_display_policy === "embed_rights_cleared" ? "Rights-cleared image is ready to display." : image ? "Image reference is present, but this page keeps it link-only until rights are reviewed." : "Photo proof is source-attributed, but no rights-cleared embeddable image URL is stored yet.")}</p>
       <dl>
         <div>
           <dt>Photo role</dt>
@@ -392,6 +415,10 @@ function renderProofVisual(productRow, version, row) {
         <div>
           <dt>Rights</dt>
           <dd>${escapeHtml(rightsNote(row))}</dd>
+        </div>
+        <div>
+          <dt>Display policy</dt>
+          <dd>${escapeHtml(row.image_display_policy || "source_link_only_no_public_image")}</dd>
         </div>
       </dl>
       ${source ? `<a href="${escapeHtml(source)}" target="_blank" rel="noreferrer">Open source photo/document</a>` : ""}
@@ -464,14 +491,21 @@ function renderProofCard(productRow, version, modeLabel) {
 
 function renderProofReader(productRow, version) {
   if (!els.proofReader) return;
-  const versions = visibleVersions(productRow);
-  const current = productRow.versions.find((row) => row.vintage === "current_2020s") || versions[versions.length - 1] || version;
-  const cards = state.compare && current.id !== version.id
+  const versions = proofFilteredVersions(productRow);
+  const displayVersion = versions.some((row) => row.id === version.id) ? version : versions[0] || version;
+  const current = productRow.versions.find((row) => row.vintage === "current_2020s") || versions[versions.length - 1] || displayVersion;
+  const cards = state.compare && current.id !== displayVersion.id
     ? [
-      { version, label: "Selected era" },
+      { version: displayVersion, label: "Selected era" },
       { version: current, label: "Current anchor" },
     ]
-    : [{ version, label: "Selected era" }];
+    : [{ version: displayVersion, label: "Selected era" }];
+  const filterRows = [
+    ["all", "All eras"],
+    ["photo", "Photo-backed"],
+    ["ingredient", "Ingredient-backed"],
+    ["verified", "Verified only"],
+  ];
   els.proofReader.innerHTML = `
     <header class="proof-reader-head">
       <div>
@@ -486,9 +520,16 @@ function renderProofReader(productRow, version) {
     </header>
     <div class="proof-era-toggle" aria-label="Recipe history era toggle">
       ${versions.map((row) => `
-        <button type="button" data-version-id="${escapeHtml(row.id)}" class="${row.id === version.id ? "is-selected" : ""}">
+        <button type="button" data-version-id="${escapeHtml(row.id)}" class="${row.id === displayVersion.id ? "is-selected" : ""}">
           <span>${escapeHtml(row.year)}</span>
           <strong>${escapeHtml(row.label)}</strong>
+        </button>
+      `).join("")}
+    </div>
+    <div class="proof-filter-toggle" aria-label="Proof filter controls">
+      ${filterRows.map(([key, label]) => `
+        <button type="button" data-proof-filter="${escapeHtml(key)}" class="${state.proofFilter === key ? "is-selected" : ""}">
+          ${escapeHtml(label)}
         </button>
       `).join("")}
     </div>
@@ -721,6 +762,12 @@ function attachEvents() {
     render();
   });
   els.proofReader.addEventListener("click", (event) => {
+    const filterButton = event.target.closest("[data-proof-filter]");
+    if (filterButton) {
+      state.proofFilter = filterButton.dataset.proofFilter || "all";
+      render();
+      return;
+    }
     const button = event.target.closest("[data-version-id]");
     if (!button) return;
     state.versionId = button.dataset.versionId;

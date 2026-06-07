@@ -410,7 +410,14 @@ a:hover {
   padding-bottom: 2px;
 }
 
-.proof-era-toggle button {
+.proof-filter-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.proof-era-toggle button,
+.proof-filter-toggle button {
   flex: 0 0 136px;
   min-height: 62px;
   border: 1px solid var(--line);
@@ -422,8 +429,20 @@ a:hover {
   text-align: left;
 }
 
-.proof-era-toggle button.is-selected {
+.proof-filter-toggle button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 10px;
+}
+
+.proof-era-toggle button.is-selected,
+.proof-filter-toggle button.is-selected {
   border-color: var(--teal);
+  color: var(--ink);
   box-shadow: inset 0 0 0 1px rgba(101, 183, 177, 0.38);
 }
 
@@ -720,6 +739,8 @@ a:hover {
 
 .status-badge.status-deferred,
 .status-badge.status-source_review,
+.status-badge.status-source_discovery_needed,
+.status-badge.status-full_corpus_selectable,
 .status-badge.status-needs_photo_review,
 .status-badge.status-needs_label_transcription,
 .status-badge.status-needs_manual_verification {
