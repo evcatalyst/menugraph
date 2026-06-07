@@ -932,6 +932,60 @@ function renderConfectionWrapperItemPanelTriageStatus() {
   `;
 }
 
+function renderConfectionWrapperItemPanelPipelineStatus() {
+  const summary = state.summary?.confection_wrapper_item_panel_pipeline_summary || {};
+  if (!summary.run_id) return "";
+  const model = summary.model_routes || {};
+  const capture = summary.capture || {};
+  const ocr = summary.ocr || {};
+  const review = summary.review_queue || {};
+  const artifacts = summary.public_artifacts || {};
+  const blockers = summary.blockers || {};
+  const products = Array.isArray(blockers.top_products)
+    ? blockers.top_products.map((row) => `${row.key || "Product"} · ${row.count || 0}`)
+    : String(blockers.top_products || "").split(";").map((value) => value.trim()).filter(Boolean);
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-needs_source_review">
+      <span>Candy Wrapper Archive OCR Pipeline</span>
+      <strong>${escapeHtml(`${model.spark_packets_generated || 0} Spark packets · ${review.rows || 0} review rows`)}</strong>
+      <p>The item-level Candy Wrapper Archive lane now runs through the same model/capture/OCR summary flow. This is still a dry run: archive photos are source leads, ingredient proof starts only after private readable-panel crops are supplied.</p>
+      <dl>
+        <div>
+          <dt>Dry-run rows</dt>
+          <dd>${escapeHtml(capture.selected_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Ready for OCR</dt>
+          <dd>${escapeHtml(capture.ready_for_ocr || 0)}</dd>
+        </div>
+        <div>
+          <dt>No-network blocks</dt>
+          <dd>${escapeHtml(capture.blocked_no_network || 0)}</dd>
+        </div>
+        <div>
+          <dt>OCR skipped</dt>
+          <dd>${escapeHtml(ocr.ocr_skipped_no_image || 0)}</dd>
+        </div>
+        <div>
+          <dt>Source review</dt>
+          <dd>${escapeHtml(review.needs_source_review || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive pipeline product blockers">
+        ${products.slice(0, 5).map((row) => `<span>${escapeHtml(row)}</span>`).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.model_assist_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.model_assist_summary_csv))}">Spark Packets CSV</a>` : ""}
+        ${artifacts.run_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.run_summary_csv))}">Capture Dry Run CSV</a>` : ""}
+        ${artifacts.image_map_template_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_template_csv))}">Image Map Template</a>` : ""}
+        ${artifacts.ocr_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ocr_summary_csv))}">OCR Summary CSV</a>` : ""}
+        ${artifacts.review_queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.review_queue_csv))}">Review Queue CSV</a>` : ""}
+        ${artifacts.pipeline_summary_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.pipeline_summary_json))}">Pipeline JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
@@ -988,6 +1042,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperCaptureHandoffStatus()}
     ${renderConfectionWrapperItemCandidateStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
+    ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
     ${storyBriefs.product_count ? `
       <article class="corpus-handoff-card status-full_corpus_selectable">

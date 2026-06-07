@@ -1,0 +1,76 @@
+{
+  "schema_version": "hybrid_ingredient_ocr_public_rollup.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "confection-wrapper-item-panel-v1",
+  "public_safety": {
+    "images_committed": false,
+    "private_paths_committed": false,
+    "prompts_with_private_paths_committed": false,
+    "api_keys_committed": false,
+    "unverified_ingredient_claims_published": false,
+    "manual_verified_created": false,
+    "candidate_only": true
+  },
+  "model_routes": {
+    "spark_model": "gpt-5.3-codex-spark",
+    "gpt55_review_model": "gpt-5.5",
+    "grok_research_model": "grok-4.3",
+    "spark_packets_generated": 3,
+    "gpt55_review_batches_planned": 0,
+    "grok_assist_batches_created": 0
+  },
+  "capture": {
+    "selected_rows": 49,
+    "rows_captured": 49,
+    "ready_for_ocr": 0,
+    "blocked_no_network": 49,
+    "image_map_template_rows": 49,
+    "image_map_key_count": 149
+  },
+  "ocr": {
+    "ocr_result_rows": 49,
+    "ocr_planned": 0,
+    "ocr_attempted": 0,
+    "ocr_succeeded": 0,
+    "ocr_failed": 0,
+    "ocr_skipped_no_image": 49,
+    "ingredient_signal_found": 0,
+    "needs_human_correction": 0
+  },
+  "review_queue": {
+    "rows": 49,
+    "by_status": [
+      {
+        "key": "needs_source_review",
+        "count": 49
+      }
+    ],
+    "candidate_review_ready": 0,
+    "needs_better_crop": 0,
+    "needs_source_review": 49,
+    "needs_manual_transcription": 0
+  },
+  "blockers": {
+    "top_gap_categories": [
+      {
+        "key": "source_page_capture_needed",
+        "count": 49
+      }
+    ],
+    "top_source_domains": [
+      {
+        "key": "www.candywrapperarchive.com",
+        "count": 49
+      }
+    ],
+    "top_products": "Butterfinger Bar (8); Reese's Peanut Butter Cups (7); Hershey's Milk Chocolate Bar (6); Kit Kat Bar (6); Snickers Bar (6); M&M's Milk Chocolate Candies (5); Twix Bar (5); Milky Way Bar (4); Tootsie Roll (2)"
+  },
+  "public_artifacts": {
+    "pipeline_summary_json": "docs/data/product-evidence/confection_wrapper_item_panel_pipeline_summary.json",
+    "run_summary_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_dry_run_summary.csv",
+    "image_map_template_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_image_map_template.csv",
+    "ocr_summary_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_native_ocr_summary.csv",
+    "model_assist_summary_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_model_assist_summary.csv",
+    "review_queue_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_review_queue.csv"
+  }
+}
