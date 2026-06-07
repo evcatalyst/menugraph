@@ -1,0 +1,388 @@
+{
+  "generated_at_utc": "2026-06-07T10:45:00Z",
+  "schema_version": "ingredient_navigator_v1",
+  "default_product": "oreo_original_chocolate_sandwich_cookies",
+  "status_legend": [
+    {
+      "key": "manual_verified",
+      "label": "Verified label",
+      "meaning": "Reviewed ingredient text can carry scoped formulation claims."
+    },
+    {
+      "key": "label_visible",
+      "label": "Label visible",
+      "meaning": "Ingredient panel or text appears available, but needs reviewed transcription."
+    },
+    {
+      "key": "usable_photo",
+      "label": "Photo lead",
+      "meaning": "A product object can anchor the era, but the ingredient panel is not yet readable."
+    },
+    {
+      "key": "source_review",
+      "label": "Source review",
+      "meaning": "A source exists, but source/date/product identity still need review."
+    },
+    {
+      "key": "gap",
+      "label": "Explicit gap",
+      "meaning": "The story must not claim ingredient facts for this slot."
+    }
+  ],
+  "products": [
+    {
+      "id": "oreo_original_chocolate_sandwich_cookies",
+      "name": "Oreo Original Chocolate Sandwich Cookies",
+      "brand": "Oreo",
+      "category": "packaged cookies",
+      "coverage": 100,
+      "source_backed_slots": 6,
+      "total_slots": 6,
+      "candidate_count": 16,
+      "verified_labels": 0,
+      "label_visible_leads": 7,
+      "summary": "Oreo has a complete source-backed package journey across the vintage slots, but the recipe journey is still locked because no comparable ingredient statement has been manually verified.",
+      "story_thesis": "The visible story is the proof chase: package and label leads exist, but the original-to-current ingredient comparison cannot publish until readable panels become reviewed text.",
+      "claim_boundary": "1912 original ingredient label not verified. Do not imply a verified original recipe or a full original-to-current formulation diff.",
+      "next_unlock": "Start with label-visible current and 2010s records, transcribe against source images/pages, then attach reviewer attribution before comparing ingredients.",
+      "source_domains": [
+        "smartlabel.mondelez.info",
+        "www.flickr.com",
+        "www.ewg.org",
+        "www.kroger.com",
+        "business.walmart.com",
+        "www.packagingdigest.com"
+      ],
+      "versions": [
+        {
+          "id": "origin_1912_gap",
+          "year": 1912,
+          "label": "1912 origin gap",
+          "vintage": "earliest_verified_label",
+          "status": "gap",
+          "source_count": 0,
+          "confidence": 0.12,
+          "headline": "Original label not verified",
+          "ingredient_summary": "No verified 1912 ingredient statement is present in the snapshot.",
+          "facet_summary": ["origin gap", "claim boundary", "needs source"],
+          "package_context": "Launch/origin claim requires a label or source-attributable transcription before recipe language.",
+          "price_weight_context": "No price/weight alignment for this origin claim.",
+          "next_step": "Find a source-attributable 1912 package label, catalog scan, archive object, or defensible transcription.",
+          "evidence_ids": []
+        },
+        {
+          "id": "early_package_leads",
+          "year": 1960,
+          "label": "1950s-1960s package lead",
+          "vintage": "1980s_or_earlier",
+          "status": "usable_photo",
+          "source_count": 3,
+          "confidence": 0.36,
+          "headline": "Vintage package object, not recipe text",
+          "ingredient_summary": "Package-photo and article leads can anchor the era visually, but ingredient panel text is not verified.",
+          "facet_summary": ["package lead", "panel needed", "date basis review"],
+          "package_context": "Candidate package history exists; net weight and serving fields are not captured.",
+          "price_weight_context": "Price/weight alignment deferred until package fields are reviewed.",
+          "next_step": "Review the source object for readable ingredient panel, net weight, manufacturer/distributor text, and rights.",
+          "evidence_ids": ["flickr_oreo_1960s", "packaging_digest_century", "seattlepi_century"]
+        },
+        {
+          "id": "package_1993",
+          "year": 1993,
+          "label": "1990s package object",
+          "vintage": "1990s",
+          "status": "usable_photo",
+          "source_count": 1,
+          "confidence": 0.34,
+          "headline": "1993 package lead",
+          "ingredient_summary": "A source-attributable package object exists, but no reviewed ingredient text is attached.",
+          "facet_summary": ["photo lead", "panel needed", "recipe locked"],
+          "package_context": "Package format visible in source title; panel fields still uncaptured.",
+          "price_weight_context": "No price link attached.",
+          "next_step": "Confirm label-panel readability and date basis, then transcribe if readable.",
+          "evidence_ids": ["flickr_oreo_1993"]
+        },
+        {
+          "id": "package_2000s",
+          "year": 2002,
+          "label": "2000s package bridge",
+          "vintage": "2000s",
+          "status": "usable_photo",
+          "source_count": 2,
+          "confidence": 0.38,
+          "headline": "Archive-era package leads",
+          "ingredient_summary": "Package-photo leads can bridge the timeline but do not support ingredient diffs yet.",
+          "facet_summary": ["photo lead", "transcription needed", "variant caution"],
+          "package_context": "Candidate package objects include special editions/variants; identity review is required.",
+          "price_weight_context": "No price/weight alignment yet.",
+          "next_step": "Separate variant/package identity, then review panels for ingredient and weight text.",
+          "evidence_ids": ["flickr_oreo_harley_2000", "flickr_oreo_uhoh_2002"]
+        },
+        {
+          "id": "label_2010s",
+          "year": 2010,
+          "label": "2010s label bridge",
+          "vintage": "2010s",
+          "status": "label_visible",
+          "source_count": 3,
+          "confidence": 0.56,
+          "headline": "Readable-label candidate",
+          "ingredient_summary": "Label-visible records exist, but the ingredient text still needs correction/manual verification.",
+          "facet_summary": ["label visible", "OCR/manual review", "package review"],
+          "package_context": "2010s package leads include collector photos and EWG label records.",
+          "price_weight_context": "No normalized price/weight row attached.",
+          "next_step": "Correct/transcribe visible label text and record reviewer attribution.",
+          "evidence_ids": ["ewg_oreo_winter_2010", "flickr_oreo_spring_2010", "flickr_oreo_nascar_2010"]
+        },
+        {
+          "id": "current_2020s",
+          "year": 2026,
+          "label": "Current SKU anchor",
+          "vintage": "current_2020s",
+          "status": "label_visible",
+          "source_count": 6,
+          "confidence": 0.68,
+          "headline": "Current label leads, archive needed",
+          "ingredient_summary": "Current ingredient sources are visible, but the record still needs durable capture and reviewed transcription before comparison.",
+          "facet_summary": ["label visible", "durable capture needed", "SKU-specific"],
+          "package_context": "Current SKU examples include 14.3 oz and 13.29 oz source titles; normalize by SKU/package before analysis.",
+          "price_weight_context": "Price-per-ounce and price-per-serving are deferred until package/price links are aligned.",
+          "next_step": "Capture durable current label evidence, verify SKU/package context, and attach reviewed ingredient text.",
+          "evidence_ids": ["smartlabel_oreo_143", "ewg_oreo_current", "kroger_oreo_current", "walmart_oreo_current"]
+        }
+      ],
+      "facets": [
+        {
+          "id": "fat_oil",
+          "label": "Fat/Oil System",
+          "status": "blocked",
+          "detail": "High-interest story lane, but no oil-system change can be asserted until labels are verified."
+        },
+        {
+          "id": "sweetener",
+          "label": "Sweeteners",
+          "status": "blocked",
+          "detail": "Ingredient text is required before sugar/HFCS/invert-sugar comparisons can be made."
+        },
+        {
+          "id": "flour_grain",
+          "label": "Flour/Grain",
+          "status": "blocked",
+          "detail": "Needs parsed ingredient statements to compare enriched flour and subingredients."
+        },
+        {
+          "id": "cocoa_chocolate",
+          "label": "Cocoa/Chocolate",
+          "status": "blocked",
+          "detail": "Cocoa/chocolate terms must come from reviewed labels, not product names."
+        },
+        {
+          "id": "package_weight",
+          "label": "Package Weight",
+          "status": "deferred",
+          "detail": "Source titles expose current package-size hints; normalized analysis waits for captured net weight and price links."
+        },
+        {
+          "id": "evidence_quality",
+          "label": "Evidence Quality",
+          "status": "active",
+          "detail": "This is the current publishable story: where evidence exists, where it breaks, and what unlocks recipe comparison."
+        }
+      ],
+      "events": [
+        {
+          "year": 1912,
+          "label": "Origin claim held",
+          "status": "gap",
+          "detail": "Original Oreo ingredient label is not verified."
+        },
+        {
+          "year": 1960,
+          "label": "Vintage package lead",
+          "status": "usable_photo",
+          "detail": "Package object can anchor visual history, not ingredient claims."
+        },
+        {
+          "year": 2010,
+          "label": "Readable-label bridge",
+          "status": "label_visible",
+          "detail": "Label-visible sources can move into transcription review."
+        },
+        {
+          "year": 2026,
+          "label": "Current SKU anchor",
+          "status": "label_visible",
+          "detail": "Current label sources need durable capture and manual verification."
+        }
+      ],
+      "evidence": [
+        {
+          "id": "smartlabel_oreo_143",
+          "title": "Nabisco Oreo Sandwich Cookies 14.3 oz - SmartLabel",
+          "source": "smartlabel.mondelez.info",
+          "url": "https://smartlabel.mondelez.info/00044000033262-0001-en-US/index.html",
+          "status": "label_visible",
+          "kind": "brand_label_page",
+          "rights": "External source; rights note needed before reproducing imagery."
+        },
+        {
+          "id": "ewg_oreo_current",
+          "title": "EWG Food Scores - Oreo Chocolate Original Flavor Sandwich Cookies",
+          "source": "www.ewg.org",
+          "url": "https://www.ewg.org/foodscores/products/0044000051617-OreoChocolateOriginalFlavorSandwichCookies/",
+          "status": "label_visible",
+          "kind": "label_database_record",
+          "rights": "External source; use as citation link."
+        },
+        {
+          "id": "kroger_oreo_current",
+          "title": "OREO Chocolate Sandwich Cookies, 14.3 oz - Kroger",
+          "source": "www.kroger.com",
+          "url": "https://www.kroger.com/p/nabisco-original-oreos/0004400003202",
+          "status": "label_visible",
+          "kind": "retailer_page",
+          "rights": "External source; current-web evidence needs durable capture."
+        },
+        {
+          "id": "walmart_oreo_current",
+          "title": "Oreo Original Cookie 13.29 oz - Walmart Business",
+          "source": "business.walmart.com",
+          "url": "https://business.walmart.com/ip/Oreo-Original-Cookie-13-29-oz/16255757318",
+          "status": "label_visible",
+          "kind": "retailer_page",
+          "rights": "External source; current-web evidence needs durable capture."
+        },
+        {
+          "id": "ewg_oreo_winter_2010",
+          "title": "EWG Food Scores - Oreo Chocolate Sandwich Cookies, Original, Winter",
+          "source": "www.ewg.org",
+          "url": "https://www.ewg.org/foodscores/products/044000081034-OreoChocolateSandwichCookiesOriginalWinter/",
+          "status": "label_visible",
+          "kind": "label_database_record",
+          "rights": "External source; use as citation link."
+        },
+        {
+          "id": "flickr_oreo_spring_2010",
+          "title": "Nabisco Oreo Spring edition cookie package, 2010 - Flickr",
+          "source": "www.flickr.com",
+          "url": "https://www.flickr.com/photos/jasonliebigstuff/4359618633",
+          "status": "usable_photo",
+          "kind": "collector_package_photo",
+          "rights": "Collector photo; inspect license/rights before reuse."
+        },
+        {
+          "id": "flickr_oreo_nascar_2010",
+          "title": "Nabisco Oreo Nascar Edition cookie package, 2010 - Flickr",
+          "source": "www.flickr.com",
+          "url": "https://www.flickr.com/photos/jasonliebigstuff/4786235805",
+          "status": "usable_photo",
+          "kind": "collector_package_photo",
+          "rights": "Collector photo; inspect license/rights before reuse."
+        },
+        {
+          "id": "flickr_oreo_harley_2000",
+          "title": "Nabisco Oreo Win Harley-Davidson cookie box, 2000 - Flickr",
+          "source": "www.flickr.com",
+          "url": "https://www.flickr.com/photos/jasonliebigstuff/6823913378",
+          "status": "usable_photo",
+          "kind": "collector_package_photo",
+          "rights": "Collector photo; inspect license/rights before reuse."
+        },
+        {
+          "id": "flickr_oreo_uhoh_2002",
+          "title": "Nabisco Uh-Oh! Oreo cookies package, 2002-2003 - Flickr",
+          "source": "www.flickr.com",
+          "url": "https://www.flickr.com/photos/jasonliebigstuff/4777043511",
+          "status": "usable_photo",
+          "kind": "collector_package_photo",
+          "rights": "Collector photo; inspect license/rights before reuse."
+        },
+        {
+          "id": "flickr_oreo_1993",
+          "title": "Nabisco - Oreo - 6-pack cookie pack - 1993 - Flickr",
+          "source": "www.flickr.com",
+          "url": "https://www.flickr.com/photos/jasonliebigstuff/6823914204",
+          "status": "usable_photo",
+          "kind": "collector_package_photo",
+          "rights": "Collector photo; inspect license/rights before reuse."
+        },
+        {
+          "id": "flickr_oreo_1960s",
+          "title": "Nabisco Oreo Creme Sandwich cello package, 1950s-1960s - Flickr",
+          "source": "www.flickr.com",
+          "url": "https://www.flickr.com/photos/jasonliebigstuff/4635007453",
+          "status": "usable_photo",
+          "kind": "collector_package_photo",
+          "rights": "Collector photo; inspect license/rights before reuse."
+        },
+        {
+          "id": "packaging_digest_century",
+          "title": "Oreo celebrates century of cookie packaging - Packaging Digest",
+          "source": "www.packagingdigest.com",
+          "url": "https://www.packagingdigest.com/packaging-design/oreo-celebrates-century-of-cookie-packaging",
+          "status": "source_review",
+          "kind": "current_web_page",
+          "rights": "Article citation; not ingredient-label evidence."
+        },
+        {
+          "id": "seattlepi_century",
+          "title": "A century of Oreos - SeattlePI",
+          "source": "www.seattlepi.com",
+          "url": "https://www.seattlepi.com/entertainment/article/a-century-of-oreos-3386488.php",
+          "status": "source_review",
+          "kind": "current_web_page",
+          "rights": "Article citation; not ingredient-label evidence."
+        }
+      ],
+      "clusters": [
+        {
+          "label": "Oil System Changes",
+          "status": "blocked",
+          "detail": "Potential future story lane; no oil substitution claim until verified labels exist."
+        },
+        {
+          "label": "Sweetener Transitions",
+          "status": "blocked",
+          "detail": "Potential future story lane; requires parsed ingredient statements."
+        },
+        {
+          "label": "Package + Price Overlay",
+          "status": "deferred",
+          "detail": "Current package-size hints exist; normalized price/weight analysis is deferred."
+        },
+        {
+          "label": "Evidence Quality",
+          "status": "active",
+          "detail": "Publishable now as an evidence-status journey with explicit gaps."
+        }
+      ]
+    }
+  ],
+  "product_index": [
+    {
+      "id": "oreo_original_chocolate_sandwich_cookies",
+      "label": "Oreo",
+      "status": "loaded"
+    },
+    {
+      "id": "doritos",
+      "label": "Doritos",
+      "status": "planned"
+    },
+    {
+      "id": "cheerios",
+      "label": "Cheerios",
+      "status": "planned"
+    },
+    {
+      "id": "big_mac",
+      "label": "Big Mac",
+      "status": "planned"
+    },
+    {
+      "id": "mcnuggets",
+      "label": "McNuggets",
+      "status": "planned"
+    }
+  ]
+}
