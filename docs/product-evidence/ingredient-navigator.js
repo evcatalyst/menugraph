@@ -59,6 +59,14 @@ function labelFor(value) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function navigatorArtifactHref(value) {
+  const text = String(value || "");
+  if (!text) return "";
+  return text
+    .replace(/^docs\/data\//, "../data/")
+    .replace(/^docs\/product-evidence\//, "./");
+}
+
 function statusBadge(status) {
   return `<span class="status-badge status-${escapeHtml(status || "unknown")}">${escapeHtml(labelFor(status || "unknown"))}</span>`;
 }
@@ -280,6 +288,8 @@ function renderCorpusHandoff() {
   if (!els.corpusHandoff) return;
   const stats = corpusHandoffStats();
   const tasks = captureTaskSummary();
+  const storyBriefs = state.data.full_corpus_story_briefs_summary || {};
+  const storyArtifacts = storyBriefs.site_artifacts || storyBriefs.public_artifacts || {};
   els.corpusHandoff.innerHTML = `
     <article class="corpus-handoff-card">
       <span>Corpus Loaded</span>
@@ -320,6 +330,32 @@ function renderCorpusHandoff() {
       <strong>Private capture then review</strong>
       <p>Capture/crop source pages privately, run native OCR, batch-review candidate text, then publish only rights-cleared images or link-only proof cards.</p>
     </article>
+    ${storyBriefs.product_count ? `
+      <article class="corpus-handoff-card status-full_corpus_selectable">
+        <span>Story Brief Exports</span>
+        <strong>${escapeHtml(`${storyBriefs.product_count} product briefs`)}</strong>
+        <p>${escapeHtml(storyBriefs.public_policy || "Story briefs are source/story handoffs; ingredient claims still require manual verification.")}</p>
+        <dl>
+          <div>
+            <dt>Proof shells</dt>
+            <dd>${escapeHtml(storyBriefs.proof_shell_count || 0)}</dd>
+          </div>
+          <div>
+            <dt>Receipts</dt>
+            <dd>${escapeHtml(storyBriefs.source_receipts || 0)}</dd>
+          </div>
+          <div>
+            <dt>Embeds</dt>
+            <dd>${escapeHtml(storyBriefs.public_embeds || 0)}</dd>
+          </div>
+        </dl>
+        <div class="corpus-handoff-links">
+          ${storyArtifacts.story_briefs_markdown ? `<a href="${escapeHtml(navigatorArtifactHref(storyArtifacts.story_briefs_markdown))}">Markdown</a>` : ""}
+          ${storyArtifacts.story_briefs_csv ? `<a href="${escapeHtml(navigatorArtifactHref(storyArtifacts.story_briefs_csv))}">CSV</a>` : ""}
+          ${storyArtifacts.story_briefs_json ? `<a href="${escapeHtml(navigatorArtifactHref(storyArtifacts.story_briefs_json))}">JSON</a>` : ""}
+        </div>
+      </article>
+    ` : ""}
     ${renderCaptureTaskPreview(tasks)}
   `;
 }
@@ -1056,6 +1092,9 @@ function renderReviewQueue(productRow) {
 
 function renderExports(productRow) {
   const exports = productRow.export_paths || {};
+  const storyArtifacts = state.data.full_corpus_story_briefs_summary?.site_artifacts
+    || state.data.full_corpus_story_briefs_summary?.public_artifacts
+    || {};
   const rows = [
     ["Timeline JSON", exports.timeline_json],
     ["Evidence CSV", exports.evidence_csv],
@@ -1063,9 +1102,12 @@ function renderExports(productRow) {
     ["Gap Closure CSV", exports.gap_closure_csv],
     ["OCR Queue CSV", exports.ocr_queue_csv],
     ["Story Briefs", exports.story_markdown],
+    ["Full Corpus Stories MD", storyArtifacts.story_briefs_markdown],
+    ["Full Corpus Stories CSV", storyArtifacts.story_briefs_csv],
+    ["Full Corpus Stories JSON", storyArtifacts.story_briefs_json],
   ].filter(([, href]) => href);
   els.exportLinks.innerHTML = rows.length
-    ? rows.map(([label, href]) => `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`).join("")
+    ? rows.map(([label, href]) => `<a href="${escapeHtml(navigatorArtifactHref(href))}">${escapeHtml(label)}</a>`).join("")
     : `<p class="empty-note">Exports are not configured for this product.</p>`;
 }
 

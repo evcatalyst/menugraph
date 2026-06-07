@@ -92107,5 +92107,36 @@
     "embedded_public_images": 0,
     "link_only_photo_receipts": 1369,
     "note": "The navigator is full-corpus selectable. Most products are conservative proof shells until photo rights, OCR, and manual verification improve."
+  },
+  "full_corpus_story_briefs_summary": {
+    "schema_version": "full_corpus_story_briefs_summary.v1",
+    "generated_at": "2026-06-07T20:45:00Z",
+    "product_count": 120,
+    "story_rich_pilot_count": 10,
+    "proof_shell_count": 110,
+    "products_with_candidate_text": 10,
+    "products_with_source_gaps": 117,
+    "source_receipts": 1369,
+    "link_only_receipts": 1369,
+    "public_embeds": 0,
+    "public_safety": {
+      "candidate_only": true,
+      "manual_verified_created": false,
+      "claim_promotion_allowed": false,
+      "only_embed_rights_cleared_images": true,
+      "external_images_published": false,
+      "private_paths_committed": false
+    },
+    "public_policy": "Story briefs can show source receipts and candidate text state. Ingredient claims still require manual verification; external photos remain link-only unless marked embed_rights_cleared.",
+    "public_artifacts": {
+      "story_briefs_json": "docs/data/product-evidence/exports/full_corpus_story_briefs.json",
+      "story_briefs_csv": "docs/data/product-evidence/exports/full_corpus_story_briefs.csv",
+      "story_briefs_markdown": "docs/data/product-evidence/exports/full_corpus_story_briefs.md"
+    },
+    "site_artifacts": {
+      "story_briefs_json": "../data/product-evidence/exports/full_corpus_story_briefs.json",
+      "story_briefs_csv": "../data/product-evidence/exports/full_corpus_story_briefs.csv",
+      "story_briefs_markdown": "../data/product-evidence/exports/full_corpus_story_briefs.md"
+    }
   }
 }
