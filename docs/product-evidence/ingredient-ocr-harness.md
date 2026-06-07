@@ -116,6 +116,7 @@ Private image-map run:
 ```sh
 cp docs/data/product-evidence/exports/hybrid_ocr_image_map_template.csv .cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-template.private.csv
 # Fill local_private_image_path or processed_private_image_path in the private copy.
+node scripts/audit-image-map-template.js --run-id=hybrid-ocr-v1 --template=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-template.private.csv --public-audit-summary=docs/data/product-evidence/exports/hybrid_ocr_image_map_audit.csv --public-audit-json=docs/data/product-evidence/hybrid_ocr_image_map_audit.json
 node scripts/build-image-map-from-template.js --run-id=hybrid-ocr-v1 --template=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-template.private.csv --output=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-input.json
 node scripts/capture-ingredient-ocr-assets.js --run-id=hybrid-ocr-v1 --limit=250 --image-map=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-input.json
 node scripts/run-ingredient-ocr.js --run-id=hybrid-ocr-v1 --limit=250
