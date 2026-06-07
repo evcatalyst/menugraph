@@ -11,6 +11,7 @@ const {
   modelDefaults,
   numberArg,
   pathFromArg,
+  publicArtifactRef,
   publicEvidenceRow,
   publicModelSummaryCsvPath,
   queuePathFromArgs,
@@ -214,7 +215,7 @@ function main() {
   const summary = redactPrivate(buildSummary(runId, runDir, selectedRows, packets, {
     packetSize,
     dryRun,
-    publicModelSummaryRef: path.relative(root, publicModelSummaryPath),
+    publicModelSummaryRef: publicArtifactRef(publicModelSummaryPath),
   }));
   writeJson(path.join(runDir, "spark_packet_summary.public.json"), summary);
   writeCsv(publicModelSummaryPath, [

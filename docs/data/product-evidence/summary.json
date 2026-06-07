@@ -183602,10 +183602,12 @@
       "blocked_no_network": 101
     },
     "ocr": {
-      "ocr_result_rows": 0,
+      "ocr_result_rows": 101,
+      "ocr_planned": 0,
       "ocr_attempted": 0,
       "ocr_succeeded": 0,
       "ocr_failed": 0,
+      "ocr_skipped_no_image": 101,
       "ingredient_signal_found": 0,
       "needs_human_correction": 0
     },
@@ -183688,6 +183690,7 @@
     "public_artifacts": {
       "pipeline_summary_json": "docs/data/product-evidence/pilot_capture_pipeline_summary.json",
       "run_summary_csv": "docs/data/product-evidence/exports/pilot_capture_dry_run_summary.csv",
+      "ocr_summary_csv": "docs/data/product-evidence/exports/pilot_capture_native_ocr_summary.csv",
       "model_assist_summary_csv": "docs/data/product-evidence/exports/pilot_capture_model_assist_summary.csv",
       "review_queue_csv": "docs/data/product-evidence/exports/pilot_capture_review_queue.csv"
     }

@@ -87,17 +87,30 @@ function renderProductPicker() {
   const rows = state.data.product_index.filter((row) => (
     !state.search.trim() || `${row.label} ${row.id}`.toLowerCase().includes(state.search.trim().toLowerCase())
   ));
+  const allRows = state.data.product_index || [];
+  const storyRich = allRows.filter((row) => row.scope === "story_rich_pilot").length;
+  const proofShells = Math.max(0, allRows.length - storyRich);
+  const searchLabel = state.search.trim()
+    ? `${rows.length} matching products`
+    : `${allRows.length} total products`;
   els.productSelect.innerHTML = rows
     .map((row) => `<option value="${escapeHtml(row.id)}" ${row.id === state.productId ? "selected" : ""} ${row.status !== "loaded" ? "disabled" : ""}>${escapeHtml(row.label)}${row.scope === "full_corpus_shell" ? " (corpus)" : ""}</option>`)
     .join("");
-  els.productStrip.innerHTML = rows
+  els.productStrip.innerHTML = `
+    <article class="product-strip-summary" aria-label="Corpus selector summary">
+      <span>${escapeHtml(searchLabel)}</span>
+      <strong>${escapeHtml(storyRich)} pilot stories + ${escapeHtml(proofShells)} proof shells</strong>
+      <p>Scroll or search to open any corpus product. Only the first ten are stitched story pilots; the rest are evidence-first shells.</p>
+    </article>
+    ${rows
     .map((row) => `
       <button class="product-card ${row.id === state.productId ? "is-selected" : ""}" type="button" data-product-id="${escapeHtml(row.id)}" ${row.status !== "loaded" ? "disabled" : ""}>
         <strong>${escapeHtml(row.label)}</strong>
-        <span>${escapeHtml(row.scope === "story_rich_pilot" ? "Story-rich pilot" : "Full-corpus proof shell")}</span>
+        <span>${escapeHtml(row.scope === "story_rich_pilot" ? "Story-rich pilot" : "Full-corpus proof shell")} · ${escapeHtml(row.source_backed_slots || 0)}/${escapeHtml(row.total_slots || 6)} source slots</span>
       </button>
     `)
-    .join("");
+    .join("")}
+  `;
 }
 
 function corpusHandoffStats() {
@@ -399,6 +412,15 @@ function proofSourceUrl(row) {
   return row?.source_photo_url || row?.url || row?.source_url || row?.archive_url || "";
 }
 
+function sourceHost(url) {
+  if (!url) return "source needed";
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch (_error) {
+    return String(url).replace(/^https?:\/\//, "").split("/")[0] || "source";
+  }
+}
+
 function proofImageUrl(row) {
   return row?.public_image_url || row?.thumbnail_url || row?.image_url || row?.image_path_or_url || row?.package_image_url || row?.screenshot_image_path || "";
 }
@@ -473,6 +495,11 @@ function renderProofVisual(productRow, version, row) {
   }
   return `
     <div class="proof-photo proof-photo-receipt status-${escapeHtml(row.status || version.status || "unknown")}">
+      <div class="proof-receipt-visual" aria-hidden="true">
+        <span>${escapeHtml(canEmbedProofImage(row) ? "image ready" : source ? "linked source" : "gap")}</span>
+        <strong>${escapeHtml(sourceHost(source))}</strong>
+        <em>${escapeHtml(row.photo_role || version.photo_quality?.role || "photo proof")}</em>
+      </div>
       <span>${escapeHtml(row.kind || "source receipt")}</span>
       <strong>${escapeHtml(title || "Photo proof needed")}</strong>
       <p>${escapeHtml(row.image_display_policy === "embed_rights_cleared" ? "Rights-cleared image is ready to display." : image ? "Image reference is present, but this page keeps it link-only until rights are reviewed." : "Photo proof is source-attributed, but no rights-cleared embeddable image URL is stored yet.")}</p>

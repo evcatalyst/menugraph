@@ -60,6 +60,15 @@ node scripts/build-ingredient-ocr-queue.js --run --scope=full --image-map=/priva
 
 By default OCR results are written to `.cache/ingredient-ocr/`, which is ignored by git.
 
+For the hybrid capture pipeline, prefer the run-scoped OCR command after the capture step has produced `.cache/ingredient-ocr/runs/<run-id>/image-map.json`:
+
+```sh
+node scripts/run-ingredient-ocr.js --run-id=hybrid-ocr-v1 --limit=250
+node scripts/summarize-ingredient-ocr-run.js --run-id=hybrid-ocr-v1
+```
+
+`run-ingredient-ocr.js` keeps full OCR lines and private image paths under the ignored run directory. The public CSV contains only evidence IDs, OCR status, line counts, ingredient-signal counts, confidence, hashes, and candidate-only flags.
+
 Direct single-image usage:
 
 ```sh
@@ -104,7 +113,8 @@ Private image-map run:
 
 ```sh
 node scripts/capture-ingredient-ocr-assets.js --run-id=hybrid-ocr-v1 --limit=250 --image-map=.cache/ingredient-ocr/runs/hybrid-ocr-v1/image-map-input.json
-swift scripts/vision-ocr.swift .cache/ingredient-ocr/runs/hybrid-ocr-v1/processed/example-panel.jpg
+node scripts/run-ingredient-ocr.js --run-id=hybrid-ocr-v1 --limit=250
+node scripts/summarize-ingredient-ocr-run.js --run-id=hybrid-ocr-v1
 ```
 
 Grok-assisted source hunting, when explicitly enabled:
