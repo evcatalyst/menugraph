@@ -1225,6 +1225,57 @@ function renderConfectionWrapperIngredientPriorityStatus() {
   `;
 }
 
+function renderConfectionWrapperSourceImageIntakeStatus() {
+  const summary = state.summary?.confection_wrapper_source_image_intake_summary
+    || state.summary?.confection_wrapper_ingredient_priority_summary?.source_image_intake_summary
+    || {};
+  if (!summary.selected_packets) return "";
+  const artifacts = summary.public_artifacts || {};
+  const rows = summary.first_rows || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-needs_photo_review">
+      <span>Candy Wrapper Archive Source Image Intake</span>
+      <strong>${escapeHtml(`${summary.source_pages_with_image_candidates || 0}/${summary.selected_packets || 0} pages have private image candidates`)}</strong>
+      <p>Source-page HTML has been parsed privately to find likely wrapper photos. Public outputs keep only source URLs, counts, and statuses; image URLs, screenshots, crops, OCR text, and verification decisions stay private.</p>
+      <dl>
+        <div>
+          <dt>HTML pages</dt>
+          <dd>${escapeHtml(summary.source_pages_with_html || 0)}</dd>
+        </div>
+        <div>
+          <dt>Image candidates</dt>
+          <dd>${escapeHtml(summary.private_image_candidate_count || 0)}</dd>
+        </div>
+        <div>
+          <dt>Fetch failed</dt>
+          <dd>${escapeHtml(summary.source_pages_fetch_failed || 0)}</dd>
+        </div>
+        <div>
+          <dt>Candidate claim state</dt>
+          <dd>Private review</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive source image intake rows">
+        ${rows.slice(0, 4).map((row) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`${row.packet_rank || "?"}. ${row.vintage_label || "vintage"} · ${labelFor(row.source_page_status || "source page")}`)}</span>
+            <strong>${escapeHtml(row.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${row.image_candidate_count || 0} private image candidates · ${sourceHost(row.source_url || "")}`)}</p>
+            <em>${escapeHtml(row.next_action || "Privately inspect source image candidates before panel crop/OCR.")}</em>
+            ${row.source_url ? `<a href="${escapeHtml(row.source_url)}" target="_blank" rel="noopener">Open source</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
+        ${artifacts.source_image_intake_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_image_intake_csv))}">Source Image Intake CSV</a>` : ""}
+        ${artifacts.source_image_intake_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_image_intake_runbook_md))}">Source Image Intake Runbook</a>` : ""}
+        ${artifacts.source_image_intake_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_image_intake_json))}">Source Image Intake JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1434,6 +1485,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperSurfaceOcrStatus()}
     ${renderConfectionWrapperStorySeedStatus()}
     ${renderConfectionWrapperIngredientPriorityStatus()}
+    ${renderConfectionWrapperSourceImageIntakeStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}

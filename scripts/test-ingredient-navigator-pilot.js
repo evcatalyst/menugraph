@@ -136,6 +136,11 @@ assert(js.includes("Source-site products"), "navigator should expose CWA source-
 assert(js.includes("Private Run Handoff CSV"), "navigator should link CWA private-run handoff CSV");
 assert(js.includes("Private Run Handoff Runbook"), "navigator should link CWA private-run handoff runbook");
 assert(js.includes("Private Run Handoff JSON"), "navigator should link CWA private-run handoff JSON");
+assert(js.includes("Candy Wrapper Archive Source Image Intake"), "navigator should expose CWA source-image intake status");
+assert(js.includes("source_pages_with_image_candidates"), "navigator should show source-page image candidate coverage");
+assert(js.includes("Source Image Intake CSV"), "navigator should link CWA source-image intake CSV");
+assert(js.includes("Source Image Intake Runbook"), "navigator should link CWA source-image intake runbook");
+assert(js.includes("Source Image Intake JSON"), "navigator should link CWA source-image intake JSON");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

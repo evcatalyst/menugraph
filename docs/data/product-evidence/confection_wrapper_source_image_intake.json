@@ -1,0 +1,193 @@
+{
+  "schema_version": "confection_wrapper_source_image_intake.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "cwa-source-image-intake-v1",
+  "source_domain": "www.candywrapperarchive.com",
+  "run_mode": "private_network_source_html_intake",
+  "selected_packets": 49,
+  "source_pages_with_html": 49,
+  "source_pages_fetched": 49,
+  "source_pages_missing_html": 0,
+  "source_pages_fetch_failed": 0,
+  "source_pages_with_image_candidates": 49,
+  "private_image_candidate_count": 343,
+  "by_status": [
+    {
+      "key": "image_candidate_found_needs_private_review",
+      "count": 49
+    }
+  ],
+  "by_product": [
+    {
+      "key": "Butterfinger Bar",
+      "count": 8
+    },
+    {
+      "key": "Reese's Peanut Butter Cups",
+      "count": 7
+    },
+    {
+      "key": "Hershey's Milk Chocolate Bar",
+      "count": 6
+    },
+    {
+      "key": "Kit Kat Bar",
+      "count": 6
+    },
+    {
+      "key": "Snickers Bar",
+      "count": 6
+    },
+    {
+      "key": "M&M's Milk Chocolate Candies",
+      "count": 5
+    },
+    {
+      "key": "Twix Bar",
+      "count": 5
+    },
+    {
+      "key": "Milky Way Bar",
+      "count": 4
+    },
+    {
+      "key": "Tootsie Roll",
+      "count": 2
+    }
+  ],
+  "first_rows": [
+    {
+      "packet_id": "cwa_ingredient_packet_84a4b9dcab7f9f",
+      "packet_rank": 1,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1930s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_c1cab625704bfc",
+      "packet_rank": 2,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 8,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_72f4c60dcc3f7d",
+      "packet_rank": 3,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1950",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_f221e653ba688a",
+      "packet_rank": 4,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1964",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 8,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_fd81bc6a933d6c",
+      "packet_rank": 5,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1975",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1975-butterfinger/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_4096b6dfdd1f55",
+      "packet_rank": 6,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1980s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-butterfinger/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_19f6380dee5d22",
+      "packet_rank": 7,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "2002",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2002-butterfinger/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_e8520178db04a4",
+      "packet_rank": 8,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "2009",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2009-butterfinger/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_caa6d23e9fde06",
+      "packet_rank": 9,
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_label": "1940s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-reeses-bag/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_0075af3870d743",
+      "packet_rank": 10,
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_label": "1970s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-reeses/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_99d7a0607d525c",
+      "packet_rank": 11,
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_label": "1980s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-reeses/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_759d8e5eb34575",
+      "packet_rank": 12,
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_label": "1991",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1991-reeses/",
+      "source_page_status": "image_candidate_found_needs_private_review",
+      "image_candidate_count": 7,
+      "next_action": "Privately inspect the top image candidate, crop ingredient/nutrition panels if visible, then fill private image-map paths."
+    }
+  ],
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "image_urls_committed": false,
+    "images_committed": false,
+    "ocr_text_committed": false,
+    "manual_verified_created": false
+  },
+  "public_artifacts": {
+    "source_image_intake_csv": "docs/data/product-evidence/exports/confection_wrapper_source_image_intake.csv",
+    "source_image_intake_json": "docs/data/product-evidence/confection_wrapper_source_image_intake.json",
+    "source_image_intake_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_source_image_intake_runbook.md"
+  }
+}
