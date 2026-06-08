@@ -1090,27 +1090,37 @@ function renderConfectionWrapperIngredientPriorityStatus() {
   if (!totals.priority_rows) return "";
   const artifacts = summary.artifacts || {};
   const rows = summary.first_rows || [];
+  const capture = summary.capture_task_summary || state.summary?.confection_wrapper_ingredient_capture_task_summary || {};
+  const audit = summary.image_map_audit || state.summary?.confection_wrapper_ingredient_image_map_audit || {};
   return `
     <article class="corpus-handoff-card panel-capture-card status-panel_capture_needed">
       <span>Candy Wrapper Archive Ingredient-First Priority</span>
       <strong>${escapeHtml(`${totals.primary_text_rows || 0} ingredient/nutrition rows · ${totals.support_text_rows || 0} support rows`)}</strong>
-      <p>These rows translate CWA wrapper lineages into a capture order: ingredient panel first, nutrition panel second, supporting label text next, and wrapper-front context last.</p>
+      <p>These rows translate CWA wrapper lineages into a capture order and private image-map handoff: ingredient panel first, nutrition panel second, supporting label text next, and wrapper-front context last.</p>
       <dl>
         <div>
-          <dt>Products</dt>
-          <dd>${escapeHtml(totals.products || 0)}</dd>
+          <dt>Capture tasks</dt>
+          <dd>${escapeHtml(capture.task_count || totals.capture_task_rows || 0)}</dd>
         </div>
         <div>
-          <dt>Source eras</dt>
-          <dd>${escapeHtml(totals.source_eras || 0)}</dd>
+          <dt>Image-map rows</dt>
+          <dd>${escapeHtml(audit.template_rows || totals.image_map_template_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Paths needed</dt>
+          <dd>${escapeHtml(capture.paths_needed ?? totals.paths_needed ?? 0)}</dd>
         </div>
         <div>
           <dt>Ready now</dt>
-          <dd>${escapeHtml(totals.ready_for_ocr || 0)}</dd>
+          <dd>${escapeHtml(audit.ready_for_capture || totals.ready_for_ocr || 0)}</dd>
         </div>
         <div>
           <dt>Verified labels</dt>
           <dd>${escapeHtml(totals.verified_ingredient_labels || 0)}</dd>
+        </div>
+        <div>
+          <dt>Products</dt>
+          <dd>${escapeHtml(totals.products || 0)}</dd>
         </div>
       </dl>
       <div class="panel-capture-list" aria-label="Candy Wrapper Archive ingredient-first capture priorities">
@@ -1127,6 +1137,10 @@ function renderConfectionWrapperIngredientPriorityStatus() {
       <div class="corpus-handoff-links">
         ${artifacts.ingredient_priority_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ingredient_priority_csv))}">Ingredient Priority CSV</a>` : ""}
         ${artifacts.ingredient_priority_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ingredient_priority_runbook_md))}">Ingredient Priority Runbook</a>` : ""}
+        ${artifacts.image_map_template_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_template_csv))}">Priority Image Map Template</a>` : ""}
+        ${artifacts.image_map_audit_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_audit_csv))}">Priority Image Map Audit</a>` : ""}
+        ${artifacts.capture_task_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_csv))}">Ingredient Capture Tasks CSV</a>` : ""}
+        ${artifacts.capture_task_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_runbook_md))}">Ingredient Capture Runbook</a>` : ""}
         ${artifacts.ingredient_priority_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ingredient_priority_json))}">Ingredient Priority JSON</a>` : ""}
       </div>
     </article>

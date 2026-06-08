@@ -20,6 +20,8 @@ This artifact turns Candy Wrapper Archive lineage rows into an ingredient-first 
 - Support text rows: 147
 - Ready for OCR now: 0
 - Verified ingredient labels: 0
+- Image-map template rows: 245
+- Private paths still needed: 245
 
 ## First Rows
 

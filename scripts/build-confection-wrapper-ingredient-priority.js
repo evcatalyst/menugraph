@@ -11,6 +11,15 @@ const {
   writeCsv,
   writeJson,
 } = require("./ingredient-ocr-pipeline-utils");
+const {
+  publicAuditRows,
+  summarizeAudit,
+} = require("./audit-image-map-template");
+const {
+  buildCaptureTasks,
+  buildTaskSummary,
+  renderRunbook: renderCaptureTaskRunbook,
+} = require("./build-capture-task-manifest");
 
 const root = path.join(__dirname, "..");
 const storySeedJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_story_seeds.json");
@@ -18,6 +27,13 @@ const surfaceQueuePath = path.join(root, "docs/data/product-evidence/exports/con
 const priorityJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_ingredient_priority.json");
 const priorityCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_priority.csv");
 const runbookPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_priority_runbook.md");
+const imageMapTemplatePath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_priority_image_map_template.csv");
+const auditCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_priority_image_map_audit.csv");
+const auditJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_ingredient_priority_image_map_audit.json");
+const captureTaskCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_capture_tasks.csv");
+const captureTaskJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_ingredient_capture_tasks.json");
+const captureTaskRunbookPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_capture_runbook.md");
+const runId = "cwa-ingredient-priority-v1";
 
 const primarySurfaceIds = new Set(["ingredient_panel", "nutrition_panel"]);
 const supportSurfaceIds = new Set(["wrapper_back_or_side", "net_weight", "maker_or_date"]);
@@ -108,6 +124,7 @@ function priorityRow(row = {}, context = {}) {
     source_domain: row.source_domain || sourceHost(row.source_url),
     source_url: row.source_url,
     source_title: row.source_title,
+    source_type: row.source_type || "collector_archive_page",
     surface_id: row.surface_id,
     surface_label: row.surface_label,
     surface_rank: surfaceRank(row),
@@ -115,6 +132,7 @@ function priorityRow(row = {}, context = {}) {
     proof_lane_rank: numeric(row.proof_lane_rank),
     photo_priority: primary ? "primary_ingredient_or_nutrition_photo" : "supporting_label_text_photo",
     ocr_priority: row.ocr_priority,
+    ocr_gap_category: row.ocr_gap_category || "panel_capture_needed",
     ocr_expected_surface: row.ocr_expected_surface,
     panel_acquisition_state: row.panel_acquisition_state,
     ocr_access_state: row.ocr_access_state,
@@ -125,6 +143,10 @@ function priorityRow(row = {}, context = {}) {
     claim_gate: "blocked_until_private_readable_crop_ocr_correction_and_manual_verification",
     publication_image_policy: "source_link_only_until_rights_review_clears_reuse",
     rights_review_status: row.rights_review_status || "rights_review_needed",
+    image_map_keys: row.private_image_map_keys || row.image_map_keys || row.evidence_id || "",
+    local_private_image_path: "",
+    processed_private_image_path: "",
+    panel_crop_note: "",
     primary_text_surface: primary ? 1 : 0,
     support_text_surface: supportSurfaceIds.has(row.surface_id) ? 1 : 0,
     private_paths_supplied: row.ocr_access_state === "local_image_ready" ? 1 : 0,
@@ -182,6 +204,38 @@ function productPriorities(rows = [], seeds = []) {
   }).filter((row) => row.capture_rows);
 }
 
+function imageMapTemplateRows(rows = []) {
+  return rows.map((row) => ({
+    run_id: runId,
+    priority_id: row.priority_id,
+    global_capture_rank: row.global_capture_rank,
+    product_capture_rank: row.product_capture_rank,
+    evidence_id: row.evidence_id,
+    product_id: row.product_id,
+    product_name: row.product_name,
+    vintage_label: row.vintage_label,
+    source_domain: row.source_domain,
+    source_url: row.source_url,
+    source_type: row.source_type,
+    source_title: row.source_title,
+    surface_id: row.surface_id,
+    surface_label: row.surface_label,
+    ocr_gap_category: row.ocr_gap_category,
+    ocr_priority: row.ocr_priority,
+    capture_strategy: row.capture_strategy,
+    crop_target: row.crop_target,
+    ocr_expected_surface: row.ocr_expected_surface,
+    image_map_keys: row.image_map_keys,
+    local_private_image_path: "",
+    processed_private_image_path: "",
+    panel_crop_note: "",
+    rights_review_status: row.rights_review_status,
+    publication_image_policy: row.publication_image_policy,
+    candidate_only: 1,
+    manual_verified: 0,
+  }));
+}
+
 function buildIngredientPriority({ storyManifest = {}, surfaceRows = [] }) {
   const context = storySeedMaps(storyManifest);
   const candidateRows = surfaceRows
@@ -191,7 +245,7 @@ function buildIngredientPriority({ storyManifest = {}, surfaceRows = [] }) {
   return addRanks(sortPriorityRows(candidateRows));
 }
 
-function manifestFor({ storyManifest, surfaceRows, rows }) {
+function manifestFor({ storyManifest, surfaceRows, rows, auditSummary = {}, captureTaskSummary = {} }) {
   const seeds = storyManifest.story_seeds || [];
   const products = productPriorities(rows, seeds);
   const totals = {
@@ -208,6 +262,10 @@ function manifestFor({ storyManifest, surfaceRows, rows }) {
     verified_ingredient_labels: 0,
     claim_blocked_rows: rows.length,
     input_surface_rows: surfaceRows.length,
+    image_map_template_rows: auditSummary.template_rows || rows.length,
+    image_map_key_count: auditSummary.image_map_key_count || 0,
+    capture_task_rows: captureTaskSummary.task_count || rows.length,
+    paths_needed: captureTaskSummary.paths_needed ?? rows.length,
   };
   return {
     schema_version: "confection_wrapper_ingredient_priority.v1",
@@ -232,16 +290,20 @@ function manifestFor({ storyManifest, surfaceRows, rows }) {
     totals,
     by_product: countBy(rows, "product_name"),
     by_surface: countBy(rows, "surface_id"),
+    image_map_audit: auditSummary,
+    capture_task_summary: captureTaskSummary,
     first_rows: rows.slice(0, 16).map((row) => ({
       global_capture_rank: row.global_capture_rank,
       product_capture_rank: row.product_capture_rank,
       product_id: row.product_id,
       product_name: row.product_name,
       vintage_label: row.vintage_label,
+      evidence_id: row.evidence_id,
       surface_id: row.surface_id,
       surface_label: row.surface_label,
       photo_priority: row.photo_priority,
       source_url: row.source_url,
+      image_map_keys: row.image_map_keys,
       capture_instruction: row.capture_instruction,
       claim_gate: row.claim_gate,
     })),
@@ -250,6 +312,12 @@ function manifestFor({ storyManifest, surfaceRows, rows }) {
       ingredient_priority_json: publicArtifactRef(priorityJsonPath),
       ingredient_priority_csv: publicArtifactRef(priorityCsvPath),
       ingredient_priority_runbook_md: publicArtifactRef(runbookPath),
+      image_map_template_csv: publicArtifactRef(imageMapTemplatePath),
+      image_map_audit_csv: publicArtifactRef(auditCsvPath),
+      image_map_audit_json: publicArtifactRef(auditJsonPath),
+      capture_task_csv: publicArtifactRef(captureTaskCsvPath),
+      capture_task_json: publicArtifactRef(captureTaskJsonPath),
+      capture_task_runbook_md: publicArtifactRef(captureTaskRunbookPath),
     },
   };
 }
@@ -279,6 +347,8 @@ function renderRunbook(manifest = {}) {
     `- Support text rows: ${totals.support_text_rows || 0}`,
     `- Ready for OCR now: ${totals.ready_for_ocr || 0}`,
     `- Verified ingredient labels: ${totals.verified_ingredient_labels || 0}`,
+    `- Image-map template rows: ${totals.image_map_template_rows || 0}`,
+    `- Private paths still needed: ${totals.paths_needed || 0}`,
     "",
     "## First Rows",
     "",
@@ -295,7 +365,27 @@ function writeIngredientPriority() {
     ? parseCsv(fs.readFileSync(surfaceQueuePath, "utf8"))
     : [];
   const rows = buildIngredientPriority({ storyManifest, surfaceRows });
-  const manifest = manifestFor({ storyManifest, surfaceRows, rows });
+  const templateRows = imageMapTemplateRows(rows);
+  const auditRows = publicAuditRows(templateRows);
+  const auditSummary = summarizeAudit(runId, auditRows, {
+    publicAuditCsvRef: publicArtifactRef(auditCsvPath),
+    publicAuditJsonRef: publicArtifactRef(auditJsonPath),
+  });
+  const captureTasks = buildCaptureTasks({ runId, templateRows, auditRows });
+  const captureTaskSummary = buildTaskSummary({
+    runId,
+    tasks: captureTasks,
+    publicTaskCsvPath: captureTaskCsvPath,
+    publicTaskJsonPath: captureTaskJsonPath,
+    publicRunbookPath: captureTaskRunbookPath,
+  });
+  const manifest = manifestFor({
+    storyManifest,
+    surfaceRows,
+    rows,
+    auditSummary,
+    captureTaskSummary,
+  });
 
   writeJson(priorityJsonPath, manifest);
   writeCsv(priorityCsvPath, [
@@ -313,12 +403,14 @@ function writeIngredientPriority() {
     "source_domain",
     "source_url",
     "source_title",
+    "source_type",
     "surface_id",
     "surface_label",
     "surface_rank",
     "proof_lane",
     "photo_priority",
     "ocr_priority",
+    "ocr_gap_category",
     "ocr_expected_surface",
     "panel_acquisition_state",
     "ocr_access_state",
@@ -329,6 +421,10 @@ function writeIngredientPriority() {
     "claim_gate",
     "publication_image_policy",
     "rights_review_status",
+    "image_map_keys",
+    "local_private_image_path",
+    "processed_private_image_path",
+    "panel_crop_note",
     "primary_text_surface",
     "support_text_surface",
     "private_paths_supplied",
@@ -336,8 +432,90 @@ function writeIngredientPriority() {
     "candidate_only",
     "manual_verified",
   ], rows);
+  writeCsv(imageMapTemplatePath, [
+    "run_id",
+    "priority_id",
+    "global_capture_rank",
+    "product_capture_rank",
+    "evidence_id",
+    "product_id",
+    "product_name",
+    "vintage_label",
+    "source_domain",
+    "source_url",
+    "source_type",
+    "source_title",
+    "surface_id",
+    "surface_label",
+    "ocr_gap_category",
+    "ocr_priority",
+    "capture_strategy",
+    "crop_target",
+    "ocr_expected_surface",
+    "image_map_keys",
+    "local_private_image_path",
+    "processed_private_image_path",
+    "panel_crop_note",
+    "rights_review_status",
+    "publication_image_policy",
+    "candidate_only",
+    "manual_verified",
+  ], templateRows);
+  writeCsv(auditCsvPath, [
+    "run_id",
+    "evidence_id",
+    "product_id",
+    "product_name",
+    "vintage_label",
+    "source_domain",
+    "source_url",
+    "source_type",
+    "ocr_gap_category",
+    "ocr_priority",
+    "capture_strategy",
+    "key_count",
+    "private_path_supplied",
+    "private_path_exists",
+    "extension_ok",
+    "audit_status",
+    "recommended_next_action",
+    "candidate_only",
+    "manual_verified",
+  ], auditRows);
+  writeJson(auditJsonPath, auditSummary);
+  writeCsv(captureTaskCsvPath, [
+    "run_id",
+    "task_id",
+    "task_rank",
+    "task_priority_score",
+    "audit_status",
+    "evidence_id",
+    "product_id",
+    "product_name",
+    "vintage_label",
+    "source_domain",
+    "source_url",
+    "source_title",
+    "source_type",
+    "ocr_gap_category",
+    "ocr_priority",
+    "capture_strategy",
+    "crop_target",
+    "ocr_expected_surface",
+    "image_map_keys",
+    "key_count",
+    "private_template_fields_to_fill",
+    "rights_review_status",
+    "publication_image_policy",
+    "recommended_next_action",
+    "done_when",
+    "candidate_only",
+    "manual_verified",
+  ], captureTasks);
+  writeJson(captureTaskJsonPath, captureTaskSummary);
   fs.mkdirSync(path.dirname(runbookPath), { recursive: true });
   fs.writeFileSync(runbookPath, renderRunbook(manifest));
+  fs.writeFileSync(captureTaskRunbookPath, renderCaptureTaskRunbook(captureTaskSummary, captureTasks));
 
   const summary = readJson(summaryPath, {});
   summary.confection_wrapper_ingredient_priority_summary = {
@@ -349,9 +527,13 @@ function writeIngredientPriority() {
     totals: manifest.totals,
     by_product: manifest.by_product,
     by_surface: manifest.by_surface,
+    image_map_audit: manifest.image_map_audit,
+    capture_task_summary: manifest.capture_task_summary,
     first_rows: manifest.first_rows,
     artifacts: manifest.artifacts,
   };
+  summary.confection_wrapper_ingredient_capture_task_summary = captureTaskSummary;
+  summary.confection_wrapper_ingredient_image_map_audit = auditSummary;
   writeJson(summaryPath, summary);
   return manifest;
 }
@@ -364,6 +546,8 @@ function main() {
     primary_text_rows: manifest.totals.primary_text_rows,
     support_text_rows: manifest.totals.support_text_rows,
     ready_for_ocr: manifest.totals.ready_for_ocr,
+    image_map_template_rows: manifest.totals.image_map_template_rows,
+    capture_task_rows: manifest.totals.capture_task_rows,
     ingredient_priority_csv: manifest.artifacts.ingredient_priority_csv,
   }, null, 2));
 }
@@ -372,5 +556,6 @@ if (require.main === module) main();
 
 module.exports = {
   buildIngredientPriority,
+  imageMapTemplateRows,
   writeIngredientPriority,
 };

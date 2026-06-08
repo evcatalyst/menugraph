@@ -1,0 +1,279 @@
+{
+  "schema_version": "hybrid_ingredient_ocr_capture_task_summary.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "cwa-ingredient-priority-v1",
+  "task_count": 245,
+  "high_priority_tasks": 98,
+  "ready_for_capture": 0,
+  "paths_needed": 245,
+  "source_discovery_tasks": 0,
+  "by_status": [
+    {
+      "key": "no_private_path_supplied",
+      "count": 245
+    }
+  ],
+  "by_product": [
+    {
+      "key": "Butterfinger Bar",
+      "tasks": 40,
+      "high_priority": 16,
+      "ready_for_capture": 0,
+      "paths_needed": 40,
+      "top_task_id": "capture_9237261a5864df",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Reese's Peanut Butter Cups",
+      "tasks": 35,
+      "high_priority": 14,
+      "ready_for_capture": 0,
+      "paths_needed": 35,
+      "top_task_id": "capture_53ddd1bb67a735",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Hershey's Milk Chocolate Bar",
+      "tasks": 30,
+      "high_priority": 12,
+      "ready_for_capture": 0,
+      "paths_needed": 30,
+      "top_task_id": "capture_84cbc3b7006361",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Kit Kat Bar",
+      "tasks": 30,
+      "high_priority": 12,
+      "ready_for_capture": 0,
+      "paths_needed": 30,
+      "top_task_id": "capture_2ae03c9701afd7",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Snickers Bar",
+      "tasks": 30,
+      "high_priority": 12,
+      "ready_for_capture": 0,
+      "paths_needed": 30,
+      "top_task_id": "capture_ce8214e1933859",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "M&M's Milk Chocolate Candies",
+      "tasks": 25,
+      "high_priority": 10,
+      "ready_for_capture": 0,
+      "paths_needed": 25,
+      "top_task_id": "capture_6993ea716f4e9c",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Twix Bar",
+      "tasks": 25,
+      "high_priority": 10,
+      "ready_for_capture": 0,
+      "paths_needed": 25,
+      "top_task_id": "capture_f688b9d0dbb22e",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Milky Way Bar",
+      "tasks": 20,
+      "high_priority": 8,
+      "ready_for_capture": 0,
+      "paths_needed": 20,
+      "top_task_id": "capture_c03f8c136c99b7",
+      "top_source_domain": "www.candywrapperarchive.com"
+    },
+    {
+      "key": "Tootsie Roll",
+      "tasks": 10,
+      "high_priority": 4,
+      "ready_for_capture": 0,
+      "paths_needed": 10,
+      "top_task_id": "capture_e581bd1af57ce3",
+      "top_source_domain": "www.candywrapperarchive.com"
+    }
+  ],
+  "by_source_domain": [
+    {
+      "key": "www.candywrapperarchive.com",
+      "tasks": 245,
+      "high_priority": 98,
+      "ready_for_capture": 0,
+      "paths_needed": 245,
+      "top_task_id": "capture_9237261a5864df",
+      "top_source_domain": "www.candywrapperarchive.com"
+    }
+  ],
+  "first_tasks": [
+    {
+      "task_id": "capture_9237261a5864df",
+      "rank": 1,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "2009",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2009-butterfinger/",
+      "source_title": "2009 Butterfinger - Nutrition panel",
+      "evidence_id": "cwa_surface_06fb011e088d40",
+      "crop_target": "Crop the nutrition panel and serving-size text if visible.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_6dc1d3d558e2a8",
+      "rank": 2,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "2002",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2002-butterfinger/",
+      "source_title": "2002 Butterfinger - Nutrition panel",
+      "evidence_id": "cwa_surface_0a1eeb650363ed",
+      "crop_target": "Crop the nutrition panel and serving-size text if visible.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_028d044d5c5df2",
+      "rank": 3,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1980s",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-butterfinger/",
+      "source_title": "1980s Butterfinger - Ingredient panel",
+      "evidence_id": "cwa_surface_11352cd6262a16",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_bd4ec0441b54b9",
+      "rank": 4,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1950",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+      "source_title": "1950 Butterfinger - Ingredient panel",
+      "evidence_id": "cwa_surface_14e84cbbae8fe9",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_e3f2448ce7863b",
+      "rank": 5,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "source_title": "1936 Butterfinger - Ingredient panel",
+      "evidence_id": "cwa_surface_20807ca6246abf",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_e0b0639f758ca2",
+      "rank": 6,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "2009",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2009-butterfinger/",
+      "source_title": "2009 Butterfinger - Ingredient panel",
+      "evidence_id": "cwa_surface_29f395474ef684",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_386e840bd30374",
+      "rank": 7,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1964",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
+      "source_title": "1964 Butterfinger - Nutrition panel",
+      "evidence_id": "cwa_surface_2bf81d0b93b9ab",
+      "crop_target": "Crop the nutrition panel and serving-size text if visible.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_f363f2549601b9",
+      "rank": 8,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1975",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1975-butterfinger/",
+      "source_title": "1975 Butterfinger - Ingredient panel",
+      "evidence_id": "cwa_surface_2f942468ca250f",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_e4e5be49a7ce60",
+      "rank": 9,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "source_title": "1936 Butterfinger - Nutrition panel",
+      "evidence_id": "cwa_surface_3e9fb8bd823a85",
+      "crop_target": "Crop the nutrition panel and serving-size text if visible.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_25685137619a77",
+      "rank": 10,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "2002",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2002-butterfinger/",
+      "source_title": "2002 Butterfinger - Ingredient panel",
+      "evidence_id": "cwa_surface_60231b54b36cda",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_2ab2af6a6bcdef",
+      "rank": 11,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1975",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1975-butterfinger/",
+      "source_title": "1975 Butterfinger - Nutrition panel",
+      "evidence_id": "cwa_surface_6c45d30611861d",
+      "crop_target": "Crop the nutrition panel and serving-size text if visible.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    },
+    {
+      "task_id": "capture_867a293d6094ae",
+      "rank": 12,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1964",
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
+      "source_title": "1964 Butterfinger - Ingredient panel",
+      "evidence_id": "cwa_surface_99e8305790e753",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "priority_score": 155,
+      "next_action": "Open source, capture a private panel crop, then fill the private template path."
+    }
+  ],
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "images_committed": false,
+    "manual_verified_created": false
+  },
+  "public_artifacts": {
+    "capture_task_csv": "docs/data/product-evidence/exports/confection_wrapper_ingredient_capture_tasks.csv",
+    "capture_task_json": "docs/data/product-evidence/confection_wrapper_ingredient_capture_tasks.json",
+    "capture_task_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_ingredient_capture_runbook.md"
+  }
+}

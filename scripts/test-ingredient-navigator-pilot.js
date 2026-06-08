@@ -98,6 +98,10 @@ assert(js.includes("CWA Ingredient-First Capture Priority"), "navigator should r
 assert(js.includes("cwaIngredientPriorityForProduct"), "navigator should map CWA ingredient priorities to selected products");
 assert(js.includes("confection_wrapper_ingredient_priority.json"), "navigator should fetch CWA ingredient priority rows");
 assert(js.includes("Ingredient Priority CSV"), "navigator should link CWA ingredient priority CSV");
+assert(js.includes("private image-map handoff"), "navigator should explain CWA private image-map handoff");
+assert(js.includes("Priority Image Map Template"), "navigator should link CWA priority image-map template");
+assert(js.includes("Ingredient Capture Tasks CSV"), "navigator should link CWA ingredient capture tasks");
+assert(js.includes("Ingredient Capture Runbook"), "navigator should link CWA ingredient capture runbook");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
