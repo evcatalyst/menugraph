@@ -35,6 +35,7 @@ const state = {
   data: null,
   summary: null,
   photoProofManifest: null,
+  cwaStorySeeds: null,
   photoProofImagesByEvidenceId: new Map(),
   productId: "",
   versionId: "",
@@ -1332,6 +1333,15 @@ function applyPhotoProofManifest(manifest = {}) {
   );
 }
 
+function applyCwaStorySeeds(manifest = {}) {
+  state.cwaStorySeeds = manifest || {};
+}
+
+function cwaStorySeedForProduct(productRow) {
+  if (!productRow?.id) return null;
+  return (state.cwaStorySeeds?.story_seeds || []).find((seed) => seed.product_id === productRow.id) || null;
+}
+
 function renderSummary(productRow) {
   const resolution = productRow.story_resolution || {};
   els.productSummary.innerHTML = `
@@ -1954,6 +1964,59 @@ function renderProofDisplayGate(stats) {
   `;
 }
 
+function renderCwaStorySeedPanel(productRow) {
+  const seed = cwaStorySeedForProduct(productRow);
+  if (!seed) return "";
+  const points = seed.timeline_points || [];
+  return `
+    <section class="proof-source-rail proof-source-rail-cwa-story" aria-label="Candy Wrapper Archive product story seed">
+      <header>
+        <div>
+          <span>Candy Wrapper Archive Story Seed</span>
+          <strong>${escapeHtml(`${seed.source_era_count || 0} source eras · ${seed.lineage_span_label || "lineage span pending"}`)}</strong>
+        </div>
+        <p>These source pages can support the package-history story for this product. Ingredient claims stay blocked until readable panel crops are OCRed, corrected, manually verified, and tied back to evidence.</p>
+      </header>
+      <div class="proof-source-metrics">
+        <span><strong>${escapeHtml(seed.ingredient_panel_targets || 0)}</strong>Ingredient panel targets</span>
+        <span><strong>${escapeHtml(seed.ocr_surface_rows || 0)}</strong>OCR surface rows</span>
+        <span><strong>${escapeHtml(seed.verified_ingredient_labels || 0)}</strong>Verified labels</span>
+        <span><strong>${escapeHtml(seed.secondary_context_targets || 0)}</strong>Wrapper context slots</span>
+      </div>
+      <div class="cwa-story-gate">
+        <article>
+          <span>Story state</span>
+          <strong>${escapeHtml(labelFor(seed.story_seed_status || "package_lineage_story_seed_ready"))}</strong>
+          <p>${escapeHtml(seed.public_confidence_label || "Source-attributable package lineage, not verified formulation.")}</p>
+        </article>
+        <article>
+          <span>Claim gate</span>
+          <strong>${escapeHtml("ingredient claims blocked")}</strong>
+          <p>${escapeHtml(seed.ingredient_claim_status || "blocked pending readable panel OCR and manual verification")}</p>
+        </article>
+        <article>
+          <span>Next action</span>
+          <strong>capture panels first</strong>
+          <p>${escapeHtml(seed.next_action || "Capture readable ingredient/nutrition surfaces, run OCR, then manually verify corrected text.")}</p>
+        </article>
+      </div>
+      <div class="cwa-story-timeline" aria-label="CWA source-era timeline for ${escapeHtml(productRow.name)}">
+        ${points.map((point) => `
+          <article>
+            <span>${escapeHtml(point.vintage_label || "era")}</span>
+            <strong>${escapeHtml(point.source_title || "CWA source")}</strong>
+            <p>${escapeHtml(point.public_story_role || "Source-attributable package lineage and capture target.")}</p>
+            <div class="lead-meta">
+              ${statusBadge("needs_label_transcription")}
+              ${point.source_url ? `<a href="${escapeHtml(point.source_url)}" target="_blank" rel="noreferrer">Open source</a>` : ""}
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderIngredientPanelProofRail(productRow) {
   const stats = ingredientPanelProofStats(productRow);
   const rows = stats.rows.slice(0, 8);
@@ -2121,6 +2184,7 @@ function renderProofReader(productRow, version) {
         <p>This page is not legal advice. It cites source pages and avoids reproducing external package photos unless rights are recorded as clear. Ingredient-panel extracts are evidence candidates, not verified formulation claims.</p>
       </aside>
     </header>
+    ${renderCwaStorySeedPanel(productRow)}
     ${renderIngredientPanelProofRail(productRow)}
     ${renderProductProofRail(productRow)}
     <div class="proof-era-toggle" aria-label="Recipe history era toggle">
@@ -2447,7 +2511,7 @@ function attachEvents() {
 
 async function init() {
   try {
-    const [response, summary, photoProofManifest] = await Promise.all([
+    const [response, summary, photoProofManifest, cwaStorySeeds] = await Promise.all([
       fetch(dataHref("../data/product-evidence/navigator_data.json")),
       fetch(dataHref("../data/product-evidence/summary.json"))
         .then((summaryResponse) => (summaryResponse.ok ? summaryResponse.json() : {}))
@@ -2455,11 +2519,15 @@ async function init() {
       fetch(dataHref("../data/product-evidence/public_photo_proof_manifest.json"))
         .then((manifestResponse) => (manifestResponse.ok ? manifestResponse.json() : {}))
         .catch(() => ({})),
+      fetch(dataHref("../data/product-evidence/confection_wrapper_story_seeds.json"))
+        .then((storySeedResponse) => (storySeedResponse.ok ? storySeedResponse.json() : {}))
+        .catch(() => ({})),
     ]);
     if (!response.ok) throw new Error(`Navigator data returned ${response.status}`);
     state.data = await response.json();
     state.summary = summary;
     applyPhotoProofManifest(photoProofManifest);
+    applyCwaStorySeeds(cwaStorySeeds);
     state.productId = state.data.default_product;
     state.maxYear = Number(els.timeRange.value || 2026);
     attachEvents();

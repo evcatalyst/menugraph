@@ -90,6 +90,9 @@ assert(js.includes("Candy Wrapper Archive Story Seeds"), "navigator should expos
 assert(js.includes("Candy Wrapper Archive story seed products"), "navigator should render CWA story seed products");
 assert(js.includes("Story Seeds CSV"), "navigator should link CWA story seed CSV");
 assert(js.includes("Story Seed Runbook"), "navigator should link CWA story seed runbook");
+assert(js.includes("Candy Wrapper Archive product story seed"), "navigator should render product-level CWA story seeds");
+assert(js.includes("cwaStorySeedForProduct"), "navigator should map CWA story seeds to selected products");
+assert(js.includes("confection_wrapper_story_seeds.json"), "navigator should fetch full CWA story seed timelines");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
@@ -97,6 +100,8 @@ assert(css.includes(".corpus-directory-grid"), "all-product directory should be 
 assert(css.includes(".proof-source-rail"), "photo proof rail should be styled");
 assert(css.includes(".proof-source-rail-primary"), "primary ingredient-panel rail should be styled");
 assert(css.includes(".proof-source-rail-secondary"), "secondary product-context rail should be styled");
+assert(css.includes(".proof-source-rail-cwa-story"), "CWA product story seed rail should be styled");
+assert(css.includes(".cwa-story-timeline"), "CWA product story seed timeline should be styled");
 assert(css.includes(".proof-source-thumb"), "public photo thumbnails should be styled");
 assert(css.includes(".product-strip-ledger"), "corpus ledger should be styled");
 assert(css.includes(".proof-display-gate"), "photo display gate should be styled");
