@@ -192744,5 +192744,314 @@
       "story_seed_csv": "docs/data/product-evidence/exports/confection_wrapper_story_seeds.csv",
       "story_seed_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_story_seed_runbook.md"
     }
+  },
+  "confection_wrapper_ingredient_priority_summary": {
+    "schema_version": "confection_wrapper_ingredient_priority.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "source_domain": "www.candywrapperarchive.com",
+    "priority_policy": {
+      "primary_visual_rule": "Ingredient and nutrition panels are the primary photo proof targets.",
+      "secondary_visual_rule": "Wrapper fronts and product beauty shots are secondary package context unless readable label text is visible.",
+      "capture_rule": "For each source era, capture ingredient panel, nutrition panel, wrapper back/side text, net weight, and maker/date cues in that order.",
+      "claim_gate": "No formulation claim is promoted until a private readable crop is OCRed/transcribed, corrected, manually verified, and attributed."
+    },
+    "public_safety": {
+      "candidate_only": true,
+      "external_images_committed": false,
+      "private_paths_committed": false,
+      "ocr_text_committed": false,
+      "ingredient_claims_promoted": false,
+      "manual_verified_created": false
+    },
+    "totals": {
+      "products": 9,
+      "priority_rows": 245,
+      "source_eras": 49,
+      "source_urls": 49,
+      "primary_text_rows": 98,
+      "ingredient_panel_rows": 49,
+      "nutrition_panel_rows": 49,
+      "support_text_rows": 147,
+      "ready_for_ocr": 0,
+      "private_paths_supplied": 0,
+      "verified_ingredient_labels": 0,
+      "claim_blocked_rows": 245,
+      "input_surface_rows": 245
+    },
+    "by_product": [
+      {
+        "key": "Butterfinger Bar",
+        "count": 40
+      },
+      {
+        "key": "Reese's Peanut Butter Cups",
+        "count": 35
+      },
+      {
+        "key": "Hershey's Milk Chocolate Bar",
+        "count": 30
+      },
+      {
+        "key": "Kit Kat Bar",
+        "count": 30
+      },
+      {
+        "key": "Snickers Bar",
+        "count": 30
+      },
+      {
+        "key": "M&M's Milk Chocolate Candies",
+        "count": 25
+      },
+      {
+        "key": "Twix Bar",
+        "count": 25
+      },
+      {
+        "key": "Milky Way Bar",
+        "count": 20
+      },
+      {
+        "key": "Tootsie Roll",
+        "count": 10
+      }
+    ],
+    "by_surface": [
+      {
+        "key": "ingredient_panel",
+        "count": 49
+      },
+      {
+        "key": "maker_or_date",
+        "count": 49
+      },
+      {
+        "key": "net_weight",
+        "count": 49
+      },
+      {
+        "key": "nutrition_panel",
+        "count": 49
+      },
+      {
+        "key": "wrapper_back_or_side",
+        "count": 49
+      }
+    ],
+    "first_rows": [
+      {
+        "global_capture_rank": 1,
+        "product_capture_rank": 1,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1930s",
+        "surface_id": "ingredient_panel",
+        "surface_label": "Ingredient panel",
+        "photo_priority": "primary_ingredient_or_nutrition_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+        "capture_instruction": "Capture the ingredient statement first, with enough wrapper context to preserve product and vintage cues.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 2,
+        "product_capture_rank": 2,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1930s",
+        "surface_id": "nutrition_panel",
+        "surface_label": "Nutrition panel",
+        "photo_priority": "primary_ingredient_or_nutrition_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+        "capture_instruction": "Capture the nutrition facts and serving-size area after the ingredient panel or when ingredients are absent.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 3,
+        "product_capture_rank": 3,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1930s",
+        "surface_id": "wrapper_back_or_side",
+        "surface_label": "Wrapper back or side text",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+        "capture_instruction": "Capture readable back/side wrapper text only after checking for ingredient and nutrition panels.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 4,
+        "product_capture_rank": 4,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1930s",
+        "surface_id": "net_weight",
+        "surface_label": "Net weight",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+        "capture_instruction": "Capture net weight as package-size evidence for later normalization.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 5,
+        "product_capture_rank": 5,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1930s",
+        "surface_id": "maker_or_date",
+        "surface_label": "Maker or date cue",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+        "capture_instruction": "Capture maker, distributor, copyright, lot, or date cues for identity and timeline confidence.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 6,
+        "product_capture_rank": 6,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1936",
+        "surface_id": "ingredient_panel",
+        "surface_label": "Ingredient panel",
+        "photo_priority": "primary_ingredient_or_nutrition_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+        "capture_instruction": "Capture the ingredient statement first, with enough wrapper context to preserve product and vintage cues.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 7,
+        "product_capture_rank": 7,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1936",
+        "surface_id": "nutrition_panel",
+        "surface_label": "Nutrition panel",
+        "photo_priority": "primary_ingredient_or_nutrition_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+        "capture_instruction": "Capture the nutrition facts and serving-size area after the ingredient panel or when ingredients are absent.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 8,
+        "product_capture_rank": 8,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1936",
+        "surface_id": "wrapper_back_or_side",
+        "surface_label": "Wrapper back or side text",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+        "capture_instruction": "Capture readable back/side wrapper text only after checking for ingredient and nutrition panels.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 9,
+        "product_capture_rank": 9,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1936",
+        "surface_id": "net_weight",
+        "surface_label": "Net weight",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+        "capture_instruction": "Capture net weight as package-size evidence for later normalization.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 10,
+        "product_capture_rank": 10,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1936",
+        "surface_id": "maker_or_date",
+        "surface_label": "Maker or date cue",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+        "capture_instruction": "Capture maker, distributor, copyright, lot, or date cues for identity and timeline confidence.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 11,
+        "product_capture_rank": 11,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1950",
+        "surface_id": "ingredient_panel",
+        "surface_label": "Ingredient panel",
+        "photo_priority": "primary_ingredient_or_nutrition_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+        "capture_instruction": "Capture the ingredient statement first, with enough wrapper context to preserve product and vintage cues.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 12,
+        "product_capture_rank": 12,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1950",
+        "surface_id": "nutrition_panel",
+        "surface_label": "Nutrition panel",
+        "photo_priority": "primary_ingredient_or_nutrition_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+        "capture_instruction": "Capture the nutrition facts and serving-size area after the ingredient panel or when ingredients are absent.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 13,
+        "product_capture_rank": 13,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1950",
+        "surface_id": "wrapper_back_or_side",
+        "surface_label": "Wrapper back or side text",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+        "capture_instruction": "Capture readable back/side wrapper text only after checking for ingredient and nutrition panels.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 14,
+        "product_capture_rank": 14,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1950",
+        "surface_id": "net_weight",
+        "surface_label": "Net weight",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+        "capture_instruction": "Capture net weight as package-size evidence for later normalization.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 15,
+        "product_capture_rank": 15,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1950",
+        "surface_id": "maker_or_date",
+        "surface_label": "Maker or date cue",
+        "photo_priority": "supporting_label_text_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+        "capture_instruction": "Capture maker, distributor, copyright, lot, or date cues for identity and timeline confidence.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      },
+      {
+        "global_capture_rank": 16,
+        "product_capture_rank": 16,
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1964",
+        "surface_id": "ingredient_panel",
+        "surface_label": "Ingredient panel",
+        "photo_priority": "primary_ingredient_or_nutrition_photo",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
+        "capture_instruction": "Capture the ingredient statement first, with enough wrapper context to preserve product and vintage cues.",
+        "claim_gate": "blocked_until_private_readable_crop_ocr_correction_and_manual_verification"
+      }
+    ],
+    "artifacts": {
+      "ingredient_priority_json": "docs/data/product-evidence/confection_wrapper_ingredient_priority.json",
+      "ingredient_priority_csv": "docs/data/product-evidence/exports/confection_wrapper_ingredient_priority.csv",
+      "ingredient_priority_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_ingredient_priority_runbook.md"
+    }
   }
 }
