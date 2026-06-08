@@ -86,6 +86,10 @@ assert.strictEqual(imageMapAudit.template_rows, queueRows.length, "audit JSON sh
 assert.strictEqual(imageMapAudit.no_private_path_supplied, queueRows.length, "audit JSON should require private paths");
 assert.strictEqual(captureTaskSummary.task_count, queueRows.length, "capture task JSON should cover all CWA rows");
 assert.strictEqual(captureTaskSummary.paths_needed, queueRows.length, "capture task JSON should need paths");
+assert(captureTaskSummary.first_tasks.length >= 4, "capture task JSON should expose first tasks for the site preview");
+assert(captureTaskSummary.first_tasks[0].source_url, "first capture task should expose source URL");
+assert(captureTaskSummary.first_tasks[0].crop_target, "first capture task should expose crop target");
+assert(captureTaskSummary.first_tasks[0].next_action, "first capture task should expose next action");
 assert(siteSummary.confection_wrapper_item_panel_image_map_audit, "site summary should expose CWA image-map audit");
 assert(siteSummary.confection_wrapper_item_panel_capture_task_summary, "site summary should expose CWA capture tasks");
 assert(captureTaskRunbook.includes("Ingredient OCR Capture Task Runbook"), "capture task runbook should be generated");

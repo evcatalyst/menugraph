@@ -68,6 +68,10 @@ assert(js.includes("Vision runtime nilError"), "navigator should explain local V
 assert(js.includes("Candidate Text CSV"), "navigator should link public candidate OCR text artifacts");
 assert(js.includes("never as verified formulation claims"), "navigator should preserve OCR candidate claim boundary");
 assert(js.includes("Story Brief Exports"), "navigator should render full-corpus story brief exports");
+assert(js.includes("Candy Wrapper Archive OCR Pipeline"), "navigator should expose CWA OCR pipeline status");
+assert(js.includes("Candy Wrapper Archive first capture tasks"), "navigator should render CWA first capture tasks");
+assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
+assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
 assert(css.includes(".corpus-directory-grid"), "all-product directory should be styled");
 assert(css.includes(".proof-source-rail"), "photo proof rail should be styled");

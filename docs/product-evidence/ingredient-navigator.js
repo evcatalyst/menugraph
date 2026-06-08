@@ -984,6 +984,17 @@ function renderConfectionWrapperItemPanelPipelineStatus() {
       <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive pipeline product blockers">
         ${products.slice(0, 5).map((row) => `<span>${escapeHtml(row)}</span>`).join("")}
       </div>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive first capture tasks">
+        ${(tasks.first_tasks || []).slice(0, 4).map((task) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`${task.rank || "?"}. ${task.vintage_label || "vintage"} · ${task.source_domain || "source"}`)}</span>
+            <strong>${escapeHtml(task.product_name || "Candy wrapper task")}</strong>
+            <p>${escapeHtml(task.crop_target || "Capture a private wrapper/panel crop before OCR.")}</p>
+            <em>${escapeHtml(task.next_action || "Fill the private image-map template path after capture.")}</em>
+            ${task.source_url ? `<a href="${escapeHtml(task.source_url)}" target="_blank" rel="noopener">Open source</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
       <div class="corpus-handoff-links">
         ${artifacts.model_assist_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.model_assist_summary_csv))}">Spark Packets CSV</a>` : ""}
         ${artifacts.run_summary_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.run_summary_csv))}">Capture Dry Run CSV</a>` : ""}
