@@ -124,6 +124,13 @@ assert(js.includes("Primary-ready packets"), "navigator should expose CWA packet
 assert(js.includes("Packet OCR Readiness CSV"), "navigator should link CWA packet OCR readiness CSV");
 assert(js.includes("Packet OCR Queue CSV"), "navigator should link CWA packet OCR queue");
 assert(js.includes("Packet OCR Readiness Runbook"), "navigator should link CWA packet OCR readiness runbook");
+assert(js.includes("CWA is now the first source-site lane"), "navigator should explain why CWA products are prioritized first");
+assert(js.includes("Private run packets"), "navigator should expose CWA private-run packet count");
+assert(js.includes("Private run surfaces"), "navigator should expose CWA private-run surface count");
+assert(js.includes("Source-site products"), "navigator should expose CWA source-site product count");
+assert(js.includes("Private Run Handoff CSV"), "navigator should link CWA private-run handoff CSV");
+assert(js.includes("Private Run Handoff Runbook"), "navigator should link CWA private-run handoff runbook");
+assert(js.includes("Private Run Handoff JSON"), "navigator should link CWA private-run handoff JSON");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

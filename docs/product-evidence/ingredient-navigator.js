@@ -1095,12 +1095,14 @@ function renderConfectionWrapperIngredientPriorityStatus() {
   const packets = summary.capture_packet_summary || state.summary?.confection_wrapper_ingredient_capture_packet_summary || {};
   const packetAudit = summary.capture_packet_audit_summary || state.summary?.confection_wrapper_ingredient_capture_packet_audit_summary || {};
   const packetAuditArtifacts = packetAudit.public_artifacts || {};
+  const privateRun = summary.private_run_handoff_summary || state.summary?.confection_wrapper_ingredient_private_run_handoff_summary || {};
+  const privateRunArtifacts = privateRun.public_artifacts || {};
   const audit = summary.image_map_audit || state.summary?.confection_wrapper_ingredient_image_map_audit || {};
   return `
     <article class="corpus-handoff-card panel-capture-card status-panel_capture_needed">
       <span>Candy Wrapper Archive Ingredient-First Priority</span>
       <strong>${escapeHtml(`${totals.primary_text_rows || 0} ingredient/nutrition rows · ${totals.support_text_rows || 0} support rows`)}</strong>
-      <p>These rows translate CWA wrapper lineages into a capture order and private image-map handoff: ingredient panel first, nutrition panel second, supporting label text next, and wrapper-front context last.</p>
+      <p>CWA is now the first source-site lane for confection recipe journeys: one dated wrapper page can feed a private image-map handoff for ingredient, nutrition, weight, maker, and wrapper-context crops. The capture order stays ingredient panel first, nutrition panel second, supporting label text next, and wrapper-front context last.</p>
       <dl>
         <div>
           <dt>Capture tasks</dt>
@@ -1129,6 +1131,18 @@ function renderConfectionWrapperIngredientPriorityStatus() {
         <div>
           <dt>Packet OCR rows</dt>
           <dd>${escapeHtml(packetAudit.ocr_queue_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Private run packets</dt>
+          <dd>${escapeHtml(privateRun.selected_packets || 0)}</dd>
+        </div>
+        <div>
+          <dt>Private run surfaces</dt>
+          <dd>${escapeHtml(privateRun.selected_surface_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Source-site products</dt>
+          <dd>${escapeHtml(privateRun.selected_product_count || totals.products || 0)}</dd>
         </div>
         <div>
           <dt>Verified labels</dt>
@@ -1162,6 +1176,9 @@ function renderConfectionWrapperIngredientPriorityStatus() {
         ${(artifacts.packet_audit_csv || packetAuditArtifacts.packet_audit_csv) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.packet_audit_csv || packetAuditArtifacts.packet_audit_csv))}">Packet OCR Readiness CSV</a>` : ""}
         ${(artifacts.packet_ocr_queue_csv || packetAuditArtifacts.packet_ocr_queue_csv) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.packet_ocr_queue_csv || packetAuditArtifacts.packet_ocr_queue_csv))}">Packet OCR Queue CSV</a>` : ""}
         ${(artifacts.packet_audit_runbook_md || packetAuditArtifacts.packet_audit_runbook_md) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.packet_audit_runbook_md || packetAuditArtifacts.packet_audit_runbook_md))}">Packet OCR Readiness Runbook</a>` : ""}
+        ${(artifacts.private_run_handoff_csv || privateRunArtifacts.handoff_csv) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.private_run_handoff_csv || privateRunArtifacts.handoff_csv))}">Private Run Handoff CSV</a>` : ""}
+        ${(artifacts.private_run_handoff_runbook_md || privateRunArtifacts.handoff_runbook_md) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.private_run_handoff_runbook_md || privateRunArtifacts.handoff_runbook_md))}">Private Run Handoff Runbook</a>` : ""}
+        ${(artifacts.private_run_handoff_json || privateRunArtifacts.handoff_json) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.private_run_handoff_json || privateRunArtifacts.handoff_json))}">Private Run Handoff JSON</a>` : ""}
         ${artifacts.ingredient_priority_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ingredient_priority_json))}">Ingredient Priority JSON</a>` : ""}
       </div>
     </article>

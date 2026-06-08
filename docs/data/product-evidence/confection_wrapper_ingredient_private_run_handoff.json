@@ -1,0 +1,218 @@
+{
+  "schema_version": "confection_wrapper_ingredient_private_run_handoff.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "cwa-ingredient-private-run-v1",
+  "priority_strategy": "candy_wrapper_archive_source_site_first_panel_first",
+  "source_domain": "www.candywrapperarchive.com",
+  "selected_packets": 49,
+  "selected_surface_rows": 245,
+  "primary_surface_rows": 98,
+  "support_surface_rows": 147,
+  "selected_packet_ids": [
+    "cwa_ingredient_packet_84a4b9dcab7f9f",
+    "cwa_ingredient_packet_c1cab625704bfc",
+    "cwa_ingredient_packet_72f4c60dcc3f7d",
+    "cwa_ingredient_packet_f221e653ba688a",
+    "cwa_ingredient_packet_fd81bc6a933d6c",
+    "cwa_ingredient_packet_4096b6dfdd1f55",
+    "cwa_ingredient_packet_19f6380dee5d22",
+    "cwa_ingredient_packet_e8520178db04a4",
+    "cwa_ingredient_packet_caa6d23e9fde06",
+    "cwa_ingredient_packet_0075af3870d743",
+    "cwa_ingredient_packet_99d7a0607d525c",
+    "cwa_ingredient_packet_759d8e5eb34575",
+    "cwa_ingredient_packet_d7867c661ce47f",
+    "cwa_ingredient_packet_0a3cbee10cb537",
+    "cwa_ingredient_packet_0393e54e2ea22e",
+    "cwa_ingredient_packet_9fb01f34256aef",
+    "cwa_ingredient_packet_15d2b3cbd91124",
+    "cwa_ingredient_packet_c66c147a91bd1a",
+    "cwa_ingredient_packet_530c22e69b076d",
+    "cwa_ingredient_packet_bc654d226b4cdf",
+    "cwa_ingredient_packet_d67b9cdf3eeee1",
+    "cwa_ingredient_packet_bf9e7268606c82",
+    "cwa_ingredient_packet_682ccb64aed667",
+    "cwa_ingredient_packet_26eff3b8ba9993",
+    "cwa_ingredient_packet_465943270b2630",
+    "cwa_ingredient_packet_da1651af787730",
+    "cwa_ingredient_packet_373b0e85d855ec",
+    "cwa_ingredient_packet_72af616e1e986a",
+    "cwa_ingredient_packet_be9651aed9a9bf",
+    "cwa_ingredient_packet_cf095a529839ae",
+    "cwa_ingredient_packet_ddded09968e768",
+    "cwa_ingredient_packet_a1563afe4d2e7f",
+    "cwa_ingredient_packet_08f3def6d53b44",
+    "cwa_ingredient_packet_4cdf0ea6ee12b6",
+    "cwa_ingredient_packet_6d2be6c2f70415",
+    "cwa_ingredient_packet_884f8d837cfd2e",
+    "cwa_ingredient_packet_9e67f67ffedb0d",
+    "cwa_ingredient_packet_65274b9298d3e2",
+    "cwa_ingredient_packet_74790ccfbe4be3",
+    "cwa_ingredient_packet_66923432543be1",
+    "cwa_ingredient_packet_72b087d6b7d783",
+    "cwa_ingredient_packet_5be1acafa1de79",
+    "cwa_ingredient_packet_4022824844b592",
+    "cwa_ingredient_packet_2280a6b4f9504b",
+    "cwa_ingredient_packet_b0bb8fbc2d7235",
+    "cwa_ingredient_packet_52c47e15c1d0c1",
+    "cwa_ingredient_packet_e06e18ec457cbe",
+    "cwa_ingredient_packet_35c7db6a33734d",
+    "cwa_ingredient_packet_8e084e5c1cb0c4"
+  ],
+  "selected_product_count": 9,
+  "selected_source_url_count": 49,
+  "by_product": [
+    {
+      "key": "Butterfinger Bar",
+      "count": 8
+    },
+    {
+      "key": "Reese's Peanut Butter Cups",
+      "count": 7
+    },
+    {
+      "key": "Hershey's Milk Chocolate Bar",
+      "count": 6
+    },
+    {
+      "key": "Kit Kat Bar",
+      "count": 6
+    },
+    {
+      "key": "Snickers Bar",
+      "count": 6
+    },
+    {
+      "key": "M&M's Milk Chocolate Candies",
+      "count": 5
+    },
+    {
+      "key": "Twix Bar",
+      "count": 5
+    },
+    {
+      "key": "Milky Way Bar",
+      "count": 4
+    },
+    {
+      "key": "Tootsie Roll",
+      "count": 2
+    }
+  ],
+  "first_packets": [
+    {
+      "packet_id": "cwa_ingredient_packet_84a4b9dcab7f9f",
+      "packet_rank": 1,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1930s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_c1cab625704bfc",
+      "packet_rank": 2,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_72f4c60dcc3f7d",
+      "packet_rank": 3,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1950",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_f221e653ba688a",
+      "packet_rank": 4,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1964",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_fd81bc6a933d6c",
+      "packet_rank": 5,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1975",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1975-butterfinger/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_4096b6dfdd1f55",
+      "packet_rank": 6,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1980s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-butterfinger/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_19f6380dee5d22",
+      "packet_rank": 7,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "2002",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2002-butterfinger/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_e8520178db04a4",
+      "packet_rank": 8,
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "2009",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/2009-butterfinger/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_caa6d23e9fde06",
+      "packet_rank": 9,
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_label": "1940s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-reeses-bag/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_0075af3870d743",
+      "packet_rank": 10,
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_label": "1970s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-reeses/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_99d7a0607d525c",
+      "packet_rank": 11,
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_label": "1980s",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-reeses/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    },
+    {
+      "packet_id": "cwa_ingredient_packet_759d8e5eb34575",
+      "packet_rank": 12,
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_label": "1991",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1991-reeses/",
+      "capture_surface_order": "ingredient_panel;nutrition_panel;wrapper_back_or_side;net_weight;maker_or_date"
+    }
+  ],
+  "public_safety": {
+    "private_paths_committed": false,
+    "images_committed": false,
+    "ocr_text_committed": false,
+    "manual_verified_created": false,
+    "candidate_only": true
+  },
+  "public_artifacts": {
+    "handoff_csv": "docs/data/product-evidence/exports/confection_wrapper_ingredient_private_run_handoff.csv",
+    "handoff_json": "docs/data/product-evidence/confection_wrapper_ingredient_private_run_handoff.json",
+    "handoff_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_ingredient_private_run_handoff_runbook.md"
+  },
+  "private_artifacts_created": {
+    "private_template": "cwa-packet-image-map-template.private.csv",
+    "private_worklist_csv": "cwa-packet-worklist.private.csv",
+    "private_worklist_json": "cwa-packet-worklist.private.json",
+    "private_runbook": "private-runbook.md"
+  }
+}
