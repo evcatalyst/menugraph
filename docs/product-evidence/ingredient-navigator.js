@@ -164,6 +164,28 @@ function productHasPublicPhoto(productRow) {
   return publicPhotoRowsForProduct(productRow).length > 0;
 }
 
+function cwaSourceSiteProductIds() {
+  return new Set([
+    ...(state.cwaStorySeeds?.story_seeds || []).map((seed) => seed.product_id),
+    ...(state.cwaIngredientPriority?.product_priorities || []).map((priority) => priority.product_id),
+    ...(state.cwaIngredientCapturePackets?.packets || []).map((packet) => packet.product_id),
+  ].filter(Boolean));
+}
+
+function productHasCwaSourceSite(productRow) {
+  return cwaSourceSiteProductIds().has(productRow?.id);
+}
+
+function cwaSourceSiteRank(productId) {
+  const priorityIds = [
+    ...(state.cwaIngredientPriority?.product_priorities || []).map((priority) => priority.product_id),
+    ...(state.cwaStorySeeds?.story_seeds || []).map((seed) => seed.product_id),
+    ...(state.cwaIngredientCapturePackets?.packets || []).map((packet) => packet.product_id),
+  ].filter(Boolean);
+  const firstIndex = priorityIds.findIndex((id) => id === productId);
+  return firstIndex >= 0 ? firstIndex : Number.MAX_SAFE_INTEGER;
+}
+
 function corpusModeDefinitions() {
   return [
     {
@@ -177,6 +199,12 @@ function corpusModeDefinitions() {
       label: "Story Pilot",
       detail: "10 stitched narratives",
       matches: (productRow) => productRow?.corpus_scope === "story_rich_pilot",
+    },
+    {
+      id: "cwa_source_site",
+      label: "CWA Source Site",
+      detail: "Wrapper lineage first",
+      matches: productHasCwaSourceSite,
     },
     {
       id: "public_photos",
@@ -207,7 +235,13 @@ function corpusModeDefinitions() {
 
 function productRowsForMode(mode = state.corpusMode) {
   const definition = corpusModeDefinitions().find((row) => row.id === mode) || corpusModeDefinitions()[0];
-  return (state.data.product_index || []).filter((row) => definition.matches(productById(row.id)));
+  const rows = (state.data.product_index || []).filter((row) => definition.matches(productById(row.id)));
+  if (mode !== "cwa_source_site") return rows;
+  return rows.slice().sort((a, b) => {
+    const rankDiff = cwaSourceSiteRank(a.id) - cwaSourceSiteRank(b.id);
+    if (rankDiff) return rankDiff;
+    return String(a.label || a.id).localeCompare(String(b.label || b.id));
+  });
 }
 
 function searchedProductRows(rows) {
@@ -244,6 +278,9 @@ function renderProductPicker() {
     ? `${rows.length} matching products`
     : `${modeRows.length} products in view`;
   const modeLabel = corpusModeDefinitions().find((row) => row.id === state.corpusMode)?.label || "Full Corpus";
+  const modeDetail = state.corpusMode === "cwa_source_site"
+    ? "Candy Wrapper Archive source pages are prioritized here because they already provide dated wrapper lineages. Use these products first for package stories, then capture ingredient/nutrition panels before any recipe claim."
+    : `${modeLabel} is showing ${rows.length} products. The first 10 are stitched pilots; the remaining ${proofShells} are source-linked proof shells for photo/OCR work.`;
   renderCorpusMode();
   els.productSelect.innerHTML = rows
     .map((row) => `<option value="${escapeHtml(row.id)}" ${row.id === state.productId ? "selected" : ""} ${row.status !== "loaded" ? "disabled" : ""}>${escapeHtml(row.label)}${row.scope === "full_corpus_shell" ? " (corpus)" : ""}</option>`)
@@ -253,7 +290,7 @@ function renderProductPicker() {
     <article class="product-strip-summary" aria-label="Corpus selector summary">
       <span>${escapeHtml(searchLabel)}</span>
       <strong>${escapeHtml(`${allRows.length}-product corpus loaded`)}</strong>
-      <p>${escapeHtml(`${modeLabel} is showing ${rows.length} products. The first 10 are stitched pilots; the remaining ${proofShells} are source-linked proof shells for photo/OCR work.`)}</p>
+      <p>${escapeHtml(modeDetail)}</p>
       <div class="product-strip-ledger" aria-label="Corpus counts">
         <span><strong>${escapeHtml(allRows.length)}</strong>All products</span>
         <span><strong>${escapeHtml(storyRich)}</strong>Story pilots</span>
@@ -927,6 +964,7 @@ function renderConfectionWrapperLineagePriorityStatus() {
         `).join("")}
       </div>
       <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
         ${artifacts.lineage_priority_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.lineage_priority_csv))}">Lineage Priority CSV</a>` : ""}
         ${artifacts.lineage_priority_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.lineage_priority_runbook_md))}">Lineage Runbook</a>` : ""}
         ${artifacts.lineage_priority_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.lineage_priority_json))}">Lineage JSON</a>` : ""}
@@ -1077,6 +1115,7 @@ function renderConfectionWrapperStorySeedStatus() {
         `).join("")}
       </div>
       <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
         ${artifacts.story_seed_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.story_seed_csv))}">Story Seeds CSV</a>` : ""}
         ${artifacts.story_seed_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.story_seed_runbook_md))}">Story Seed Runbook</a>` : ""}
         ${artifacts.story_seed_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.story_seed_json))}">Story Seeds JSON</a>` : ""}
@@ -1165,6 +1204,7 @@ function renderConfectionWrapperIngredientPriorityStatus() {
         `).join("")}
       </div>
       <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
         ${artifacts.ingredient_priority_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ingredient_priority_csv))}">Ingredient Priority CSV</a>` : ""}
         ${artifacts.ingredient_priority_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ingredient_priority_runbook_md))}">Ingredient Priority Runbook</a>` : ""}
         ${artifacts.image_map_template_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_template_csv))}">Priority Image Map Template</a>` : ""}

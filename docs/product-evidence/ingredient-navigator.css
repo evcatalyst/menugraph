@@ -242,6 +242,7 @@ a:hover {
 }
 
 .product-strip.mode-full,
+.product-strip.mode-cwa_source_site,
 .product-strip.mode-needs_photo,
 .product-strip.mode-needs_ocr,
 .product-strip.mode-review_ready {
@@ -277,6 +278,7 @@ a:hover {
 }
 
 .product-strip.mode-full .product-strip-summary,
+.product-strip.mode-cwa_source_site .product-strip-summary,
 .product-strip.mode-needs_photo .product-strip-summary,
 .product-strip.mode-needs_ocr .product-strip-summary,
 .product-strip.mode-review_ready .product-strip-summary {
@@ -425,7 +427,8 @@ a:hover {
   gap: 6px;
 }
 
-.corpus-handoff-links a {
+.corpus-handoff-links a,
+.corpus-handoff-links button {
   display: inline-flex;
   align-items: center;
   min-height: 30px;
@@ -436,6 +439,12 @@ a:hover {
   font-size: 12px;
   font-weight: 800;
   padding: 5px 9px;
+}
+
+.corpus-handoff-links button {
+  border-color: rgba(101, 183, 177, 0.5);
+  color: var(--ink);
+  cursor: pointer;
 }
 
 .capture-task-handoff {

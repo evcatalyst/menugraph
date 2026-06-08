@@ -66,6 +66,11 @@ assert(html.includes('id="corpus-mode"'), "navigator should expose corpus mode c
 assert(html.includes('id="corpus-directory"'), "navigator should expose all-product directory");
 assert(js.includes('corpusMode: "full"'), "navigator should default to full-corpus mode");
 assert(js.includes('data-corpus-mode="${escapeHtml(definition.id)}"'), "navigator should render selectable corpus modes");
+assert(js.includes('id: "cwa_source_site"'), "navigator should expose a CWA source-site corpus mode");
+assert(js.includes("CWA Source Site"), "navigator should label the CWA source-site mode");
+assert(js.includes("productHasCwaSourceSite"), "navigator should filter CWA products from loaded source manifests");
+assert(js.includes("cwaSourceSiteRank"), "navigator should sort CWA products by source-site priority");
+assert(js.includes("Show CWA products"), "navigator should provide a jump into the CWA source-site product lane");
 assert(js.includes("renderCorpusDirectory"), "navigator should render the all-product directory");
 assert(js.includes("renderProductProofRail"), "navigator should render a source-linked photo proof rail");
 assert(js.includes("renderIngredientPanelProofRail"), "navigator should render ingredient-panel proof before product context");
@@ -134,6 +139,7 @@ assert(js.includes("Private Run Handoff JSON"), "navigator should link CWA priva
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");
+assert(css.includes(".product-strip.mode-cwa_source_site"), "CWA source-site mode should use the grid product strip");
 assert(css.includes(".corpus-directory-grid"), "all-product directory should be styled");
 assert(css.includes(".proof-source-rail"), "photo proof rail should be styled");
 assert(css.includes(".proof-source-rail-primary"), "primary ingredient-panel rail should be styled");
