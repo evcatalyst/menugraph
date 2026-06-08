@@ -1924,6 +1924,11 @@ function cwaStorySeedForProduct(productRow) {
   return (state.cwaStorySeeds?.story_seeds || []).find((seed) => seed.product_id === productRow.id) || null;
 }
 
+function cwaProductStoryQueueForProduct(productRow) {
+  if (!productRow?.id) return null;
+  return (state.cwaProductStoryQueue?.rows || []).find((row) => row.product_id === productRow.id) || null;
+}
+
 function cwaIngredientPriorityForProduct(productRow) {
   if (!productRow?.id) return null;
   return (state.cwaIngredientPriority?.product_priorities || []).find((priority) => priority.product_id === productRow.id) || null;
@@ -2558,6 +2563,65 @@ function renderProofDisplayGate(stats) {
   `;
 }
 
+function renderCwaProductStoryQueuePanel(productRow) {
+  const queueRow = cwaProductStoryQueueForProduct(productRow);
+  if (!queueRow) return "";
+  const isGap = queueRow.product_queue_state === "cwa_source_hunt_gap";
+  const firstSource = queueRow.first_source_url || "";
+  return `
+    <section class="proof-source-rail proof-source-rail-cwa-product-queue" aria-label="Candy Wrapper Archive selected product queue status">
+      <header>
+        <div>
+          <span>CWA Product Story Queue Status</span>
+          <strong>${escapeHtml(`${queueRow.product_queue_rank || "?"}. ${queueRow.product_name || productRow.name} · ${labelFor(queueRow.story_readiness_state || "story state")}`)}</strong>
+        </div>
+        <p>Candy Wrapper Archive can anchor this product's package-history lane, but it cannot prove a recipe change until an ingredient or nutrition panel is readable, OCRed or transcribed, corrected, and manually verified.</p>
+      </header>
+      <div class="proof-source-metrics">
+        <span><strong>${escapeHtml(queueRow.source_era_count || 0)}</strong>Source eras</span>
+        <span><strong>${escapeHtml(queueRow.primary_panel_targets || 0)}</strong>Ingredient/nutrition targets</span>
+        <span><strong>${escapeHtml(queueRow.back_panel_hunt_needed_rows || 0)}</strong>Back-panel hunts</span>
+        <span><strong>${escapeHtml(queueRow.verified_ingredient_labels || 0)}</strong>Verified labels</span>
+      </div>
+      <div class="cwa-story-gate">
+        <article>
+          <span>Why this product</span>
+          <strong>${escapeHtml(labelFor(queueRow.source_site_readiness || "source readiness"))}</strong>
+          <p>${escapeHtml(isGap ? "This product still needs an item-level CWA page or equivalent source-attributable package photo before it can become a CWA package story." : `${queueRow.lineage_span_label || "Lineage span"} package lineage with ${queueRow.item_page_count || 0} source pages.`)}</p>
+        </article>
+        <article>
+          <span>Primary proof target</span>
+          <strong>ingredient panels first</strong>
+          <p>${escapeHtml(`${queueRow.ingredient_panel_targets || 0} ingredient targets and ${queueRow.nutrition_panel_targets || 0} nutrition targets; wrapper fronts are secondary context unless label text is visible.`)}</p>
+        </article>
+        <article>
+          <span>Current blocker</span>
+          <strong>${escapeHtml(labelFor(queueRow.ingredient_evidence_state || "ingredient evidence state"))}</strong>
+          <p>${escapeHtml(queueRow.review_blocker || "Ingredient claims remain blocked pending readable panel review and manual verification.")}</p>
+        </article>
+      </div>
+      <div class="cwa-product-queue-action">
+        <article>
+          <span>Next action</span>
+          <strong>${escapeHtml(isGap ? "find source pages" : "hunt readable panels")}</strong>
+          <p>${escapeHtml(queueRow.next_action || "Inspect source pages for readable ingredient/nutrition panels before OCR.")}</p>
+          <div class="lead-meta">
+            ${statusBadge(isGap ? "source_discovery_needed" : "needs_photo_review")}
+            ${firstSource ? `<a href="${escapeHtml(firstSource)}" target="_blank" rel="noreferrer">Open first CWA source</a>` : ""}
+          </div>
+        </article>
+        ${queueRow.source_hunt_queries ? `
+          <article>
+            <span>Constrained CWA queries</span>
+            <strong>source hunt before story</strong>
+            <p>${escapeHtml(queueRow.source_hunt_queries)}</p>
+          </article>
+        ` : ""}
+      </div>
+    </section>
+  `;
+}
+
 function renderCwaStorySeedPanel(productRow) {
   const seed = cwaStorySeedForProduct(productRow);
   if (!seed) return "";
@@ -2916,6 +2980,7 @@ function renderProofReader(productRow, version) {
         <p>This page is not legal advice. It cites source pages and avoids reproducing external package photos unless rights are recorded as clear. Ingredient-panel extracts are evidence candidates, not verified formulation claims.</p>
       </aside>
     </header>
+    ${renderCwaProductStoryQueuePanel(productRow)}
     ${renderCwaStorySeedPanel(productRow)}
     ${renderCwaIngredientPriorityPanel(productRow)}
     ${renderCwaIngredientCapturePacketPanel(productRow)}
