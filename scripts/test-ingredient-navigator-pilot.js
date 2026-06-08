@@ -74,6 +74,10 @@ assert(js.includes("Candy Wrapper Archive panel review questions"), "navigator s
 assert(js.includes("Panel reviews"), "navigator should expose CWA panel-review count");
 assert(js.includes("Panel Review CSV"), "navigator should link CWA panel-review worksheet");
 assert(js.includes("Panel Review Runbook"), "navigator should link CWA panel-review runbook");
+assert(js.includes("Candy Wrapper Archive Item Lineage"), "navigator should expose CWA item-lineage priority");
+assert(js.includes("Candy Wrapper Archive product lineage priorities"), "navigator should render CWA product-lineage priorities");
+assert(js.includes("Lineage Priority CSV"), "navigator should link CWA lineage-priority exports");
+assert(js.includes("Candy Wrapper Archive focus products"), "navigator should keep focused CWA products visible");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

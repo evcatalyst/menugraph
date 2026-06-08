@@ -877,6 +877,61 @@ function renderConfectionWrapperItemCandidateStatus() {
   `;
 }
 
+function renderConfectionWrapperLineagePriorityStatus() {
+  const summary = state.summary?.confection_wrapper_lineage_priority_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.item_pages) return "";
+  const artifacts = summary.artifacts || {};
+  const targets = summary.top_targets || [];
+  const focusTargets = summary.focus_targets || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-source_review">
+      <span>Candy Wrapper Archive Item Lineage</span>
+      <strong>${escapeHtml(`${totals.item_pages || 0} item pages · ${totals.lineage_products || 0} products prioritized`)}</strong>
+      <p>Use products with multiple Candy Wrapper Archive item pages as the first wrapper-history review lane. These pages can support package lineage and era selection, but ingredient proof still requires readable panel crops and manual verification.</p>
+      <dl>
+        <div>
+          <dt>Direct image refs</dt>
+          <dd>${escapeHtml(totals.direct_image_references || 0)}</dd>
+        </div>
+        <div>
+          <dt>Panel reviews</dt>
+          <dd>${escapeHtml(totals.panel_review_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Readable panels</dt>
+          <dd>${escapeHtml(totals.readable_for_ocr || 0)}</dd>
+        </div>
+        <div>
+          <dt>Source gaps</dt>
+          <dd>${escapeHtml(totals.source_hunt_gaps || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive product lineage priorities">
+        ${targets.slice(0, 4).map((target) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`${labelFor(target.priority_tier || "lineage target")} · ${target.lineage_span_label || "date review"}`)}</span>
+            <strong>${escapeHtml(target.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${target.item_page_count || 0} item pages · ${target.panel_review_rows || 0} panel reviews · ${target.readable_for_ocr || 0} readable`)}</p>
+            <em>${escapeHtml(target.next_action || "Review item pages, crop readable panels, then route to OCR.")}</em>
+            ${target.source_urls ? `<a href="${escapeHtml(target.source_urls.split(";")[0])}" target="_blank" rel="noopener">Open first item</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive focus products">
+        ${focusTargets.slice(0, 5).map((target) => `
+          <span>${escapeHtml(`${target.product_name} · ${target.item_page_count} pages · ${target.lineage_span_label}`)}</span>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.lineage_priority_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.lineage_priority_csv))}">Lineage Priority CSV</a>` : ""}
+        ${artifacts.lineage_priority_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.lineage_priority_runbook_md))}">Lineage Runbook</a>` : ""}
+        ${artifacts.lineage_priority_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.lineage_priority_json))}">Lineage JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1081,6 +1136,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperReviewQueueStatus()}
     ${renderConfectionWrapperCaptureHandoffStatus()}
     ${renderConfectionWrapperItemCandidateStatus()}
+    ${renderConfectionWrapperLineagePriorityStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
