@@ -8,9 +8,11 @@ const htmlPath = path.join(root, "docs/product-evidence/ingredient-navigator.htm
 const jsPath = path.join(root, "docs/product-evidence/ingredient-navigator.js");
 const cssPath = path.join(root, "docs/product-evidence/ingredient-navigator.css");
 const publicPhotoManifestPath = path.join(root, "docs/data/product-evidence/public_photo_proof_manifest.json");
+const cwaProductStoryQueuePath = path.join(root, "docs/data/product-evidence/confection_wrapper_product_story_queue.json");
 const cwaCapturePacketsPath = path.join(root, "docs/data/product-evidence/confection_wrapper_ingredient_capture_packets.json");
 const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
 const publicPhotoManifest = JSON.parse(fs.readFileSync(publicPhotoManifestPath, "utf8"));
+const cwaProductStoryQueue = JSON.parse(fs.readFileSync(cwaProductStoryQueuePath, "utf8"));
 const cwaCapturePackets = JSON.parse(fs.readFileSync(cwaCapturePacketsPath, "utf8"));
 const html = fs.readFileSync(htmlPath, "utf8");
 const js = fs.readFileSync(jsPath, "utf8");
@@ -53,6 +55,10 @@ assert(
   "published public photo rows must be rights-cleared embeds",
 );
 assert.strictEqual(cwaCapturePackets.packet_count, 49, "CWA source-page packet manifest should expose 49 packets");
+assert.strictEqual(cwaProductStoryQueue.totals.product_queue_rows, 12, "CWA product story queue should expose 12 prioritized products/gaps");
+assert.strictEqual(cwaProductStoryQueue.totals.package_story_candidate_products, 9, "CWA product story queue should expose nine story candidates");
+assert.strictEqual(cwaProductStoryQueue.totals.primary_panel_targets, 98, "CWA product story queue should keep ingredient/nutrition targets primary");
+assert.strictEqual(cwaProductStoryQueue.totals.verified_ingredient_labels, 0, "CWA product story queue should not verify labels");
 assert.strictEqual(
   cwaCapturePackets.packets.filter((packet) => packet.product_id === "tootsie_roll").length,
   2,
@@ -70,6 +76,15 @@ assert(js.includes('id: "cwa_source_site"'), "navigator should expose a CWA sour
 assert(js.includes("CWA Source Site"), "navigator should label the CWA source-site mode");
 assert(js.includes("productHasCwaSourceSite"), "navigator should filter CWA products from loaded source manifests");
 assert(js.includes("cwaSourceSiteRank"), "navigator should sort CWA products by source-site priority");
+assert(js.includes("confection_wrapper_product_story_queue.json"), "navigator should fetch the CWA product story queue");
+assert(js.includes("applyCwaProductStoryQueue"), "navigator should apply the CWA product story queue");
+assert(js.includes("Candy Wrapper Archive Product Story Queue"), "navigator should expose the CWA product story queue");
+assert(js.includes("Candy Wrapper Archive product story queue"), "navigator should render CWA product story queue targets");
+assert(js.includes("Product Story Queue CSV"), "navigator should link the CWA product story queue CSV");
+assert(js.includes("Product Story Queue Runbook"), "navigator should link the CWA product story queue runbook");
+assert(js.includes("Product Story Queue JSON"), "navigator should link the CWA product story queue JSON");
+assert(js.includes("Ingredient panels primary"), "navigator should state CWA product queue visual priority");
+assert(js.includes("Wrapper fronts are context"), "navigator should state wrapper fronts are context");
 assert(js.includes("Show CWA products"), "navigator should provide a jump into the CWA source-site product lane");
 assert(js.includes("renderCorpusDirectory"), "navigator should render the all-product directory");
 assert(js.includes("renderProductProofRail"), "navigator should render a source-linked photo proof rail");
