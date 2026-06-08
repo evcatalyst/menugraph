@@ -1,0 +1,90 @@
+{
+  "schema_version": "hybrid_ingredient_ocr_image_map_audit.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "cwa-surface-ocr-v1",
+  "template_rows": 210,
+  "image_map_key_count": 840,
+  "private_paths_supplied": 0,
+  "private_paths_existing": 0,
+  "ready_for_capture": 0,
+  "no_private_path_supplied": 210,
+  "private_path_missing": 0,
+  "unsupported_image_extension": 0,
+  "by_status": [
+    {
+      "key": "no_private_path_supplied",
+      "count": 210
+    }
+  ],
+  "by_product": [
+    {
+      "key": "Butterfinger Bar",
+      "rows": 48,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 48,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Reese's Peanut Butter Cups",
+      "rows": 42,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 42,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Hershey's Milk Chocolate Bar",
+      "rows": 36,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 36,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Kit Kat Bar",
+      "rows": 36,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 36,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Snickers Bar",
+      "rows": 36,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 36,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Tootsie Roll",
+      "rows": 12,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 12,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    }
+  ],
+  "by_source_domain": [
+    {
+      "key": "www.candywrapperarchive.com",
+      "rows": 210,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 210,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    }
+  ],
+  "next_action": "Capture private panel crops and fill the image-map template before OCR.",
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "images_committed": false,
+    "manual_verified_created": false
+  },
+  "public_artifacts": {
+    "audit_summary_csv": "docs/data/product-evidence/exports/confection_wrapper_surface_image_map_audit.csv",
+    "audit_summary_json": "docs/data/product-evidence/confection_wrapper_surface_image_map_audit.json"
+  }
+}

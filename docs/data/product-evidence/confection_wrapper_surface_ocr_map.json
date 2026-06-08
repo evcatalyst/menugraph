@@ -1,0 +1,315 @@
+{
+  "schema_version": "confection_wrapper_surface_ocr_map.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "cwa-surface-ocr-v1",
+  "source_capture_worksheet": "docs/data/product-evidence/exports/confection_wrapper_capture_worksheet.csv",
+  "surface_policy": {
+    "primary_surfaces": "ingredient_panel; nutrition_panel; wrapper_back_or_side; net_weight; maker_or_date",
+    "secondary_surfaces": "wrapper_front_context",
+    "ocr_gate": "Only OCR text-eligible private crop surfaces; wrapper-front context is excluded from the OCR queue by default.",
+    "publication_gate": "Do not publish external images, private crop paths, OCR text, or verified claims from this template."
+  },
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "images_committed": false,
+    "ocr_text_committed": false,
+    "manual_verified_created": false
+  },
+  "totals": {
+    "capture_rows": 35,
+    "surface_template_rows": 210,
+    "ocr_queue_rows": 175,
+    "primary_ingredient_panel_rows": 35,
+    "primary_nutrition_panel_rows": 35,
+    "support_text_rows": 105,
+    "secondary_context_rows": 35,
+    "ready_for_capture": 0,
+    "no_private_path_supplied": 210,
+    "private_paths_supplied": 0
+  },
+  "by_surface": [
+    {
+      "key": "ingredient_panel",
+      "count": 35
+    },
+    {
+      "key": "maker_or_date",
+      "count": 35
+    },
+    {
+      "key": "net_weight",
+      "count": 35
+    },
+    {
+      "key": "nutrition_panel",
+      "count": 35
+    },
+    {
+      "key": "wrapper_back_or_side",
+      "count": 35
+    },
+    {
+      "key": "wrapper_front_context",
+      "count": 35
+    }
+  ],
+  "by_product": [
+    {
+      "key": "Butterfinger Bar",
+      "count": 48
+    },
+    {
+      "key": "Reese's Peanut Butter Cups",
+      "count": 42
+    },
+    {
+      "key": "Hershey's Milk Chocolate Bar",
+      "count": 36
+    },
+    {
+      "key": "Kit Kat Bar",
+      "count": 36
+    },
+    {
+      "key": "Snickers Bar",
+      "count": 36
+    },
+    {
+      "key": "Tootsie Roll",
+      "count": 12
+    }
+  ],
+  "first_rows": [
+    {
+      "evidence_id": "cwa_surface_767db4d8302651",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1930s",
+      "surface_id": "ingredient_panel",
+      "proof_lane": "primary_ingredient_panel",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_0fa1f3fc3def18",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1930s",
+      "surface_id": "nutrition_panel",
+      "proof_lane": "primary_nutrition_panel",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+      "crop_target": "Crop the nutrition panel and serving-size text if visible.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_f1966b7ad04559",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1930s",
+      "surface_id": "wrapper_back_or_side",
+      "proof_lane": "support_package_text",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+      "crop_target": "Crop readable wrapper back/side text, prioritizing ingredients, nutrition, net weight, maker, or date cues.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_c6609fb9e7503a",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1930s",
+      "surface_id": "net_weight",
+      "proof_lane": "support_package_text",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+      "crop_target": "Crop net weight and package-size text.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_9fc6c5b91c315f",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1930s",
+      "surface_id": "maker_or_date",
+      "proof_lane": "support_package_text",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+      "crop_target": "Crop maker/distributor, copyright, lot, or date cue text.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_fbc7199f53282a",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1930s",
+      "surface_id": "wrapper_front_context",
+      "proof_lane": "secondary_product_context",
+      "ocr_eligible": 0,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+      "crop_target": "Capture wrapper front only as product/package context after text surfaces are handled.",
+      "ocr_recommended_action": "Capture only as package context; do not route wrapper-front context to OCR unless a reviewer promotes visible text."
+    },
+    {
+      "evidence_id": "cwa_surface_0bbc4337dc4564",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "surface_id": "ingredient_panel",
+      "proof_lane": "primary_ingredient_panel",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "crop_target": "Crop the ingredient statement with enough package context to preserve product/date cues.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_85b527f5d66f45",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "surface_id": "nutrition_panel",
+      "proof_lane": "primary_nutrition_panel",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "crop_target": "Crop the nutrition panel and serving-size text if visible.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_e8d7ac7f27dc98",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "surface_id": "wrapper_back_or_side",
+      "proof_lane": "support_package_text",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "crop_target": "Crop readable wrapper back/side text, prioritizing ingredients, nutrition, net weight, maker, or date cues.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_2dda4fa260b335",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "surface_id": "net_weight",
+      "proof_lane": "support_package_text",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "crop_target": "Crop net weight and package-size text.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_1a266a1bda2530",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "surface_id": "maker_or_date",
+      "proof_lane": "support_package_text",
+      "ocr_eligible": 1,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "crop_target": "Crop maker/distributor, copyright, lot, or date cue text.",
+      "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
+    },
+    {
+      "evidence_id": "cwa_surface_523473bef5ffc3",
+      "product_name": "Butterfinger Bar",
+      "vintage_label": "1936",
+      "surface_id": "wrapper_front_context",
+      "proof_lane": "secondary_product_context",
+      "ocr_eligible": 0,
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+      "crop_target": "Capture wrapper front only as product/package context after text surfaces are handled.",
+      "ocr_recommended_action": "Capture only as package context; do not route wrapper-front context to OCR unless a reviewer promotes visible text."
+    }
+  ],
+  "artifacts": {
+    "surface_ocr_map_json": "docs/data/product-evidence/confection_wrapper_surface_ocr_map.json",
+    "surface_ocr_queue_csv": "docs/data/product-evidence/exports/confection_wrapper_surface_ocr_queue.csv",
+    "surface_image_map_template_csv": "docs/data/product-evidence/exports/confection_wrapper_surface_image_map_template.csv",
+    "surface_image_map_audit_csv": "docs/data/product-evidence/exports/confection_wrapper_surface_image_map_audit.csv",
+    "surface_image_map_audit_json": "docs/data/product-evidence/confection_wrapper_surface_image_map_audit.json",
+    "surface_ocr_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_surface_ocr_runbook.md"
+  },
+  "audit_summary": {
+    "schema_version": "hybrid_ingredient_ocr_image_map_audit.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "run_id": "cwa-surface-ocr-v1",
+    "template_rows": 210,
+    "image_map_key_count": 840,
+    "private_paths_supplied": 0,
+    "private_paths_existing": 0,
+    "ready_for_capture": 0,
+    "no_private_path_supplied": 210,
+    "private_path_missing": 0,
+    "unsupported_image_extension": 0,
+    "by_status": [
+      {
+        "key": "no_private_path_supplied",
+        "count": 210
+      }
+    ],
+    "by_product": [
+      {
+        "key": "Butterfinger Bar",
+        "rows": 48,
+        "ready_for_capture": 0,
+        "no_private_path_supplied": 48,
+        "private_path_missing": 0,
+        "unsupported_image_extension": 0
+      },
+      {
+        "key": "Reese's Peanut Butter Cups",
+        "rows": 42,
+        "ready_for_capture": 0,
+        "no_private_path_supplied": 42,
+        "private_path_missing": 0,
+        "unsupported_image_extension": 0
+      },
+      {
+        "key": "Hershey's Milk Chocolate Bar",
+        "rows": 36,
+        "ready_for_capture": 0,
+        "no_private_path_supplied": 36,
+        "private_path_missing": 0,
+        "unsupported_image_extension": 0
+      },
+      {
+        "key": "Kit Kat Bar",
+        "rows": 36,
+        "ready_for_capture": 0,
+        "no_private_path_supplied": 36,
+        "private_path_missing": 0,
+        "unsupported_image_extension": 0
+      },
+      {
+        "key": "Snickers Bar",
+        "rows": 36,
+        "ready_for_capture": 0,
+        "no_private_path_supplied": 36,
+        "private_path_missing": 0,
+        "unsupported_image_extension": 0
+      },
+      {
+        "key": "Tootsie Roll",
+        "rows": 12,
+        "ready_for_capture": 0,
+        "no_private_path_supplied": 12,
+        "private_path_missing": 0,
+        "unsupported_image_extension": 0
+      }
+    ],
+    "by_source_domain": [
+      {
+        "key": "www.candywrapperarchive.com",
+        "rows": 210,
+        "ready_for_capture": 0,
+        "no_private_path_supplied": 210,
+        "private_path_missing": 0,
+        "unsupported_image_extension": 0
+      }
+    ],
+    "next_action": "Capture private panel crops and fill the image-map template before OCR.",
+    "public_safety": {
+      "candidate_only": true,
+      "private_paths_committed": false,
+      "images_committed": false,
+      "manual_verified_created": false
+    },
+    "public_artifacts": {
+      "audit_summary_csv": "docs/data/product-evidence/exports/confection_wrapper_surface_image_map_audit.csv",
+      "audit_summary_json": "docs/data/product-evidence/confection_wrapper_surface_image_map_audit.json"
+    }
+  }
+}

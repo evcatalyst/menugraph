@@ -988,6 +988,51 @@ function renderConfectionWrapperCaptureBatchStatus() {
   `;
 }
 
+function renderConfectionWrapperSurfaceOcrStatus() {
+  const summary = state.summary?.confection_wrapper_surface_ocr_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.surface_template_rows) return "";
+  const artifacts = summary.artifacts || {};
+  const surfaces = summary.by_surface || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-panel_capture_needed">
+      <span>Candy Wrapper Archive Surface OCR Map</span>
+      <strong>${escapeHtml(`${totals.ocr_queue_rows || 0} OCR rows · ${totals.surface_template_rows || 0} surface slots`)}</strong>
+      <p>The capture worksheet is now split into surface-level OCR rows. Ingredient and nutrition panels lead the queue; wrapper-front context is present in the template but excluded from OCR by default.</p>
+      <dl>
+        <div>
+          <dt>Ingredient panels</dt>
+          <dd>${escapeHtml(totals.primary_ingredient_panel_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Nutrition panels</dt>
+          <dd>${escapeHtml(totals.primary_nutrition_panel_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Support text</dt>
+          <dd>${escapeHtml(totals.support_text_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Ready now</dt>
+          <dd>${escapeHtml(totals.ready_for_capture || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive OCR surfaces">
+        ${surfaces.slice(0, 6).map((row) => `
+          <span>${escapeHtml(`${labelFor(row.key)} · ${row.count}`)}</span>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.surface_ocr_queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.surface_ocr_queue_csv))}">Surface OCR Queue CSV</a>` : ""}
+        ${artifacts.surface_image_map_template_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.surface_image_map_template_csv))}">Surface Image Map Template</a>` : ""}
+        ${artifacts.surface_image_map_audit_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.surface_image_map_audit_csv))}">Surface Image Map Audit</a>` : ""}
+        ${artifacts.surface_ocr_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.surface_ocr_runbook_md))}">Surface OCR Runbook</a>` : ""}
+        ${artifacts.surface_ocr_map_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.surface_ocr_map_json))}">Surface OCR JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1194,6 +1239,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperItemCandidateStatus()}
     ${renderConfectionWrapperLineagePriorityStatus()}
     ${renderConfectionWrapperCaptureBatchStatus()}
+    ${renderConfectionWrapperSurfaceOcrStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
