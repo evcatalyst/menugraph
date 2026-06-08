@@ -1,0 +1,1 @@
+run_id,source_packet_run_id,packet_id,packet_rank,packet_audit_status,evidence_id,product_id,product_name,vintage_label,source_domain,source_url,source_title,surface_id,surface_label,ocr_gap_category,ocr_priority,capture_strategy,crop_target,ocr_expected_surface,image_map_keys,ocr_queue_status,claim_gate,candidate_only,manual_verified

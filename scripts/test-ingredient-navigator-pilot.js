@@ -120,6 +120,10 @@ assert(js.includes("Ingredient Capture Tasks CSV"), "navigator should link CWA i
 assert(js.includes("Ingredient Capture Runbook"), "navigator should link CWA ingredient capture runbook");
 assert(js.includes("Source Capture Packets CSV"), "navigator should link CWA source-page capture packets");
 assert(js.includes("Source Capture Packet Runbook"), "navigator should link CWA source-page packet runbook");
+assert(js.includes("Primary-ready packets"), "navigator should expose CWA packet OCR readiness");
+assert(js.includes("Packet OCR Readiness CSV"), "navigator should link CWA packet OCR readiness CSV");
+assert(js.includes("Packet OCR Queue CSV"), "navigator should link CWA packet OCR queue");
+assert(js.includes("Packet OCR Readiness Runbook"), "navigator should link CWA packet OCR readiness runbook");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

@@ -1093,6 +1093,8 @@ function renderConfectionWrapperIngredientPriorityStatus() {
   const rows = summary.first_rows || [];
   const capture = summary.capture_task_summary || state.summary?.confection_wrapper_ingredient_capture_task_summary || {};
   const packets = summary.capture_packet_summary || state.summary?.confection_wrapper_ingredient_capture_packet_summary || {};
+  const packetAudit = summary.capture_packet_audit_summary || state.summary?.confection_wrapper_ingredient_capture_packet_audit_summary || {};
+  const packetAuditArtifacts = packetAudit.public_artifacts || {};
   const audit = summary.image_map_audit || state.summary?.confection_wrapper_ingredient_image_map_audit || {};
   return `
     <article class="corpus-handoff-card panel-capture-card status-panel_capture_needed">
@@ -1119,6 +1121,14 @@ function renderConfectionWrapperIngredientPriorityStatus() {
         <div>
           <dt>Ready now</dt>
           <dd>${escapeHtml(audit.ready_for_capture || totals.ready_for_ocr || 0)}</dd>
+        </div>
+        <div>
+          <dt>Primary-ready packets</dt>
+          <dd>${escapeHtml(packetAudit.packets_primary_ready_for_ocr || 0)}</dd>
+        </div>
+        <div>
+          <dt>Packet OCR rows</dt>
+          <dd>${escapeHtml(packetAudit.ocr_queue_rows || 0)}</dd>
         </div>
         <div>
           <dt>Verified labels</dt>
@@ -1149,6 +1159,9 @@ function renderConfectionWrapperIngredientPriorityStatus() {
         ${artifacts.capture_task_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_runbook_md))}">Ingredient Capture Runbook</a>` : ""}
         ${artifacts.capture_packet_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_packet_csv))}">Source Capture Packets CSV</a>` : ""}
         ${artifacts.capture_packet_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_packet_runbook_md))}">Source Capture Packet Runbook</a>` : ""}
+        ${(artifacts.packet_audit_csv || packetAuditArtifacts.packet_audit_csv) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.packet_audit_csv || packetAuditArtifacts.packet_audit_csv))}">Packet OCR Readiness CSV</a>` : ""}
+        ${(artifacts.packet_ocr_queue_csv || packetAuditArtifacts.packet_ocr_queue_csv) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.packet_ocr_queue_csv || packetAuditArtifacts.packet_ocr_queue_csv))}">Packet OCR Queue CSV</a>` : ""}
+        ${(artifacts.packet_audit_runbook_md || packetAuditArtifacts.packet_audit_runbook_md) ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.packet_audit_runbook_md || packetAuditArtifacts.packet_audit_runbook_md))}">Packet OCR Readiness Runbook</a>` : ""}
         ${artifacts.ingredient_priority_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ingredient_priority_json))}">Ingredient Priority JSON</a>` : ""}
       </div>
     </article>
