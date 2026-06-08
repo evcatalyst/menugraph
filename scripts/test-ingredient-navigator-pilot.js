@@ -102,6 +102,8 @@ assert(js.includes("private image-map handoff"), "navigator should explain CWA p
 assert(js.includes("Priority Image Map Template"), "navigator should link CWA priority image-map template");
 assert(js.includes("Ingredient Capture Tasks CSV"), "navigator should link CWA ingredient capture tasks");
 assert(js.includes("Ingredient Capture Runbook"), "navigator should link CWA ingredient capture runbook");
+assert(js.includes("Source Capture Packets CSV"), "navigator should link CWA source-page capture packets");
+assert(js.includes("Source Capture Packet Runbook"), "navigator should link CWA source-page packet runbook");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

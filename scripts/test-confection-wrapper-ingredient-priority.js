@@ -13,6 +13,9 @@ const auditJsonPath = path.join(root, "docs/data/product-evidence/confection_wra
 const captureTaskCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_capture_tasks.csv");
 const captureTaskJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_ingredient_capture_tasks.json");
 const captureRunbookPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_capture_runbook.md");
+const capturePacketCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_capture_packets.csv");
+const capturePacketJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_ingredient_capture_packets.json");
+const capturePacketRunbookPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_ingredient_capture_packet_runbook.md");
 const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
 
 function assertNoPrivatePaths(value, label) {
@@ -26,8 +29,11 @@ const auditRows = parseCsv(fs.readFileSync(auditCsvPath, "utf8"));
 const auditSummary = JSON.parse(fs.readFileSync(auditJsonPath, "utf8"));
 const captureTaskRows = parseCsv(fs.readFileSync(captureTaskCsvPath, "utf8"));
 const captureTaskSummary = JSON.parse(fs.readFileSync(captureTaskJsonPath, "utf8"));
+const capturePacketRows = parseCsv(fs.readFileSync(capturePacketCsvPath, "utf8"));
+const capturePacketSummary = JSON.parse(fs.readFileSync(capturePacketJsonPath, "utf8"));
 const runbook = fs.readFileSync(runbookPath, "utf8");
 const captureRunbook = fs.readFileSync(captureRunbookPath, "utf8");
+const capturePacketRunbook = fs.readFileSync(capturePacketRunbookPath, "utf8");
 const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 
 assert.strictEqual(manifest.schema_version, "confection_wrapper_ingredient_priority.v1", "ingredient priority should use expected schema");
@@ -44,17 +50,25 @@ assert.strictEqual(manifest.totals.verified_ingredient_labels, 0, "priority arti
 assert.strictEqual(manifest.totals.claim_blocked_rows, 245, "every priority row should keep claims blocked");
 assert.strictEqual(manifest.totals.image_map_template_rows, 245, "every priority row should enter the private image-map template");
 assert.strictEqual(manifest.totals.capture_task_rows, 245, "every priority row should become a capture task");
+assert.strictEqual(manifest.totals.capture_packets, 49, "every source era should become one source-page capture packet");
 assert.strictEqual(manifest.totals.paths_needed, 245, "every priority row should still need a private crop path");
 assert.strictEqual(csvRows.length, 245, "CSV should contain every priority row");
 assert.strictEqual(imageMapRows.length, 245, "image-map template should contain every priority row");
 assert.strictEqual(auditRows.length, 245, "audit CSV should contain every priority row");
 assert.strictEqual(captureTaskRows.length, 245, "capture task CSV should contain every priority row");
+assert.strictEqual(capturePacketRows.length, 49, "capture packet CSV should contain one row per source era");
 assert.strictEqual(auditSummary.template_rows, 245, "audit summary should count every template row");
 assert.strictEqual(auditSummary.ready_for_capture, 0, "audit should not mark rows ready without private paths");
 assert.strictEqual(auditSummary.no_private_path_supplied, 245, "audit should identify missing private paths");
 assert.strictEqual(captureTaskSummary.task_count, 245, "capture task summary should count every task");
 assert.strictEqual(captureTaskSummary.paths_needed, 245, "capture task summary should identify path work");
 assert.strictEqual(captureTaskSummary.ready_for_capture, 0, "capture task summary should not mark rows ready");
+assert.strictEqual(capturePacketSummary.packet_count, 49, "capture packet summary should count source pages");
+assert.strictEqual(capturePacketSummary.surface_rows, 245, "capture packet summary should count all surface rows");
+assert.strictEqual(capturePacketSummary.primary_text_rows, 98, "capture packet summary should count primary rows");
+assert.strictEqual(capturePacketSummary.support_text_rows, 147, "capture packet summary should count support rows");
+assert.strictEqual(capturePacketSummary.private_paths_needed, 245, "capture packet summary should identify private path work");
+assert.strictEqual(capturePacketSummary.ready_for_ocr, 0, "capture packet summary should not mark rows ready");
 
 const productNames = new Set(manifest.product_priorities.map((row) => row.product_name));
 [
@@ -89,13 +103,27 @@ assert(summary.confection_wrapper_ingredient_priority_summary.artifacts.ingredie
 assert(summary.confection_wrapper_ingredient_priority_summary.artifacts.ingredient_priority_runbook_md, "site summary should link ingredient priority runbook");
 assert(summary.confection_wrapper_ingredient_priority_summary.artifacts.image_map_template_csv, "site summary should link image-map template CSV");
 assert(summary.confection_wrapper_ingredient_priority_summary.artifacts.capture_task_csv, "site summary should link capture task CSV");
+assert(summary.confection_wrapper_ingredient_priority_summary.artifacts.capture_packet_csv, "site summary should link capture packet CSV");
 assert.strictEqual(summary.confection_wrapper_ingredient_capture_task_summary.task_count, 245, "site summary should expose capture task summary");
+assert.strictEqual(summary.confection_wrapper_ingredient_capture_packet_summary.packet_count, 49, "site summary should expose capture packet summary");
 assert.strictEqual(summary.confection_wrapper_ingredient_image_map_audit.template_rows, 245, "site summary should expose image-map audit");
 assert(runbook.includes("Candy Wrapper Archive Ingredient-First Priority"), "runbook should identify ingredient priority");
 assert(runbook.includes("Capture ingredient panels first"), "runbook should state ingredient-first rule");
 assert(runbook.includes("wrapper-front product photos as secondary context"), "runbook should keep product photos secondary");
 assert(captureRunbook.includes("Ingredient OCR Capture Task Runbook"), "capture runbook should use capture task flow");
 assert(captureRunbook.includes("Image-map keys"), "capture runbook should expose image-map keys");
+assert(capturePacketRunbook.includes("Candy Wrapper Archive Ingredient Capture Packets"), "packet runbook should identify packets");
+assert(capturePacketRunbook.includes("open one source page"), "packet runbook should explain source-page capture");
+
+capturePacketSummary.packets.forEach((packet) => {
+  assert.strictEqual(packet.surface_count, 5, `${packet.packet_id} should group five expected surfaces`);
+  assert.strictEqual(packet.primary_text_rows, 2, `${packet.packet_id} should include ingredient and nutrition rows`);
+  assert.strictEqual(packet.support_text_rows, 3, `${packet.packet_id} should include support text rows`);
+  assert.strictEqual(packet.ready_for_ocr, 0, `${packet.packet_id} should not be OCR-ready`);
+  assert.strictEqual(packet.private_paths_needed, 5, `${packet.packet_id} should need private crop paths`);
+  assert.strictEqual(packet.rows[0].surface_id, "ingredient_panel", `${packet.packet_id} should start with ingredient panel`);
+  assert.strictEqual(packet.rows[1].surface_id, "nutrition_panel", `${packet.packet_id} should capture nutrition second`);
+});
 
 imageMapRows.forEach((row) => {
   assert(row.image_map_keys.includes(row.evidence_id), `${row.evidence_id} should include evidence image-map key`);
@@ -115,6 +143,9 @@ imageMapRows.forEach((row) => {
   captureTaskCsvPath,
   captureTaskJsonPath,
   captureRunbookPath,
+  capturePacketCsvPath,
+  capturePacketJsonPath,
+  capturePacketRunbookPath,
   summaryPath,
 ].forEach((filePath) => assertNoPrivatePaths(fs.readFileSync(filePath, "utf8"), filePath));
 

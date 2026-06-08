@@ -1091,6 +1091,7 @@ function renderConfectionWrapperIngredientPriorityStatus() {
   const artifacts = summary.artifacts || {};
   const rows = summary.first_rows || [];
   const capture = summary.capture_task_summary || state.summary?.confection_wrapper_ingredient_capture_task_summary || {};
+  const packets = summary.capture_packet_summary || state.summary?.confection_wrapper_ingredient_capture_packet_summary || {};
   const audit = summary.image_map_audit || state.summary?.confection_wrapper_ingredient_image_map_audit || {};
   return `
     <article class="corpus-handoff-card panel-capture-card status-panel_capture_needed">
@@ -1101,6 +1102,10 @@ function renderConfectionWrapperIngredientPriorityStatus() {
         <div>
           <dt>Capture tasks</dt>
           <dd>${escapeHtml(capture.task_count || totals.capture_task_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Source packets</dt>
+          <dd>${escapeHtml(packets.packet_count || totals.capture_packets || 0)}</dd>
         </div>
         <div>
           <dt>Image-map rows</dt>
@@ -1141,6 +1146,8 @@ function renderConfectionWrapperIngredientPriorityStatus() {
         ${artifacts.image_map_audit_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.image_map_audit_csv))}">Priority Image Map Audit</a>` : ""}
         ${artifacts.capture_task_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_csv))}">Ingredient Capture Tasks CSV</a>` : ""}
         ${artifacts.capture_task_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_runbook_md))}">Ingredient Capture Runbook</a>` : ""}
+        ${artifacts.capture_packet_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_packet_csv))}">Source Capture Packets CSV</a>` : ""}
+        ${artifacts.capture_packet_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_packet_runbook_md))}">Source Capture Packet Runbook</a>` : ""}
         ${artifacts.ingredient_priority_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.ingredient_priority_json))}">Ingredient Priority JSON</a>` : ""}
       </div>
     </article>
