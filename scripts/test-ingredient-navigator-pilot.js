@@ -161,6 +161,11 @@ assert(js.includes("packets completed"), "navigator should show CWA Grok run com
 assert(js.includes("Grok Run CSV"), "navigator should link CWA Grok run CSV");
 assert(js.includes("Grok Run Runbook"), "navigator should link CWA Grok run runbook");
 assert(js.includes("Grok Run JSON"), "navigator should link CWA Grok run JSON");
+assert(js.includes("Candy Wrapper Archive Grok Lead Review"), "navigator should expose CWA Grok lead review");
+assert(js.includes("candidate leads"), "navigator should show CWA Grok lead review counts");
+assert(js.includes("Grok Lead Review CSV"), "navigator should link CWA Grok lead review CSV");
+assert(js.includes("Grok Lead Review Runbook"), "navigator should link CWA Grok lead review runbook");
+assert(js.includes("Grok Lead Review JSON"), "navigator should link CWA Grok lead review JSON");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

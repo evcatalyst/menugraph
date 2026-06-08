@@ -1505,6 +1505,73 @@ function renderConfectionWrapperGrokSourceHuntRunStatus() {
   `;
 }
 
+function renderConfectionWrapperGrokSourceLeadReviewStatus() {
+  const summary = state.summary?.confection_wrapper_grok_source_lead_review_summary
+    || state.summary?.confection_wrapper_grok_source_hunt_run_summary?.lead_review_summary
+    || state.summary?.confection_wrapper_ingredient_priority_summary?.grok_source_lead_review_summary
+    || {};
+  if (!summary.generated_at) return "";
+  const artifacts = summary.public_artifacts || {};
+  const rows = summary.first_rows || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-needs_source_review">
+      <span>Candy Wrapper Archive Grok Lead Review</span>
+      <strong>${escapeHtml(`${summary.public_review_rows || 0} candidate leads · ${summary.products_with_candidate_leads || 0} products`)}</strong>
+      <p>Model-returned source leads now have a review gate before evidence promotion. The public queue publishes hashes and review states only; returned URLs, titles, owner text, confidence warnings, raw output, and prompts stay private until source review.</p>
+      <dl>
+        <div>
+          <dt>Result files</dt>
+          <dd>${escapeHtml(summary.private_result_files_read || 0)}</dd>
+        </div>
+        <div>
+          <dt>Panel signals</dt>
+          <dd>${escapeHtml(summary.ingredient_panel_signal_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Nutrition signals</dt>
+          <dd>${escapeHtml(summary.nutrition_panel_signal_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Verified labels</dt>
+          <dd>${escapeHtml(summary.manual_verified_rows || 0)}</dd>
+        </div>
+      </dl>
+      ${rows.length ? `
+        <div class="panel-capture-list" aria-label="Candy Wrapper Archive Grok source lead review rows">
+          ${rows.slice(0, 4).map((row) => `
+            <article class="panel-acquisition-target panel-capture-target">
+              <span>${escapeHtml(`${row.review_state || "needs review"} · ${row.source_type || "source lead"}`)}</span>
+              <strong>${escapeHtml(row.product_name || "Candy product")}</strong>
+              <p>${escapeHtml(`${row.visible_surfaces || "surface unknown"} · priority ${row.candidate_priority || 0}`)}</p>
+              <em>${escapeHtml(row.next_action || "Privately review source lead before OCR.")}</em>
+            </article>
+          `).join("")}
+        </div>
+      ` : `
+        <div class="panel-capture-list" aria-label="Candy Wrapper Archive Grok source lead review empty state">
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>No imported leads yet</span>
+            <strong>Run a private Grok packet to populate this queue</strong>
+            <p>Lead URLs and model text will stay private until source review.</p>
+            <em>Use the Grok run script with a bounded packet/product selection when budget allows.</em>
+          </article>
+        </div>
+      `}
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive Grok lead review guardrails">
+        <span>URLs private</span>
+        <span>Hashes public</span>
+        <span>Review before OCR</span>
+      </div>
+      <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
+        ${artifacts.grok_source_lead_review_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_lead_review_csv))}">Grok Lead Review CSV</a>` : ""}
+        ${artifacts.grok_source_lead_review_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_lead_review_runbook_md))}">Grok Lead Review Runbook</a>` : ""}
+        ${artifacts.grok_source_lead_review_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_lead_review_json))}">Grok Lead Review JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1719,6 +1786,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperPanelGapSourceHuntStatus()}
     ${renderConfectionWrapperGrokSourceHuntPacketStatus()}
     ${renderConfectionWrapperGrokSourceHuntRunStatus()}
+    ${renderConfectionWrapperGrokSourceLeadReviewStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}

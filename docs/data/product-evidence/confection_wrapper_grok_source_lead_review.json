@@ -1,0 +1,30 @@
+{
+  "schema_version": "confection_wrapper_grok_source_lead_review.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "cwa-grok-source-lead-review-v1",
+  "private_result_files_read": 0,
+  "public_review_rows": 0,
+  "products_with_candidate_leads": 0,
+  "ingredient_panel_signal_rows": 0,
+  "nutrition_panel_signal_rows": 0,
+  "candidate_only_rows": 0,
+  "manual_verified_rows": 0,
+  "by_review_state": [],
+  "by_product": [],
+  "by_source_type": [],
+  "first_rows": [],
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "model_returned_source_urls_committed": false,
+    "model_returned_source_titles_committed": false,
+    "raw_model_outputs_committed": false,
+    "prompts_committed": false,
+    "manual_verified_created": false
+  },
+  "public_artifacts": {
+    "grok_source_lead_review_csv": "docs/data/product-evidence/exports/confection_wrapper_grok_source_lead_review.csv",
+    "grok_source_lead_review_json": "docs/data/product-evidence/confection_wrapper_grok_source_lead_review.json",
+    "grok_source_lead_review_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_grok_source_lead_review_runbook.md"
+  }
+}
