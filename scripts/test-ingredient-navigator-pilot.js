@@ -151,6 +151,11 @@ assert(js.includes("wrapper-lineage gaps need back-panel evidence"), "navigator 
 assert(js.includes("Back-Panel Hunt CSV"), "navigator should link CWA back-panel hunt CSV");
 assert(js.includes("Back-Panel Hunt Runbook"), "navigator should link CWA back-panel hunt runbook");
 assert(js.includes("Back-Panel Hunt JSON"), "navigator should link CWA back-panel hunt JSON");
+assert(js.includes("Candy Wrapper Archive Grok Source-Hunt Packets"), "navigator should expose CWA Grok source-hunt packet status");
+assert(js.includes("product packets ready"), "navigator should show CWA Grok packet readiness");
+assert(js.includes("Grok Packets CSV"), "navigator should link CWA Grok packet CSV");
+assert(js.includes("Grok Packets Runbook"), "navigator should link CWA Grok packet runbook");
+assert(js.includes("Grok Packets JSON"), "navigator should link CWA Grok packet JSON");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

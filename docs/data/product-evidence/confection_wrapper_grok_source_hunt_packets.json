@@ -1,0 +1,252 @@
+{
+  "schema_version": "confection_wrapper_grok_source_hunt_packet_summary.v1",
+  "generated_at": "2026-06-07T20:30:00Z",
+  "run_id": "cwa-grok-source-hunt-v1",
+  "source_queue": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt.csv",
+  "provider": {
+    "name": "xai",
+    "base_url": "https://api.x.ai/v1",
+    "model": "grok-4.3",
+    "network_called": false,
+    "policy": "Packets are prepared for Grok research assist only; this builder does not call the API."
+  },
+  "routing_policy": {
+    "grok": "source hunting, domain strategy, and validation warnings only",
+    "codex_spark": "bounded queue classification and packet normalization",
+    "gpt55": "later compact batch review and conflict resolution",
+    "verification_gate": "human/manual verification is required before any ingredient claim can be promoted"
+  },
+  "totals": {
+    "source_hunt_rows": 49,
+    "products": 9,
+    "grok_packets": 9,
+    "candidate_only_packets": 9,
+    "manual_verified_created": 0
+  },
+  "by_product": [
+    {
+      "key": "Butterfinger Bar",
+      "count": 8
+    },
+    {
+      "key": "Reese's Peanut Butter Cups",
+      "count": 7
+    },
+    {
+      "key": "Hershey's Milk Chocolate Bar",
+      "count": 6
+    },
+    {
+      "key": "Kit Kat Bar",
+      "count": 6
+    },
+    {
+      "key": "Snickers Bar",
+      "count": 6
+    },
+    {
+      "key": "M&M's Milk Chocolate Candies",
+      "count": 5
+    },
+    {
+      "key": "Twix Bar",
+      "count": 5
+    },
+    {
+      "key": "Milky Way Bar",
+      "count": 4
+    },
+    {
+      "key": "Tootsie Roll",
+      "count": 2
+    }
+  ],
+  "by_vintage_bucket": [
+    {
+      "key": "2000s",
+      "count": 15
+    },
+    {
+      "key": "1990s",
+      "count": 6
+    },
+    {
+      "key": "1930s",
+      "count": 5
+    },
+    {
+      "key": "1940s",
+      "count": 5
+    },
+    {
+      "key": "1950s",
+      "count": 5
+    },
+    {
+      "key": "1960s",
+      "count": 4
+    },
+    {
+      "key": "1970s",
+      "count": 4
+    },
+    {
+      "key": "1980s",
+      "count": 3
+    },
+    {
+      "key": "1900s",
+      "count": 1
+    },
+    {
+      "key": "1910s",
+      "count": 1
+    }
+  ],
+  "first_packets": [
+    {
+      "packet_id": "cwa_grok_source_hunt_e682516daa971d",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "butterfinger_bar",
+      "product_name": "Butterfinger Bar",
+      "vintage_span": "1930s to 2009",
+      "source_row_count": 8,
+      "prompt_hash": "6806e1382775ca2e5701bfee205d620e963fa5ce768cd35c787dc061faf294f4",
+      "source_packet_ids": "cwa_ingredient_packet_84a4b9dcab7f9f;cwa_ingredient_packet_c1cab625704bfc;cwa_ingredient_packet_72f4c60dcc3f7d;cwa_ingredient_packet_f221e653ba688a;cwa_ingredient_packet_fd81bc6a933d6c;cwa_ingredient_packet_4096b6dfdd1f55;cwa_ingredient_packet_19f6380dee5d22;cwa_ingredient_packet_e8520178db04a4",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    },
+    {
+      "packet_id": "cwa_grok_source_hunt_d83c2a70b3bf01",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "hersheys_milk_chocolate_bar",
+      "product_name": "Hershey's Milk Chocolate Bar",
+      "vintage_span": "1908 to 1960s",
+      "source_row_count": 6,
+      "prompt_hash": "7d12ab353b94dcfe5d92b7b5d28a07bfb83802f41a5218a6bee246e862342778",
+      "source_packet_ids": "cwa_ingredient_packet_9fb01f34256aef;cwa_ingredient_packet_15d2b3cbd91124;cwa_ingredient_packet_c66c147a91bd1a;cwa_ingredient_packet_530c22e69b076d;cwa_ingredient_packet_bc654d226b4cdf;cwa_ingredient_packet_d67b9cdf3eeee1",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    },
+    {
+      "packet_id": "cwa_grok_source_hunt_7f4e4780a6dd08",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "kit_kat_bar",
+      "product_name": "Kit Kat Bar",
+      "vintage_span": "1960s to 2007",
+      "source_row_count": 6,
+      "prompt_hash": "95c3df45ed9d4a0100c90ba5b90443e6eedd9fe8921aaced01ff45f745769952",
+      "source_packet_ids": "cwa_ingredient_packet_bf9e7268606c82;cwa_ingredient_packet_682ccb64aed667;cwa_ingredient_packet_26eff3b8ba9993;cwa_ingredient_packet_465943270b2630;cwa_ingredient_packet_da1651af787730;cwa_ingredient_packet_373b0e85d855ec",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    },
+    {
+      "packet_id": "cwa_grok_source_hunt_79c923686985b5",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "mms_milk_chocolate",
+      "product_name": "M&M's Milk Chocolate Candies",
+      "vintage_span": "1970s to 1998",
+      "source_row_count": 5,
+      "prompt_hash": "58db1962c9640a672af462a29e6effac18a9fd8d320e7f92e102e93227258ed9",
+      "source_packet_ids": "cwa_ingredient_packet_4cdf0ea6ee12b6;cwa_ingredient_packet_6d2be6c2f70415;cwa_ingredient_packet_884f8d837cfd2e;cwa_ingredient_packet_9e67f67ffedb0d;cwa_ingredient_packet_65274b9298d3e2",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    },
+    {
+      "packet_id": "cwa_grok_source_hunt_118aef6304c3fb",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "milky_way_bar",
+      "product_name": "Milky Way Bar",
+      "vintage_span": "1939 to 1958",
+      "source_row_count": 4,
+      "prompt_hash": "94aa90ac6b081d701a473218a533a2511debb88cdff1959918e9752e568ab233",
+      "source_packet_ids": "cwa_ingredient_packet_2280a6b4f9504b;cwa_ingredient_packet_b0bb8fbc2d7235;cwa_ingredient_packet_52c47e15c1d0c1;cwa_ingredient_packet_e06e18ec457cbe",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    },
+    {
+      "packet_id": "cwa_grok_source_hunt_a2463937eb225b",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "reeses_peanut_butter_cups",
+      "product_name": "Reese's Peanut Butter Cups",
+      "vintage_span": "1940s to 2005",
+      "source_row_count": 7,
+      "prompt_hash": "d729be8b23248b123cd8699b36ebf9210f1182887beadbc438a64ce912f8f3ba",
+      "source_packet_ids": "cwa_ingredient_packet_caa6d23e9fde06;cwa_ingredient_packet_0075af3870d743;cwa_ingredient_packet_99d7a0607d525c;cwa_ingredient_packet_759d8e5eb34575;cwa_ingredient_packet_d7867c661ce47f;cwa_ingredient_packet_0a3cbee10cb537;cwa_ingredient_packet_0393e54e2ea22e",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    },
+    {
+      "packet_id": "cwa_grok_source_hunt_f5b8d1b45ccb67",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "snickers_bar",
+      "product_name": "Snickers Bar",
+      "vintage_span": "1939 to 2002",
+      "source_row_count": 6,
+      "prompt_hash": "5f105ea5a937bc9d7012f70d2b94a5841254264838c941f10903414fdab3ae0e",
+      "source_packet_ids": "cwa_ingredient_packet_72af616e1e986a;cwa_ingredient_packet_be9651aed9a9bf;cwa_ingredient_packet_cf095a529839ae;cwa_ingredient_packet_ddded09968e768;cwa_ingredient_packet_a1563afe4d2e7f;cwa_ingredient_packet_08f3def6d53b44",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    },
+    {
+      "packet_id": "cwa_grok_source_hunt_3cc1ee5ccede0d",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "tootsie_roll",
+      "product_name": "Tootsie Roll",
+      "vintage_span": "1940s to 1960s",
+      "source_row_count": 2,
+      "prompt_hash": "0f4b61c1fb986e8892788deab5cca021b34a37e993fe53168ea1b15d328abba0",
+      "source_packet_ids": "cwa_ingredient_packet_35c7db6a33734d;cwa_ingredient_packet_8e084e5c1cb0c4",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    },
+    {
+      "packet_id": "cwa_grok_source_hunt_a5be1676f42ffd",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "status": "packet_ready_not_called",
+      "product_id": "twix_bar",
+      "product_name": "Twix Bar",
+      "vintage_span": "2002 to 2009",
+      "source_row_count": 5,
+      "prompt_hash": "9405506c29cd0e8bb4769e4c2bc6c6416a0b922e091219156e249235b2fe1537",
+      "source_packet_ids": "cwa_ingredient_packet_74790ccfbe4be3;cwa_ingredient_packet_66923432543be1;cwa_ingredient_packet_72b087d6b7d783;cwa_ingredient_packet_5be1acafa1de79;cwa_ingredient_packet_4022824844b592",
+      "candidate_only": 1,
+      "manual_verified_created": 0
+    }
+  ],
+  "public_safety": {
+    "candidate_only": true,
+    "private_paths_committed": false,
+    "prompts_committed": false,
+    "model_outputs_committed": false,
+    "image_urls_committed": false,
+    "manual_verified_created": false
+  },
+  "private_artifacts_created": {
+    "run_dir": "[private_path_redacted]",
+    "grok_packets_dir": "grok-source-hunt-packets",
+    "private_packet_manifest": "grok-source-hunt-packets/packet_manifest.json"
+  },
+  "public_artifacts": {
+    "grok_source_hunt_packets_csv": "docs/data/product-evidence/exports/confection_wrapper_grok_source_hunt_packets.csv",
+    "grok_source_hunt_packets_json": "docs/data/product-evidence/confection_wrapper_grok_source_hunt_packets.json",
+    "grok_source_hunt_packets_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_grok_source_hunt_packets_runbook.md"
+  }
+}

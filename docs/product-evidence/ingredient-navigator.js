@@ -1391,6 +1391,63 @@ function renderConfectionWrapperPanelGapSourceHuntStatus() {
   `;
 }
 
+function renderConfectionWrapperGrokSourceHuntPacketStatus() {
+  const summary = state.summary?.confection_wrapper_grok_source_hunt_packet_summary
+    || state.summary?.confection_wrapper_panel_gap_source_hunt_summary?.grok_packet_summary
+    || state.summary?.confection_wrapper_ingredient_priority_summary?.grok_source_hunt_packet_summary
+    || {};
+  const totals = summary.totals || {};
+  if (!totals.grok_packets) return "";
+  const artifacts = summary.public_artifacts || {};
+  const packets = summary.first_packets || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-source_discovery_needed">
+      <span>Candy Wrapper Archive Grok Source-Hunt Packets</span>
+      <strong>${escapeHtml(`${totals.grok_packets || 0} product packets ready · ${totals.source_hunt_rows || 0} source-hunt rows`)}</strong>
+      <p>Back-panel hunts are batched by product for efficient Grok research assists. The private prompts ask for source leads and validation warnings only; public outputs show packet scope and prompt hashes, not prompts, model output, images, or verified claims.</p>
+      <dl>
+        <div>
+          <dt>Products</dt>
+          <dd>${escapeHtml(totals.products || 0)}</dd>
+        </div>
+        <div>
+          <dt>Candidate packets</dt>
+          <dd>${escapeHtml(totals.candidate_only_packets || 0)}</dd>
+        </div>
+        <div>
+          <dt>API called</dt>
+          <dd>${summary.provider?.network_called ? "yes" : "no"}</dd>
+        </div>
+        <div>
+          <dt>Verified labels</dt>
+          <dd>${escapeHtml(totals.manual_verified_created || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive Grok source hunt packets">
+        ${packets.slice(0, 4).map((packet) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`${packet.source_row_count || 0} rows · ${packet.status || "packet ready"}`)}</span>
+            <strong>${escapeHtml(packet.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${packet.vintage_span || "vintage span"} · ${packet.model || "grok research model"}`)}</p>
+            <em>${escapeHtml(`Prompt hash ${String(packet.prompt_hash || "").slice(0, 12)} · candidate-only source research`)}</em>
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive Grok packet guardrails">
+        <span>Research assist only</span>
+        <span>Prompt hashes public</span>
+        <span>Outputs stay candidate</span>
+      </div>
+      <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
+        ${artifacts.grok_source_hunt_packets_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_hunt_packets_csv))}">Grok Packets CSV</a>` : ""}
+        ${artifacts.grok_source_hunt_packets_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_hunt_packets_runbook_md))}">Grok Packets Runbook</a>` : ""}
+        ${artifacts.grok_source_hunt_packets_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_hunt_packets_json))}">Grok Packets JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1603,6 +1660,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperSourceImageIntakeStatus()}
     ${renderConfectionWrapperSourcePanelCandidateReviewStatus()}
     ${renderConfectionWrapperPanelGapSourceHuntStatus()}
+    ${renderConfectionWrapperGrokSourceHuntPacketStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
