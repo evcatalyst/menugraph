@@ -141,6 +141,11 @@ assert(js.includes("source_pages_with_image_candidates"), "navigator should show
 assert(js.includes("Source Image Intake CSV"), "navigator should link CWA source-image intake CSV");
 assert(js.includes("Source Image Intake Runbook"), "navigator should link CWA source-image intake runbook");
 assert(js.includes("Source Image Intake JSON"), "navigator should link CWA source-image intake JSON");
+assert(js.includes("Candy Wrapper Archive Panel Candidate Review"), "navigator should expose CWA panel candidate review status");
+assert(js.includes("Ingredient photos primary"), "navigator should state ingredient photos are primary");
+assert(js.includes("Panel Candidate Review CSV"), "navigator should link CWA panel candidate review CSV");
+assert(js.includes("Panel Candidate Review Runbook"), "navigator should link CWA panel candidate review runbook");
+assert(js.includes("Panel Candidate Review JSON"), "navigator should link CWA panel candidate review JSON");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

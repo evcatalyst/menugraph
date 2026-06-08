@@ -1276,6 +1276,63 @@ function renderConfectionWrapperSourceImageIntakeStatus() {
   `;
 }
 
+function renderConfectionWrapperSourcePanelCandidateReviewStatus() {
+  const summary = state.summary?.confection_wrapper_source_panel_candidate_review_summary
+    || state.summary?.confection_wrapper_source_image_intake_summary?.source_panel_candidate_review_summary
+    || state.summary?.confection_wrapper_ingredient_priority_summary?.source_panel_candidate_review_summary
+    || {};
+  if (!summary.selected_packets) return "";
+  const artifacts = summary.public_artifacts || {};
+  const rows = summary.first_rows || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-needs_photo_review">
+      <span>Candy Wrapper Archive Panel Candidate Review</span>
+      <strong>${escapeHtml(`${summary.packets_with_explicit_panel_signal || 0}/${summary.selected_packets || 0} packets have explicit panel signal`)}</strong>
+      <p>CWA is prioritized for dated wrapper lineage, but ingredient evidence still starts with readable ingredient or nutrition panels. Current metadata ranks the extracted photos as wrapper-context leads until private visual review confirms a back, side, ingredient, or nutrition panel.</p>
+      <dl>
+        <div>
+          <dt>Private candidates</dt>
+          <dd>${escapeHtml(summary.private_image_candidate_count || 0)}</dd>
+        </div>
+        <div>
+          <dt>Panel signal</dt>
+          <dd>${escapeHtml(summary.packets_with_explicit_panel_signal || 0)}</dd>
+        </div>
+        <div>
+          <dt>Wrapper only</dt>
+          <dd>${escapeHtml(summary.packets_with_wrapper_context_only || 0)}</dd>
+        </div>
+        <div>
+          <dt>Verified labels</dt>
+          <dd>0</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive source panel candidate review rows">
+        ${rows.slice(0, 4).map((row) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`${row.packet_rank || "?"}. ${row.vintage_label || "vintage"} · ${labelFor(row.panel_candidate_status || "panel review")}`)}</span>
+            <strong>${escapeHtml(row.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${row.explicit_panel_signal_candidates || 0} panel-signal candidates · ${row.wrapper_context_candidates || 0} wrapper-context candidates`)}</p>
+            <em>${escapeHtml(row.next_action || "Inspect private candidates for ingredient/nutrition panel visibility before OCR.")}</em>
+            ${row.source_url ? `<a href="${escapeHtml(row.source_url)}" target="_blank" rel="noopener">Open source</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive source panel candidate guardrails">
+        <span>Ingredient photos primary</span>
+        <span>Nutrition panels second</span>
+        <span>Wrapper fronts are context</span>
+      </div>
+      <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
+        ${artifacts.source_panel_candidate_review_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_panel_candidate_review_csv))}">Panel Candidate Review CSV</a>` : ""}
+        ${artifacts.source_panel_candidate_review_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_panel_candidate_review_runbook_md))}">Panel Candidate Review Runbook</a>` : ""}
+        ${artifacts.source_panel_candidate_review_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_panel_candidate_review_json))}">Panel Candidate Review JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1486,6 +1543,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperStorySeedStatus()}
     ${renderConfectionWrapperIngredientPriorityStatus()}
     ${renderConfectionWrapperSourceImageIntakeStatus()}
+    ${renderConfectionWrapperSourcePanelCandidateReviewStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
