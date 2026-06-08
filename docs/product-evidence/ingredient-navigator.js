@@ -37,6 +37,7 @@ const state = {
   photoProofManifest: null,
   cwaStorySeeds: null,
   cwaIngredientPriority: null,
+  cwaIngredientCapturePackets: null,
   photoProofImagesByEvidenceId: new Map(),
   productId: "",
   versionId: "",
@@ -1413,6 +1414,10 @@ function applyCwaIngredientPriority(manifest = {}) {
   state.cwaIngredientPriority = manifest || {};
 }
 
+function applyCwaIngredientCapturePackets(manifest = {}) {
+  state.cwaIngredientCapturePackets = manifest || {};
+}
+
 function cwaStorySeedForProduct(productRow) {
   if (!productRow?.id) return null;
   return (state.cwaStorySeeds?.story_seeds || []).find((seed) => seed.product_id === productRow.id) || null;
@@ -1421,6 +1426,13 @@ function cwaStorySeedForProduct(productRow) {
 function cwaIngredientPriorityForProduct(productRow) {
   if (!productRow?.id) return null;
   return (state.cwaIngredientPriority?.product_priorities || []).find((priority) => priority.product_id === productRow.id) || null;
+}
+
+function cwaIngredientCapturePacketsForProduct(productRow) {
+  if (!productRow?.id) return [];
+  return (state.cwaIngredientCapturePackets?.packets || [])
+    .filter((packet) => packet.product_id === productRow.id)
+    .sort((a, b) => Number(a.packet_rank || 0) - Number(b.packet_rank || 0));
 }
 
 function renderSummary(productRow) {
@@ -2165,6 +2177,77 @@ function renderCwaIngredientPriorityPanel(productRow) {
   `;
 }
 
+function renderCwaIngredientCapturePacketPanel(productRow) {
+  const packets = cwaIngredientCapturePacketsForProduct(productRow);
+  if (!packets.length) return "";
+  const primaryRows = packets.reduce((sum, packet) => sum + Number(packet.primary_text_rows || 0), 0);
+  const supportRows = packets.reduce((sum, packet) => sum + Number(packet.support_text_rows || 0), 0);
+  const privatePathsNeeded = packets.reduce((sum, packet) => sum + Number(packet.private_paths_needed || 0), 0);
+  return `
+    <section class="proof-source-rail proof-source-rail-cwa-source-packets" aria-label="Candy Wrapper Archive source-page capture packets">
+      <header>
+        <div>
+          <span>CWA Source-Page Capture Packets</span>
+          <strong>${escapeHtml(`${packets.length} source pages · ${primaryRows} ingredient/nutrition surfaces`)}</strong>
+        </div>
+        <p>Open one CWA page, capture ingredient and nutrition text first, then capture secondary wrapper context only if readable. These packets are capture instructions, not verified ingredient claims.</p>
+      </header>
+      <div class="proof-source-metrics">
+        <span><strong>${escapeHtml(primaryRows)}</strong>Primary text surfaces</span>
+        <span><strong>${escapeHtml(supportRows)}</strong>Support text surfaces</span>
+        <span><strong>${escapeHtml(privatePathsNeeded)}</strong>Private crops needed</span>
+        <span><strong>${escapeHtml(packets.reduce((sum, packet) => sum + Number(packet.ready_for_ocr || 0), 0))}</strong>Ready for OCR</span>
+      </div>
+      <div class="cwa-source-packet-list" aria-label="Source-page packets for ${escapeHtml(productRow.name)}">
+        ${packets.slice(0, 8).map((packet) => {
+          const surfaceRows = packet.rows || [];
+          const surfaceOrder = surfaceRows.length
+            ? surfaceRows
+            : String(packet.capture_surface_order || "").split(";").filter(Boolean).map((surfaceId, index) => ({
+              surface_id: surfaceId,
+              surface_label: labelFor(surfaceId),
+              surface_rank: index + 1,
+              crop_target: "",
+            }));
+          return `
+            <article class="cwa-source-packet-card status-panel_capture_needed">
+              <span>${escapeHtml(`${packet.packet_rank || "?"}. ${packet.vintage_label || "vintage"} source page`)}</span>
+              <strong>${escapeHtml(packet.source_title || `${packet.product_name || productRow.name} source page`)}</strong>
+              <p>${escapeHtml(packet.recommended_next_action || "Open the source page once and crop readable ingredient/nutrition surfaces first.")}</p>
+              <ol class="cwa-source-surface-order">
+                ${surfaceOrder.slice(0, 5).map((row) => `
+                  <li class="${["ingredient_panel", "nutrition_panel"].includes(row.surface_id) ? "is-primary-surface" : "is-support-surface"}">
+                    <span>${escapeHtml(labelFor(row.surface_id || row.surface_label || "surface"))}</span>
+                    <em>${escapeHtml(row.crop_target || row.capture_strategy || "Capture only if readable.")}</em>
+                  </li>
+                `).join("")}
+              </ol>
+              <dl>
+                <div>
+                  <dt>Ingredient evidence</dt>
+                  <dd>${escapeHtml(packet.ingredient_panel_evidence_id || "needed")}</dd>
+                </div>
+                <div>
+                  <dt>Image policy</dt>
+                  <dd>${escapeHtml(labelFor(packet.publication_image_policy || "source_link_only_until_rights_review_clears_reuse"))}</dd>
+                </div>
+                <div>
+                  <dt>Claim gate</dt>
+                  <dd>${escapeHtml(labelFor(packet.claim_gate || "blocked_until_manual_verification"))}</dd>
+                </div>
+              </dl>
+              <div class="lead-meta">
+                ${statusBadge("panel_capture_needed")}
+                ${packet.source_url ? `<a href="${escapeHtml(packet.source_url)}" target="_blank" rel="noreferrer">Open source page</a>` : ""}
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderIngredientPanelProofRail(productRow) {
   const stats = ingredientPanelProofStats(productRow);
   const rows = stats.rows.slice(0, 8);
@@ -2334,6 +2417,7 @@ function renderProofReader(productRow, version) {
     </header>
     ${renderCwaStorySeedPanel(productRow)}
     ${renderCwaIngredientPriorityPanel(productRow)}
+    ${renderCwaIngredientCapturePacketPanel(productRow)}
     ${renderIngredientPanelProofRail(productRow)}
     ${renderProductProofRail(productRow)}
     <div class="proof-era-toggle" aria-label="Recipe history era toggle">
@@ -2660,7 +2744,7 @@ function attachEvents() {
 
 async function init() {
   try {
-    const [response, summary, photoProofManifest, cwaStorySeeds, cwaIngredientPriority] = await Promise.all([
+    const [response, summary, photoProofManifest, cwaStorySeeds, cwaIngredientPriority, cwaIngredientCapturePackets] = await Promise.all([
       fetch(dataHref("../data/product-evidence/navigator_data.json")),
       fetch(dataHref("../data/product-evidence/summary.json"))
         .then((summaryResponse) => (summaryResponse.ok ? summaryResponse.json() : {}))
@@ -2674,6 +2758,9 @@ async function init() {
       fetch(dataHref("../data/product-evidence/confection_wrapper_ingredient_priority.json"))
         .then((ingredientPriorityResponse) => (ingredientPriorityResponse.ok ? ingredientPriorityResponse.json() : {}))
         .catch(() => ({})),
+      fetch(dataHref("../data/product-evidence/confection_wrapper_ingredient_capture_packets.json"))
+        .then((capturePacketResponse) => (capturePacketResponse.ok ? capturePacketResponse.json() : {}))
+        .catch(() => ({})),
     ]);
     if (!response.ok) throw new Error(`Navigator data returned ${response.status}`);
     state.data = await response.json();
@@ -2681,6 +2768,7 @@ async function init() {
     applyPhotoProofManifest(photoProofManifest);
     applyCwaStorySeeds(cwaStorySeeds);
     applyCwaIngredientPriority(cwaIngredientPriority);
+    applyCwaIngredientCapturePackets(cwaIngredientCapturePackets);
     state.productId = state.data.default_product;
     state.maxYear = Number(els.timeRange.value || 2026);
     attachEvents();

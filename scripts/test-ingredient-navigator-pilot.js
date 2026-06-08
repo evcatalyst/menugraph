@@ -8,8 +8,10 @@ const htmlPath = path.join(root, "docs/product-evidence/ingredient-navigator.htm
 const jsPath = path.join(root, "docs/product-evidence/ingredient-navigator.js");
 const cssPath = path.join(root, "docs/product-evidence/ingredient-navigator.css");
 const publicPhotoManifestPath = path.join(root, "docs/data/product-evidence/public_photo_proof_manifest.json");
+const cwaCapturePacketsPath = path.join(root, "docs/data/product-evidence/confection_wrapper_ingredient_capture_packets.json");
 const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
 const publicPhotoManifest = JSON.parse(fs.readFileSync(publicPhotoManifestPath, "utf8"));
+const cwaCapturePackets = JSON.parse(fs.readFileSync(cwaCapturePacketsPath, "utf8"));
 const html = fs.readFileSync(htmlPath, "utf8");
 const js = fs.readFileSync(jsPath, "utf8");
 const css = fs.readFileSync(cssPath, "utf8");
@@ -49,6 +51,16 @@ assert.strictEqual(publicPhotoManifest.published_image_count, 31, "public photo 
 assert(
   publicPhotoManifest.published_images.every((row) => row.image_display_policy === "embed_rights_cleared"),
   "published public photo rows must be rights-cleared embeds",
+);
+assert.strictEqual(cwaCapturePackets.packet_count, 49, "CWA source-page packet manifest should expose 49 packets");
+assert.strictEqual(
+  cwaCapturePackets.packets.filter((packet) => packet.product_id === "tootsie_roll").length,
+  2,
+  "Tootsie Roll should have source-page packet leads from CWA",
+);
+assert(
+  cwaCapturePackets.packets.every((packet) => packet.rows[0].surface_id === "ingredient_panel" && packet.rows[1].surface_id === "nutrition_panel"),
+  "CWA source-page packets should order ingredient and nutrition surfaces first",
 );
 assert(html.includes('id="corpus-mode"'), "navigator should expose corpus mode controls");
 assert(html.includes('id="corpus-directory"'), "navigator should expose all-product directory");
@@ -97,6 +109,10 @@ assert(js.includes("Candy Wrapper Archive Ingredient-First Priority"), "navigato
 assert(js.includes("CWA Ingredient-First Capture Priority"), "navigator should render selected-product CWA ingredient priority");
 assert(js.includes("cwaIngredientPriorityForProduct"), "navigator should map CWA ingredient priorities to selected products");
 assert(js.includes("confection_wrapper_ingredient_priority.json"), "navigator should fetch CWA ingredient priority rows");
+assert(js.includes("CWA Source-Page Capture Packets"), "navigator should render selected-product CWA source-page capture packets");
+assert(js.includes("cwaIngredientCapturePacketsForProduct"), "navigator should map CWA source-page packets to selected products");
+assert(js.includes("confection_wrapper_ingredient_capture_packets.json"), "navigator should fetch CWA source-page capture packets");
+assert(js.includes("Open one CWA page"), "navigator should explain the source-page packet workflow");
 assert(js.includes("Ingredient Priority CSV"), "navigator should link CWA ingredient priority CSV");
 assert(js.includes("private image-map handoff"), "navigator should explain CWA private image-map handoff");
 assert(js.includes("Priority Image Map Template"), "navigator should link CWA priority image-map template");
@@ -115,6 +131,9 @@ assert(css.includes(".proof-source-rail-cwa-story"), "CWA product story seed rai
 assert(css.includes(".cwa-story-timeline"), "CWA product story seed timeline should be styled");
 assert(css.includes(".proof-source-rail-cwa-ingredient-priority"), "CWA ingredient priority rail should be styled");
 assert(css.includes(".cwa-ingredient-priority-list"), "CWA ingredient priority list should be styled");
+assert(css.includes(".proof-source-rail-cwa-source-packets"), "CWA source-page packet rail should be styled");
+assert(css.includes(".cwa-source-packet-list"), "CWA source-page packet list should be styled");
+assert(css.includes(".cwa-source-surface-order"), "CWA source-page surface order should be styled");
 assert(css.includes(".proof-source-thumb"), "public photo thumbnails should be styled");
 assert(css.includes(".product-strip-ledger"), "corpus ledger should be styled");
 assert(css.includes(".proof-display-gate"), "photo display gate should be styled");
