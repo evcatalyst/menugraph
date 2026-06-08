@@ -15,6 +15,7 @@ const reviewQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/c
 const captureTaskCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_tasks.csv");
 const captureTaskJsonPath = path.join(root, "docs/data/product-evidence/confection_wrapper_item_panel_capture_tasks.json");
 const captureTaskRunbookPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_task_runbook.md");
+const panelReviewWorksheetCsvPath = path.join(root, "docs/data/product-evidence/exports/confection_wrapper_panel_review_worksheet.csv");
 const pipelineSummaryPath = path.join(root, "docs/data/product-evidence/confection_wrapper_item_panel_pipeline_summary.json");
 const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
 
@@ -34,6 +35,7 @@ const reviewRows = parseCsv(fs.readFileSync(reviewQueueCsvPath, "utf8"));
 const captureTaskRows = parseCsv(fs.readFileSync(captureTaskCsvPath, "utf8"));
 const captureTaskSummary = JSON.parse(fs.readFileSync(captureTaskJsonPath, "utf8"));
 const captureTaskRunbook = fs.readFileSync(captureTaskRunbookPath, "utf8");
+const panelReviewWorksheetRows = parseCsv(fs.readFileSync(panelReviewWorksheetCsvPath, "utf8"));
 const pipelineSummary = JSON.parse(fs.readFileSync(pipelineSummaryPath, "utf8"));
 const siteSummary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 
@@ -60,6 +62,7 @@ assert.strictEqual(imageMapAuditRows.length, queueRows.length, "image-map audit 
 assert.strictEqual(nativeOcrRows.length, queueRows.length, "native OCR summary should cover every CWA row");
 assert.strictEqual(reviewRows.length, queueRows.length, "review queue should cover every CWA row");
 assert.strictEqual(captureTaskRows.length, queueRows.length, "capture tasks should cover every CWA row");
+assert.strictEqual(panelReviewWorksheetRows.length, queueRows.length, "panel review worksheet should cover every CWA row");
 assert(dryRunRows.every((row) => row.capture_status === "source_page_capture_blocked_no_network"), "dry run should not claim public image capture");
 assert(dryRunRows.every((row) => row.ready_for_ocr === "0"), "dry-run rows should not be OCR-ready");
 assert(imageMapRows.every((row) => row.local_private_image_path === "" && row.processed_private_image_path === ""), "image-map template should keep private paths blank");
@@ -69,6 +72,8 @@ assert(reviewRows.every((row) => row.review_status === "needs_source_review"), "
 assert(reviewRows.every((row) => row.candidate_only === "1" && row.manual_verified === "0"), "review queue must stay candidate-only");
 assert(captureTaskRows.every((row) => row.audit_status === "no_private_path_supplied"), "capture tasks should wait on private paths");
 assert(captureTaskRows.every((row) => row.candidate_only === "1" && row.manual_verified === "0"), "capture tasks must stay candidate-only");
+assert(panelReviewWorksheetRows.every((row) => row.review_state === "panel_review_not_started"), "panel worksheet should wait on human review");
+assert(panelReviewWorksheetRows.every((row) => row.candidate_only === "1" && row.manual_verified === "0"), "panel worksheet must stay candidate-only");
 
 assert.strictEqual(pipelineSummary.model_routes.spark_packets_generated, 3, "pipeline should expose Spark packet count");
 assert.strictEqual(pipelineSummary.capture.selected_rows, queueRows.length, "pipeline capture rows should match queue rows");
@@ -82,6 +87,11 @@ assert.strictEqual(pipelineSummary.review_queue.rows, queueRows.length, "pipelin
 assert.strictEqual(pipelineSummary.review_queue.needs_source_review, queueRows.length, "pipeline should require source review");
 assert.strictEqual(pipelineSummary.capture_task_summary.task_count, queueRows.length, "pipeline should expose capture tasks");
 assert.strictEqual(pipelineSummary.capture_task_summary.paths_needed, queueRows.length, "pipeline capture tasks should need paths");
+assert.strictEqual(pipelineSummary.panel_review_worksheet.worksheet_rows, queueRows.length, "pipeline should expose panel review worksheet rows");
+assert.strictEqual(pipelineSummary.panel_review_worksheet.panel_review_not_started, queueRows.length, "pipeline should expose unreviewed panel rows");
+assert.strictEqual(pipelineSummary.panel_review_worksheet.readable_for_ocr, 0, "pipeline should expose no readable panel reviews yet");
+assert(pipelineSummary.public_artifacts.panel_review_worksheet_csv, "pipeline should link panel review worksheet CSV");
+assert(pipelineSummary.public_artifacts.panel_review_worksheet_runbook_md, "pipeline should link panel review runbook");
 assert.strictEqual(imageMapAudit.template_rows, queueRows.length, "audit JSON should cover all CWA rows");
 assert.strictEqual(imageMapAudit.no_private_path_supplied, queueRows.length, "audit JSON should require private paths");
 assert.strictEqual(captureTaskSummary.task_count, queueRows.length, "capture task JSON should cover all CWA rows");
@@ -106,6 +116,7 @@ assert(captureTaskRunbook.includes("Image-map keys"), "capture task runbook shou
   captureTaskCsvPath,
   captureTaskJsonPath,
   captureTaskRunbookPath,
+  panelReviewWorksheetCsvPath,
   pipelineSummaryPath,
 ].forEach(assertNoPrivatePaths);
 

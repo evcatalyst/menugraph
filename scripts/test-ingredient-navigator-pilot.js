@@ -70,6 +70,10 @@ assert(js.includes("never as verified formulation claims"), "navigator should pr
 assert(js.includes("Story Brief Exports"), "navigator should render full-corpus story brief exports");
 assert(js.includes("Candy Wrapper Archive OCR Pipeline"), "navigator should expose CWA OCR pipeline status");
 assert(js.includes("Candy Wrapper Archive first capture tasks"), "navigator should render CWA first capture tasks");
+assert(js.includes("Candy Wrapper Archive panel review questions"), "navigator should render CWA panel-review questions");
+assert(js.includes("Panel reviews"), "navigator should expose CWA panel-review count");
+assert(js.includes("Panel Review CSV"), "navigator should link CWA panel-review worksheet");
+assert(js.includes("Panel Review Runbook"), "navigator should link CWA panel-review runbook");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

@@ -943,13 +943,15 @@ function renderConfectionWrapperItemPanelPipelineStatus() {
   const blockers = summary.blockers || {};
   const audit = summary.image_map_audit || {};
   const tasks = summary.capture_task_summary || {};
+  const panelReview = summary.panel_review_worksheet || {};
   const products = Array.isArray(blockers.top_products)
     ? blockers.top_products.map((row) => `${row.key || "Product"} · ${row.count || 0}`)
     : String(blockers.top_products || "").split(";").map((value) => value.trim()).filter(Boolean);
+  const reviewQuestions = panelReview.review_questions || [];
   return `
     <article class="corpus-handoff-card panel-capture-card status-needs_source_review">
       <span>Candy Wrapper Archive OCR Pipeline</span>
-      <strong>${escapeHtml(`${model.spark_packets_generated || 0} Spark packets · ${review.rows || 0} review rows`)}</strong>
+      <strong>${escapeHtml(`${model.spark_packets_generated || 0} Spark packets · ${panelReview.worksheet_rows || review.rows || 0} panel reviews`)}</strong>
       <p>The item-level Candy Wrapper Archive lane now runs through the same model/capture/OCR summary flow. This is still a dry run: archive photos are source leads, ingredient proof starts only after private readable-panel crops are supplied.</p>
       <dl>
         <div>
@@ -980,9 +982,20 @@ function renderConfectionWrapperItemPanelPipelineStatus() {
           <dt>Capture tasks</dt>
           <dd>${escapeHtml(tasks.task_count || 0)}</dd>
         </div>
+        <div>
+          <dt>Panel reviews</dt>
+          <dd>${escapeHtml(panelReview.worksheet_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Readable reviews</dt>
+          <dd>${escapeHtml(panelReview.readable_for_ocr || 0)}</dd>
+        </div>
       </dl>
       <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive pipeline product blockers">
         ${products.slice(0, 5).map((row) => `<span>${escapeHtml(row)}</span>`).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive panel review questions">
+        ${reviewQuestions.slice(2, 8).map((question) => `<span>${escapeHtml(question)}</span>`).join("")}
       </div>
       <div class="panel-capture-list" aria-label="Candy Wrapper Archive first capture tasks">
         ${(tasks.first_tasks || []).slice(0, 4).map((task) => `
@@ -1004,6 +1017,9 @@ function renderConfectionWrapperItemPanelPipelineStatus() {
         ${artifacts.review_queue_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.review_queue_csv))}">Review Queue CSV</a>` : ""}
         ${artifacts.capture_task_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_csv))}">Capture Tasks CSV</a>` : ""}
         ${artifacts.capture_task_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_task_runbook_md))}">Capture Runbook</a>` : ""}
+        ${artifacts.panel_review_worksheet_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.panel_review_worksheet_csv))}">Panel Review CSV</a>` : ""}
+        ${artifacts.panel_review_worksheet_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.panel_review_worksheet_runbook_md))}">Panel Review Runbook</a>` : ""}
+        ${artifacts.panel_review_worksheet_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.panel_review_worksheet_json))}">Panel Review JSON</a>` : ""}
         ${artifacts.pipeline_summary_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.pipeline_summary_json))}">Pipeline JSON</a>` : ""}
       </div>
     </article>

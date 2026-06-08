@@ -76,7 +76,10 @@
     "image_map_audit_json": "docs/data/product-evidence/confection_wrapper_item_panel_image_map_audit.json",
     "capture_task_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_tasks.csv",
     "capture_task_json": "docs/data/product-evidence/confection_wrapper_item_panel_capture_tasks.json",
-    "capture_task_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_task_runbook.md"
+    "capture_task_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_task_runbook.md",
+    "panel_review_worksheet_csv": "docs/data/product-evidence/exports/confection_wrapper_panel_review_worksheet.csv",
+    "panel_review_worksheet_json": "docs/data/product-evidence/confection_wrapper_panel_review_worksheet.json",
+    "panel_review_worksheet_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_panel_review_worksheet_runbook.md"
   },
   "image_map_audit": {
     "schema_version": "hybrid_ingredient_ocr_image_map_audit.v1",
@@ -469,6 +472,227 @@
       "capture_task_csv": "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_tasks.csv",
       "capture_task_json": "docs/data/product-evidence/confection_wrapper_item_panel_capture_tasks.json",
       "capture_task_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_item_panel_capture_task_runbook.md"
+    }
+  },
+  "panel_review_worksheet": {
+    "schema_version": "confection_wrapper_panel_review_worksheet.v1",
+    "generated_at": "2026-06-07T20:30:00Z",
+    "run_id": "confection-wrapper-item-panel-v1",
+    "worksheet_rows": 49,
+    "panel_review_not_started": 49,
+    "private_crops_supplied": 0,
+    "readable_for_ocr": 0,
+    "manual_verified_created": 0,
+    "review_questions": [
+      "Is this an item-level wrapper or package source?",
+      "Is a package surface visible after private capture?",
+      "Is ingredient text visible?",
+      "Is nutrition text visible?",
+      "Is net weight visible?",
+      "Is maker/distributor text visible?",
+      "Is date, copyright, or lot cue visible?",
+      "Is any visible text readable enough for OCR?",
+      "Is this only wrapper-front/product identity context?",
+      "Should this remain source-link-only for rights reasons?"
+    ],
+    "by_product": [
+      {
+        "key": "Butterfinger Bar",
+        "count": 8
+      },
+      {
+        "key": "Reese's Peanut Butter Cups",
+        "count": 7
+      },
+      {
+        "key": "Hershey's Milk Chocolate Bar",
+        "count": 6
+      },
+      {
+        "key": "Kit Kat Bar",
+        "count": 6
+      },
+      {
+        "key": "Snickers Bar",
+        "count": 6
+      },
+      {
+        "key": "M&M's Milk Chocolate Candies",
+        "count": 5
+      },
+      {
+        "key": "Twix Bar",
+        "count": 5
+      },
+      {
+        "key": "Milky Way Bar",
+        "count": 4
+      },
+      {
+        "key": "Tootsie Roll",
+        "count": 2
+      }
+    ],
+    "by_review_surface_hint": [
+      {
+        "key": "ingredient_or_package_text_surface",
+        "count": 49
+      }
+    ],
+    "first_rows": [
+      {
+        "review_id": "cwa_panel_review_kit_kat_bar_0e2438decd",
+        "rank": "1",
+        "product_name": "Kit Kat Bar",
+        "vintage_label": "2002",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/2002-kit-kat/",
+        "source_title": "2002 Kit Kat",
+        "evidence_id": "cwa_item_triage_kit_kat_bar_048074b72f",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_kit_kat_bar_49e53c60cd",
+        "rank": "2",
+        "product_name": "Kit Kat Bar",
+        "vintage_label": "1970s",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-kit-kat/",
+        "source_title": "1970s Kit Kat",
+        "evidence_id": "cwa_item_triage_kit_kat_bar_2a96c86c14",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_kit_kat_bar_457135a656",
+        "rank": "3",
+        "product_name": "Kit Kat Bar",
+        "vintage_label": "2007",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/2007-kit-kat/",
+        "source_title": "2007 Kit Kat",
+        "evidence_id": "cwa_item_triage_kit_kat_bar_7d8d5f75c1",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_kit_kat_bar_d4accc7a5e",
+        "rank": "4",
+        "product_name": "Kit Kat Bar",
+        "vintage_label": "2000",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/2000-kit-kat/",
+        "source_title": "2000 Kit Kat",
+        "evidence_id": "cwa_item_triage_kit_kat_bar_b6403000eb",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_kit_kat_bar_59e2a2fae8",
+        "rank": "5",
+        "product_name": "Kit Kat Bar",
+        "vintage_label": "2006",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/2006-kit-kat/",
+        "source_title": "2006 Kit Kat",
+        "evidence_id": "cwa_item_triage_kit_kat_bar_c130111192",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_kit_kat_bar_e4b325412d",
+        "rank": "6",
+        "product_name": "Kit Kat Bar",
+        "vintage_label": "1960s",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1960s-kit-kat/",
+        "source_title": "1960s Kit Kat",
+        "evidence_id": "cwa_item_triage_kit_kat_bar_cc86c0713b",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_milky_way_bar_40533303ce",
+        "rank": "7",
+        "product_name": "Milky Way Bar",
+        "vintage_label": "1950s",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1950s-milky-way-2/",
+        "source_title": "1950s Milky Way",
+        "evidence_id": "cwa_item_triage_milky_way_bar_522c99a44a",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_milky_way_bar_409fcc912c",
+        "rank": "8",
+        "product_name": "Milky Way Bar",
+        "vintage_label": "1939",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1939-milky-way/",
+        "source_title": "1939 Milky Way",
+        "evidence_id": "cwa_item_triage_milky_way_bar_5b9a6ac660",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_milky_way_bar_e6dc50eafd",
+        "rank": "9",
+        "product_name": "Milky Way Bar",
+        "vintage_label": "1940s",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-milky-way/",
+        "source_title": "1940s Milky Way",
+        "evidence_id": "cwa_item_triage_milky_way_bar_95738b0020",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      },
+      {
+        "review_id": "cwa_panel_review_milky_way_bar_698dd4ddbf",
+        "rank": "10",
+        "product_name": "Milky Way Bar",
+        "vintage_label": "1958",
+        "source_domain": "www.candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1958-milky-way/",
+        "source_title": "1958 Milky Way",
+        "evidence_id": "cwa_item_triage_milky_way_bar_e949e52021",
+        "review_surface_hint": "ingredient_or_package_text_surface",
+        "crop_target": "Capture item page and wrapper image privately; crop visible wrapper surfaces and classify front, back, side, net weight, maker, date cue, ingredient panel, and nutrition panel visibility.",
+        "recommended_next_action": "Open source, privately capture/crop the package surface, answer the review fields, then route readable text crops to OCR.",
+        "review_state": "panel_review_not_started"
+      }
+    ],
+    "public_safety": {
+      "candidate_only": true,
+      "private_paths_committed": false,
+      "private_hashes_committed": false,
+      "images_committed": false,
+      "ocr_text_committed": false,
+      "manual_verified_created": false
+    },
+    "public_artifacts": {
+      "panel_review_worksheet_csv": "docs/data/product-evidence/exports/confection_wrapper_panel_review_worksheet.csv",
+      "panel_review_worksheet_json": "docs/data/product-evidence/confection_wrapper_panel_review_worksheet.json",
+      "panel_review_worksheet_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_panel_review_worksheet_runbook.md"
     }
   }
 }
