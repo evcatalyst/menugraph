@@ -193711,7 +193711,10 @@
       "source_image_intake_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_source_image_intake_runbook.md",
       "source_panel_candidate_review_csv": "docs/data/product-evidence/exports/confection_wrapper_source_panel_candidate_review.csv",
       "source_panel_candidate_review_json": "docs/data/product-evidence/confection_wrapper_source_panel_candidate_review.json",
-      "source_panel_candidate_review_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_source_panel_candidate_review_runbook.md"
+      "source_panel_candidate_review_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_source_panel_candidate_review_runbook.md",
+      "source_hunt_csv": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt.csv",
+      "source_hunt_json": "docs/data/product-evidence/confection_wrapper_panel_gap_source_hunt.json",
+      "source_hunt_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt_runbook.md"
     },
     "capture_packet_audit_summary": {
       "schema_version": "confection_wrapper_ingredient_capture_packet_audit.v1",
@@ -194612,6 +194615,510 @@
         "source_panel_candidate_review_csv": "docs/data/product-evidence/exports/confection_wrapper_source_panel_candidate_review.csv",
         "source_panel_candidate_review_json": "docs/data/product-evidence/confection_wrapper_source_panel_candidate_review.json",
         "source_panel_candidate_review_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_source_panel_candidate_review_runbook.md"
+      }
+    },
+    "panel_gap_source_hunt_summary": {
+      "generated_at": "2026-06-07T20:30:00Z",
+      "run_id": "cwa-panel-gap-source-hunt-v1",
+      "source_panel_review": "docs/data/product-evidence/confection_wrapper_source_panel_candidate_review.json",
+      "selection_policy": {
+        "primary_rule": "Ingredient panel photos are primary evidence; nutrition panels are second; product/wrapper photos are secondary identity context.",
+        "source_rule": "Candy Wrapper Archive lineage pages can support product/vintage context, but not formulation claims until a readable ingredient or nutrition panel is cropped, OCRed, corrected, and manually verified.",
+        "grok_rule": "Grok/source-hunt prompts are research assists only and cannot create verified claims."
+      },
+      "totals": {
+        "source_packets": 49,
+        "products": 9,
+        "panel_candidate_private_review_needed": 0,
+        "lineage_photo_only_back_panel_hunt_needed": 49,
+        "manual_source_review_needed": 0,
+        "candidate_only_rows": 49,
+        "manual_verified_rows": 0,
+        "source_panel_review_packets_with_panel_signal": 0,
+        "source_panel_review_wrapper_context_only": 49
+      },
+      "by_status": [
+        {
+          "key": "lineage_photo_only_back_panel_hunt_needed",
+          "count": 49
+        }
+      ],
+      "by_product": [
+        {
+          "key": "Butterfinger Bar",
+          "count": 8
+        },
+        {
+          "key": "Reese's Peanut Butter Cups",
+          "count": 7
+        },
+        {
+          "key": "Hershey's Milk Chocolate Bar",
+          "count": 6
+        },
+        {
+          "key": "Kit Kat Bar",
+          "count": 6
+        },
+        {
+          "key": "Snickers Bar",
+          "count": 6
+        },
+        {
+          "key": "M&M's Milk Chocolate Candies",
+          "count": 5
+        },
+        {
+          "key": "Twix Bar",
+          "count": 5
+        },
+        {
+          "key": "Milky Way Bar",
+          "count": 4
+        },
+        {
+          "key": "Tootsie Roll",
+          "count": 2
+        }
+      ],
+      "by_vintage_bucket": [
+        {
+          "key": "2000s",
+          "count": 15
+        },
+        {
+          "key": "1990s",
+          "count": 6
+        },
+        {
+          "key": "1930s",
+          "count": 5
+        },
+        {
+          "key": "1940s",
+          "count": 5
+        },
+        {
+          "key": "1950s",
+          "count": 5
+        },
+        {
+          "key": "1960s",
+          "count": 4
+        },
+        {
+          "key": "1970s",
+          "count": 4
+        },
+        {
+          "key": "1980s",
+          "count": 3
+        },
+        {
+          "key": "1900s",
+          "count": 1
+        },
+        {
+          "key": "1910s",
+          "count": 1
+        }
+      ],
+      "product_rollups": [
+        {
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "gap_rows": 8,
+          "wrapper_context_only_rows": 8,
+          "panel_candidate_rows": 0,
+          "top_priority": 92,
+          "next_target_vintage": "1930s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "gap_rows": 7,
+          "wrapper_context_only_rows": 7,
+          "panel_candidate_rows": 0,
+          "top_priority": 92,
+          "next_target_vintage": "1940s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "hersheys_milk_chocolate_bar",
+          "product_name": "Hershey's Milk Chocolate Bar",
+          "gap_rows": 6,
+          "wrapper_context_only_rows": 6,
+          "panel_candidate_rows": 0,
+          "top_priority": 74,
+          "next_target_vintage": "1908",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "kit_kat_bar",
+          "product_name": "Kit Kat Bar",
+          "gap_rows": 6,
+          "wrapper_context_only_rows": 6,
+          "panel_candidate_rows": 0,
+          "top_priority": 74,
+          "next_target_vintage": "1960s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "snickers_bar",
+          "product_name": "Snickers Bar",
+          "gap_rows": 6,
+          "wrapper_context_only_rows": 6,
+          "panel_candidate_rows": 0,
+          "top_priority": 66,
+          "next_target_vintage": "1939",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "mms_milk_chocolate",
+          "product_name": "M&M's Milk Chocolate Candies",
+          "gap_rows": 5,
+          "wrapper_context_only_rows": 5,
+          "panel_candidate_rows": 0,
+          "top_priority": 66,
+          "next_target_vintage": "1970s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "milky_way_bar",
+          "product_name": "Milky Way Bar",
+          "gap_rows": 4,
+          "wrapper_context_only_rows": 4,
+          "panel_candidate_rows": 0,
+          "top_priority": 66,
+          "next_target_vintage": "1939",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "tootsie_roll",
+          "product_name": "Tootsie Roll",
+          "gap_rows": 2,
+          "wrapper_context_only_rows": 2,
+          "panel_candidate_rows": 0,
+          "top_priority": 60,
+          "next_target_vintage": "1940s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "twix_bar",
+          "product_name": "Twix Bar",
+          "gap_rows": 5,
+          "wrapper_context_only_rows": 5,
+          "panel_candidate_rows": 0,
+          "top_priority": 58,
+          "next_target_vintage": "2002",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        }
+      ],
+      "first_rows": [
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_84a4b9dcab7f9f",
+          "packet_rank": "1",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1930s",
+          "vintage_bucket": "1930s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+          "source_title": "1930s Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "2",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1930s Butterfinger Bar\" ingredients wrapper back panel; \"1930s Butterfinger Bar\" nutrition facts wrapper; \"1930s Butterfinger Bar\" candy wrapper back; \"1930s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1930s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1930s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_c1cab625704bfc",
+          "packet_rank": "2",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1936",
+          "vintage_bucket": "1930s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+          "source_title": "1936 Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "8",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "3",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1936 Butterfinger Bar\" ingredients wrapper back panel; \"1936 Butterfinger Bar\" nutrition facts wrapper; \"1936 Butterfinger Bar\" candy wrapper back; \"1930s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1936 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1936 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_72f4c60dcc3f7d",
+          "packet_rank": "3",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1950",
+          "vintage_bucket": "1950s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+          "source_title": "1950 Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "2",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1950 Butterfinger Bar\" ingredients wrapper back panel; \"1950 Butterfinger Bar\" nutrition facts wrapper; \"1950 Butterfinger Bar\" candy wrapper back; \"1950s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1950 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1950 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_f221e653ba688a",
+          "packet_rank": "4",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1964",
+          "vintage_bucket": "1960s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
+          "source_title": "1964 Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "8",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "3",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1964 Butterfinger Bar\" ingredients wrapper back panel; \"1964 Butterfinger Bar\" nutrition facts wrapper; \"1964 Butterfinger Bar\" candy wrapper back; \"1960s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1964 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1964 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_fd81bc6a933d6c",
+          "packet_rank": "5",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1975",
+          "vintage_bucket": "1970s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1975-butterfinger/",
+          "source_title": "1975 Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "2",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1975 Butterfinger Bar\" ingredients wrapper back panel; \"1975 Butterfinger Bar\" nutrition facts wrapper; \"1975 Butterfinger Bar\" candy wrapper back; \"1970s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1975 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1975 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_4096b6dfdd1f55",
+          "packet_rank": "6",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1980s",
+          "vintage_bucket": "1980s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-butterfinger/",
+          "source_title": "1980s Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "2",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1980s Butterfinger Bar\" ingredients wrapper back panel; \"1980s Butterfinger Bar\" nutrition facts wrapper; \"1980s Butterfinger Bar\" candy wrapper back; \"1980s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1980s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1980s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_caa6d23e9fde06",
+          "packet_rank": "9",
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "vintage_label": "1940s",
+          "vintage_bucket": "1940s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-reeses-bag/",
+          "source_title": "1940s Reese's Peanut Butter Cups source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "1",
+          "low_signal_candidates": "6",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1940s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1940s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1940s Reese's Peanut Butter Cups\" candy wrapper back; \"1940s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1940s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1940s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_0075af3870d743",
+          "packet_rank": "10",
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "vintage_label": "1970s",
+          "vintage_bucket": "1970s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-reeses/",
+          "source_title": "1970s Reese's Peanut Butter Cups source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "1",
+          "low_signal_candidates": "6",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1970s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1970s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1970s Reese's Peanut Butter Cups\" candy wrapper back; \"1970s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1970s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1970s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_99d7a0607d525c",
+          "packet_rank": "11",
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "vintage_label": "1980s",
+          "vintage_bucket": "1980s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-reeses/",
+          "source_title": "1980s Reese's Peanut Butter Cups source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "1",
+          "low_signal_candidates": "6",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1980s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1980s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1980s Reese's Peanut Butter Cups\" candy wrapper back; \"1980s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1980s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1980s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_759d8e5eb34575",
+          "packet_rank": "12",
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "vintage_label": "1991",
+          "vintage_bucket": "1990s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1991-reeses/",
+          "source_title": "1991 Reese's Peanut Butter Cups source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "1",
+          "low_signal_candidates": "6",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1991 Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1991 Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1991 Reese's Peanut Butter Cups\" candy wrapper back; \"1990s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1991 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1991 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        }
+      ],
+      "public_safety": {
+        "candidate_only": true,
+        "private_paths_committed": false,
+        "image_urls_committed": false,
+        "images_committed": false,
+        "ocr_text_committed": false,
+        "manual_verified_created": false
+      },
+      "artifacts": {
+        "source_hunt_csv": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt.csv",
+        "source_hunt_json": "docs/data/product-evidence/confection_wrapper_panel_gap_source_hunt.json",
+        "source_hunt_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt_runbook.md"
       }
     }
   },
@@ -196360,7 +196867,1018 @@
     "public_artifacts": {
       "source_panel_candidate_review_csv": "docs/data/product-evidence/exports/confection_wrapper_source_panel_candidate_review.csv",
       "source_panel_candidate_review_json": "docs/data/product-evidence/confection_wrapper_source_panel_candidate_review.json",
-      "source_panel_candidate_review_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_source_panel_candidate_review_runbook.md"
+      "source_panel_candidate_review_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_source_panel_candidate_review_runbook.md",
+      "source_hunt_csv": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt.csv",
+      "source_hunt_json": "docs/data/product-evidence/confection_wrapper_panel_gap_source_hunt.json",
+      "source_hunt_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt_runbook.md"
+    },
+    "panel_gap_source_hunt_summary": {
+      "generated_at": "2026-06-07T20:30:00Z",
+      "run_id": "cwa-panel-gap-source-hunt-v1",
+      "source_panel_review": "docs/data/product-evidence/confection_wrapper_source_panel_candidate_review.json",
+      "selection_policy": {
+        "primary_rule": "Ingredient panel photos are primary evidence; nutrition panels are second; product/wrapper photos are secondary identity context.",
+        "source_rule": "Candy Wrapper Archive lineage pages can support product/vintage context, but not formulation claims until a readable ingredient or nutrition panel is cropped, OCRed, corrected, and manually verified.",
+        "grok_rule": "Grok/source-hunt prompts are research assists only and cannot create verified claims."
+      },
+      "totals": {
+        "source_packets": 49,
+        "products": 9,
+        "panel_candidate_private_review_needed": 0,
+        "lineage_photo_only_back_panel_hunt_needed": 49,
+        "manual_source_review_needed": 0,
+        "candidate_only_rows": 49,
+        "manual_verified_rows": 0,
+        "source_panel_review_packets_with_panel_signal": 0,
+        "source_panel_review_wrapper_context_only": 49
+      },
+      "by_status": [
+        {
+          "key": "lineage_photo_only_back_panel_hunt_needed",
+          "count": 49
+        }
+      ],
+      "by_product": [
+        {
+          "key": "Butterfinger Bar",
+          "count": 8
+        },
+        {
+          "key": "Reese's Peanut Butter Cups",
+          "count": 7
+        },
+        {
+          "key": "Hershey's Milk Chocolate Bar",
+          "count": 6
+        },
+        {
+          "key": "Kit Kat Bar",
+          "count": 6
+        },
+        {
+          "key": "Snickers Bar",
+          "count": 6
+        },
+        {
+          "key": "M&M's Milk Chocolate Candies",
+          "count": 5
+        },
+        {
+          "key": "Twix Bar",
+          "count": 5
+        },
+        {
+          "key": "Milky Way Bar",
+          "count": 4
+        },
+        {
+          "key": "Tootsie Roll",
+          "count": 2
+        }
+      ],
+      "by_vintage_bucket": [
+        {
+          "key": "2000s",
+          "count": 15
+        },
+        {
+          "key": "1990s",
+          "count": 6
+        },
+        {
+          "key": "1930s",
+          "count": 5
+        },
+        {
+          "key": "1940s",
+          "count": 5
+        },
+        {
+          "key": "1950s",
+          "count": 5
+        },
+        {
+          "key": "1960s",
+          "count": 4
+        },
+        {
+          "key": "1970s",
+          "count": 4
+        },
+        {
+          "key": "1980s",
+          "count": 3
+        },
+        {
+          "key": "1900s",
+          "count": 1
+        },
+        {
+          "key": "1910s",
+          "count": 1
+        }
+      ],
+      "product_rollups": [
+        {
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "gap_rows": 8,
+          "wrapper_context_only_rows": 8,
+          "panel_candidate_rows": 0,
+          "top_priority": 92,
+          "next_target_vintage": "1930s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "gap_rows": 7,
+          "wrapper_context_only_rows": 7,
+          "panel_candidate_rows": 0,
+          "top_priority": 92,
+          "next_target_vintage": "1940s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "hersheys_milk_chocolate_bar",
+          "product_name": "Hershey's Milk Chocolate Bar",
+          "gap_rows": 6,
+          "wrapper_context_only_rows": 6,
+          "panel_candidate_rows": 0,
+          "top_priority": 74,
+          "next_target_vintage": "1908",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "kit_kat_bar",
+          "product_name": "Kit Kat Bar",
+          "gap_rows": 6,
+          "wrapper_context_only_rows": 6,
+          "panel_candidate_rows": 0,
+          "top_priority": 74,
+          "next_target_vintage": "1960s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "snickers_bar",
+          "product_name": "Snickers Bar",
+          "gap_rows": 6,
+          "wrapper_context_only_rows": 6,
+          "panel_candidate_rows": 0,
+          "top_priority": 66,
+          "next_target_vintage": "1939",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "mms_milk_chocolate",
+          "product_name": "M&M's Milk Chocolate Candies",
+          "gap_rows": 5,
+          "wrapper_context_only_rows": 5,
+          "panel_candidate_rows": 0,
+          "top_priority": 66,
+          "next_target_vintage": "1970s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "milky_way_bar",
+          "product_name": "Milky Way Bar",
+          "gap_rows": 4,
+          "wrapper_context_only_rows": 4,
+          "panel_candidate_rows": 0,
+          "top_priority": 66,
+          "next_target_vintage": "1939",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "tootsie_roll",
+          "product_name": "Tootsie Roll",
+          "gap_rows": 2,
+          "wrapper_context_only_rows": 2,
+          "panel_candidate_rows": 0,
+          "top_priority": 60,
+          "next_target_vintage": "1940s",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        },
+        {
+          "product_id": "twix_bar",
+          "product_name": "Twix Bar",
+          "gap_rows": 5,
+          "wrapper_context_only_rows": 5,
+          "panel_candidate_rows": 0,
+          "top_priority": 58,
+          "next_target_vintage": "2002",
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+        }
+      ],
+      "first_rows": [
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_84a4b9dcab7f9f",
+          "packet_rank": "1",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1930s",
+          "vintage_bucket": "1930s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+          "source_title": "1930s Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "2",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1930s Butterfinger Bar\" ingredients wrapper back panel; \"1930s Butterfinger Bar\" nutrition facts wrapper; \"1930s Butterfinger Bar\" candy wrapper back; \"1930s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1930s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1930s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_c1cab625704bfc",
+          "packet_rank": "2",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1936",
+          "vintage_bucket": "1930s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+          "source_title": "1936 Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "8",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "3",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1936 Butterfinger Bar\" ingredients wrapper back panel; \"1936 Butterfinger Bar\" nutrition facts wrapper; \"1936 Butterfinger Bar\" candy wrapper back; \"1930s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1936 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1936 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_72f4c60dcc3f7d",
+          "packet_rank": "3",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1950",
+          "vintage_bucket": "1950s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+          "source_title": "1950 Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "2",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1950 Butterfinger Bar\" ingredients wrapper back panel; \"1950 Butterfinger Bar\" nutrition facts wrapper; \"1950 Butterfinger Bar\" candy wrapper back; \"1950s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1950 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1950 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_f221e653ba688a",
+          "packet_rank": "4",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1964",
+          "vintage_bucket": "1960s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
+          "source_title": "1964 Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "8",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "3",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1964 Butterfinger Bar\" ingredients wrapper back panel; \"1964 Butterfinger Bar\" nutrition facts wrapper; \"1964 Butterfinger Bar\" candy wrapper back; \"1960s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1964 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1964 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_fd81bc6a933d6c",
+          "packet_rank": "5",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1975",
+          "vintage_bucket": "1970s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1975-butterfinger/",
+          "source_title": "1975 Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "2",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1975 Butterfinger Bar\" ingredients wrapper back panel; \"1975 Butterfinger Bar\" nutrition facts wrapper; \"1975 Butterfinger Bar\" candy wrapper back; \"1970s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1975 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1975 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_4096b6dfdd1f55",
+          "packet_rank": "6",
+          "product_id": "butterfinger_bar",
+          "product_name": "Butterfinger Bar",
+          "vintage_label": "1980s",
+          "vintage_bucket": "1980s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-butterfinger/",
+          "source_title": "1980s Butterfinger Bar source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "5",
+          "low_signal_candidates": "2",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1980s Butterfinger Bar\" ingredients wrapper back panel; \"1980s Butterfinger Bar\" nutrition facts wrapper; \"1980s Butterfinger Bar\" candy wrapper back; \"1980s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1980s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1980s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_caa6d23e9fde06",
+          "packet_rank": "9",
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "vintage_label": "1940s",
+          "vintage_bucket": "1940s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-reeses-bag/",
+          "source_title": "1940s Reese's Peanut Butter Cups source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "1",
+          "low_signal_candidates": "6",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1940s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1940s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1940s Reese's Peanut Butter Cups\" candy wrapper back; \"1940s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1940s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1940s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_0075af3870d743",
+          "packet_rank": "10",
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "vintage_label": "1970s",
+          "vintage_bucket": "1970s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-reeses/",
+          "source_title": "1970s Reese's Peanut Butter Cups source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "1",
+          "low_signal_candidates": "6",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1970s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1970s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1970s Reese's Peanut Butter Cups\" candy wrapper back; \"1970s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1970s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1970s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_99d7a0607d525c",
+          "packet_rank": "11",
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "vintage_label": "1980s",
+          "vintage_bucket": "1980s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-reeses/",
+          "source_title": "1980s Reese's Peanut Butter Cups source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "1",
+          "low_signal_candidates": "6",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1980s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1980s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1980s Reese's Peanut Butter Cups\" candy wrapper back; \"1980s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1980s \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1980s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        },
+        {
+          "run_id": "cwa-panel-gap-source-hunt-v1",
+          "packet_id": "cwa_ingredient_packet_759d8e5eb34575",
+          "packet_rank": "12",
+          "product_id": "reeses_peanut_butter_cups",
+          "product_name": "Reese's Peanut Butter Cups",
+          "vintage_label": "1991",
+          "vintage_bucket": "1990s",
+          "source_domain": "candywrapperarchive.com",
+          "source_url": "https://www.candywrapperarchive.com/candy-collector/1991-reeses/",
+          "source_title": "1991 Reese's Peanut Butter Cups source page",
+          "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+          "proof_lane": "ingredient_panel_source_hunt",
+          "existing_source_role": "dated_wrapper_lineage_context",
+          "existing_image_candidate_count": "7",
+          "explicit_panel_signal_candidates": "0",
+          "wrapper_context_candidates": "1",
+          "low_signal_candidates": "6",
+          "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+          "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+          "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+          "source_hunt_queries": "\"1991 Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1991 Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1991 Reese's Peanut Butter Cups\" candy wrapper back; \"1990s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1991 \"net wt\" wrapper",
+          "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1991 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+          "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+          "priority": 92,
+          "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+          "candidate_only": 1,
+          "manual_verified": 0
+        }
+      ],
+      "public_safety": {
+        "candidate_only": true,
+        "private_paths_committed": false,
+        "image_urls_committed": false,
+        "images_committed": false,
+        "ocr_text_committed": false,
+        "manual_verified_created": false
+      },
+      "artifacts": {
+        "source_hunt_csv": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt.csv",
+        "source_hunt_json": "docs/data/product-evidence/confection_wrapper_panel_gap_source_hunt.json",
+        "source_hunt_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt_runbook.md"
+      }
+    }
+  },
+  "confection_wrapper_panel_gap_source_hunt_summary": {
+    "generated_at": "2026-06-07T20:30:00Z",
+    "run_id": "cwa-panel-gap-source-hunt-v1",
+    "source_panel_review": "docs/data/product-evidence/confection_wrapper_source_panel_candidate_review.json",
+    "selection_policy": {
+      "primary_rule": "Ingredient panel photos are primary evidence; nutrition panels are second; product/wrapper photos are secondary identity context.",
+      "source_rule": "Candy Wrapper Archive lineage pages can support product/vintage context, but not formulation claims until a readable ingredient or nutrition panel is cropped, OCRed, corrected, and manually verified.",
+      "grok_rule": "Grok/source-hunt prompts are research assists only and cannot create verified claims."
+    },
+    "totals": {
+      "source_packets": 49,
+      "products": 9,
+      "panel_candidate_private_review_needed": 0,
+      "lineage_photo_only_back_panel_hunt_needed": 49,
+      "manual_source_review_needed": 0,
+      "candidate_only_rows": 49,
+      "manual_verified_rows": 0,
+      "source_panel_review_packets_with_panel_signal": 0,
+      "source_panel_review_wrapper_context_only": 49
+    },
+    "by_status": [
+      {
+        "key": "lineage_photo_only_back_panel_hunt_needed",
+        "count": 49
+      }
+    ],
+    "by_product": [
+      {
+        "key": "Butterfinger Bar",
+        "count": 8
+      },
+      {
+        "key": "Reese's Peanut Butter Cups",
+        "count": 7
+      },
+      {
+        "key": "Hershey's Milk Chocolate Bar",
+        "count": 6
+      },
+      {
+        "key": "Kit Kat Bar",
+        "count": 6
+      },
+      {
+        "key": "Snickers Bar",
+        "count": 6
+      },
+      {
+        "key": "M&M's Milk Chocolate Candies",
+        "count": 5
+      },
+      {
+        "key": "Twix Bar",
+        "count": 5
+      },
+      {
+        "key": "Milky Way Bar",
+        "count": 4
+      },
+      {
+        "key": "Tootsie Roll",
+        "count": 2
+      }
+    ],
+    "by_vintage_bucket": [
+      {
+        "key": "2000s",
+        "count": 15
+      },
+      {
+        "key": "1990s",
+        "count": 6
+      },
+      {
+        "key": "1930s",
+        "count": 5
+      },
+      {
+        "key": "1940s",
+        "count": 5
+      },
+      {
+        "key": "1950s",
+        "count": 5
+      },
+      {
+        "key": "1960s",
+        "count": 4
+      },
+      {
+        "key": "1970s",
+        "count": 4
+      },
+      {
+        "key": "1980s",
+        "count": 3
+      },
+      {
+        "key": "1900s",
+        "count": 1
+      },
+      {
+        "key": "1910s",
+        "count": 1
+      }
+    ],
+    "product_rollups": [
+      {
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "gap_rows": 8,
+        "wrapper_context_only_rows": 8,
+        "panel_candidate_rows": 0,
+        "top_priority": 92,
+        "next_target_vintage": "1930s",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      },
+      {
+        "product_id": "reeses_peanut_butter_cups",
+        "product_name": "Reese's Peanut Butter Cups",
+        "gap_rows": 7,
+        "wrapper_context_only_rows": 7,
+        "panel_candidate_rows": 0,
+        "top_priority": 92,
+        "next_target_vintage": "1940s",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      },
+      {
+        "product_id": "hersheys_milk_chocolate_bar",
+        "product_name": "Hershey's Milk Chocolate Bar",
+        "gap_rows": 6,
+        "wrapper_context_only_rows": 6,
+        "panel_candidate_rows": 0,
+        "top_priority": 74,
+        "next_target_vintage": "1908",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      },
+      {
+        "product_id": "kit_kat_bar",
+        "product_name": "Kit Kat Bar",
+        "gap_rows": 6,
+        "wrapper_context_only_rows": 6,
+        "panel_candidate_rows": 0,
+        "top_priority": 74,
+        "next_target_vintage": "1960s",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      },
+      {
+        "product_id": "snickers_bar",
+        "product_name": "Snickers Bar",
+        "gap_rows": 6,
+        "wrapper_context_only_rows": 6,
+        "panel_candidate_rows": 0,
+        "top_priority": 66,
+        "next_target_vintage": "1939",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      },
+      {
+        "product_id": "mms_milk_chocolate",
+        "product_name": "M&M's Milk Chocolate Candies",
+        "gap_rows": 5,
+        "wrapper_context_only_rows": 5,
+        "panel_candidate_rows": 0,
+        "top_priority": 66,
+        "next_target_vintage": "1970s",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      },
+      {
+        "product_id": "milky_way_bar",
+        "product_name": "Milky Way Bar",
+        "gap_rows": 4,
+        "wrapper_context_only_rows": 4,
+        "panel_candidate_rows": 0,
+        "top_priority": 66,
+        "next_target_vintage": "1939",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      },
+      {
+        "product_id": "tootsie_roll",
+        "product_name": "Tootsie Roll",
+        "gap_rows": 2,
+        "wrapper_context_only_rows": 2,
+        "panel_candidate_rows": 0,
+        "top_priority": 60,
+        "next_target_vintage": "1940s",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      },
+      {
+        "product_id": "twix_bar",
+        "product_name": "Twix Bar",
+        "gap_rows": 5,
+        "wrapper_context_only_rows": 5,
+        "panel_candidate_rows": 0,
+        "top_priority": 58,
+        "next_target_vintage": "2002",
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage."
+      }
+    ],
+    "first_rows": [
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_84a4b9dcab7f9f",
+        "packet_rank": "1",
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1930s",
+        "vintage_bucket": "1930s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
+        "source_title": "1930s Butterfinger Bar source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "7",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "5",
+        "low_signal_candidates": "2",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1930s Butterfinger Bar\" ingredients wrapper back panel; \"1930s Butterfinger Bar\" nutrition facts wrapper; \"1930s Butterfinger Bar\" candy wrapper back; \"1930s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1930s \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1930s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_c1cab625704bfc",
+        "packet_rank": "2",
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1936",
+        "vintage_bucket": "1930s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
+        "source_title": "1936 Butterfinger Bar source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "8",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "5",
+        "low_signal_candidates": "3",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1936 Butterfinger Bar\" ingredients wrapper back panel; \"1936 Butterfinger Bar\" nutrition facts wrapper; \"1936 Butterfinger Bar\" candy wrapper back; \"1930s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1936 \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1936 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_72f4c60dcc3f7d",
+        "packet_rank": "3",
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1950",
+        "vintage_bucket": "1950s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
+        "source_title": "1950 Butterfinger Bar source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "7",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "5",
+        "low_signal_candidates": "2",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1950 Butterfinger Bar\" ingredients wrapper back panel; \"1950 Butterfinger Bar\" nutrition facts wrapper; \"1950 Butterfinger Bar\" candy wrapper back; \"1950s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1950 \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1950 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_f221e653ba688a",
+        "packet_rank": "4",
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1964",
+        "vintage_bucket": "1960s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
+        "source_title": "1964 Butterfinger Bar source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "8",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "5",
+        "low_signal_candidates": "3",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1964 Butterfinger Bar\" ingredients wrapper back panel; \"1964 Butterfinger Bar\" nutrition facts wrapper; \"1964 Butterfinger Bar\" candy wrapper back; \"1960s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1964 \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1964 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_fd81bc6a933d6c",
+        "packet_rank": "5",
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1975",
+        "vintage_bucket": "1970s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1975-butterfinger/",
+        "source_title": "1975 Butterfinger Bar source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "7",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "5",
+        "low_signal_candidates": "2",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1975 Butterfinger Bar\" ingredients wrapper back panel; \"1975 Butterfinger Bar\" nutrition facts wrapper; \"1975 Butterfinger Bar\" candy wrapper back; \"1970s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1975 \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1975 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_4096b6dfdd1f55",
+        "packet_rank": "6",
+        "product_id": "butterfinger_bar",
+        "product_name": "Butterfinger Bar",
+        "vintage_label": "1980s",
+        "vintage_bucket": "1980s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-butterfinger/",
+        "source_title": "1980s Butterfinger Bar source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "7",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "5",
+        "low_signal_candidates": "2",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1980s Butterfinger Bar\" ingredients wrapper back panel; \"1980s Butterfinger Bar\" nutrition facts wrapper; \"1980s Butterfinger Bar\" candy wrapper back; \"1980s Butterfinger Bar\" ingredients label; \"Butterfinger Bar\" 1980s \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Butterfinger Bar 1980s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_caa6d23e9fde06",
+        "packet_rank": "9",
+        "product_id": "reeses_peanut_butter_cups",
+        "product_name": "Reese's Peanut Butter Cups",
+        "vintage_label": "1940s",
+        "vintage_bucket": "1940s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-reeses-bag/",
+        "source_title": "1940s Reese's Peanut Butter Cups source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "7",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "1",
+        "low_signal_candidates": "6",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1940s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1940s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1940s Reese's Peanut Butter Cups\" candy wrapper back; \"1940s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1940s \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1940s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_0075af3870d743",
+        "packet_rank": "10",
+        "product_id": "reeses_peanut_butter_cups",
+        "product_name": "Reese's Peanut Butter Cups",
+        "vintage_label": "1970s",
+        "vintage_bucket": "1970s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-reeses/",
+        "source_title": "1970s Reese's Peanut Butter Cups source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "7",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "1",
+        "low_signal_candidates": "6",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1970s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1970s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1970s Reese's Peanut Butter Cups\" candy wrapper back; \"1970s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1970s \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1970s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_99d7a0607d525c",
+        "packet_rank": "11",
+        "product_id": "reeses_peanut_butter_cups",
+        "product_name": "Reese's Peanut Butter Cups",
+        "vintage_label": "1980s",
+        "vintage_bucket": "1980s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-reeses/",
+        "source_title": "1980s Reese's Peanut Butter Cups source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "7",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "1",
+        "low_signal_candidates": "6",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1980s Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1980s Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1980s Reese's Peanut Butter Cups\" candy wrapper back; \"1980s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1980s \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1980s ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      },
+      {
+        "run_id": "cwa-panel-gap-source-hunt-v1",
+        "packet_id": "cwa_ingredient_packet_759d8e5eb34575",
+        "packet_rank": "12",
+        "product_id": "reeses_peanut_butter_cups",
+        "product_name": "Reese's Peanut Butter Cups",
+        "vintage_label": "1991",
+        "vintage_bucket": "1990s",
+        "source_domain": "candywrapperarchive.com",
+        "source_url": "https://www.candywrapperarchive.com/candy-collector/1991-reeses/",
+        "source_title": "1991 Reese's Peanut Butter Cups source page",
+        "panel_gap_status": "lineage_photo_only_back_panel_hunt_needed",
+        "proof_lane": "ingredient_panel_source_hunt",
+        "existing_source_role": "dated_wrapper_lineage_context",
+        "existing_image_candidate_count": "7",
+        "explicit_panel_signal_candidates": "0",
+        "wrapper_context_candidates": "1",
+        "low_signal_candidates": "6",
+        "missing_primary_surfaces": "ingredient_panel;nutrition_panel",
+        "missing_support_surfaces": "net_weight;manufacturer_or_distributor;serving_size;date_or_lot_cue",
+        "preferred_source_types": "back_panel_photo;side_panel_photo;auction_listing_photo;collector_listing_photo;brand_archive;retailer_label;archive_capture",
+        "source_hunt_queries": "\"1991 Reese's Peanut Butter Cups\" ingredients wrapper back panel; \"1991 Reese's Peanut Butter Cups\" nutrition facts wrapper; \"1991 Reese's Peanut Butter Cups\" candy wrapper back; \"1990s Reese's Peanut Butter Cups\" ingredients label; \"Reese's Peanut Butter Cups\" 1991 \"net wt\" wrapper",
+        "grok_research_packet": "Research assist only: find source-attributable Reese's Peanut Butter Cups 1991 ingredient, nutrition, or back-panel photo leads. Treat CWA as dated wrapper context only; return source URLs and confidence warnings, not verified claims.",
+        "review_sequence": "1_private_visual_review_existing_cwa;2_back_panel_source_hunt;3_private_crop;4_native_ocr;5_corrected_transcription;6_manual_verification",
+        "priority": 92,
+        "next_action": "Use the CWA wrapper photo as dated product context, then hunt a readable back/side ingredient or nutrition panel for the same product and vintage.",
+        "candidate_only": 1,
+        "manual_verified": 0
+      }
+    ],
+    "public_safety": {
+      "candidate_only": true,
+      "private_paths_committed": false,
+      "image_urls_committed": false,
+      "images_committed": false,
+      "ocr_text_committed": false,
+      "manual_verified_created": false
+    },
+    "artifacts": {
+      "source_hunt_csv": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt.csv",
+      "source_hunt_json": "docs/data/product-evidence/confection_wrapper_panel_gap_source_hunt.json",
+      "source_hunt_runbook_md": "docs/data/product-evidence/exports/confection_wrapper_panel_gap_source_hunt_runbook.md"
     }
   }
 }

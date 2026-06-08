@@ -1333,6 +1333,64 @@ function renderConfectionWrapperSourcePanelCandidateReviewStatus() {
   `;
 }
 
+function renderConfectionWrapperPanelGapSourceHuntStatus() {
+  const summary = state.summary?.confection_wrapper_panel_gap_source_hunt_summary
+    || state.summary?.confection_wrapper_source_panel_candidate_review_summary?.panel_gap_source_hunt_summary
+    || state.summary?.confection_wrapper_ingredient_priority_summary?.panel_gap_source_hunt_summary
+    || {};
+  const totals = summary.totals || {};
+  if (!totals.source_packets) return "";
+  const artifacts = summary.artifacts || {};
+  const rows = summary.first_rows || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-source_discovery_needed">
+      <span>Candy Wrapper Archive Back-Panel Source Hunt</span>
+      <strong>${escapeHtml(`${totals.lineage_photo_only_back_panel_hunt_needed || 0} wrapper-lineage gaps need back-panel evidence`)}</strong>
+      <p>The CWA pages now anchor product/vintage lineage, but they stay secondary until a readable ingredient or nutrition panel is found. This queue turns each wrapper-only lineage slot into a targeted source hunt with queries, preferred source types, and OCR review order.</p>
+      <dl>
+        <div>
+          <dt>Source packets</dt>
+          <dd>${escapeHtml(totals.source_packets || 0)}</dd>
+        </div>
+        <div>
+          <dt>Products</dt>
+          <dd>${escapeHtml(totals.products || 0)}</dd>
+        </div>
+        <div>
+          <dt>Panel candidates</dt>
+          <dd>${escapeHtml(totals.panel_candidate_private_review_needed || 0)}</dd>
+        </div>
+        <div>
+          <dt>Verified labels</dt>
+          <dd>${escapeHtml(totals.manual_verified_rows || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive back-panel source hunt rows">
+        ${rows.slice(0, 4).map((row) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`${row.packet_rank || "?"}. ${row.vintage_label || "vintage"} · ${labelFor(row.panel_gap_status || "source hunt")}`)}</span>
+            <strong>${escapeHtml(row.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`Missing ${labelFor(row.missing_primary_surfaces || "ingredient_panel;nutrition_panel")} · ${labelFor(row.existing_source_role || "wrapper context")}`)}</p>
+            <em>${escapeHtml(row.next_action || "Hunt a readable ingredient or nutrition panel before OCR.")}</em>
+            ${row.source_url ? `<a href="${escapeHtml(row.source_url)}" target="_blank" rel="noopener">Open CWA anchor</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive back-panel source hunt guardrails">
+        <span>CWA anchors lineage</span>
+        <span>Back panels unblock OCR</span>
+        <span>Grok is research assist only</span>
+      </div>
+      <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
+        ${artifacts.source_hunt_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_hunt_csv))}">Back-Panel Hunt CSV</a>` : ""}
+        ${artifacts.source_hunt_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_hunt_runbook_md))}">Back-Panel Hunt Runbook</a>` : ""}
+        ${artifacts.source_hunt_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.source_hunt_json))}">Back-Panel Hunt JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1544,6 +1602,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperIngredientPriorityStatus()}
     ${renderConfectionWrapperSourceImageIntakeStatus()}
     ${renderConfectionWrapperSourcePanelCandidateReviewStatus()}
+    ${renderConfectionWrapperPanelGapSourceHuntStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
