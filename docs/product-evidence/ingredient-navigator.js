@@ -1448,6 +1448,63 @@ function renderConfectionWrapperGrokSourceHuntPacketStatus() {
   `;
 }
 
+function renderConfectionWrapperGrokSourceHuntRunStatus() {
+  const summary = state.summary?.confection_wrapper_grok_source_hunt_run_summary
+    || state.summary?.confection_wrapper_grok_source_hunt_packet_summary?.grok_run_summary
+    || state.summary?.confection_wrapper_ingredient_priority_summary?.grok_source_hunt_run_summary
+    || {};
+  if (!summary.packets_available) return "";
+  const artifacts = summary.public_artifacts || {};
+  const rows = summary.first_rows || [];
+  const totals = summary.totals || {};
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-needs_source_review">
+      <span>Candy Wrapper Archive Grok Run State</span>
+      <strong>${escapeHtml(`${summary.packets_completed || 0}/${summary.packets_available || 0} packets completed · ${totals.candidate_leads_private || 0} private leads`)}</strong>
+      <p>Grok execution is now tracked separately from packet preparation. Public run state exposes call status and response hashes only; prompts, raw model output, model-returned source URLs, and any private paths stay out of the site.</p>
+      <dl>
+        <div>
+          <dt>Selected</dt>
+          <dd>${escapeHtml(summary.packets_selected_for_call || 0)}</dd>
+        </div>
+        <div>
+          <dt>Completed</dt>
+          <dd>${escapeHtml(summary.packets_completed || 0)}</dd>
+        </div>
+        <div>
+          <dt>Run mode</dt>
+          <dd>${escapeHtml(labelFor(summary.run_mode || "not run"))}</dd>
+        </div>
+        <div>
+          <dt>Verified labels</dt>
+          <dd>${escapeHtml(totals.manual_verified_created || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive Grok source hunt run rows">
+        ${rows.slice(0, 4).map((row) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`${row.status || "not run"} · ${row.source_row_count || 0} source rows`)}</span>
+            <strong>${escapeHtml(row.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${row.vintage_span || "vintage span"} · ${row.candidate_lead_count || 0} private candidate leads`)}</p>
+            <em>${escapeHtml(row.next_action || "Run packet when budget allows; then visually review returned leads.")}</em>
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive Grok run guardrails">
+        <span>Responses private</span>
+        <span>Source URLs withheld</span>
+        <span>No verified claims</span>
+      </div>
+      <div class="corpus-handoff-links">
+        <button type="button" data-corpus-mode-jump="cwa_source_site">Show CWA products</button>
+        ${artifacts.grok_source_hunt_run_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_hunt_run_csv))}">Grok Run CSV</a>` : ""}
+        ${artifacts.grok_source_hunt_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_hunt_runbook_md))}">Grok Run Runbook</a>` : ""}
+        ${artifacts.grok_source_hunt_run_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.grok_source_hunt_run_json))}">Grok Run JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1661,6 +1718,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperSourcePanelCandidateReviewStatus()}
     ${renderConfectionWrapperPanelGapSourceHuntStatus()}
     ${renderConfectionWrapperGrokSourceHuntPacketStatus()}
+    ${renderConfectionWrapperGrokSourceHuntRunStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
