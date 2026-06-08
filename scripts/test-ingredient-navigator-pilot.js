@@ -86,6 +86,10 @@ assert(js.includes("Candy Wrapper Archive Surface OCR Map"), "navigator should e
 assert(js.includes("Candy Wrapper Archive OCR surfaces"), "navigator should render CWA OCR surface counts");
 assert(js.includes("Surface OCR Queue CSV"), "navigator should link CWA surface OCR queue");
 assert(js.includes("Surface Image Map Template"), "navigator should link CWA surface image-map template");
+assert(js.includes("Candy Wrapper Archive Story Seeds"), "navigator should expose CWA story seed status");
+assert(js.includes("Candy Wrapper Archive story seed products"), "navigator should render CWA story seed products");
+assert(js.includes("Story Seeds CSV"), "navigator should link CWA story seed CSV");
+assert(js.includes("Story Seed Runbook"), "navigator should link CWA story seed runbook");
 assert(js.includes("Capture Tasks CSV"), "navigator should link CWA capture task exports");
 assert(js.includes("Capture Runbook"), "navigator should link CWA capture runbook");
 assert(css.includes(".product-strip.mode-full"), "full corpus mode should use a grid product strip");

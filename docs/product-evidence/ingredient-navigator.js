@@ -1033,6 +1033,55 @@ function renderConfectionWrapperSurfaceOcrStatus() {
   `;
 }
 
+function renderConfectionWrapperStorySeedStatus() {
+  const summary = state.summary?.confection_wrapper_story_seed_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.story_seed_products) return "";
+  const artifacts = summary.artifacts || {};
+  const seeds = summary.first_story_seeds || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-gap_publishable">
+      <span>Candy Wrapper Archive Story Seeds</span>
+      <strong>${escapeHtml(`${totals.story_seed_products || 0} story seeds · ${totals.source_eras || 0} source eras`)}</strong>
+      <p>CWA wrapper lineages can now support source-attributable package stories, but ingredient claims remain blocked until panel crops, OCR, correction, and manual verification are complete.</p>
+      <dl>
+        <div>
+          <dt>Ingredient targets</dt>
+          <dd>${escapeHtml(totals.ingredient_panel_targets || 0)}</dd>
+        </div>
+        <div>
+          <dt>OCR rows</dt>
+          <dd>${escapeHtml(totals.ocr_surface_rows || 0)}</dd>
+        </div>
+        <div>
+          <dt>Verified labels</dt>
+          <dd>${escapeHtml(totals.verified_ingredient_labels || 0)}</dd>
+        </div>
+        <div>
+          <dt>Blocked products</dt>
+          <dd>${escapeHtml(totals.blocked_ingredient_claim_products || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive story seed products">
+        ${seeds.slice(0, 4).map((seed) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(seed.lineage_span_label || "lineage span")}</span>
+            <strong>${escapeHtml(seed.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${seed.source_era_count || 0} eras · ${seed.ingredient_panel_targets || 0} ingredient-panel targets`)}</p>
+            <em>${escapeHtml(seed.ingredient_claim_status || "Ingredient claims blocked pending manual verification.")}</em>
+            ${seed.first_source_url ? `<a href="${escapeHtml(seed.first_source_url)}" target="_blank" rel="noopener">Open first source</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.story_seed_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.story_seed_csv))}">Story Seeds CSV</a>` : ""}
+        ${artifacts.story_seed_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.story_seed_runbook_md))}">Story Seed Runbook</a>` : ""}
+        ${artifacts.story_seed_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.story_seed_json))}">Story Seeds JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1240,6 +1289,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperLineagePriorityStatus()}
     ${renderConfectionWrapperCaptureBatchStatus()}
     ${renderConfectionWrapperSurfaceOcrStatus()}
+    ${renderConfectionWrapperStorySeedStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
