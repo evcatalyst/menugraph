@@ -941,9 +941,9 @@ function renderConfectionWrapperCaptureBatchStatus() {
   const productCounts = summary.by_product || [];
   return `
     <article class="corpus-handoff-card panel-capture-card status-source_page_capture_needed">
-      <span>Candy Wrapper Archive Capture Round</span>
+      <span>Candy Wrapper Archive Capture Queue</span>
       <strong>${escapeHtml(`${totals.capture_rows || 0} capture rows · ${totals.product_batches || 0} product batches`)}</strong>
-      <p>Round one turns the highest-density item lineage products plus Tootsie Roll into a private screenshot/crop worksheet. Ingredient and nutrition panels are first-priority capture surfaces; wrapper fronts remain secondary context.</p>
+      <p>All currently known Candy Wrapper Archive item-lineage products now flow into the private screenshot/crop worksheet. Ingredient and nutrition panels are first-priority capture surfaces; wrapper fronts remain secondary context.</p>
       <dl>
         <div>
           <dt>Source URLs</dt>

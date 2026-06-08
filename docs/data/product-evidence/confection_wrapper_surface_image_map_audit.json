@@ -2,18 +2,18 @@
   "schema_version": "hybrid_ingredient_ocr_image_map_audit.v1",
   "generated_at": "2026-06-07T20:30:00Z",
   "run_id": "cwa-surface-ocr-v1",
-  "template_rows": 210,
-  "image_map_key_count": 840,
+  "template_rows": 294,
+  "image_map_key_count": 1176,
   "private_paths_supplied": 0,
   "private_paths_existing": 0,
   "ready_for_capture": 0,
-  "no_private_path_supplied": 210,
+  "no_private_path_supplied": 294,
   "private_path_missing": 0,
   "unsupported_image_extension": 0,
   "by_status": [
     {
       "key": "no_private_path_supplied",
-      "count": 210
+      "count": 294
     }
   ],
   "by_product": [
@@ -58,6 +58,30 @@
       "unsupported_image_extension": 0
     },
     {
+      "key": "M&M's Milk Chocolate Candies",
+      "rows": 30,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 30,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Twix Bar",
+      "rows": 30,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 30,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
+      "key": "Milky Way Bar",
+      "rows": 24,
+      "ready_for_capture": 0,
+      "no_private_path_supplied": 24,
+      "private_path_missing": 0,
+      "unsupported_image_extension": 0
+    },
+    {
       "key": "Tootsie Roll",
       "rows": 12,
       "ready_for_capture": 0,
@@ -69,9 +93,9 @@
   "by_source_domain": [
     {
       "key": "www.candywrapperarchive.com",
-      "rows": 210,
+      "rows": 294,
       "ready_for_capture": 0,
-      "no_private_path_supplied": 210,
+      "no_private_path_supplied": 294,
       "private_path_missing": 0,
       "unsupported_image_extension": 0
     }

@@ -23,7 +23,7 @@ This artifact converts the CWA private capture worksheet into surface-level OCR 
 
 ## Totals
 
-- Capture rows: 35
-- Surface template rows: 210
-- OCR queue rows: 175
+- Capture rows: 49
+- Surface template rows: 294
+- OCR queue rows: 245
 - Ready for capture now: 0

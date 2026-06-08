@@ -78,7 +78,7 @@ assert(js.includes("Candy Wrapper Archive Item Lineage"), "navigator should expo
 assert(js.includes("Candy Wrapper Archive product lineage priorities"), "navigator should render CWA product-lineage priorities");
 assert(js.includes("Lineage Priority CSV"), "navigator should link CWA lineage-priority exports");
 assert(js.includes("Candy Wrapper Archive focus products"), "navigator should keep focused CWA products visible");
-assert(js.includes("Candy Wrapper Archive Capture Round"), "navigator should expose CWA capture round");
+assert(js.includes("Candy Wrapper Archive Capture Queue"), "navigator should expose CWA capture queue");
 assert(js.includes("Candy Wrapper Archive capture batches"), "navigator should render CWA capture batches");
 assert(js.includes("Capture Worksheet CSV"), "navigator should link CWA capture worksheet");
 assert(js.includes("Capture Batch Runbook"), "navigator should link CWA capture runbook");

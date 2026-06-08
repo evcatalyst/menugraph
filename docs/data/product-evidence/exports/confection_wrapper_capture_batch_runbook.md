@@ -1,9 +1,9 @@
 # Candy Wrapper Archive Private Capture Batches
 
 Generated: 2026-06-07T20:30:00Z
-Run ID: cwa-private-capture-round-1
+Run ID: cwa-private-capture-all-lineage-v1
 
-This is the execution handoff for the first private capture pass over prioritized Candy Wrapper Archive item pages. It is public-safe: it publishes source URLs, crop instructions, and blank capture fields, but no images, private paths, OCR text, or verified ingredient claims.
+This is the execution handoff for private capture across currently known Candy Wrapper Archive item pages. It is public-safe: it publishes source URLs, crop instructions, and blank capture fields, but no images, private paths, OCR text, or verified ingredient claims.
 
 ## Rules
 
@@ -16,9 +16,9 @@ This is the execution handoff for the first private capture pass over prioritize
 
 ## Totals
 
-- Product batches: 6
-- Capture rows: 35
-- Source URLs: 35
+- Product batches: 9
+- Capture rows: 49
+- Source URLs: 49
 - Readable for OCR now: 0
 
 ## First Batches
@@ -58,10 +58,24 @@ This is the execution handoff for the first private capture pass over prioritize
 - Goal: Privately capture source item pages, crop ingredient/nutrition/back-side text before wrapper fronts, and keep all output candidate-only.
 - Done when: Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR.
 
-### 6. Tootsie Roll (1940s-1960s)
+### 6. Milky Way Bar (1939-1958)
 
-- Rows: 2
-- First source: https://www.candywrapperarchive.com/candy-collector/1940s-tootsie-roll/
+- Rows: 4
+- First source: https://www.candywrapperarchive.com/candy-collector/1939-milky-way/
+- Goal: Privately capture source item pages, crop ingredient/nutrition/back-side text before wrapper fronts, and keep all output candidate-only.
+- Done when: Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR.
+
+### 7. M&M's Milk Chocolate Candies (1970s-1998)
+
+- Rows: 5
+- First source: https://www.candywrapperarchive.com/candy-collector/1970s-mms/
+- Goal: Privately capture source item pages, crop ingredient/nutrition/back-side text before wrapper fronts, and keep all output candidate-only.
+- Done when: Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR.
+
+### 8. Twix Bar (2002-2009)
+
+- Rows: 5
+- First source: https://www.candywrapperarchive.com/candy-collector/2002-twix/
 - Goal: Privately capture source item pages, crop ingredient/nutrition/back-side text before wrapper fronts, and keep all output candidate-only.
 - Done when: Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR.
 

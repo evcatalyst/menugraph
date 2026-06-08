@@ -192049,20 +192049,22 @@
   "confection_wrapper_capture_batch_summary": {
     "schema_version": "confection_wrapper_capture_batches.v1",
     "generated_at": "2026-06-07T20:30:00Z",
-    "run_id": "cwa-private-capture-round-1",
+    "run_id": "cwa-private-capture-all-lineage-v1",
     "source_domain": "www.candywrapperarchive.com",
     "selection_policy": {
-      "scope": "Round-one private capture batches for highest-density Candy Wrapper Archive item-lineage products plus forced focus products.",
-      "product_limit": 5,
-      "forced_products": [
-        "tootsie_roll"
-      ],
+      "scope": "Private capture batches for every currently known Candy Wrapper Archive item-lineage product.",
+      "selection_mode": "all_available_lineage_products",
+      "product_limit": 0,
+      "forced_products": [],
       "selected_product_ids": [
         "butterfinger_bar",
         "reeses_peanut_butter_cups",
         "hersheys_milk_chocolate_bar",
         "snickers_bar",
         "kit_kat_bar",
+        "milky_way_bar",
+        "mms_milk_chocolate",
+        "twix_bar",
         "tootsie_roll"
       ],
       "primary_capture_rule": "Capture ingredient/nutrition/back-side text surfaces first; wrapper-front product photos are secondary context.",
@@ -192077,12 +192079,12 @@
       "manual_verified_created": false
     },
     "totals": {
-      "product_batches": 6,
-      "capture_rows": 35,
-      "source_urls": 35,
+      "product_batches": 9,
+      "capture_rows": 49,
+      "source_urls": 49,
       "readable_for_ocr": 0,
       "private_paths_supplied": 0,
-      "candidate_only_rows": 35,
+      "candidate_only_rows": 49,
       "lineage_products_available": 9,
       "lineage_item_pages_available": 49,
       "worksheet_rows_available": 49
@@ -192109,6 +192111,18 @@
         "count": 6
       },
       {
+        "key": "M&M's Milk Chocolate Candies",
+        "count": 5
+      },
+      {
+        "key": "Twix Bar",
+        "count": 5
+      },
+      {
+        "key": "Milky Way Bar",
+        "count": 4
+      },
+      {
         "key": "Tootsie Roll",
         "count": 2
       }
@@ -192120,7 +192134,7 @@
       },
       {
         "key": "multi_era_lineage",
-        "count": 6
+        "count": 20
       },
       {
         "key": "promising_lineage",
@@ -192129,7 +192143,7 @@
     ],
     "first_batches": [
       {
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "batch_rank": 1,
         "product_name": "Butterfinger Bar",
         "lineage_span_label": "1930s-2009",
@@ -192140,7 +192154,7 @@
         "done_when": "Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR."
       },
       {
-        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_2df61ccd",
+        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_dcf01ee4",
         "batch_rank": 2,
         "product_name": "Reese's Peanut Butter Cups",
         "lineage_span_label": "1940s-2005",
@@ -192151,7 +192165,7 @@
         "done_when": "Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR."
       },
       {
-        "batch_id": "cwa_capture_batch_hersheys_milk_chocolate_bar_cb6b5f96",
+        "batch_id": "cwa_capture_batch_hersheys_milk_chocolate_bar_959b8945",
         "batch_rank": 3,
         "product_name": "Hershey's Milk Chocolate Bar",
         "lineage_span_label": "1908-1960s",
@@ -192162,7 +192176,7 @@
         "done_when": "Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR."
       },
       {
-        "batch_id": "cwa_capture_batch_snickers_bar_b46dfbed",
+        "batch_id": "cwa_capture_batch_snickers_bar_7d19b929",
         "batch_rank": 4,
         "product_name": "Snickers Bar",
         "lineage_span_label": "1939-2002",
@@ -192173,7 +192187,7 @@
         "done_when": "Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR."
       },
       {
-        "batch_id": "cwa_capture_batch_kit_kat_bar_4b2c10ba",
+        "batch_id": "cwa_capture_batch_kit_kat_bar_37a6ed59",
         "batch_rank": 5,
         "product_name": "Kit Kat Bar",
         "lineage_span_label": "1960s-2007",
@@ -192184,21 +192198,43 @@
         "done_when": "Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR."
       },
       {
-        "batch_id": "cwa_capture_batch_tootsie_roll_6fec4d95",
+        "batch_id": "cwa_capture_batch_milky_way_bar_bb978e50",
         "batch_rank": 6,
-        "product_name": "Tootsie Roll",
-        "lineage_span_label": "1940s-1960s",
-        "item_page_count": 2,
-        "panel_review_rows": 2,
-        "first_source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-tootsie-roll/",
+        "product_name": "Milky Way Bar",
+        "lineage_span_label": "1939-1958",
+        "item_page_count": 4,
+        "panel_review_rows": 4,
+        "first_source_url": "https://www.candywrapperarchive.com/candy-collector/1939-milky-way/",
+        "capture_goal": "Privately capture source item pages, crop ingredient/nutrition/back-side text before wrapper fronts, and keep all output candidate-only.",
+        "done_when": "Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR."
+      },
+      {
+        "batch_id": "cwa_capture_batch_mms_milk_chocolate_c7430b35",
+        "batch_rank": 7,
+        "product_name": "M&M's Milk Chocolate Candies",
+        "lineage_span_label": "1970s-1998",
+        "item_page_count": 5,
+        "panel_review_rows": 5,
+        "first_source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-mms/",
+        "capture_goal": "Privately capture source item pages, crop ingredient/nutrition/back-side text before wrapper fronts, and keep all output candidate-only.",
+        "done_when": "Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR."
+      },
+      {
+        "batch_id": "cwa_capture_batch_twix_bar_aabba35f",
+        "batch_rank": 8,
+        "product_name": "Twix Bar",
+        "lineage_span_label": "2002-2009",
+        "item_page_count": 5,
+        "panel_review_rows": 5,
+        "first_source_url": "https://www.candywrapperarchive.com/candy-collector/2002-twix/",
         "capture_goal": "Privately capture source item pages, crop ingredient/nutrition/back-side text before wrapper fronts, and keep all output candidate-only.",
         "done_when": "Every row has private screenshot/crop paths filled locally or an explicit no-readable-panel note; readable text crops can then enter native OCR."
       }
     ],
     "first_rows": [
       {
-        "capture_id": "cwa_capture_round_c0a05285a046",
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "capture_id": "cwa_capture_round_54bf4d9d9b8d",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1930s",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1930s-butterfinger-2/",
@@ -192208,8 +192244,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_35e90cf639af",
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "capture_id": "cwa_capture_round_7f9a71c59f94",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1936",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1936-butterfinger/",
@@ -192219,8 +192255,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_e5e82e38a474",
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "capture_id": "cwa_capture_round_4a02e8a42692",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1950",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1950-butterfinger-2/",
@@ -192230,8 +192266,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_e2b147128c03",
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "capture_id": "cwa_capture_round_af76a4c6c608",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1964",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1964-butterfinger/",
@@ -192241,8 +192277,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_b80bc9e89430",
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "capture_id": "cwa_capture_round_9a000e6d1375",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1975",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1975-butterfinger/",
@@ -192252,8 +192288,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_6ca20b3fe628",
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "capture_id": "cwa_capture_round_add5694f379c",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1980s",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-butterfinger/",
@@ -192263,8 +192299,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_d11966b5622f",
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "capture_id": "cwa_capture_round_a497fbb8b330",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "product_name": "Butterfinger Bar",
         "vintage_label": "2002",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/2002-butterfinger/",
@@ -192274,8 +192310,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_a09accad1b8c",
-        "batch_id": "cwa_capture_batch_butterfinger_bar_54fe23ad",
+        "capture_id": "cwa_capture_round_46b6a1edde5b",
+        "batch_id": "cwa_capture_batch_butterfinger_bar_4a457a69",
         "product_name": "Butterfinger Bar",
         "vintage_label": "2009",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/2009-butterfinger/",
@@ -192285,8 +192321,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_3e923b85cbf8",
-        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_2df61ccd",
+        "capture_id": "cwa_capture_round_d5aa38435ce0",
+        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_dcf01ee4",
         "product_name": "Reese's Peanut Butter Cups",
         "vintage_label": "1940s",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1940s-reeses-bag/",
@@ -192296,8 +192332,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_7c32e385405e",
-        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_2df61ccd",
+        "capture_id": "cwa_capture_round_cc2395496fc1",
+        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_dcf01ee4",
         "product_name": "Reese's Peanut Butter Cups",
         "vintage_label": "1970s",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1970s-reeses/",
@@ -192307,8 +192343,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_e7a9af3281b8",
-        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_2df61ccd",
+        "capture_id": "cwa_capture_round_9247ec43d032",
+        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_dcf01ee4",
         "product_name": "Reese's Peanut Butter Cups",
         "vintage_label": "1980s",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1980s-reeses/",
@@ -192318,8 +192354,8 @@
         "next_action": "Open source, privately screenshot the item page, crop panel surfaces in priority order, fill private paths locally, then route only readable text crops to native OCR."
       },
       {
-        "capture_id": "cwa_capture_round_7dc74e9ca8ab",
-        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_2df61ccd",
+        "capture_id": "cwa_capture_round_6df649a46222",
+        "batch_id": "cwa_capture_batch_reeses_peanut_butter_cups_dcf01ee4",
         "product_name": "Reese's Peanut Butter Cups",
         "vintage_label": "1991",
         "source_url": "https://www.candywrapperarchive.com/candy-collector/1991-reeses/",
@@ -192355,41 +192391,41 @@
       "manual_verified_created": false
     },
     "totals": {
-      "capture_rows": 35,
-      "surface_template_rows": 210,
-      "ocr_queue_rows": 175,
-      "primary_ingredient_panel_rows": 35,
-      "primary_nutrition_panel_rows": 35,
-      "support_text_rows": 105,
-      "secondary_context_rows": 35,
+      "capture_rows": 49,
+      "surface_template_rows": 294,
+      "ocr_queue_rows": 245,
+      "primary_ingredient_panel_rows": 49,
+      "primary_nutrition_panel_rows": 49,
+      "support_text_rows": 147,
+      "secondary_context_rows": 49,
       "ready_for_capture": 0,
-      "no_private_path_supplied": 210,
+      "no_private_path_supplied": 294,
       "private_paths_supplied": 0
     },
     "by_surface": [
       {
         "key": "ingredient_panel",
-        "count": 35
+        "count": 49
       },
       {
         "key": "maker_or_date",
-        "count": 35
+        "count": 49
       },
       {
         "key": "net_weight",
-        "count": 35
+        "count": 49
       },
       {
         "key": "nutrition_panel",
-        "count": 35
+        "count": 49
       },
       {
         "key": "wrapper_back_or_side",
-        "count": 35
+        "count": 49
       },
       {
         "key": "wrapper_front_context",
-        "count": 35
+        "count": 49
       }
     ],
     "by_product": [
@@ -192414,13 +192450,25 @@
         "count": 36
       },
       {
+        "key": "M&M's Milk Chocolate Candies",
+        "count": 30
+      },
+      {
+        "key": "Twix Bar",
+        "count": 30
+      },
+      {
+        "key": "Milky Way Bar",
+        "count": 24
+      },
+      {
         "key": "Tootsie Roll",
         "count": 12
       }
     ],
     "first_rows": [
       {
-        "evidence_id": "cwa_surface_767db4d8302651",
+        "evidence_id": "cwa_surface_bdb8731dc7e98b",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1930s",
         "surface_id": "ingredient_panel",
@@ -192431,7 +192479,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_0fa1f3fc3def18",
+        "evidence_id": "cwa_surface_b363dd0d60335c",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1930s",
         "surface_id": "nutrition_panel",
@@ -192442,7 +192490,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_f1966b7ad04559",
+        "evidence_id": "cwa_surface_84d0eb71616be7",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1930s",
         "surface_id": "wrapper_back_or_side",
@@ -192453,7 +192501,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_c6609fb9e7503a",
+        "evidence_id": "cwa_surface_a683962b007a91",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1930s",
         "surface_id": "net_weight",
@@ -192464,7 +192512,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_9fc6c5b91c315f",
+        "evidence_id": "cwa_surface_4ca2fc76512393",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1930s",
         "surface_id": "maker_or_date",
@@ -192475,7 +192523,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_fbc7199f53282a",
+        "evidence_id": "cwa_surface_f028bf20715457",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1930s",
         "surface_id": "wrapper_front_context",
@@ -192486,7 +192534,7 @@
         "ocr_recommended_action": "Capture only as package context; do not route wrapper-front context to OCR unless a reviewer promotes visible text."
       },
       {
-        "evidence_id": "cwa_surface_0bbc4337dc4564",
+        "evidence_id": "cwa_surface_20807ca6246abf",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1936",
         "surface_id": "ingredient_panel",
@@ -192497,7 +192545,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_85b527f5d66f45",
+        "evidence_id": "cwa_surface_3e9fb8bd823a85",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1936",
         "surface_id": "nutrition_panel",
@@ -192508,7 +192556,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_e8d7ac7f27dc98",
+        "evidence_id": "cwa_surface_b6b7bb8b5a98d5",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1936",
         "surface_id": "wrapper_back_or_side",
@@ -192519,7 +192567,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_2dda4fa260b335",
+        "evidence_id": "cwa_surface_dca02008554124",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1936",
         "surface_id": "net_weight",
@@ -192530,7 +192578,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_1a266a1bda2530",
+        "evidence_id": "cwa_surface_c1f792333d347e",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1936",
         "surface_id": "maker_or_date",
@@ -192541,7 +192589,7 @@
         "ocr_recommended_action": "Fill the private crop path after capture; build private image-map input; run native OCR only if the text is readable."
       },
       {
-        "evidence_id": "cwa_surface_523473bef5ffc3",
+        "evidence_id": "cwa_surface_3e21c8b478b777",
         "product_name": "Butterfinger Bar",
         "vintage_label": "1936",
         "surface_id": "wrapper_front_context",

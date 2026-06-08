@@ -35,11 +35,11 @@ function rowDateSort(row = {}) {
   return 9999;
 }
 
-function selectedProductIds(lineageRows = [], { productLimit = 5, forceProducts = ["tootsie_roll"] } = {}) {
-  const top = lineageRows
+function selectedProductIds(lineageRows = [], { productLimit = 0, forceProducts = [] } = {}) {
+  const available = lineageRows
     .filter((row) => Number(row.item_page_count || 0) > 0)
-    .slice(0, productLimit)
     .map((row) => row.product_id);
+  const top = productLimit > 0 ? available.slice(0, productLimit) : available;
   return [...new Set([...top, ...forceProducts])];
 }
 
@@ -155,6 +155,8 @@ function flatRows(batches = []) {
 
 function buildManifest({ lineageManifest, worksheetRows, batches, runId, productLimit, forceProducts }) {
   const rows = flatRows(batches);
+  const availableLineageProducts = lineageManifest.totals?.lineage_products || 0;
+  const selectedAllAvailable = batches.length >= availableLineageProducts && availableLineageProducts > 0;
   return {
     schema_version: "confection_wrapper_capture_batches.v1",
     generated_at: generatedAt,
@@ -163,7 +165,10 @@ function buildManifest({ lineageManifest, worksheetRows, batches, runId, product
     source_lineage_priority: publicArtifactRef(lineagePriorityPath),
     source_panel_review_worksheet: publicArtifactRef(panelWorksheetCsvPath),
     selection_policy: {
-      scope: "Round-one private capture batches for highest-density Candy Wrapper Archive item-lineage products plus forced focus products.",
+      scope: selectedAllAvailable
+        ? "Private capture batches for every currently known Candy Wrapper Archive item-lineage product."
+        : "Private capture batches for the highest-density Candy Wrapper Archive item-lineage products plus forced focus products.",
+      selection_mode: selectedAllAvailable ? "all_available_lineage_products" : "top_n_plus_forced_products",
       product_limit: productLimit,
       forced_products: forceProducts,
       selected_product_ids: batches.map((batch) => batch.product_id),
@@ -230,7 +235,7 @@ function renderRunbook(manifest = {}) {
     `Generated: ${manifest.generated_at}`,
     `Run ID: ${manifest.run_id}`,
     "",
-    "This is the execution handoff for the first private capture pass over prioritized Candy Wrapper Archive item pages. It is public-safe: it publishes source URLs, crop instructions, and blank capture fields, but no images, private paths, OCR text, or verified ingredient claims.",
+    "This is the execution handoff for private capture across currently known Candy Wrapper Archive item pages. It is public-safe: it publishes source URLs, crop instructions, and blank capture fields, but no images, private paths, OCR text, or verified ingredient claims.",
     "",
     "## Rules",
     "",
@@ -278,9 +283,9 @@ function renderRunbook(manifest = {}) {
 }
 
 function writeCaptureBatches({
-  runId = "cwa-private-capture-round-1",
-  productLimit = 5,
-  forceProducts = ["tootsie_roll"],
+  runId = "cwa-private-capture-all-lineage-v1",
+  productLimit = 0,
+  forceProducts = [],
 } = {}) {
   const lineageManifest = readJson(lineagePriorityPath, {});
   const worksheetRows = fs.existsSync(panelWorksheetCsvPath)
@@ -377,9 +382,9 @@ function writeCaptureBatches({
 
 function main() {
   const manifest = writeCaptureBatches({
-    runId: argValue("run-id", "cwa-private-capture-round-1"),
-    productLimit: numberArg("product-limit", 5),
-    forceProducts: splitList(argValue("force-product", "tootsie_roll")),
+    runId: argValue("run-id", "cwa-private-capture-all-lineage-v1"),
+    productLimit: numberArg("product-limit", 0),
+    forceProducts: splitList(argValue("force-product", "")),
   });
   console.log(JSON.stringify({
     run_id: manifest.run_id,

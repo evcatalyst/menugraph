@@ -21,15 +21,18 @@ const runbook = fs.readFileSync(captureRunbookPath, "utf8");
 const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 
 assert.strictEqual(manifest.schema_version, "confection_wrapper_capture_batches.v1", "capture batches should use the CWA capture schema");
-assert.strictEqual(manifest.run_id, "cwa-private-capture-round-1", "capture batches should use the round-one run id");
-assert.strictEqual(manifest.totals.product_batches, 6, "round one should include top five lineage products plus Tootsie");
-assert.strictEqual(manifest.totals.capture_rows, 35, "round one should include 35 capture rows");
-assert.strictEqual(manifest.totals.source_urls, 35, "round one should expose one source URL per capture row");
+assert.strictEqual(manifest.run_id, "cwa-private-capture-all-lineage-v1", "capture batches should use the all-lineage run id");
+assert.strictEqual(manifest.selection_policy.selection_mode, "all_available_lineage_products", "capture batches should include every available CWA lineage product by default");
+assert.strictEqual(manifest.totals.product_batches, manifest.totals.lineage_products_available, "capture batches should cover all available lineage products");
+assert.strictEqual(manifest.totals.capture_rows, manifest.totals.lineage_item_pages_available, "capture batches should cover all available lineage item pages");
+assert.strictEqual(manifest.totals.product_batches, 9, "current CWA capture queue should include nine item-lineage products");
+assert.strictEqual(manifest.totals.capture_rows, 49, "current CWA capture queue should include 49 capture rows");
+assert.strictEqual(manifest.totals.source_urls, 49, "capture queue should expose one source URL per capture row");
 assert.strictEqual(manifest.totals.readable_for_ocr, 0, "capture worksheet must not mark rows readable before review");
 assert.strictEqual(manifest.totals.private_paths_supplied, 0, "public capture worksheet must not include private paths");
-assert.strictEqual(manifest.totals.candidate_only_rows, 35, "all capture rows should remain candidate-only");
-assert.strictEqual(batchRows.length, 6, "batch CSV should include six product batches");
-assert.strictEqual(worksheetRows.length, 35, "capture worksheet should include selected product rows");
+assert.strictEqual(manifest.totals.candidate_only_rows, 49, "all capture rows should remain candidate-only");
+assert.strictEqual(batchRows.length, 9, "batch CSV should include every product batch");
+assert.strictEqual(worksheetRows.length, 49, "capture worksheet should include every CWA item-page row");
 assert.strictEqual(manifest.public_safety.external_images_committed, false, "capture batches must not publish external images");
 assert.strictEqual(manifest.public_safety.private_paths_committed, false, "capture batches must not publish private paths");
 assert.strictEqual(manifest.public_safety.ocr_text_committed, false, "capture batches must not publish OCR text");
@@ -43,8 +46,11 @@ const products = new Set(batchRows.map((row) => row.product_name));
   "Hershey's Milk Chocolate Bar",
   "Snickers Bar",
   "Kit Kat Bar",
+  "Milky Way Bar",
+  "M&M's Milk Chocolate Candies",
+  "Twix Bar",
   "Tootsie Roll",
-].forEach((productName) => assert(products.has(productName), `round one should include ${productName}`));
+].forEach((productName) => assert(products.has(productName), `capture queue should include ${productName}`));
 
 const tootsieRows = worksheetRows.filter((row) => row.product_name === "Tootsie Roll");
 assert.strictEqual(tootsieRows.length, 2, "Tootsie should contribute two capture rows");
