@@ -932,6 +932,62 @@ function renderConfectionWrapperLineagePriorityStatus() {
   `;
 }
 
+function renderConfectionWrapperCaptureBatchStatus() {
+  const summary = state.summary?.confection_wrapper_capture_batch_summary || {};
+  const totals = summary.totals || {};
+  if (!totals.capture_rows) return "";
+  const artifacts = summary.artifacts || {};
+  const batches = summary.first_batches || [];
+  const productCounts = summary.by_product || [];
+  return `
+    <article class="corpus-handoff-card panel-capture-card status-source_page_capture_needed">
+      <span>Candy Wrapper Archive Capture Round</span>
+      <strong>${escapeHtml(`${totals.capture_rows || 0} capture rows · ${totals.product_batches || 0} product batches`)}</strong>
+      <p>Round one turns the highest-density item lineage products plus Tootsie Roll into a private screenshot/crop worksheet. Ingredient and nutrition panels are first-priority capture surfaces; wrapper fronts remain secondary context.</p>
+      <dl>
+        <div>
+          <dt>Source URLs</dt>
+          <dd>${escapeHtml(totals.source_urls || 0)}</dd>
+        </div>
+        <div>
+          <dt>Private paths</dt>
+          <dd>${escapeHtml(totals.private_paths_supplied || 0)}</dd>
+        </div>
+        <div>
+          <dt>Readable panels</dt>
+          <dd>${escapeHtml(totals.readable_for_ocr || 0)}</dd>
+        </div>
+        <div>
+          <dt>Candidate rows</dt>
+          <dd>${escapeHtml(totals.candidate_only_rows || 0)}</dd>
+        </div>
+      </dl>
+      <div class="panel-capture-list" aria-label="Candy Wrapper Archive capture batches">
+        ${batches.slice(0, 4).map((batch) => `
+          <article class="panel-acquisition-target panel-capture-target">
+            <span>${escapeHtml(`${batch.batch_rank || "?"}. ${batch.lineage_span_label || "lineage span"}`)}</span>
+            <strong>${escapeHtml(batch.product_name || "Candy product")}</strong>
+            <p>${escapeHtml(`${batch.panel_review_rows || 0} rows · ${batch.item_page_count || 0} item pages`)}</p>
+            <em>${escapeHtml(batch.capture_goal || "Capture private panel crops before OCR.")}</em>
+            ${batch.first_source_url ? `<a href="${escapeHtml(batch.first_source_url)}" target="_blank" rel="noopener">Open first source</a>` : ""}
+          </article>
+        `).join("")}
+      </div>
+      <div class="panel-capture-row-strip" aria-label="Candy Wrapper Archive capture products">
+        ${productCounts.slice(0, 6).map((row) => `
+          <span>${escapeHtml(`${row.key} · ${row.count}`)}</span>
+        `).join("")}
+      </div>
+      <div class="corpus-handoff-links">
+        ${artifacts.capture_worksheet_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_worksheet_csv))}">Capture Worksheet CSV</a>` : ""}
+        ${artifacts.capture_runbook_md ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_runbook_md))}">Capture Batch Runbook</a>` : ""}
+        ${artifacts.capture_batches_csv ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_batches_csv))}">Capture Batches CSV</a>` : ""}
+        ${artifacts.capture_batches_json ? `<a href="${escapeHtml(navigatorArtifactHref(artifacts.capture_batches_json))}">Capture Batches JSON</a>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderConfectionWrapperItemPanelTriageStatus() {
   const summary = state.summary?.confection_wrapper_item_panel_triage_summary || {};
   const totals = summary.totals || {};
@@ -1137,6 +1193,7 @@ function renderCorpusHandoff() {
     ${renderConfectionWrapperCaptureHandoffStatus()}
     ${renderConfectionWrapperItemCandidateStatus()}
     ${renderConfectionWrapperLineagePriorityStatus()}
+    ${renderConfectionWrapperCaptureBatchStatus()}
     ${renderConfectionWrapperItemPanelTriageStatus()}
     ${renderConfectionWrapperItemPanelPipelineStatus()}
     ${renderPublicPhotoOcrStatus()}
