@@ -9,10 +9,12 @@ const jsPath = path.join(root, "docs/product-evidence/ingredient-navigator.js");
 const cssPath = path.join(root, "docs/product-evidence/ingredient-navigator.css");
 const publicPhotoManifestPath = path.join(root, "docs/data/product-evidence/public_photo_proof_manifest.json");
 const cwaProductStoryQueuePath = path.join(root, "docs/data/product-evidence/confection_wrapper_product_story_queue.json");
+const cwaPanelGapSourceHuntPath = path.join(root, "docs/data/product-evidence/confection_wrapper_panel_gap_source_hunt.json");
 const cwaCapturePacketsPath = path.join(root, "docs/data/product-evidence/confection_wrapper_ingredient_capture_packets.json");
 const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
 const publicPhotoManifest = JSON.parse(fs.readFileSync(publicPhotoManifestPath, "utf8"));
 const cwaProductStoryQueue = JSON.parse(fs.readFileSync(cwaProductStoryQueuePath, "utf8"));
+const cwaPanelGapSourceHunt = JSON.parse(fs.readFileSync(cwaPanelGapSourceHuntPath, "utf8"));
 const cwaCapturePackets = JSON.parse(fs.readFileSync(cwaCapturePacketsPath, "utf8"));
 const html = fs.readFileSync(htmlPath, "utf8");
 const js = fs.readFileSync(jsPath, "utf8");
@@ -59,6 +61,8 @@ assert.strictEqual(cwaProductStoryQueue.totals.product_queue_rows, 12, "CWA prod
 assert.strictEqual(cwaProductStoryQueue.totals.package_story_candidate_products, 9, "CWA product story queue should expose nine story candidates");
 assert.strictEqual(cwaProductStoryQueue.totals.primary_panel_targets, 98, "CWA product story queue should keep ingredient/nutrition targets primary");
 assert.strictEqual(cwaProductStoryQueue.totals.verified_ingredient_labels, 0, "CWA product story queue should not verify labels");
+assert.strictEqual(cwaPanelGapSourceHunt.totals.lineage_photo_only_back_panel_hunt_needed, 49, "CWA panel-gap hunt should expose all wrapper-only source eras");
+assert.strictEqual(cwaPanelGapSourceHunt.totals.manual_verified_rows, 0, "CWA panel-gap hunt should not verify labels");
 assert.strictEqual(
   cwaCapturePackets.packets.filter((packet) => packet.product_id === "tootsie_roll").length,
   2,
@@ -79,6 +83,9 @@ assert(js.includes("cwaSourceSiteRank"), "navigator should sort CWA products by 
 assert(js.includes("confection_wrapper_product_story_queue.json"), "navigator should fetch the CWA product story queue");
 assert(js.includes("applyCwaProductStoryQueue"), "navigator should apply the CWA product story queue");
 assert(js.includes("cwaProductStoryQueueForProduct"), "navigator should map CWA product story queue rows to selected products");
+assert(js.includes("confection_wrapper_panel_gap_source_hunt.json"), "navigator should fetch the CWA panel-gap source hunt manifest");
+assert(js.includes("applyCwaPanelGapSourceHunt"), "navigator should apply the CWA panel-gap source hunt manifest");
+assert(js.includes("cwaPanelGapRowsForProduct"), "navigator should map CWA panel-gap rows to selected products");
 assert(js.includes("Candy Wrapper Archive Product Story Queue"), "navigator should expose the CWA product story queue");
 assert(js.includes("Candy Wrapper Archive product story queue"), "navigator should render CWA product story queue targets");
 assert(js.includes("CWA Product Story Queue Status"), "navigator should render selected-product CWA queue status");
@@ -88,6 +95,11 @@ assert(js.includes("hunt readable panels"), "navigator should show selected CWA 
 assert(js.includes("Product Story Queue CSV"), "navigator should link the CWA product story queue CSV");
 assert(js.includes("Product Story Queue Runbook"), "navigator should link the CWA product story queue runbook");
 assert(js.includes("Product Story Queue JSON"), "navigator should link the CWA product story queue JSON");
+assert(js.includes("CWA Back-Panel Hunt Worklist"), "navigator should render selected-product CWA back-panel hunts");
+assert(js.includes("Candy Wrapper Archive selected product back-panel hunt worklist"), "navigator should label selected-product CWA back-panel worklist");
+assert(js.includes("wrapper-lineage eras need ingredient evidence"), "navigator should explain selected-product CWA panel gaps");
+assert(js.includes("Suggested source queries"), "navigator should expose selected-product CWA source queries");
+assert(js.includes("Open CWA context"), "navigator should link selected-product CWA context pages");
 assert(js.includes("Ingredient panels primary"), "navigator should state CWA product queue visual priority");
 assert(js.includes("Wrapper fronts are context"), "navigator should state wrapper fronts are context");
 assert(js.includes("Show CWA products"), "navigator should provide a jump into the CWA source-site product lane");
@@ -197,6 +209,9 @@ assert(css.includes(".proof-source-rail-secondary"), "secondary product-context 
 assert(css.includes(".proof-source-rail-cwa-story"), "CWA product story seed rail should be styled");
 assert(css.includes(".proof-source-rail-cwa-product-queue"), "CWA selected-product queue rail should be styled");
 assert(css.includes(".cwa-product-queue-action"), "CWA selected-product queue action should be styled");
+assert(css.includes(".proof-source-rail-cwa-panel-hunt"), "CWA selected-product panel hunt rail should be styled");
+assert(css.includes(".cwa-panel-gap-list"), "CWA selected-product panel hunt list should be styled");
+assert(css.includes(".cwa-panel-gap-queries"), "CWA selected-product source queries should be styled");
 assert(css.includes(".cwa-story-timeline"), "CWA product story seed timeline should be styled");
 assert(css.includes(".proof-source-rail-cwa-ingredient-priority"), "CWA ingredient priority rail should be styled");
 assert(css.includes(".cwa-ingredient-priority-list"), "CWA ingredient priority list should be styled");

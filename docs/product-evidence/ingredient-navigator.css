@@ -1034,6 +1034,11 @@ a:hover {
   background: rgba(18, 30, 29, 0.5);
 }
 
+.proof-source-rail-cwa-panel-hunt {
+  border-color: rgba(212, 173, 87, 0.46);
+  background: rgba(36, 31, 23, 0.5);
+}
+
 .proof-source-rail-secondary .proof-source-card {
   opacity: 0.92;
 }
@@ -1203,6 +1208,12 @@ a:hover {
   gap: 7px;
 }
 
+.cwa-panel-gap-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 7px;
+}
+
 .cwa-source-packet-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -1216,10 +1227,19 @@ a:hover {
 }
 
 .cwa-ingredient-priority-card,
+.cwa-panel-gap-card,
 .cwa-source-packet-card {
   display: grid;
   align-content: start;
   gap: 7px;
+}
+
+.cwa-panel-gap-card {
+  min-width: 0;
+  border: 1px solid rgba(212, 173, 87, 0.34);
+  border-radius: 8px;
+  background: rgba(29, 31, 27, 0.74);
+  padding: 9px;
 }
 
 .cwa-source-packet-card {
@@ -1231,6 +1251,7 @@ a:hover {
 }
 
 .cwa-ingredient-priority-card dl,
+.cwa-panel-gap-card dl,
 .cwa-source-packet-card dl {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1239,6 +1260,7 @@ a:hover {
 }
 
 .cwa-ingredient-priority-card dl div,
+.cwa-panel-gap-card dl div,
 .cwa-source-packet-card dl div {
   min-width: 0;
   border-top: 1px solid var(--line);
@@ -1246,6 +1268,7 @@ a:hover {
 }
 
 .cwa-ingredient-priority-card dd,
+.cwa-panel-gap-card dd,
 .cwa-source-packet-card dd {
   margin: 3px 0 0;
   color: var(--muted);
@@ -1255,6 +1278,8 @@ a:hover {
 }
 
 .cwa-source-packet-card > span,
+.cwa-panel-gap-card > span,
+.cwa-panel-gap-card dt,
 .cwa-source-packet-card dt,
 .cwa-source-surface-order span {
   color: var(--teal);
@@ -1270,13 +1295,43 @@ a:hover {
   overflow-wrap: anywhere;
 }
 
+.cwa-panel-gap-card > span,
+.cwa-panel-gap-card dt {
+  color: var(--gold);
+}
+
+.cwa-panel-gap-card strong {
+  color: var(--ink);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
 .cwa-source-packet-card p,
+.cwa-panel-gap-card p,
 .cwa-source-surface-order em {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
   font-style: normal;
   line-height: 1.34;
+  overflow-wrap: anywhere;
+}
+
+.cwa-panel-gap-queries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.cwa-panel-gap-queries span {
+  max-width: 100%;
+  border: 1px solid rgba(212, 173, 87, 0.24);
+  border-radius: 999px;
+  background: rgba(212, 173, 87, 0.08);
+  color: var(--ink);
+  padding: 4px 7px;
+  font-size: 10px;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
@@ -2354,6 +2409,7 @@ a:hover {
   }
 
   .cwa-ingredient-priority-card dl,
+  .cwa-panel-gap-card dl,
   .cwa-source-packet-card dl {
     grid-template-columns: 1fr;
   }

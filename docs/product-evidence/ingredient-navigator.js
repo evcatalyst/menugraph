@@ -37,6 +37,7 @@ const state = {
   photoProofManifest: null,
   cwaStorySeeds: null,
   cwaProductStoryQueue: null,
+  cwaPanelGapSourceHunt: null,
   cwaIngredientPriority: null,
   cwaIngredientCapturePackets: null,
   photoProofImagesByEvidenceId: new Map(),
@@ -1911,6 +1912,10 @@ function applyCwaProductStoryQueue(manifest = {}) {
   state.cwaProductStoryQueue = manifest || {};
 }
 
+function applyCwaPanelGapSourceHunt(manifest = {}) {
+  state.cwaPanelGapSourceHunt = manifest || {};
+}
+
 function applyCwaIngredientPriority(manifest = {}) {
   state.cwaIngredientPriority = manifest || {};
 }
@@ -1927,6 +1932,13 @@ function cwaStorySeedForProduct(productRow) {
 function cwaProductStoryQueueForProduct(productRow) {
   if (!productRow?.id) return null;
   return (state.cwaProductStoryQueue?.rows || []).find((row) => row.product_id === productRow.id) || null;
+}
+
+function cwaPanelGapRowsForProduct(productRow) {
+  if (!productRow?.id) return [];
+  return (state.cwaPanelGapSourceHunt?.rows || [])
+    .filter((row) => row.product_id === productRow.id)
+    .sort((a, b) => Number(a.packet_rank || 9999) - Number(b.packet_rank || 9999));
 }
 
 function cwaIngredientPriorityForProduct(productRow) {
@@ -2622,6 +2634,65 @@ function renderCwaProductStoryQueuePanel(productRow) {
   `;
 }
 
+function renderCwaPanelGapSourceHuntPanel(productRow) {
+  const rows = cwaPanelGapRowsForProduct(productRow);
+  if (!rows.length) return "";
+  const totalImageCandidates = rows.reduce((sum, row) => sum + Number(row.existing_image_candidate_count || 0), 0);
+  const wrapperContextRows = rows.filter((row) => Number(row.wrapper_context_candidates || 0) > 0).length;
+  return `
+    <section class="proof-source-rail proof-source-rail-cwa-panel-hunt" aria-label="Candy Wrapper Archive selected product back-panel hunt worklist">
+      <header>
+        <div>
+          <span>CWA Back-Panel Hunt Worklist</span>
+          <strong>${escapeHtml(`${rows.length} wrapper-lineage eras need ingredient evidence`)}</strong>
+        </div>
+        <p>These CWA pages are useful dated wrapper context, but each era still needs a readable ingredient, nutrition, net-weight, maker, or date surface before OCR and formulation review.</p>
+      </header>
+      <div class="proof-source-metrics">
+        <span><strong>${escapeHtml(rows.length)}</strong>Hunt rows</span>
+        <span><strong>${escapeHtml(wrapperContextRows)}</strong>Wrapper-only eras</span>
+        <span><strong>${escapeHtml(totalImageCandidates)}</strong>Image candidates</span>
+        <span><strong>0</strong>Verified labels</span>
+      </div>
+      <div class="cwa-panel-gap-list" aria-label="Back-panel source hunts for ${escapeHtml(productRow.name)}">
+        ${rows.slice(0, 8).map((row) => {
+          const queries = String(row.source_hunt_queries || "").split(";").map((item) => item.trim()).filter(Boolean);
+          return `
+            <article class="cwa-panel-gap-card status-source_discovery_needed">
+              <span>${escapeHtml(`${row.packet_rank || "?"}. ${row.vintage_label || "vintage"} · ${labelFor(row.panel_gap_status || "source hunt")}`)}</span>
+              <strong>${escapeHtml(row.source_title || `${productRow.name} source page`)}</strong>
+              <p>${escapeHtml(row.next_action || "Find a readable back/side ingredient or nutrition panel for this vintage.")}</p>
+              <dl>
+                <div>
+                  <dt>Missing primary</dt>
+                  <dd>${escapeHtml(row.missing_primary_surfaces || "ingredient_panel;nutrition_panel")}</dd>
+                </div>
+                <div>
+                  <dt>Missing support</dt>
+                  <dd>${escapeHtml(row.missing_support_surfaces || "net_weight;maker/date")}</dd>
+                </div>
+                <div>
+                  <dt>Preferred sources</dt>
+                  <dd>${escapeHtml(row.preferred_source_types || "back_panel_photo;archive_capture")}</dd>
+                </div>
+              </dl>
+              ${queries.length ? `
+                <div class="cwa-panel-gap-queries" aria-label="Suggested source queries">
+                  ${queries.slice(0, 3).map((query) => `<span>${escapeHtml(query)}</span>`).join("")}
+                </div>
+              ` : ""}
+              <div class="lead-meta">
+                ${statusBadge("source_discovery_needed")}
+                ${row.source_url ? `<a href="${escapeHtml(row.source_url)}" target="_blank" rel="noreferrer">Open CWA context</a>` : ""}
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderCwaStorySeedPanel(productRow) {
   const seed = cwaStorySeedForProduct(productRow);
   if (!seed) return "";
@@ -2981,6 +3052,7 @@ function renderProofReader(productRow, version) {
       </aside>
     </header>
     ${renderCwaProductStoryQueuePanel(productRow)}
+    ${renderCwaPanelGapSourceHuntPanel(productRow)}
     ${renderCwaStorySeedPanel(productRow)}
     ${renderCwaIngredientPriorityPanel(productRow)}
     ${renderCwaIngredientCapturePacketPanel(productRow)}
@@ -3310,7 +3382,7 @@ function attachEvents() {
 
 async function init() {
   try {
-    const [response, summary, photoProofManifest, cwaStorySeeds, cwaProductStoryQueue, cwaIngredientPriority, cwaIngredientCapturePackets] = await Promise.all([
+    const [response, summary, photoProofManifest, cwaStorySeeds, cwaProductStoryQueue, cwaPanelGapSourceHunt, cwaIngredientPriority, cwaIngredientCapturePackets] = await Promise.all([
       fetch(dataHref("../data/product-evidence/navigator_data.json")),
       fetch(dataHref("../data/product-evidence/summary.json"))
         .then((summaryResponse) => (summaryResponse.ok ? summaryResponse.json() : {}))
@@ -3323,6 +3395,9 @@ async function init() {
         .catch(() => ({})),
       fetch(dataHref("../data/product-evidence/confection_wrapper_product_story_queue.json"))
         .then((productQueueResponse) => (productQueueResponse.ok ? productQueueResponse.json() : {}))
+        .catch(() => ({})),
+      fetch(dataHref("../data/product-evidence/confection_wrapper_panel_gap_source_hunt.json"))
+        .then((panelGapResponse) => (panelGapResponse.ok ? panelGapResponse.json() : {}))
         .catch(() => ({})),
       fetch(dataHref("../data/product-evidence/confection_wrapper_ingredient_priority.json"))
         .then((ingredientPriorityResponse) => (ingredientPriorityResponse.ok ? ingredientPriorityResponse.json() : {}))
@@ -3337,6 +3412,7 @@ async function init() {
     applyPhotoProofManifest(photoProofManifest);
     applyCwaStorySeeds(cwaStorySeeds);
     applyCwaProductStoryQueue(cwaProductStoryQueue);
+    applyCwaPanelGapSourceHunt(cwaPanelGapSourceHunt);
     applyCwaIngredientPriority(cwaIngredientPriority);
     applyCwaIngredientCapturePackets(cwaIngredientCapturePackets);
     state.productId = state.data.default_product;
