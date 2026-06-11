@@ -4,6 +4,7 @@ const els = {
   productStrip: document.querySelector("#product-strip"),
   timeRange: document.querySelector("#time-range"),
   compareToggle: document.querySelector("#compare-toggle"),
+  sourceFamilySummary: document.querySelector("#source-family-summary"),
   status: document.querySelector("#journey-status"),
   productSummary: document.querySelector("#product-summary"),
   storyReadiness: document.querySelector("#story-readiness"),
@@ -95,6 +96,41 @@ function renderProductPicker() {
       </button>
     `)
     .join("");
+}
+
+function renderSourceFamilySummary() {
+  if (!els.sourceFamilySummary) return;
+  const family = (state.data.source_family_summary?.families || [])[0];
+  const board = state.data.ocr_board_summary || {};
+  if (!family) {
+    els.sourceFamilySummary.innerHTML = `
+      <article class="source-family-empty">
+        <strong>Source-family queue pending</strong>
+        <span>Run the ingredient OCR build to publish source-rich product lanes.</span>
+      </article>
+    `;
+    return;
+  }
+  const products = (family.products || []).slice(0, 8);
+  els.sourceFamilySummary.innerHTML = `
+    <div class="source-family-metrics">
+      <span><strong>${escapeHtml(family.product_count)}</strong>products</span>
+      <span><strong>${escapeHtml(family.evidence_row_count)}</strong>evidence rows</span>
+      <span><strong>${escapeHtml(board.scratch_soft_quota || "200GB")}</strong>private quota</span>
+    </div>
+    <div class="source-family-products">
+      ${products.map((row) => `
+        <article class="source-family-card">
+          <span>${escapeHtml(family.label)}</span>
+          <strong>${escapeHtml(row.product_name)}</strong>
+          <p>${escapeHtml(`${row.evidence_count} lineage rows · ${row.vintage_count} vintage slots · ${row.readable_panel_photo_needed_count} need panel photos`)}</p>
+          <em>${escapeHtml(labelFor(row.next_action))}</em>
+          ${row.source_urls?.[0] ? `<a href="${escapeHtml(row.source_urls[0])}" target="_blank" rel="noreferrer">Open source lineage</a>` : ""}
+        </article>
+      `).join("")}
+    </div>
+    <p class="source-family-policy">${escapeHtml(family.claim_policy)}</p>
+  `;
 }
 
 function renderSummary(productRow) {
@@ -225,7 +261,8 @@ function renderPhotoSummary(productRow) {
 
 function renderTimeline(productRow) {
   const versions = visibleVersions(productRow);
-  const columns = `repeat(${Math.max(1, versions.length)}, minmax(0, 1fr))`;
+  const isMobile = window.matchMedia("(max-width: 680px)").matches;
+  const columns = isMobile ? "1fr" : `repeat(${Math.max(1, versions.length)}, minmax(0, 1fr))`;
   els.timelineAxis.style.gridTemplateColumns = columns;
   els.timelineTrack.style.gridTemplateColumns = columns;
   els.timelineAxis.innerHTML = versions.map((row) => `<span>${escapeHtml(row.year)}</span>`).join("");
@@ -500,6 +537,7 @@ function render() {
   }
   const version = selectedVersion(productRow);
   renderProductPicker();
+  renderSourceFamilySummary();
   renderStatus(productRow);
   renderSummary(productRow);
   renderStoryReadiness(productRow);

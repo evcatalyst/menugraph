@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-06-07T19:00:00Z",
+  "scratch_root_policy": "A private OCR scratch root is configured for bulk captures and OCR work; public site exports must not include private paths.",
+  "scratch_soft_quota": "200GB",
+  "public_safety_note": "Counts and source links are public. Captures, crops, OCR text, prompts, model responses, hashes, and local paths stay private.",
+  "model_policy": "Spark handles bounded packet work; GPT-5.5 handles compact batch review; Grok assists source hunting and validation only.",
+  "totals": {
+    "products": 120,
+    "registry_records": 1701,
+    "ocr_candidates": 1701,
+    "high_priority": 818,
+    "medium_priority": 646,
+    "low_priority": 0,
+    "blocked_priority": 237,
+    "local_image_ready": 0,
+    "not_easily_accessible": 1701,
+    "source_page_capture_needed": 1464,
+    "source_discovery_needed": 237,
+    "ingredient_panel_visible": 671,
+    "ingredient_text_candidates": 77,
+    "manual_verified": 0,
+    "manual_transcriptions": 0
+  },
+  "source_family_count": 1,
+  "source_family_rows": 16
+}

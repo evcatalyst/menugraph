@@ -11,6 +11,11 @@ const fullCorpusManifestPath = path.join(root, "docs/data/product-evidence/full_
 const fullCorpusQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv");
 const fullCorpusGapCsvPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv");
 const fullCorpusGapMarkdownPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.md");
+const sourceFamilySummaryPath = path.join(root, "docs/data/product-evidence/source_family_summary.json");
+const ocrBoardSummaryPath = path.join(root, "docs/data/product-evidence/ocr_board_summary.json");
+const productStoryIndexPath = path.join(root, "docs/data/product-evidence/product_story_index.json");
+const publicReviewQueuePath = path.join(root, "docs/data/product-evidence/review_queue_public.csv");
+const publicGapReportPath = path.join(root, "docs/data/product-evidence/gap_report_public.csv");
 const swiftHarnessPath = path.join(root, "scripts/vision-ocr.swift");
 const defaultResultDir = path.join(root, ".cache/ingredient-ocr");
 const generatedAt = "2026-06-07T19:00:00Z";
@@ -112,6 +117,27 @@ function topValues(rows, field, limit = 6) {
     .slice(0, limit)
     .map(([value, count]) => `${value} (${count})`)
     .join("; ");
+}
+
+function cwaFamilyMatch(row) {
+  return /candywrapperarchive\.com|candy wrapper archive/i.test(textBlob(
+    row.source_domain,
+    row.source_url,
+    row.source_title,
+    row.source_owner,
+  ));
+}
+
+function sourceFamilyFor(row) {
+  if (cwaFamilyMatch(row)) return "candy-wrapper-archive";
+  return "";
+}
+
+function sourceFamilyLabel(id) {
+  const labels = {
+    "candy-wrapper-archive": "Candy Wrapper Archive",
+  };
+  return labels[id] || id;
 }
 
 function isPhotoLike(evidence) {
@@ -642,6 +668,189 @@ function buildFullCorpusManifest(summary, queue, gapReport) {
   };
 }
 
+function buildSourceFamilySummary(queue) {
+  const families = new Map();
+  for (const row of queue) {
+    const familyId = sourceFamilyFor(row);
+    if (!familyId) continue;
+    if (!families.has(familyId)) {
+      families.set(familyId, {
+        id: familyId,
+        label: sourceFamilyLabel(familyId),
+        strategy: "visual_lineage_first",
+        public_image_policy: "Link out to source pages; do not reproduce external photos unless rights are clear.",
+        claim_policy: "Wrapper lineage can support visual provenance only. Ingredient claims require readable panel OCR and manual verification.",
+        evidence_row_count: 0,
+        product_ids: new Set(),
+        products: new Map(),
+        source_domains: [],
+        source_urls: [],
+        gap_categories: [],
+        cwa_run_command: "INGREDIENT_OCR_SCRATCH_ROOT=<private-scratch-root> python3 -m ccfoodprice --run-dir runs/product-discovery --db runs/product-discovery/product_discovery.sqlite ingredient-ocr-image-map --source-family candy-wrapper-archive --run-id cwa-top250 --limit 250 --max-scratch-bytes 200GB",
+      });
+    }
+    const family = families.get(familyId);
+    family.evidence_row_count += 1;
+    family.product_ids.add(row.product_id);
+    family.source_domains.push(row.source_domain);
+    family.source_urls.push(row.source_url);
+    family.gap_categories.push(row.ocr_gap_category);
+    if (!family.products.has(row.product_id)) {
+      family.products.set(row.product_id, {
+        product_id: row.product_id,
+        product_name: row.product_name,
+        brand: row.brand,
+        category: row.category,
+        evidence_count: 0,
+        vintages: new Set(),
+        source_urls: [],
+        ingredient_panel_visible_count: 0,
+        local_image_ready_count: 0,
+        readable_panel_photo_needed_count: 0,
+        next_action: "Find a back/side/ingredient-panel photo, then route private capture through OCR.",
+      });
+    }
+    const product = family.products.get(row.product_id);
+    product.evidence_count += 1;
+    if (row.vintage_label) product.vintages.add(row.vintage_label);
+    if (row.source_url) product.source_urls.push(row.source_url);
+    if (booleanFlag(row.ingredient_panel_visible)) product.ingredient_panel_visible_count += 1;
+    if (row.local_image_path) product.local_image_ready_count += 1;
+    if (row.ocr_gap_category === "readable_panel_photo_needed") product.readable_panel_photo_needed_count += 1;
+    product.next_action = row.ocr_recommended_action || product.next_action;
+  }
+  return {
+    schema_version: 1,
+    generated_at_utc: generatedAt,
+    private_scratch_policy: "Use the configured private scratch root for captures, crops, OCR text, model packets, and review manifests. Public files remain link/status only.",
+    families: [...families.values()].map((family) => ({
+      id: family.id,
+      label: family.label,
+      strategy: family.strategy,
+      public_image_policy: family.public_image_policy,
+      claim_policy: family.claim_policy,
+      evidence_row_count: family.evidence_row_count,
+      product_count: family.product_ids.size,
+      top_domains: topValues(family.source_domains.map((value) => ({ value })), "value", 8),
+      gap_categories: topValues(family.gap_categories.map((value) => ({ value })), "value", 8),
+      cwa_run_command: family.cwa_run_command,
+      products: [...family.products.values()]
+        .map((product) => ({
+          ...product,
+          vintage_count: product.vintages.size,
+          vintages: [...product.vintages].sort(),
+          source_urls: unique(product.source_urls).slice(0, 5),
+        }))
+        .sort((a, b) => b.evidence_count - a.evidence_count || a.product_name.localeCompare(b.product_name)),
+    })),
+  };
+}
+
+function buildOcrBoardSummary(fullManifest, sourceFamilySummary) {
+  return {
+    schema_version: 1,
+    generated_at_utc: generatedAt,
+    scratch_root_policy: "A private OCR scratch root is configured for bulk captures and OCR work; public site exports must not include private paths.",
+    scratch_soft_quota: "200GB",
+    public_safety_note: "Counts and source links are public. Captures, crops, OCR text, prompts, model responses, hashes, and local paths stay private.",
+    model_policy: "Spark handles bounded packet work; GPT-5.5 handles compact batch review; Grok assists source hunting and validation only.",
+    totals: fullManifest?.totals || {},
+    source_family_count: sourceFamilySummary.families.length,
+    source_family_rows: sourceFamilySummary.families.reduce((sum, family) => sum + family.evidence_row_count, 0),
+  };
+}
+
+function buildProductStoryIndex(data, fullQueue) {
+  const sourceFamilyProducts = new Map();
+  for (const row of fullQueue) {
+    const familyId = sourceFamilyFor(row);
+    if (!familyId) continue;
+    if (!sourceFamilyProducts.has(row.product_id)) {
+      sourceFamilyProducts.set(row.product_id, {
+        product_id: row.product_id,
+        product_name: row.product_name,
+        source_family: familyId,
+        mode: "visual_lineage_candidate",
+        evidence_count: 0,
+        vintages: new Set(),
+        story_state: "needs_panel_photo",
+        next_action: "Find readable ingredient/back/side panel evidence before formulation claims.",
+      });
+    }
+    const product = sourceFamilyProducts.get(row.product_id);
+    product.evidence_count += 1;
+    if (row.vintage_label) product.vintages.add(row.vintage_label);
+    product.next_action = row.ocr_recommended_action || product.next_action;
+  }
+  return {
+    schema_version: 1,
+    generated_at_utc: generatedAt,
+    pilot_products: (data.products || []).map((product) => ({
+      product_id: product.id,
+      product_name: product.name,
+      mode: "pilot_story",
+      story_state: product.pilot_rollup_status || "story_ready",
+      claim_state: product.claim_rollup_status || "needs_manual_verification",
+      total_slots: product.total_slots,
+      source_backed_slots: product.source_backed_slots,
+      verified_labels: product.verified_labels,
+    })),
+    source_family_products: [...sourceFamilyProducts.values()].map((product) => ({
+      ...product,
+      vintage_count: product.vintages.size,
+      vintages: [...product.vintages].sort(),
+    })),
+  };
+}
+
+function buildPublicReviewRows(data, fullQueue) {
+  const pilotRows = (data.review_queue || []).map((row) => ({
+    product_id: row.product_id,
+    product_name: row.product_name,
+    source_family: "",
+    vintage_label: row.vintage,
+    source_url: "",
+    status: row.status,
+    missing_fields: row.missing_fields,
+    next_action: row.next_action,
+    public_note: "Pilot review row; candidate-only until manual verification.",
+  }));
+  const sourceRows = fullQueue
+    .filter((row) => sourceFamilyFor(row))
+    .map((row) => ({
+      product_id: row.product_id,
+      product_name: row.product_name,
+      source_family: sourceFamilyFor(row),
+      vintage_label: row.vintage_label,
+      source_url: row.source_url,
+      status: row.ocr_gap_category,
+      missing_fields: row.ground_truth_fields_missing || row.promotion_blocker,
+      next_action: row.ocr_recommended_action,
+      public_note: "Source-family lineage row; source link only, no external image reuse.",
+    }));
+  return [...pilotRows, ...sourceRows];
+}
+
+function buildPublicGapRows(fullGapReport, sourceFamilySummary) {
+  const corpusRows = fullGapReport.map((row) => ({
+    scope: "full_corpus",
+    family_or_gap: row.gap_category,
+    row_count: row.row_count,
+    product_count: row.product_count,
+    next_action: row.suggested_future_run,
+    public_note: row.why_not_easy,
+  }));
+  const familyRows = sourceFamilySummary.families.map((family) => ({
+    scope: "source_family",
+    family_or_gap: family.id,
+    row_count: family.evidence_row_count,
+    product_count: family.product_count,
+    next_action: "Use lineage pages to find readable back/side/ingredient panels, then run private OCR.",
+    public_note: family.claim_policy,
+  }));
+  return [...familyRows, ...corpusRows];
+}
+
 function writeGapMarkdown(filePath, manifest) {
   const lines = [
     "# Full-Corpus Ingredient OCR Gap Report",
@@ -811,17 +1020,28 @@ function main() {
     "linked_vintages",
     "linked_versions",
   ], queue);
-  writeJson(navigatorPath, data);
 
   let fullCorpusQueue = [];
   let fullCorpusManifest = null;
   let fullCorpusGapReport = [];
+  let sourceFamilySummary = null;
+  let ocrBoardSummary = null;
+  let productStoryIndex = null;
   if (summary) {
     fullCorpusQueue = buildFullCorpusQueue(summary, imageMap);
     fullCorpusGapReport = buildGapReport(fullCorpusQueue);
     fullCorpusManifest = buildFullCorpusManifest(summary, fullCorpusQueue, fullCorpusGapReport);
+    sourceFamilySummary = buildSourceFamilySummary(fullCorpusQueue);
+    ocrBoardSummary = buildOcrBoardSummary(fullCorpusManifest, sourceFamilySummary);
+    productStoryIndex = buildProductStoryIndex(data, fullCorpusQueue);
+    data.source_family_summary = sourceFamilySummary;
+    data.ocr_board_summary = ocrBoardSummary;
+    data.product_story_index = productStoryIndex;
     updateSummaryData(summary, fullCorpusManifest);
     writeJson(fullCorpusManifestPath, fullCorpusManifest);
+    writeJson(sourceFamilySummaryPath, sourceFamilySummary);
+    writeJson(ocrBoardSummaryPath, ocrBoardSummary);
+    writeJson(productStoryIndexPath, productStoryIndex);
     writeCsv(fullCorpusQueueCsvPath, [
       "product_id",
       "product_name",
@@ -883,8 +1103,28 @@ function main() {
       "example_source_urls",
     ], fullCorpusGapReport);
     writeGapMarkdown(fullCorpusGapMarkdownPath, fullCorpusManifest);
+    writeCsv(publicReviewQueuePath, [
+      "product_id",
+      "product_name",
+      "source_family",
+      "vintage_label",
+      "source_url",
+      "status",
+      "missing_fields",
+      "next_action",
+      "public_note",
+    ], buildPublicReviewRows(data, fullCorpusQueue));
+    writeCsv(publicGapReportPath, [
+      "scope",
+      "family_or_gap",
+      "row_count",
+      "product_count",
+      "next_action",
+      "public_note",
+    ], buildPublicGapRows(fullCorpusGapReport, sourceFamilySummary));
     writeJson(summaryPath, summary);
   }
+  writeJson(navigatorPath, data);
 
   let runSummary = null;
   if (hasFlag("run")) {
@@ -923,6 +1163,11 @@ function main() {
       manifest: fullCorpusManifestPath,
       queue_csv: fullCorpusQueueCsvPath,
       gap_report_csv: fullCorpusGapCsvPath,
+      source_family_summary: sourceFamilySummaryPath,
+      ocr_board_summary: ocrBoardSummaryPath,
+      product_story_index: productStoryIndexPath,
+      review_queue_public: publicReviewQueuePath,
+      gap_report_public: publicGapReportPath,
     } : null,
     run: runSummary,
   }, null, 2));

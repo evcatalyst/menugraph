@@ -23,6 +23,7 @@
 html,
 body {
   min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -177,13 +178,132 @@ a:hover {
   box-shadow: inset 0 0 0 1px rgba(101, 183, 177, 0.4);
 }
 
+.source-family-panel {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 10px;
+  border: 1px solid rgba(101, 183, 177, 0.45);
+  border-radius: 8px;
+  background: rgba(20, 26, 23, 0.94);
+  padding: 12px;
+}
+
+.source-family-panel h2,
+.source-family-panel p {
+  margin: 0;
+}
+
+.source-family-panel h2 {
+  margin-top: 3px;
+  font-size: clamp(20px, 2vw, 30px);
+  line-height: 1.03;
+  letter-spacing: 0;
+}
+
+.source-family-panel p:not(.eyebrow) {
+  margin-top: 7px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.source-family-summary {
+  min-width: 0;
+}
+
+.source-family-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.source-family-metrics span,
+.source-family-empty {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel-soft);
+  padding: 8px;
+}
+
+.source-family-metrics strong,
+.source-family-metrics span {
+  display: block;
+}
+
+.source-family-metrics strong {
+  color: var(--teal);
+  font-size: 21px;
+  line-height: 1;
+}
+
+.source-family-metrics span {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.source-family-products {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.source-family-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(32, 34, 29, 0.88);
+  padding: 9px;
+}
+
+.source-family-card span {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.source-family-card strong {
+  display: block;
+  margin-top: 4px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.source-family-card p,
+.source-family-card em {
+  display: block;
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
+}
+
+.source-family-card a {
+  display: inline-flex;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.source-family-policy {
+  margin-top: 8px;
+  color: var(--gold);
+  font-size: 12px;
+}
+
 .product-strip {
   display: flex;
   gap: 8px;
   max-width: 100%;
   margin-top: 10px;
   padding: 8px;
+  contain: layout paint;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-inline: contain;
 }
 
@@ -888,6 +1008,7 @@ a:hover {
 @media (max-width: 1180px) {
   .navigator-topbar,
   .navigator-controls,
+  .source-family-panel,
   .navigator-grid {
     grid-template-columns: 1fr;
   }
@@ -904,6 +1025,10 @@ a:hover {
   .cluster-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .source-family-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
@@ -913,6 +1038,8 @@ a:hover {
 
   .summary-metrics,
   .hero-metrics,
+  .source-family-metrics,
+  .source-family-products,
   .detail-grid,
   .price-weight,
   .export-links,

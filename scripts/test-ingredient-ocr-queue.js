@@ -10,6 +10,11 @@ const fullQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/ful
 const fullGapCsvPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_gap_report.csv");
 const navigatorPath = path.join(root, "docs/data/product-evidence/navigator_data.json");
 const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
+const sourceFamilySummaryPath = path.join(root, "docs/data/product-evidence/source_family_summary.json");
+const ocrBoardSummaryPath = path.join(root, "docs/data/product-evidence/ocr_board_summary.json");
+const productStoryIndexPath = path.join(root, "docs/data/product-evidence/product_story_index.json");
+const publicReviewQueuePath = path.join(root, "docs/data/product-evidence/review_queue_public.csv");
+const publicGapReportPath = path.join(root, "docs/data/product-evidence/gap_report_public.csv");
 
 function parseCsv(text) {
   const rows = [];
@@ -58,9 +63,14 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 const fullManifest = JSON.parse(fs.readFileSync(fullManifestPath, "utf8"));
 const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
+const sourceFamilySummary = JSON.parse(fs.readFileSync(sourceFamilySummaryPath, "utf8"));
+const ocrBoardSummary = JSON.parse(fs.readFileSync(ocrBoardSummaryPath, "utf8"));
+const productStoryIndex = JSON.parse(fs.readFileSync(productStoryIndexPath, "utf8"));
 const queue = parseCsv(fs.readFileSync(queueCsvPath, "utf8"));
 const fullQueue = parseCsv(fs.readFileSync(fullQueueCsvPath, "utf8"));
 const fullGapReport = parseCsv(fs.readFileSync(fullGapCsvPath, "utf8"));
+const publicReviewQueue = parseCsv(fs.readFileSync(publicReviewQueuePath, "utf8"));
+const publicGapReport = parseCsv(fs.readFileSync(publicGapReportPath, "utf8"));
 
 assert.strictEqual(manifest.schema_version, 1, "manifest schema should be versioned");
 assert.strictEqual(manifest.products.length, 10, "manifest should cover the 10-product pilot");
@@ -112,6 +122,30 @@ assert(fullGapReport.some((row) => row.gap_category === "source_discovery_needed
 assert(fullGapReport.some((row) => row.gap_category === "readable_panel_photo_needed"), "readable panel photo gaps should be reported");
 assert(fullGapReport.some((row) => row.gap_category === "panel_capture_needed"), "panel capture gaps should be reported");
 assert(fullGapReport.some((row) => row.gap_category === "document_text_pipeline_needed"), "document-first OCR gaps should be reported");
+
+assert.strictEqual(sourceFamilySummary.schema_version, 1, "source family summary should be versioned");
+const cwa = sourceFamilySummary.families.find((row) => row.id === "candy-wrapper-archive");
+assert(cwa, "Candy Wrapper Archive source family should be published");
+assert(cwa.product_count >= 5, "CWA source family should expose multiple products beyond the 10-product pilot");
+assert(cwa.evidence_row_count >= 10, "CWA source family should expose lineage rows");
+assert(cwa.claim_policy.includes("manual verification"), "CWA family should keep claims gated");
+assert(cwa.products.some((row) => row.product_id === "tootsie_roll"), "CWA source family should include Tootsie Roll");
+assert(cwa.products.every((row) => row.source_urls.every((url) => /^https?:/.test(url))), "CWA source URLs should remain link-only");
+
+assert.strictEqual(ocrBoardSummary.schema_version, 1, "OCR board summary should be versioned");
+assert.strictEqual(ocrBoardSummary.scratch_soft_quota, "200GB", "OCR board should publish the soft scratch quota");
+assert(!JSON.stringify(ocrBoardSummary).includes("/Volumes/azssd/scratch/ingredient-ocr/runs/"), "OCR board should not publish private run paths");
+assert(!JSON.stringify(ocrBoardSummary).includes("/Volumes/azssd/scratch"), "OCR board should not publish the private scratch path");
+assert(!JSON.stringify(sourceFamilySummary).includes("/Volumes/azssd/scratch"), "source family summary should not publish the private scratch path");
+
+assert.strictEqual(productStoryIndex.schema_version, 1, "product story index should be versioned");
+assert.strictEqual(productStoryIndex.pilot_products.length, 10, "story index should keep the 10 pilot products");
+assert(productStoryIndex.source_family_products.length >= 5, "story index should add source-family products");
+assert(productStoryIndex.source_family_products.some((row) => row.product_id === "tootsie_roll"), "story index should expose Tootsie Roll as a source-family candidate");
+
+assert(publicReviewQueue.length > 60, "public review queue should combine pilot and source-family rows");
+assert(publicReviewQueue.some((row) => row.source_family === "candy-wrapper-archive"), "public review queue should include CWA rows");
+assert(publicGapReport.some((row) => row.scope === "source_family" && row.family_or_gap === "candy-wrapper-archive"), "public gap report should include CWA source-family gaps");
 
 fullQueue.forEach((row) => {
   assert(row.product_id, "full queue row missing product id");

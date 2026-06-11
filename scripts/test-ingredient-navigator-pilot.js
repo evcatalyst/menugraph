@@ -20,6 +20,13 @@ const expectedProducts = [
 ];
 
 assert.strictEqual(data.products.length, 10, "navigator should expose the 10-product pilot");
+assert(data.source_family_summary, "navigator should expose source-family summary data");
+assert(data.ocr_board_summary, "navigator should expose public OCR board summary data");
+assert(data.product_story_index, "navigator should expose product story index data");
+const cwaFamily = data.source_family_summary.families.find((row) => row.id === "candy-wrapper-archive");
+assert(cwaFamily, "navigator should expose Candy Wrapper Archive source-family mode");
+assert(cwaFamily.products.some((row) => row.product_id === "tootsie_roll"), "navigator should include Tootsie Roll as a CWA source-family candidate");
+assert.strictEqual(data.ocr_board_summary.scratch_soft_quota, "200GB", "navigator should publish the OCR scratch soft quota");
 assert.deepStrictEqual(
   data.product_index.map((row) => row.id),
   expectedProducts,

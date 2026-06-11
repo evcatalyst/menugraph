@@ -7800,5 +7800,337 @@
     "manifest_path": "docs/data/product-evidence/ingredient_ocr_manifest.json",
     "queue_csv": "docs/data/product-evidence/exports/ten_product_pilot_ocr_queue.csv",
     "claim_policy": "Native OCR output is candidate evidence only until reviewer corrected and manually verified."
+  },
+  "source_family_summary": {
+    "schema_version": 1,
+    "generated_at_utc": "2026-06-07T19:00:00Z",
+    "private_scratch_policy": "Use the configured private scratch root for captures, crops, OCR text, model packets, and review manifests. Public files remain link/status only.",
+    "families": [
+      {
+        "id": "candy-wrapper-archive",
+        "label": "Candy Wrapper Archive",
+        "strategy": "visual_lineage_first",
+        "public_image_policy": "Link out to source pages; do not reproduce external photos unless rights are clear.",
+        "claim_policy": "Wrapper lineage can support visual provenance only. Ingredient claims require readable panel OCR and manual verification.",
+        "evidence_row_count": 16,
+        "product_count": 5,
+        "top_domains": "www.candywrapperarchive.com (16)",
+        "gap_categories": "readable_panel_photo_needed (16)",
+        "cwa_run_command": "INGREDIENT_OCR_SCRATCH_ROOT=<private-scratch-root> python3 -m ccfoodprice --run-dir runs/product-discovery --db runs/product-discovery/product_discovery.sqlite ingredient-ocr-image-map --source-family candy-wrapper-archive --run-id cwa-top250 --limit 250 --max-scratch-bytes 200GB",
+        "products": [
+          {
+            "product_id": "snickers_bar",
+            "product_name": "Snickers Bar",
+            "brand": "Snickers",
+            "category": "candy",
+            "evidence_count": 4,
+            "vintages": [
+              "1980s_or_earlier",
+              "1990s",
+              "2000s",
+              "earliest_verified_label"
+            ],
+            "source_urls": [
+              "https://www.candywrapperarchive.com/candy-collection/snickers/"
+            ],
+            "ingredient_panel_visible_count": 0,
+            "local_image_ready_count": 0,
+            "readable_panel_photo_needed_count": 4,
+            "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+            "vintage_count": 4
+          },
+          {
+            "product_id": "twix_bar",
+            "product_name": "Twix Bar",
+            "brand": "Twix",
+            "category": "candy",
+            "evidence_count": 4,
+            "vintages": [
+              "1980s_or_earlier",
+              "1990s",
+              "2000s",
+              "earliest_verified_label"
+            ],
+            "source_urls": [
+              "https://www.candywrapperarchive.com/candy-collection/twix/"
+            ],
+            "ingredient_panel_visible_count": 0,
+            "local_image_ready_count": 0,
+            "readable_panel_photo_needed_count": 4,
+            "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+            "vintage_count": 4
+          },
+          {
+            "product_id": "kit_kat_bar",
+            "product_name": "Kit Kat Bar",
+            "brand": "Kit Kat",
+            "category": "candy",
+            "evidence_count": 3,
+            "vintages": [
+              "1980s_or_earlier",
+              "2000s",
+              "earliest_verified_label"
+            ],
+            "source_urls": [
+              "https://www.candywrapperarchive.com/candy-collection/kit-kat/"
+            ],
+            "ingredient_panel_visible_count": 0,
+            "local_image_ready_count": 0,
+            "readable_panel_photo_needed_count": 3,
+            "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+            "vintage_count": 3
+          },
+          {
+            "product_id": "tootsie_roll",
+            "product_name": "Tootsie Roll",
+            "brand": "Tootsie Roll",
+            "category": "candy",
+            "evidence_count": 3,
+            "vintages": [
+              "1980s_or_earlier",
+              "earliest_verified_label"
+            ],
+            "source_urls": [
+              "https://www.candywrapperarchive.com/candy-collector/1960s-tootsie-roll-2/",
+              "https://www.candywrapperarchive.com/candy-collector/1940s-tootsie-roll/"
+            ],
+            "ingredient_panel_visible_count": 0,
+            "local_image_ready_count": 0,
+            "readable_panel_photo_needed_count": 3,
+            "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+            "vintage_count": 2
+          },
+          {
+            "product_id": "milky_way_bar",
+            "product_name": "Milky Way Bar",
+            "brand": "Milky Way",
+            "category": "candy",
+            "evidence_count": 2,
+            "vintages": [
+              "1980s_or_earlier",
+              "earliest_verified_label"
+            ],
+            "source_urls": [
+              "https://www.candywrapperarchive.com/candy-collection/milky-way/"
+            ],
+            "ingredient_panel_visible_count": 0,
+            "local_image_ready_count": 0,
+            "readable_panel_photo_needed_count": 2,
+            "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+            "vintage_count": 2
+          }
+        ]
+      }
+    ]
+  },
+  "ocr_board_summary": {
+    "schema_version": 1,
+    "generated_at_utc": "2026-06-07T19:00:00Z",
+    "scratch_root_policy": "A private OCR scratch root is configured for bulk captures and OCR work; public site exports must not include private paths.",
+    "scratch_soft_quota": "200GB",
+    "public_safety_note": "Counts and source links are public. Captures, crops, OCR text, prompts, model responses, hashes, and local paths stay private.",
+    "model_policy": "Spark handles bounded packet work; GPT-5.5 handles compact batch review; Grok assists source hunting and validation only.",
+    "totals": {
+      "products": 120,
+      "registry_records": 1701,
+      "ocr_candidates": 1701,
+      "high_priority": 818,
+      "medium_priority": 646,
+      "low_priority": 0,
+      "blocked_priority": 237,
+      "local_image_ready": 0,
+      "not_easily_accessible": 1701,
+      "source_page_capture_needed": 1464,
+      "source_discovery_needed": 237,
+      "ingredient_panel_visible": 671,
+      "ingredient_text_candidates": 77,
+      "manual_verified": 0,
+      "manual_transcriptions": 0
+    },
+    "source_family_count": 1,
+    "source_family_rows": 16
+  },
+  "product_story_index": {
+    "schema_version": 1,
+    "generated_at_utc": "2026-06-07T19:00:00Z",
+    "pilot_products": [
+      {
+        "product_id": "oreo_original_chocolate_sandwich_cookies",
+        "product_name": "Oreo Original Chocolate Sandwich Cookies",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 6,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "doritos_nacho_cheese",
+        "product_name": "Doritos Nacho Cheese",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 6,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "cheerios_original",
+        "product_name": "Cheerios Original",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 5,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "coca_cola_classic",
+        "product_name": "Coca-Cola Classic",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 6,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "campbells_tomato_soup",
+        "product_name": "Campbell's Condensed Tomato Soup",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 4,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "heinz_tomato_ketchup",
+        "product_name": "Heinz Tomato Ketchup",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 4,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "poptarts_frosted_strawberry",
+        "product_name": "Pop-Tarts Frosted Strawberry",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 5,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "kraft_macaroni_and_cheese_original",
+        "product_name": "Kraft Macaroni & Cheese Original",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 5,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "mcdonalds_big_mac",
+        "product_name": "McDonald's Big Mac",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 6,
+        "verified_labels": 0
+      },
+      {
+        "product_id": "mcdonalds_chicken_mcnuggets",
+        "product_name": "McDonald's Chicken McNuggets",
+        "mode": "pilot_story",
+        "story_state": "confirmed_story_ready",
+        "claim_state": "needs_manual_verification",
+        "total_slots": 6,
+        "source_backed_slots": 5,
+        "verified_labels": 0
+      }
+    ],
+    "source_family_products": [
+      {
+        "product_id": "snickers_bar",
+        "product_name": "Snickers Bar",
+        "source_family": "candy-wrapper-archive",
+        "mode": "visual_lineage_candidate",
+        "evidence_count": 4,
+        "vintages": [
+          "1980s_or_earlier",
+          "1990s",
+          "2000s",
+          "earliest_verified_label"
+        ],
+        "story_state": "needs_panel_photo",
+        "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+        "vintage_count": 4
+      },
+      {
+        "product_id": "kit_kat_bar",
+        "product_name": "Kit Kat Bar",
+        "source_family": "candy-wrapper-archive",
+        "mode": "visual_lineage_candidate",
+        "evidence_count": 3,
+        "vintages": [
+          "1980s_or_earlier",
+          "2000s",
+          "earliest_verified_label"
+        ],
+        "story_state": "needs_panel_photo",
+        "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+        "vintage_count": 3
+      },
+      {
+        "product_id": "twix_bar",
+        "product_name": "Twix Bar",
+        "source_family": "candy-wrapper-archive",
+        "mode": "visual_lineage_candidate",
+        "evidence_count": 4,
+        "vintages": [
+          "1980s_or_earlier",
+          "1990s",
+          "2000s",
+          "earliest_verified_label"
+        ],
+        "story_state": "needs_panel_photo",
+        "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+        "vintage_count": 4
+      },
+      {
+        "product_id": "milky_way_bar",
+        "product_name": "Milky Way Bar",
+        "source_family": "candy-wrapper-archive",
+        "mode": "visual_lineage_candidate",
+        "evidence_count": 2,
+        "vintages": [
+          "1980s_or_earlier",
+          "earliest_verified_label"
+        ],
+        "story_state": "needs_panel_photo",
+        "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+        "vintage_count": 2
+      },
+      {
+        "product_id": "tootsie_roll",
+        "product_name": "Tootsie Roll",
+        "source_family": "candy-wrapper-archive",
+        "mode": "visual_lineage_candidate",
+        "evidence_count": 3,
+        "vintages": [
+          "1980s_or_earlier",
+          "earliest_verified_label"
+        ],
+        "story_state": "needs_panel_photo",
+        "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+        "vintage_count": 2
+      }
+    ]
   }
 }

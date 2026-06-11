@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-06-07T19:00:00Z",
+  "pilot_products": [
+    {
+      "product_id": "oreo_original_chocolate_sandwich_cookies",
+      "product_name": "Oreo Original Chocolate Sandwich Cookies",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 6,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "doritos_nacho_cheese",
+      "product_name": "Doritos Nacho Cheese",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 6,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "cheerios_original",
+      "product_name": "Cheerios Original",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 5,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "coca_cola_classic",
+      "product_name": "Coca-Cola Classic",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 6,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "campbells_tomato_soup",
+      "product_name": "Campbell's Condensed Tomato Soup",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 4,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "heinz_tomato_ketchup",
+      "product_name": "Heinz Tomato Ketchup",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 4,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "poptarts_frosted_strawberry",
+      "product_name": "Pop-Tarts Frosted Strawberry",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 5,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "kraft_macaroni_and_cheese_original",
+      "product_name": "Kraft Macaroni & Cheese Original",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 5,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "mcdonalds_big_mac",
+      "product_name": "McDonald's Big Mac",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 6,
+      "verified_labels": 0
+    },
+    {
+      "product_id": "mcdonalds_chicken_mcnuggets",
+      "product_name": "McDonald's Chicken McNuggets",
+      "mode": "pilot_story",
+      "story_state": "confirmed_story_ready",
+      "claim_state": "needs_manual_verification",
+      "total_slots": 6,
+      "source_backed_slots": 5,
+      "verified_labels": 0
+    }
+  ],
+  "source_family_products": [
+    {
+      "product_id": "snickers_bar",
+      "product_name": "Snickers Bar",
+      "source_family": "candy-wrapper-archive",
+      "mode": "visual_lineage_candidate",
+      "evidence_count": 4,
+      "vintages": [
+        "1980s_or_earlier",
+        "1990s",
+        "2000s",
+        "earliest_verified_label"
+      ],
+      "story_state": "needs_panel_photo",
+      "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+      "vintage_count": 4
+    },
+    {
+      "product_id": "kit_kat_bar",
+      "product_name": "Kit Kat Bar",
+      "source_family": "candy-wrapper-archive",
+      "mode": "visual_lineage_candidate",
+      "evidence_count": 3,
+      "vintages": [
+        "1980s_or_earlier",
+        "2000s",
+        "earliest_verified_label"
+      ],
+      "story_state": "needs_panel_photo",
+      "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+      "vintage_count": 3
+    },
+    {
+      "product_id": "twix_bar",
+      "product_name": "Twix Bar",
+      "source_family": "candy-wrapper-archive",
+      "mode": "visual_lineage_candidate",
+      "evidence_count": 4,
+      "vintages": [
+        "1980s_or_earlier",
+        "1990s",
+        "2000s",
+        "earliest_verified_label"
+      ],
+      "story_state": "needs_panel_photo",
+      "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+      "vintage_count": 4
+    },
+    {
+      "product_id": "milky_way_bar",
+      "product_name": "Milky Way Bar",
+      "source_family": "candy-wrapper-archive",
+      "mode": "visual_lineage_candidate",
+      "evidence_count": 2,
+      "vintages": [
+        "1980s_or_earlier",
+        "earliest_verified_label"
+      ],
+      "story_state": "needs_panel_photo",
+      "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+      "vintage_count": 2
+    },
+    {
+      "product_id": "tootsie_roll",
+      "product_name": "Tootsie Roll",
+      "source_family": "candy-wrapper-archive",
+      "mode": "visual_lineage_candidate",
+      "evidence_count": 3,
+      "vintages": [
+        "1980s_or_earlier",
+        "earliest_verified_label"
+      ],
+      "story_state": "needs_panel_photo",
+      "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+      "vintage_count": 2
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-06-07T19:00:00Z",
+  "private_scratch_policy": "Use the configured private scratch root for captures, crops, OCR text, model packets, and review manifests. Public files remain link/status only.",
+  "families": [
+    {
+      "id": "candy-wrapper-archive",
+      "label": "Candy Wrapper Archive",
+      "strategy": "visual_lineage_first",
+      "public_image_policy": "Link out to source pages; do not reproduce external photos unless rights are clear.",
+      "claim_policy": "Wrapper lineage can support visual provenance only. Ingredient claims require readable panel OCR and manual verification.",
+      "evidence_row_count": 16,
+      "product_count": 5,
+      "top_domains": "www.candywrapperarchive.com (16)",
+      "gap_categories": "readable_panel_photo_needed (16)",
+      "cwa_run_command": "INGREDIENT_OCR_SCRATCH_ROOT=<private-scratch-root> python3 -m ccfoodprice --run-dir runs/product-discovery --db runs/product-discovery/product_discovery.sqlite ingredient-ocr-image-map --source-family candy-wrapper-archive --run-id cwa-top250 --limit 250 --max-scratch-bytes 200GB",
+      "products": [
+        {
+          "product_id": "snickers_bar",
+          "product_name": "Snickers Bar",
+          "brand": "Snickers",
+          "category": "candy",
+          "evidence_count": 4,
+          "vintages": [
+            "1980s_or_earlier",
+            "1990s",
+            "2000s",
+            "earliest_verified_label"
+          ],
+          "source_urls": [
+            "https://www.candywrapperarchive.com/candy-collection/snickers/"
+          ],
+          "ingredient_panel_visible_count": 0,
+          "local_image_ready_count": 0,
+          "readable_panel_photo_needed_count": 4,
+          "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+          "vintage_count": 4
+        },
+        {
+          "product_id": "twix_bar",
+          "product_name": "Twix Bar",
+          "brand": "Twix",
+          "category": "candy",
+          "evidence_count": 4,
+          "vintages": [
+            "1980s_or_earlier",
+            "1990s",
+            "2000s",
+            "earliest_verified_label"
+          ],
+          "source_urls": [
+            "https://www.candywrapperarchive.com/candy-collection/twix/"
+          ],
+          "ingredient_panel_visible_count": 0,
+          "local_image_ready_count": 0,
+          "readable_panel_photo_needed_count": 4,
+          "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+          "vintage_count": 4
+        },
+        {
+          "product_id": "kit_kat_bar",
+          "product_name": "Kit Kat Bar",
+          "brand": "Kit Kat",
+          "category": "candy",
+          "evidence_count": 3,
+          "vintages": [
+            "1980s_or_earlier",
+            "2000s",
+            "earliest_verified_label"
+          ],
+          "source_urls": [
+            "https://www.candywrapperarchive.com/candy-collection/kit-kat/"
+          ],
+          "ingredient_panel_visible_count": 0,
+          "local_image_ready_count": 0,
+          "readable_panel_photo_needed_count": 3,
+          "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+          "vintage_count": 3
+        },
+        {
+          "product_id": "tootsie_roll",
+          "product_name": "Tootsie Roll",
+          "brand": "Tootsie Roll",
+          "category": "candy",
+          "evidence_count": 3,
+          "vintages": [
+            "1980s_or_earlier",
+            "earliest_verified_label"
+          ],
+          "source_urls": [
+            "https://www.candywrapperarchive.com/candy-collector/1960s-tootsie-roll-2/",
+            "https://www.candywrapperarchive.com/candy-collector/1940s-tootsie-roll/"
+          ],
+          "ingredient_panel_visible_count": 0,
+          "local_image_ready_count": 0,
+          "readable_panel_photo_needed_count": 3,
+          "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+          "vintage_count": 2
+        },
+        {
+          "product_id": "milky_way_bar",
+          "product_name": "Milky Way Bar",
+          "brand": "Milky Way",
+          "category": "candy",
+          "evidence_count": 2,
+          "vintages": [
+            "1980s_or_earlier",
+            "earliest_verified_label"
+          ],
+          "source_urls": [
+            "https://www.candywrapperarchive.com/candy-collection/milky-way/"
+          ],
+          "ingredient_panel_visible_count": 0,
+          "local_image_ready_count": 0,
+          "readable_panel_photo_needed_count": 2,
+          "next_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+          "vintage_count": 2
+        }
+      ]
+    }
+  ]
+}
