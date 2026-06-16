@@ -22,6 +22,11 @@ struct OcrOutput: Codable {
     let lines: [OcrLine]
 }
 
+struct RecognizedPayload {
+    let processor: String
+    let observations: [VNRecognizedTextObservation]
+}
+
 func fail(_ message: String) -> Never {
     FileHandle.standardError.write((message + "\n").data(using: .utf8)!)
     exit(1)
@@ -38,22 +43,82 @@ guard let source = CGImageSourceCreateWithURL(imageUrl as CFURL, nil),
     fail("could not read image at \(imagePath)")
 }
 
-let request = VNRecognizeTextRequest()
-request.recognitionLevel = .accurate
-request.usesLanguageCorrection = true
-request.minimumTextHeight = 0.008
-if #available(macOS 13.0, *) {
-    request.revision = VNRecognizeTextRequestRevision3
+func makeRequest(level: VNRequestTextRecognitionLevel, languageCorrection: Bool, languages: [String], minimumTextHeight: Float, revision: Int?) -> (VNRecognizeTextRequest, () -> Error?) {
+    var recognitionError: Error?
+    let request = VNRecognizeTextRequest { _, error in
+        recognitionError = error
+    }
+    request.recognitionLevel = level
+    request.usesLanguageCorrection = languageCorrection
+    if !languages.isEmpty {
+        request.recognitionLanguages = languages
+    }
+    request.minimumTextHeight = minimumTextHeight
+    if let revision {
+        request.revision = revision
+    }
+    return (request, { recognitionError })
 }
 
-let handler = VNImageRequestHandler(cgImage: image, options: [:])
-do {
-    try handler.perform([request])
-} catch {
-    fail("vision text recognition failed for \(imagePath): \(error)")
+func recognizeText() -> (payload: RecognizedPayload?, error: String) {
+    var attempts: [(String, VNRequestTextRecognitionLevel, Bool, [String], Float, Int?, Bool)] = [
+        ("vision_text_recognition_accurate_default", .accurate, false, [], 0.006, nil, false),
+        ("vision_text_recognition_accurate_en", .accurate, true, ["en-US"], 0.006, nil, false),
+        ("vision_text_recognition_fast_default", .fast, false, [], 0.004, nil, false),
+        ("vision_text_recognition_url_default", .accurate, false, [], 0.006, nil, true),
+    ]
+    if #available(macOS 13.0, *) {
+        attempts.insert(("vision_text_recognition_revision3_default", .accurate, false, [], 0.006, VNRecognizeTextRequestRevision3, false), at: 0)
+    }
+
+    var errors: [String] = []
+    var emptySuccess: RecognizedPayload?
+
+    for (name, level, correction, languages, minimumHeight, revision, useUrlHandler) in attempts {
+        let (request, requestError) = makeRequest(
+            level: level,
+            languageCorrection: correction,
+            languages: languages,
+            minimumTextHeight: minimumHeight,
+            revision: revision
+        )
+        do {
+            if useUrlHandler {
+                let handler = VNImageRequestHandler(url: imageUrl, options: [:])
+                try handler.perform([request])
+            } else {
+                let handler = VNImageRequestHandler(cgImage: image, options: [:])
+                try handler.perform([request])
+            }
+        } catch {
+            errors.append("\(name): \(error)")
+            continue
+        }
+        if let error = requestError() {
+            errors.append("\(name): \(error)")
+            continue
+        }
+        let payload = RecognizedPayload(processor: name, observations: request.results ?? [])
+        if !payload.observations.isEmpty {
+            return (payload, "")
+        }
+        if emptySuccess == nil {
+            emptySuccess = payload
+        }
+    }
+
+    if let emptySuccess {
+        return (emptySuccess, "")
+    }
+    return (nil, errors.joined(separator: "; "))
 }
 
-let observations = request.results ?? []
+let result = recognizeText()
+guard let recognized = result.payload else {
+    fail("vision text recognition failed for \(imagePath): \(result.error)")
+}
+
+let observations = recognized.observations
 let lines = observations.compactMap { observation -> OcrLine? in
     guard let candidate = observation.topCandidates(1).first else { return nil }
     let text = candidate.string.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -79,7 +144,7 @@ let lines = observations.compactMap { observation -> OcrLine? in
 
 let output = OcrOutput(
     version: 1,
-    processor: "macos_vision_text_recognition",
+    processor: recognized.processor,
     imagePath: imagePath,
     lines: lines
 )

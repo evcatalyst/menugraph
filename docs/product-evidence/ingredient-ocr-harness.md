@@ -66,6 +66,31 @@ Direct single-image usage:
 swift scripts/vision-ocr.swift /private/path/to/panel.jpg
 ```
 
+## Candy Wrapper Archive Visual Pass
+
+The Candy Wrapper Archive lane has a repo-native collector for local visual previews:
+
+```sh
+npm run build:cwa-visuals
+```
+
+This fetches CWA source pages and candidate images into `.cache/ingredient-ocr/cwa/<run-id>/`, runs the Swift OCR harness, creates local crop previews, and writes the public-safe index:
+
+- `docs/data/product-evidence/cwa_ingredient_visual_index.json`
+- `source_family_timeline` inside `docs/data/product-evidence/navigator_data.json`
+
+The public index stores source URLs, stable `visual_id` values, crop/OCR status, short candidate excerpts, and claim boundaries. It does not publish private paths, image pixels, raw OCR dumps, prompts, or downloaded source files. On localhost the navigator may request `/api/private/ingredient-crops/:visual_id`, which resolves through `.cache/ingredient-ocr/cwa/latest-private-manifest.json`.
+
+## Flickr Package Archive Visual Pass
+
+The first non-CWA expansion uses curated high-resolution Flickr package labels with readable ingredient or formula panels:
+
+```sh
+npm run build:flickr-visuals
+```
+
+This writes private source/crop artifacts under `.cache/ingredient-ocr/flickr/<run-id>/`, publishes `docs/data/product-evidence/flickr_ingredient_visual_index.json`, and merges a `Flickr Package Archive` lane into `source_family_timeline`. The public index carries source links, candidate text, status, and claim boundaries only. Local crop pixels are served through the same loopback-only `/api/private/ingredient-crops/:visual_id` endpoint when `.cache/ingredient-ocr/flickr/latest-private-manifest.json` exists.
+
 ## Claim Policy
 
 OCR output is only a review candidate. It can move evidence from `label_visible` toward `ocr_extracted`, but no formulation claim is verified until a reviewer corrects the text, records attribution, and marks the label `manual_verified`.

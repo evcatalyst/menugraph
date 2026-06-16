@@ -5,6 +5,12 @@ const els = {
   timeRange: document.querySelector("#time-range"),
   compareToggle: document.querySelector("#compare-toggle"),
   sourceFamilySummary: document.querySelector("#source-family-summary"),
+  cwaTimelinePanel: document.querySelector("#cwa-timeline-panel"),
+  sourceFamilyTimelineTitle: document.querySelector("#source-family-timeline-title"),
+  sourceFamilyTimelineNote: document.querySelector("#source-family-timeline-note"),
+  sourceFamilyTabs: document.querySelector("#source-family-tabs"),
+  cwaProductStrip: document.querySelector("#cwa-product-strip"),
+  cwaTimelineTrack: document.querySelector("#cwa-timeline-track"),
   status: document.querySelector("#journey-status"),
   productSummary: document.querySelector("#product-summary"),
   storyReadiness: document.querySelector("#story-readiness"),
@@ -24,6 +30,8 @@ const els = {
   priceWeight: document.querySelector("#price-weight"),
   exportLinks: document.querySelector("#export-links"),
   clusterList: document.querySelector("#cluster-list"),
+  ingredientDrilldown: document.querySelector("#ingredient-drilldown"),
+  ingredientDrilldownContent: document.querySelector("#ingredient-drilldown-content"),
 };
 
 const state = {
@@ -31,6 +39,8 @@ const state = {
   productId: "",
   versionId: "",
   facetId: "",
+  sourceFamilyId: "",
+  cwaProductId: "",
   search: "",
   compare: false,
   maxYear: 2026,
@@ -52,8 +62,133 @@ function labelFor(value) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function truncateText(value, limit = 220) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  return text.length > limit ? `${text.slice(0, limit - 1).trim()}...` : text;
+}
+
 function statusBadge(status) {
   return `<span class="status-badge status-${escapeHtml(status || "unknown")}">${escapeHtml(labelFor(status || "unknown"))}</span>`;
+}
+
+const cwaIconSvgs = {
+  ingredient: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5.5h10M5 10h10M5 14.5h7" /></svg>',
+  panel: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3.5h10v13H5zM7.5 7h5M7.5 10h5M7.5 13h3" /></svg>',
+  image: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12v10H4zM6.5 12l2.4-2.5 2 2 1.4-1.3 2.2 2.8M7.5 7.5h.1" /></svg>',
+  local: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v3M14 3.5v3M6 13.5v3M14 13.5v3M3.5 6h3M13.5 6h3M3.5 14h3M13.5 14h3M7 7h6v6H7z" /></svg>',
+  date: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 4.5h10v11H5zM5 8h10M8 3v3M12 3v3" /></svg>',
+  partial: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h5M11 10h5M10 4v5M10 11v5" /></svg>',
+  source: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5H5v10h10v-3M10 4h6v6M9 11l7-7" /></svg>',
+  crop: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3v11h11M3 6h11v11M8 8h6v6H8z" /></svg>',
+  inspect: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12.5 12.5 16 16M7 9h4M9 7v4" /></svg>',
+};
+
+function cwaInlineIcon(name) {
+  return cwaIconSvgs[name] || cwaIconSvgs.image;
+}
+
+function cwaStatusIcon(name, title, tone = "neutral") {
+  return `<span class="cwa-status-icon is-${escapeHtml(tone)}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">${cwaInlineIcon(name)}</span>`;
+}
+
+function cwaStatusIcons(row) {
+  const icons = [];
+  if (row.ingredient_text) icons.push(cwaStatusIcon("ingredient", "Ingredient text candidate visible on selected label crop", "good"));
+  else if (row.crop_focus === "panel_context") icons.push(cwaStatusIcon("panel", "Package text crop, ingredient panel still needed", "warn"));
+  else icons.push(cwaStatusIcon("image", "Visual lineage only; readable ingredient panel still needed", "muted"));
+
+  if (row.local_upscaled_preview_available) icons.push(cwaStatusIcon("local", "Local private upscaled crop available", "local"));
+  else if (row.local_preview_available) icons.push(cwaStatusIcon("crop", "Local private crop available", "local"));
+
+  if (row.source_image_match_status === "vintage_matched" || row.source_image_match_status === "source_record_date_matched") {
+    icons.push(cwaStatusIcon("date", "Selected image matches the row date range", "good"));
+  } else if (row.source_image_match_status) {
+    icons.push(cwaStatusIcon("partial", labelFor(row.source_image_match_status), "warn"));
+  }
+  return icons.join("");
+}
+
+function cwaActionLink(icon, title, href) {
+  if (!href) return "";
+  return `<a class="cwa-action-icon" href="${escapeHtml(href)}" target="_blank" rel="noreferrer" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">${cwaInlineIcon(icon)}</a>`;
+}
+
+function cwaActionButton(icon, title, visualId) {
+  return `<button class="cwa-action-icon" type="button" data-cwa-inspect="${escapeHtml(visualId)}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">${cwaInlineIcon(icon)}</button>`;
+}
+
+function splitIngredientText(value) {
+  const text = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^ingredients?:\s*/i, "")
+    .replace(/^label formula statement:\s*/i, "")
+    .replace(/^seven-up contains\s*/i, "")
+    .replace(/^a beverage syrup:\s*/i, "");
+  if (!text) return [];
+
+  const parts = [];
+  let part = "";
+  let depth = 0;
+  for (const char of text) {
+    if (char === "(") depth += 1;
+    if (char === ")" && depth > 0) depth -= 1;
+    if ((char === ";" || char === ",") && depth === 0) {
+      const clean = part.trim();
+      if (clean) parts.push(clean);
+      part = "";
+    } else {
+      part += char;
+    }
+  }
+  const clean = part.replace(/\.$/, "").trim();
+  if (clean) parts.push(clean);
+  return parts
+    .map((row) => row.replace(/\.$/, "").trim())
+    .filter(Boolean);
+}
+
+function ingredientOverlay(row) {
+  if (!row.ingredient_text) {
+    return `
+      <div class="cwa-ingredient-overlay">
+        <span>Ingredient panel needed</span>
+        <p>This source image supports visual lineage, but no readable ingredient panel has been captured for this row.</p>
+      </div>
+    `;
+  }
+
+  const items = splitIngredientText(row.ingredient_text);
+  const visibleItems = items.slice(0, 14);
+  const overflowCount = Math.max(0, items.length - visibleItems.length);
+  return `
+    <div class="cwa-ingredient-overlay">
+      <span>Ingredients on label</span>
+      ${visibleItems.length
+        ? `<ul class="cwa-overlay-ingredient-list">${visibleItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+        : `<p>${escapeHtml(row.ingredient_text)}</p>`}
+      ${overflowCount ? `<em>+${escapeHtml(overflowCount)} more in text below</em>` : ""}
+    </div>
+  `;
+}
+
+function ingredientTextBlock(row, options = {}) {
+  if (!row.ingredient_text) return "";
+  const compact = Boolean(options.compact);
+  const items = splitIngredientText(row.ingredient_text);
+  const sourceText = compact
+    ? truncateText(row.candidate_excerpt || row.ingredient_text, 230)
+    : row.ingredient_text;
+  const list = items.length
+    ? `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+    : "";
+  return `
+    <div class="cwa-ingredient-copy ${compact ? "is-compact" : ""}">
+      <span>${compact ? "Ingredient text" : "Readable ingredient text"}</span>
+      <p>${escapeHtml(sourceText)}</p>
+      ${list}
+    </div>
+  `;
 }
 
 function qualityLabel(value) {
@@ -66,6 +201,132 @@ function formatPct(value) {
 
 function product() {
   return state.data.products.find((row) => row.id === state.productId) || state.data.products[0];
+}
+
+function isLocalPreviewHost() {
+  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+}
+
+function sourceFamilyTimeline() {
+  const families = state.data.source_family_timeline?.families || [];
+  return families.find((row) => row.id === state.sourceFamilyId) || families[0];
+}
+
+function cwaTimeline() {
+  return sourceFamilyTimeline();
+}
+
+function selectedCwaProduct() {
+  const family = cwaTimeline();
+  if (!family?.products?.length) return null;
+  return family.products.find((row) => row.product_id === state.cwaProductId) || family.products[0];
+}
+
+function sourceFamilyRowByVisualId(visualId) {
+  if (!visualId) return null;
+  const families = state.data?.source_family_timeline?.families || [];
+  for (const family of families) {
+    for (const productRow of family.products || []) {
+      const match = (productRow.rows || []).find((row) => row.visual_id === visualId);
+      if (match) return { ...match, source_family_label: family.label };
+    }
+  }
+  return null;
+}
+
+function statusDetail(row) {
+  const parts = [
+    row.ingredient_signal_status ? `Signal: ${labelFor(row.ingredient_signal_status)}` : "",
+    row.crop_status ? `Crop: ${labelFor(row.crop_status)}` : "",
+    row.ocr_status ? `OCR: ${labelFor(row.ocr_status)}` : "",
+  ].filter(Boolean);
+  return parts.join(" · ");
+}
+
+function drilldownPreviewStyle(row) {
+  const rotation = Number(row.crop_rotation_degrees || 0);
+  const rotateScale = Math.abs(rotation) % 180 === 90 ? 0.72 : 1;
+  return `--crop-rotation:${escapeHtml(rotation)}deg;--drilldown-rotate-scale:${escapeHtml(rotateScale)}`;
+}
+
+function drilldownPlaceholder(row, label = "Local crop unavailable") {
+  return `<div class="ingredient-drilldown-placeholder"><strong>${escapeHtml(String(row.vintage_label || "").slice(0, 4))}</strong><span>${escapeHtml(label)}</span></div>`;
+}
+
+function renderIngredientDrilldown(row) {
+  const canShowPreview = isLocalPreviewHost() && row.local_preview_available && row.preview_endpoint;
+  const sourceLink = row.source_detail_url || row.source_url;
+  const sourceTitle = row.source_image_title || row.source_title || "Source image pending";
+  const ingredientCopy = ingredientTextBlock(row);
+  const fallbackText = row.candidate_excerpt
+    || (row.crop_focus === "panel_context"
+      ? "Focused package text is visible; readable ingredient list still needed."
+      : "Wrapper imagery can support visual provenance only; readable ingredient panel still needed.");
+  const previewTitle = row.local_upscaled_preview_available
+    ? row.ingredient_text ? "Upscaled ingredient label crop" : "Upscaled visual lineage crop"
+    : row.ingredient_text ? "Ingredient label crop" : "Visual lineage crop";
+  return `
+    <div class="ingredient-drilldown-header">
+      <p class="eyebrow">${escapeHtml(row.source_family_label || row.source_family || "Source family")}</p>
+      <h2 id="ingredient-drilldown-title">${escapeHtml(row.product_name)} · ${escapeHtml(row.vintage_label)}</h2>
+      <p>${escapeHtml(sourceTitle)}</p>
+    </div>
+    <div class="ingredient-drilldown-layout">
+      <div class="ingredient-drilldown-image ${canShowPreview ? "has-private-preview" : ""}">
+        ${canShowPreview
+          ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ingredient crop`)}" style="${drilldownPreviewStyle(row)}" />`
+          : drilldownPlaceholder(row)}
+      </div>
+      <div class="ingredient-drilldown-copy">
+        <span>${escapeHtml(previewTitle)}</span>
+        ${ingredientCopy || `<p>${escapeHtml(fallbackText)}</p>`}
+        <dl class="ingredient-drilldown-meta">
+          <div>
+            <dt>Status</dt>
+            <dd>${escapeHtml(statusDetail(row) || "Pending review")}</dd>
+          </div>
+          <div>
+            <dt>Claim Boundary</dt>
+            <dd>${escapeHtml(row.claim_boundary || "No ingredient claim is promoted without manual verification.")}</dd>
+          </div>
+          <div>
+            <dt>Source</dt>
+            <dd><a href="${escapeHtml(sourceLink)}" target="_blank" rel="noreferrer">${escapeHtml(row.source_domain || "Open source")}</a></dd>
+          </div>
+          ${canShowPreview ? `
+            <div>
+              <dt>Local Crop</dt>
+              <dd><a href="${escapeHtml(row.preview_endpoint)}" target="_blank" rel="noreferrer">Open private crop</a></dd>
+            </div>
+          ` : ""}
+        </dl>
+      </div>
+    </div>
+  `;
+}
+
+function closeIngredientDrilldown() {
+  if (!els.ingredientDrilldown) return;
+  els.ingredientDrilldown.hidden = true;
+  document.body.classList.remove("ingredient-drilldown-open");
+  if (els.ingredientDrilldownContent) {
+    els.ingredientDrilldownContent.innerHTML = "";
+  }
+}
+
+function openIngredientDrilldown(row) {
+  if (!els.ingredientDrilldown || !els.ingredientDrilldownContent) return;
+  els.ingredientDrilldownContent.innerHTML = renderIngredientDrilldown(row);
+  els.ingredientDrilldown.hidden = false;
+  document.body.classList.add("ingredient-drilldown-open");
+  els.ingredientDrilldownContent.querySelector(".ingredient-drilldown-image img")?.addEventListener("error", (event) => {
+    const frame = event.currentTarget.closest(".ingredient-drilldown-image");
+    if (frame) {
+      frame.classList.add("is-missing-private-preview");
+      frame.innerHTML = drilldownPlaceholder(row, "Private crop missing");
+    }
+  }, { once: true });
+  els.ingredientDrilldown.querySelector(".ingredient-drilldown-close")?.focus();
 }
 
 function selectedVersion(productRow) {
@@ -100,9 +361,9 @@ function renderProductPicker() {
 
 function renderSourceFamilySummary() {
   if (!els.sourceFamilySummary) return;
-  const family = (state.data.source_family_summary?.families || [])[0];
+  const families = state.data.source_family_summary?.families || [];
   const board = state.data.ocr_board_summary || {};
-  if (!family) {
+  if (!families.length) {
     els.sourceFamilySummary.innerHTML = `
       <article class="source-family-empty">
         <strong>Source-family queue pending</strong>
@@ -111,26 +372,121 @@ function renderSourceFamilySummary() {
     `;
     return;
   }
-  const products = (family.products || []).slice(0, 8);
+  const selectedSummary = families.find((family) => family.id === state.sourceFamilyId) || families[0];
+  const totalProducts = families.reduce((sum, family) => sum + Number(family.product_count || 0), 0);
+  const totalRows = families.reduce((sum, family) => sum + Number(family.evidence_row_count || family.row_count || 0), 0);
+  const selectedProducts = Number(selectedSummary.product_count || selectedSummary.products?.length || 0);
+  const selectedRows = Number(selectedSummary.evidence_row_count || selectedSummary.row_count || 0);
+  const selectedProofs = Number(selectedSummary.ingredient_signal_count || 0)
+    || (selectedSummary.products || []).reduce((sum, row) => sum + Number(row.ingredient_signal_count || row.ingredient_panel_visible_count || 0), 0);
   els.sourceFamilySummary.innerHTML = `
     <div class="source-family-metrics">
-      <span><strong>${escapeHtml(family.product_count)}</strong>products</span>
-      <span><strong>${escapeHtml(family.evidence_row_count)}</strong>evidence rows</span>
+      <span><strong>${escapeHtml(totalProducts)}</strong>products</span>
+      <span><strong>${escapeHtml(totalRows)}</strong>evidence rows</span>
+      <span><strong>${escapeHtml(selectedProofs)}</strong>selected proofs</span>
       <span><strong>${escapeHtml(board.scratch_soft_quota || "200GB")}</strong>private quota</span>
     </div>
-    <div class="source-family-products">
-      ${products.map((row) => `
-        <article class="source-family-card">
-          <span>${escapeHtml(family.label)}</span>
-          <strong>${escapeHtml(row.product_name)}</strong>
-          <p>${escapeHtml(`${row.evidence_count} lineage rows · ${row.vintage_count} vintage slots · ${row.readable_panel_photo_needed_count} need panel photos`)}</p>
-          <em>${escapeHtml(labelFor(row.next_action))}</em>
-          ${row.source_urls?.[0] ? `<a href="${escapeHtml(row.source_urls[0])}" target="_blank" rel="noreferrer">Open source lineage</a>` : ""}
-        </article>
-      `).join("")}
+    <div class="source-family-focus">
+      <span>${escapeHtml(selectedSummary.label || "Selected source lane")}</span>
+      <strong>${escapeHtml(`${selectedProducts} products · ${selectedRows} evidence rows · ${selectedProofs} proof text candidates`)}</strong>
+      <em>${escapeHtml(selectedSummary.claim_policy || state.data.source_family_timeline?.claim_policy || "Ingredient text remains candidate evidence until manual review.")}</em>
     </div>
-    <p class="source-family-policy">${escapeHtml(family.claim_policy)}</p>
   `;
+}
+
+function renderCwaTimeline() {
+  if (!els.cwaTimelinePanel || !els.cwaProductStrip || !els.cwaTimelineTrack) return;
+  const families = state.data.source_family_timeline?.families || [];
+  const family = cwaTimeline();
+  if (!family?.products?.length) {
+    els.cwaTimelinePanel.hidden = true;
+    return;
+  }
+  els.cwaTimelinePanel.hidden = false;
+  if (!state.sourceFamilyId || !families.some((row) => row.id === state.sourceFamilyId)) {
+    state.sourceFamilyId = family.id;
+  }
+  if (els.sourceFamilyTimelineTitle) {
+    els.sourceFamilyTimelineTitle.textContent = `${family.label} Timeline`;
+  }
+  if (els.sourceFamilyTimelineNote) {
+    els.sourceFamilyTimelineNote.textContent = `${family.product_count || family.products.length} products · ${family.ingredient_signal_count || 0} proof text candidates`;
+  }
+  if (els.sourceFamilyTabs) {
+    els.sourceFamilyTabs.innerHTML = families.length > 1
+      ? families.map((row) => `
+        <button class="source-family-tab ${row.id === family.id ? "is-selected" : ""}" type="button" data-source-family-id="${escapeHtml(row.id)}">
+          <strong>${escapeHtml(row.label)}</strong>
+          <span>${escapeHtml(`${row.product_count || row.products?.length || 0} products · ${row.ingredient_signal_count || 0} proof`)}</span>
+        </button>
+      `).join("")
+      : "";
+  }
+  if (!state.cwaProductId || !family.products.some((row) => row.product_id === state.cwaProductId)) {
+    state.cwaProductId = family.products[0].product_id;
+  }
+  const productRow = selectedCwaProduct();
+  els.cwaProductStrip.innerHTML = family.products
+    .map((row) => `
+      <button class="cwa-product-chip ${row.product_id === state.cwaProductId ? "is-selected" : ""}" type="button" data-cwa-product-id="${escapeHtml(row.product_id)}">
+        <strong>${escapeHtml(row.product_name)}</strong>
+        <span>${escapeHtml(`${row.evidence_count} rows · ${row.ingredient_signal_count || 0} proof · ${row.local_preview_available_count} local`)}</span>
+      </button>
+    `)
+    .join("");
+
+  const localImages = isLocalPreviewHost();
+  els.cwaTimelineTrack.innerHTML = (productRow.rows || [])
+    .map((row, index) => {
+      const canShowPreview = localImages && row.local_preview_available && row.preview_endpoint;
+      const sourceLink = row.source_detail_url || row.source_url;
+      const sourceTitle = row.source_image_title || (row.source_image_year ? `${row.source_image_year} source image` : "Source image pending");
+      const ingredientText = row.ingredient_text || "";
+      const evidenceText = row.candidate_excerpt
+        || (row.crop_focus === "panel_context"
+          ? "Focused package text is visible; readable ingredient list still needed."
+          : "Wrapper imagery can support visual provenance only; readable ingredient panel still needed.");
+      const proofClass = ingredientText ? "has-ingredient-proof" : "needs-readable-panel";
+      return `
+        <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}">
+          <button class="cwa-preview-frame ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" aria-pressed="false" aria-label="${escapeHtml(`Toggle ingredient view for ${row.product_name} ${row.vintage_label}`)}">
+            ${canShowPreview
+              ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ingredient proof visual`)}" loading="lazy" data-private-preview="1" style="--crop-rotation:${escapeHtml(row.crop_rotation_degrees || 0)}deg" />`
+              : ""}
+            <div class="cwa-preview-placeholder"><span>${escapeHtml(String(row.vintage_label || "").slice(0, 4))}</span></div>
+            ${ingredientOverlay(row)}
+          </button>
+          <div class="cwa-proof-row">
+            <div class="cwa-icon-row">${cwaStatusIcons(row)}</div>
+            <div class="cwa-card-links">
+              ${cwaActionLink("source", `Open source: ${row.source_domain || "source page"}`, sourceLink)}
+              ${canShowPreview ? cwaActionLink("crop", "Open local private crop", row.preview_endpoint) : ""}
+              ${cwaActionButton("inspect", "Open ingredient drill-in", row.visual_id)}
+            </div>
+          </div>
+          <div class="cwa-card-body">
+            <span>${escapeHtml(row.vintage_label)}</span>
+            <strong>${escapeHtml(row.product_name)}</strong>
+            <small class="cwa-source-title">${escapeHtml(sourceTitle)}</small>
+            ${ingredientText ? ingredientTextBlock(row, { compact: true }) : `<p>${escapeHtml(evidenceText)}</p>`}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+  els.cwaTimelineTrack.querySelectorAll("[data-private-preview]").forEach((image) => {
+    image.addEventListener("error", () => {
+      image.closest(".cwa-preview-frame")?.classList.add("is-missing-private-preview");
+      image.remove();
+    }, { once: true });
+  });
+  els.cwaTimelineTrack.querySelectorAll("[data-cwa-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const card = button.closest(".cwa-timeline-card");
+      const isOpen = card?.classList.toggle("is-ingredient-open") || false;
+      button.setAttribute("aria-pressed", String(isOpen));
+    });
+  });
 }
 
 function renderSummary(productRow) {
@@ -538,6 +894,7 @@ function render() {
   const version = selectedVersion(productRow);
   renderProductPicker();
   renderSourceFamilySummary();
+  renderCwaTimeline();
   renderStatus(productRow);
   renderSummary(productRow);
   renderStoryReadiness(productRow);
@@ -573,6 +930,26 @@ function attachEvents() {
     state.versionId = "";
     render();
   });
+  els.cwaProductStrip?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-cwa-product-id]");
+    if (!button) return;
+    state.cwaProductId = button.dataset.cwaProductId;
+    renderCwaTimeline();
+  });
+  els.cwaTimelineTrack?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-cwa-inspect]");
+    if (!button) return;
+    const row = sourceFamilyRowByVisualId(button.dataset.cwaInspect);
+    if (row) openIngredientDrilldown(row);
+  });
+  els.sourceFamilyTabs?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-source-family-id]");
+    if (!button) return;
+    state.sourceFamilyId = button.dataset.sourceFamilyId;
+    state.cwaProductId = "";
+    renderSourceFamilySummary();
+    renderCwaTimeline();
+  });
   els.timelineTrack.addEventListener("click", (event) => {
     const button = event.target.closest("[data-version-id]");
     if (!button) return;
@@ -598,6 +975,16 @@ function attachEvents() {
     els.compareToggle.setAttribute("aria-pressed", String(state.compare));
     els.compareToggle.textContent = state.compare ? "Compare Mode On" : "Compare Mode";
   });
+  els.ingredientDrilldown?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-ingredient-drilldown-close]")) {
+      closeIngredientDrilldown();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.ingredientDrilldown?.hidden) {
+      closeIngredientDrilldown();
+    }
+  });
 }
 
 async function init() {
@@ -606,6 +993,9 @@ async function init() {
     if (!response.ok) throw new Error(`Navigator data returned ${response.status}`);
     state.data = await response.json();
     state.productId = state.data.default_product;
+    state.sourceFamilyId = state.data.source_family_timeline?.default_family || state.data.source_family_timeline?.families?.[0]?.id || "";
+    const family = sourceFamilyTimeline();
+    state.cwaProductId = family?.products?.[0]?.product_id || "";
     state.maxYear = Number(els.timeRange.value || 2026);
     attachEvents();
     render();

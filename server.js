@@ -15,6 +15,17 @@ const PUBLIC_DIR = path.join(__dirname, "docs");
 const CACHE_TTL_MS = 1000 * 60 * 30;
 const PAGE_SIZE = 1024;
 const ONTOLOGY_CACHE_PATH = path.join(__dirname, ".cache", "ontology.json");
+const PRIVATE_CWA_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "cwa");
+const PRIVATE_CWA_MANIFEST_PATH = path.join(PRIVATE_CWA_ROOT, "latest-private-manifest.json");
+const PRIVATE_FLICKR_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "flickr");
+const PRIVATE_FLICKR_MANIFEST_PATH = path.join(PRIVATE_FLICKR_ROOT, "latest-private-manifest.json");
+const PRIVATE_OFFICIAL_CURRENT_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "official-current-labels");
+const PRIVATE_OFFICIAL_CURRENT_MANIFEST_PATH = path.join(PRIVATE_OFFICIAL_CURRENT_ROOT, "latest-private-manifest.json");
+const PRIVATE_INGREDIENT_MANIFESTS = [
+  { manifestPath: PRIVATE_CWA_MANIFEST_PATH, rootDir: PRIVATE_CWA_ROOT },
+  { manifestPath: PRIVATE_FLICKR_MANIFEST_PATH, rootDir: PRIVATE_FLICKR_ROOT },
+  { manifestPath: PRIVATE_OFFICIAL_CURRENT_MANIFEST_PATH, rootDir: PRIVATE_OFFICIAL_CURRENT_ROOT },
+];
 const DATA_DIR = path.join(PUBLIC_DIR, "data");
 const DEFAULT_ASK_SECRET_HASH = "8f388ed94f5ff3d417b9b3f897bf9fc4d56a2d0dd6778905d8440a938558d30a";
 
@@ -669,9 +680,60 @@ function contentTypeFor(filePath) {
       ".js": "application/javascript; charset=utf-8",
       ".json": "application/json; charset=utf-8",
       ".svg": "image/svg+xml",
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".webp": "image/webp",
       ".ico": "image/x-icon",
     }[ext] || "application/octet-stream"
   );
+}
+
+function isLoopbackRequest(req) {
+  const remote = req.socket?.remoteAddress || "";
+  return remote === "127.0.0.1" || remote === "::1" || remote === "::ffff:127.0.0.1";
+}
+
+function isValidPrivateVisualId(value) {
+  return /^[a-z0-9][a-z0-9_-]{5,140}$/.test(String(value || ""));
+}
+
+function isWithinDirectory(targetPath, directoryPath) {
+  const resolvedTarget = path.resolve(targetPath);
+  const resolvedDirectory = path.resolve(directoryPath);
+  return resolvedTarget === resolvedDirectory || resolvedTarget.startsWith(`${resolvedDirectory}${path.sep}`);
+}
+
+function resolvePrivateCropPathFromManifest(visualId, manifestPath, rootDir) {
+  if (!isValidPrivateVisualId(visualId)) return null;
+  let manifest;
+  try {
+    manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  } catch (error) {
+    return null;
+  }
+  const row = (manifest.rows || []).find((entry) => entry.visual_id === visualId);
+  if (!row) return null;
+  const candidates = [row.upscaled_preview_path, row.preview_path].filter(Boolean);
+  for (const candidate of candidates) {
+    const resolved = path.resolve(candidate);
+    if (!isWithinDirectory(resolved, rootDir)) continue;
+    if (fs.existsSync(resolved)) return resolved;
+  }
+  return null;
+}
+
+function resolvePrivateIngredientCropPath(visualId, manifests = PRIVATE_INGREDIENT_MANIFESTS) {
+  if (!isValidPrivateVisualId(visualId)) return null;
+  for (const manifest of manifests) {
+    const resolved = resolvePrivateCropPathFromManifest(visualId, manifest.manifestPath, manifest.rootDir);
+    if (resolved) return resolved;
+  }
+  return null;
+}
+
+function resolvePrivateCwaCropPath(visualId, manifestPath = PRIVATE_CWA_MANIFEST_PATH, rootDir = PRIVATE_CWA_ROOT) {
+  return resolvePrivateCropPathFromManifest(visualId, manifestPath, rootDir);
 }
 
 function serveStatic(req, res, pathname) {
@@ -727,6 +789,29 @@ async function proxyImage(req, res, id) {
     "Cache-Control": "public, max-age=86400",
   });
   res.end(upstream.body);
+}
+
+async function servePrivateIngredientCrop(req, res, visualId) {
+  if (!isLoopbackRequest(req)) {
+    notFound(res);
+    return;
+  }
+  const cropPath = resolvePrivateIngredientCropPath(visualId);
+  if (!cropPath) {
+    notFound(res);
+    return;
+  }
+  fs.readFile(cropPath, (error, data) => {
+    if (error) {
+      notFound(res);
+      return;
+    }
+    res.writeHead(200, {
+      "Content-Type": contentTypeFor(cropPath),
+      "Cache-Control": "no-store",
+    });
+    res.end(data);
+  });
 }
 
 async function getPublicMenus({ refresh = false, source = "all" } = {}) {
@@ -1077,6 +1162,7 @@ async function handleApi(req, res, url) {
       return;
     }
 
+
     if (url.pathname === "/api/chat") {
       const answer = await answerChat(req, url);
       sendJson(res, answer.error ? answer : answer, answer.statusCode || (answer.error ? 400 : 200));
@@ -1105,6 +1191,12 @@ async function handleApi(req, res, url) {
     const itemMatch = url.pathname.match(/^\/api\/item\/(.+)$/);
     if (itemMatch) {
       sendJson(res, await getPublicItem(itemMatch[1]));
+      return;
+    }
+
+    const privateCropMatch = url.pathname.match(/^\/api\/private\/ingredient-crops\/([^/]+)$/);
+    if (privateCropMatch) {
+      await servePrivateIngredientCrop(req, res, privateCropMatch[1]);
       return;
     }
 
@@ -1146,6 +1238,8 @@ module.exports = {
   getOntology,
   getDateEstimates,
   ontologyStatus,
+  resolvePrivateIngredientCropPath,
+  resolvePrivateCwaCropPath,
   searchMenus,
   selectOntologySample,
   startOntologyBuild,

@@ -124,7 +124,7 @@ test("mobile keeps chart-first flow with drawer filters and selectable records",
   await page.waitForFunction(() => document.querySelector(".detail").getBoundingClientRect().top < window.innerHeight * 0.4);
 });
 
-test("mobile lab hybrid supports mode switching, detail sheets, gated Ask, and provenance-backed inspiration", async ({ page }) => {
+test("mobile lab hybrid supports mode switching, detail sheets, gated Ask, and evidence-graded dinner builder", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openMobileLab(page, "hybrid");
   await expect(page.locator(".mobile-hero")).toBeVisible({ timeout: 15000 });
@@ -152,9 +152,9 @@ test("mobile lab hybrid supports mode switching, detail sheets, gated Ask, and p
   await expect(page.locator(".mobile-lab-ask .chat-form")).toHaveCount(0);
 
   await page.locator('.mobile-bottom-nav button[data-mobile-mode="inspire"]').click();
-  await expect(page.locator(".mobile-inspiration-card").first()).toContainText("Inspired by menu evidence");
-  await expect(page.locator(".mobile-inspiration-card").first()).toContainText("No exact recipe");
-  await expect(page.locator(".mobile-inspiration-card .mobile-provenance").first()).toBeVisible();
+  await expect(page.locator(".mobile-inspire .dinner-builder")).toBeVisible();
+  await expect(page.locator(".mobile-inspire .dinner-course-card").first()).toContainText(/Source-attested|Recipe-attested|Reconstructed|Evidence gap/);
+  await expect(page.locator(".mobile-inspire .dinner-packet-preview")).toContainText("Host Packet");
 
   metrics = await layoutMetrics(page);
   expectNoHorizontalOverflow(metrics);
@@ -166,7 +166,7 @@ test("mobile lab variants deep-link to distinct starting modes", async ({ page }
     ["cards", "menus", ".mobile-menu-card"],
     ["journey", "discover", ".mobile-hero"],
     ["chat", "ask", ".mobile-lab-ask .ask-gate"],
-    ["recipe", "inspire", ".mobile-inspiration-card"],
+    ["recipe", "inspire", ".mobile-inspire .dinner-builder"],
     ["hybrid", "discover", ".mobile-hero"],
   ];
 
@@ -450,6 +450,245 @@ test("NYPL detail uses NYPL source links, larger images, and item transcriptions
   await expect(page.locator(".image-zoomer")).toHaveCount(0);
   await expect(page.locator("#detail-text")).toContainText("NYPL crowdsourced transcription sample");
   await expect(page.locator("#detail-text")).toContainText("Sample item rows");
+});
+
+test("ingredient navigator renders CWA visual timeline without relying on public image pixels", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/product-evidence/ingredient-navigator.html");
+
+  await expect(page.locator("#journey-status")).toContainText("Oreo");
+  await expect(page.locator("#cwa-timeline-panel")).toBeVisible();
+  await expect(page.locator(".source-family-tab")).toHaveCount(3);
+  await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
+  await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(84);
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy.is-compact")).toBeVisible();
+  const defaultProofCard = await page.locator(".cwa-timeline-card").first().boundingBox();
+  expect(defaultProofCard?.width || 0).toBeGreaterThan(900);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label^='Open source']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open local private crop']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open ingredient drill-in']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card .status-badge")).toHaveCount(0);
+  expect(await page.locator(".cwa-status-icon").count()).toBeGreaterThan(0);
+  await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveClass(/is-ingredient-open/);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Beef");
+
+  await page.locator(".source-family-tab").filter({ hasText: "Candy Wrapper Archive" }).click();
+  await expect(page.locator(".source-family-tab.is-selected")).toContainText("Candy Wrapper Archive");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(5);
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText(/readable ingredient panel still needed/i);
+  await expect(page.locator(".cwa-timeline-card").nth(1)).toContainText("Milk chocolate, peanuts");
+  await expect(page.locator(".cwa-timeline-card .status-badge")).toHaveCount(0);
+  expect(await page.locator(".cwa-status-icon").count()).toBeGreaterThan(0);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label^='Open source']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open local private crop']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open ingredient drill-in']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-card-links")).not.toContainText(/Local crop|Inspect|candywrapperarchive/i);
+  await expect(page.locator(".cwa-timeline-card a").first()).toHaveAttribute("href", /candywrapperarchive\.com/);
+  await expect(page.locator(".cwa-timeline-card").nth(1)).toHaveCSS("transform", "none");
+
+  await page.locator(".cwa-timeline-card").nth(1).locator(".cwa-preview-frame").click();
+  await expect(page.locator(".cwa-timeline-card").nth(1)).toHaveClass(/is-ingredient-open/);
+  await expect(page.locator(".cwa-timeline-card").nth(1).locator(".cwa-ingredient-overlay")).toContainText("Milk chocolate");
+  expect(await page.locator(".cwa-timeline-card").nth(1).locator(".cwa-overlay-ingredient-list li").count()).toBeGreaterThan(3);
+
+  await page.locator(".cwa-product-chip").filter({ hasText: "Tootsie Roll" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(3);
+  await expect(page.locator(".cwa-timeline-card").filter({ hasText: "Tootsie Roll" })).toHaveCount(3);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("corn syrup");
+  expect(await page.locator(".cwa-preview-frame").count()).toBe(3);
+  expect(await page.locator(".cwa-preview-frame img, .cwa-preview-placeholder").count()).toBeGreaterThanOrEqual(3);
+
+  await page.locator(".source-family-tab").filter({ hasText: "Flickr Package Archive" }).click();
+  await expect(page.locator(".source-family-tab.is-selected")).toContainText("Flickr Package Archive");
+  await expect(page.locator("#source-family-timeline-title")).toContainText("Flickr Package Archive");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(12);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText(/ingredients|beverage syrup|label formula|carbonated water/i);
+  await page.locator(".cwa-product-chip").filter({ hasText: "Cheerios Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("whole grain oats");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("trisodium phosphate");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Ingredient text candidate']")).toBeVisible();
+  await page.locator(".cwa-product-chip").filter({ hasText: "Trix Cereal" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(2);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText(/promotion\/top-flap panel only|readable ingredient panel still needed/i);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Visual lineage only']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label='Local private upscaled crop available']")).toBeVisible();
+  await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Froot Loops" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(2);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("partially hydrogenated vegetable oil");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy li").first()).toContainText("sugar");
+  await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("artificial coloring");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Ingredients on label");
+  await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
+  await expect(page.locator("#ingredient-drilldown")).toBeVisible();
+  await expect(page.locator("#ingredient-drilldown-title")).toContainText("Kellogg's Froot Loops");
+  await expect(page.locator("#ingredient-drilldown")).toContainText("partially hydrogenated vegetable oil");
+  await expect(page.locator("#ingredient-drilldown")).toContainText("Claim Boundary");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-image img, #ingredient-drilldown .ingredient-drilldown-placeholder")).toBeVisible();
+  await page.locator(".ingredient-drilldown-close").click();
+  await expect(page.locator("#ingredient-drilldown")).toBeHidden();
+
+  await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
+  await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(84);
+  await page.locator(".cwa-product-chip").filter({ hasText: "Oreo Original Chocolate Sandwich Cookies" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("HIGH FRUCTOSE CORN SYRUP");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Ingredient text candidate']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label='Local private upscaled crop available']")).toBeVisible();
+  await page.locator(".cwa-product-chip").filter({ hasText: "Cheetos Crunchy" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Enriched Corn Meal");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Pepsi Cola" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Phosphoric Acid");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Coca-Cola Classic" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("CARBONATED WATER");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Sprite Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("HIGH FRUCTOSE CORN SYRUP");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Heinz Tomato Ketchup" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("TOMATO CONCENTRATE");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Kraft Macaroni & Cheese Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("CHEESE SAUCE MIX");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Velveeta Shells & Cheese" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("SODIUM ALGINATE");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Totino's Pizza Rolls" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Tomato Puree");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Wendy's Dave's Single" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Potato Bun");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Ground Beef");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Wendy's Chili" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Chili Beans");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Cheerios Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Whole Grain Oats");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Cinnamon Toast Crunch" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Trisodium Phosphate");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Hidden Valley Original Ranch" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Monosodium Glutamate");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Butterfinger Bar" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("peanut flour");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Pop-Tarts Frosted Strawberry" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("dried strawberries");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Campbell's Condensed Tomato Soup" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Tomato Puree");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Philadelphia Original Cream Cheese" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("PASTEURIZED MILK AND CREAM");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Kool-Aid Cherry Drink Mix" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("CITRIC ACID");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Pringles Original Crisps" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("DRIED POTATOES");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Chick-fil-A Chicken Sandwich" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("monosodium glutamate");
+  await page.locator(".cwa-product-chip").filter({ hasText: "M&M's Milk Chocolate Candies" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("carnauba wax");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Kit Kat Bar" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Wheat Flour");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Tostitos Original Restaurant Style" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Corn Oil");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Triscuit Original Crackers" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("WHOLE GRAIN WHEAT");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Doritos Nacho Cheese" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Monosodium Glutamate");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Rice Krispies" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("malt flavor");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Bisquick Original Pancake and Baking Mix" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Monoglycerides");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Stouffer's Lasagna with Meat & Sauce" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("TOMATO PUREE");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Skittles Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Carnauba Wax");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Starburst Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Apple Juice From Concentrate");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Milky Way Bar" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Barley Malt Extract");
+  await page.locator(".cwa-product-chip").filter({ hasText: "SpaghettiOs Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("HIGH FRUCTOSE CORN SYRUP");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Oscar Mayer Wieners" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("SODIUM NITRITE");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Smucker's Strawberry Preserves" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("High Fructose Corn Syrup");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Panera Broccoli Cheddar Soup" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Dijon Mustard");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Twix Bar" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Enriched Wheat Flour");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Wheaties" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Whole Grain Wheat");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Ball Park Franks" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
+  await page.locator(".cwa-product-chip").filter({ hasText: "French's Classic Yellow Mustard" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("#1 Grade Mustard Seed");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Pepperidge Farm Goldfish Cheddar" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Autolyzed Yeast Extract");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Hamburger Helper Cheeseburger Macaroni" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Enriched Pasta");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Post Grape-Nuts" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Whole Grain Wheat Flour");
+  await page.locator(".cwa-product-chip").filter({ hasText: "McDonald's Big Mac" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Big Mac Sauce");
+  await page.locator(".cwa-product-chip").filter({ hasText: "McDonald's World Famous Fries" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Natural Beef Flavor");
+  await page.locator(".cwa-product-chip").filter({ hasText: "McDonald's Chicken McNuggets" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("White Boneless Chicken");
+
+  const response = await page.request.get("/api/private/ingredient-crops/unknown_visual_id_000000");
+  expect(response.status()).toBe(404);
+  const traversal = await page.request.get("/api/private/ingredient-crops/..%2Fbad");
+  expect(traversal.status()).toBe(404);
+
+  const metrics = await page.evaluate(() => ({
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expectNoHorizontalOverflow(metrics);
 });
 
 for (const viewport of [

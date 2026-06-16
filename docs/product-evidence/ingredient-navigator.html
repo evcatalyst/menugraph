@@ -36,13 +36,23 @@
         <button id="compare-toggle" type="button" aria-pressed="false">Compare Mode</button>
       </section>
 
-      <section class="source-family-panel" aria-label="Source-family operating mode">
+      <section class="source-family-panel" aria-label="Ingredient source-family operating mode">
         <div>
           <p class="eyebrow">Source Family Mode</p>
-          <h2>Candy Wrapper Archive lineage first, ingredient panels second.</h2>
-          <p>Use wrapper history as visual provenance, then route every era toward ingredient-panel capture, OCR, and manual review before making formulation claims.</p>
+          <h2>Ingredient proof first, archive lineage close behind.</h2>
+          <p>Start with readable current-label proof cards, then use archive lanes to route each older era toward panel capture, OCR, and manual review before making formulation claims.</p>
         </div>
         <div id="source-family-summary" class="source-family-summary"></div>
+      </section>
+
+      <section id="cwa-timeline-panel" class="cwa-timeline-panel" aria-label="Ingredient source-family timeline">
+        <div class="panel-title">
+          <span id="source-family-timeline-title">Candy Wrapper Archive Timeline</span>
+          <small id="source-family-timeline-note">Source-linked, claim-gated lineage</small>
+        </div>
+        <div id="source-family-tabs" class="source-family-tabs"></div>
+        <div id="cwa-product-strip" class="cwa-product-strip"></div>
+        <div id="cwa-timeline-track" class="cwa-timeline-track"></div>
       </section>
 
       <section id="product-strip" class="product-strip" aria-label="Popular products"></section>
@@ -156,6 +166,14 @@
         <div id="cluster-list" class="cluster-list"></div>
       </section>
     </main>
+
+    <section id="ingredient-drilldown" class="ingredient-drilldown" hidden aria-label="Ingredient visual detail">
+      <div class="ingredient-drilldown-backdrop" data-ingredient-drilldown-close="1"></div>
+      <article class="ingredient-drilldown-panel" role="dialog" aria-modal="true" aria-labelledby="ingredient-drilldown-title">
+        <button class="ingredient-drilldown-close" type="button" data-ingredient-drilldown-close="1">Close</button>
+        <div id="ingredient-drilldown-content"></div>
+      </article>
+    </section>
 
     <script src="./ingredient-navigator.js"></script>
   </body>
