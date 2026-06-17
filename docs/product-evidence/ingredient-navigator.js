@@ -16,6 +16,7 @@ const els = {
   sourceFamilyNext: document.querySelector("#source-family-next"),
   sourceFamilyPosition: document.querySelector("#source-family-position"),
   sourceFamilyIngredientSummary: document.querySelector("#source-family-ingredient-summary"),
+  sourceFamilyGapSummary: document.querySelector("#source-family-gap-summary"),
   cwaProductStrip: document.querySelector("#cwa-product-strip"),
   cwaTimelineTrack: document.querySelector("#cwa-timeline-track"),
   status: document.querySelector("#journey-status"),
@@ -414,6 +415,67 @@ function sourceFamilyProductPreview(productRow, query, localImages) {
   `;
 }
 
+function sourceFamilyGapRows(products, query = sourceFamilyFilterQuery()) {
+  return products.flatMap((productRow) => (
+    sourceFamilyRowsForProduct(productRow, query)
+      .filter((row) => !row.ingredient_text)
+      .map((row) => ({ ...row, product_group_id: productRow.product_id }))
+  ));
+}
+
+function sourceFamilyGapThumb(row, localImages) {
+  const canShowPreview = Boolean(localImages && row.local_preview_available && row.preview_endpoint);
+  return `
+    <span class="source-family-gap-thumb" aria-hidden="true">
+      ${canShowPreview
+        ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="" loading="lazy" data-private-gap-preview="1" />`
+        : cwaInlineIcon(row.crop_focus === "panel_context" ? "panel" : "image")}
+      <span>${cwaInlineIcon("panel")}</span>
+    </span>
+  `;
+}
+
+function renderSourceFamilyGapSummary(family, visibleProducts, query, localImages) {
+  if (!els.sourceFamilyGapSummary) return;
+  const gaps = sourceFamilyGapRows(visibleProducts, query);
+  if (!gaps.length) {
+    els.sourceFamilyGapSummary.innerHTML = "";
+    return;
+  }
+  els.sourceFamilyGapSummary.innerHTML = `
+    <div class="source-family-gap-summary-title">
+      <span>Readable panel queue</span>
+      <small>${escapeHtml(`${gaps.length} ${gaps.length === 1 ? "row" : "rows"}`)}</small>
+    </div>
+    <div class="source-family-gap-list">
+      ${gaps.slice(0, 6).map((row) => {
+        const sourceLink = row.source_detail_url || row.source_url;
+        return `
+          <article class="source-family-gap-card">
+            ${sourceFamilyGapThumb(row, localImages)}
+            <div>
+              <span>${escapeHtml(row.vintage_label)}</span>
+              <strong>${escapeHtml(row.product_name)}</strong>
+              <small>${escapeHtml(row.source_image_title || row.source_title || row.source_domain || "Source image")}</small>
+            </div>
+            <div class="source-family-gap-actions">
+              <button type="button" data-cwa-gap-product-id="${escapeHtml(row.product_group_id)}" aria-label="${escapeHtml(`Show ${row.product_name} proof rows`)}">${cwaInlineIcon("date")}</button>
+              ${sourceLink ? `<a href="${escapeHtml(sourceLink)}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(`Open source for ${row.product_name}`)}">${cwaInlineIcon("source")}</a>` : ""}
+              ${row.visual_id ? cwaActionButton("inspect", `Open ${row.product_name} collection drill-in`, row.visual_id) : ""}
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+  els.sourceFamilyGapSummary.querySelectorAll("[data-private-gap-preview]").forEach((image) => {
+    image.addEventListener("error", () => {
+      image.closest(".source-family-gap-thumb")?.classList.add("is-missing-private-preview");
+      image.remove();
+    }, { once: true });
+  });
+}
+
 function selectedCwaProduct() {
   const family = cwaTimeline();
   const products = filteredSourceFamilyProducts(family);
@@ -738,7 +800,9 @@ function renderCwaTimeline() {
       ? `${visibleProducts.length} of ${allProducts.length} products · ${visibleRows} matching proof rows`
       : `${allProducts.length} products · ${family.row_count || allProducts.reduce((sum, row) => sum + Number(row.evidence_count || 0), 0)} proof rows`;
   }
+  const localImages = isLocalPreviewHost();
   renderSourceFamilyIngredientSummary(family, visibleProducts, query);
+  renderSourceFamilyGapSummary(family, visibleProducts, query, localImages);
   if (!visibleProducts.length) {
     state.cwaProductId = "";
     els.cwaProductStrip.innerHTML = "";
@@ -759,7 +823,6 @@ function renderCwaTimeline() {
   if (els.sourceFamilyPosition) {
     els.sourceFamilyPosition.textContent = `${selectedProductIndex + 1} / ${visibleProducts.length}`;
   }
-  const localImages = isLocalPreviewHost();
   els.cwaProductStrip.innerHTML = visibleProducts
     .map((row) => `
       <button class="cwa-product-chip ${row.product_id === state.cwaProductId ? "is-selected" : ""}" type="button" data-cwa-product-id="${escapeHtml(row.product_id)}">
@@ -1311,9 +1374,23 @@ function attachEvents() {
   });
   els.cwaTimelinePanel?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-source-family-filter-value]");
-    if (!button) return;
-    event.preventDefault();
-    applySourceFamilyFilter(button.dataset.sourceFamilyFilterValue);
+    if (button) {
+      event.preventDefault();
+      applySourceFamilyFilter(button.dataset.sourceFamilyFilterValue);
+      return;
+    }
+    const gapProductButton = event.target.closest("[data-cwa-gap-product-id]");
+    if (gapProductButton) {
+      state.cwaProductId = gapProductButton.dataset.cwaGapProductId;
+      renderCwaTimeline();
+      els.cwaTimelineTrack?.scrollIntoView({ block: "start", behavior: "smooth" });
+      return;
+    }
+    const gapInspectButton = event.target.closest(".source-family-gap-summary [data-cwa-inspect]");
+    if (gapInspectButton) {
+      const row = sourceFamilyRowByVisualId(gapInspectButton.dataset.cwaInspect);
+      if (row) openIngredientDrilldown(row);
+    }
   });
   els.cwaTimelineTrack?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-cwa-inspect]");

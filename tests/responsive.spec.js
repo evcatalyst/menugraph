@@ -462,6 +462,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
+  await expect(page.locator("#source-family-gap-summary")).toBeHidden();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
@@ -511,6 +512,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".source-family-tab").filter({ hasText: "Candy Wrapper Archive" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Candy Wrapper Archive");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(5);
+  await expect(page.locator("#source-family-gap-summary")).toContainText("Readable panel queue");
+  await expect(page.locator("#source-family-gap-summary")).toContainText("Snickers Bar");
+  await expect(page.locator("#source-family-gap-summary .source-family-gap-card")).toHaveCount(2);
+  await expect(page.locator("#source-family-gap-summary .source-family-gap-card").first().locator(".source-family-gap-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
@@ -555,6 +560,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Flickr Package Archive");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Flickr Package Archive");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(14);
+  await expect(page.locator("#source-family-gap-summary")).toContainText("Trix Cereal");
+  await expect(page.locator("#source-family-gap-summary .source-family-gap-card")).toHaveCount(2);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText(/ingredients|beverage syrup|label formula|carbonated water/i);
   await page.locator(".cwa-product-chip").filter({ hasText: "Cocoa Puffs" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
