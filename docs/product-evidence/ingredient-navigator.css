@@ -116,7 +116,6 @@ a:hover {
 }
 
 .navigator-links a,
-.status-badge,
 .source-chip {
   display: inline-flex;
   align-items: center;
@@ -127,6 +126,60 @@ a:hover {
   color: var(--ink);
   padding: 5px 9px;
   white-space: nowrap;
+}
+
+.status-icon {
+  display: inline-grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(40, 42, 35, 0.72);
+  color: var(--muted);
+  line-height: 1;
+}
+
+.status-icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.status-icon.is-good {
+  border-color: rgba(119, 196, 140, 0.58);
+  background: rgba(119, 196, 140, 0.12);
+  color: #9ee5af;
+}
+
+.status-icon.is-proof {
+  border-color: rgba(101, 183, 177, 0.62);
+  background: rgba(101, 183, 177, 0.12);
+  color: var(--teal);
+}
+
+.status-icon.is-warn {
+  border-color: rgba(212, 173, 87, 0.62);
+  background: rgba(212, 173, 87, 0.12);
+  color: var(--gold);
+}
+
+.status-icon.is-bad {
+  border-color: rgba(218, 124, 123, 0.68);
+  background: rgba(218, 124, 123, 0.12);
+  color: var(--red);
+}
+
+.status-icon.is-muted {
+  border-color: rgba(187, 179, 166, 0.46);
+  background: rgba(187, 179, 166, 0.08);
+  color: var(--muted);
 }
 
 .navigator-controls,
@@ -2847,60 +2900,6 @@ a:hover {
   font-size: 12px;
   line-height: 1.36;
   overflow-wrap: anywhere;
-}
-
-.status-badge.status-label_visible {
-  border-color: rgba(131, 167, 216, 0.7);
-  color: var(--blue);
-}
-
-.status-badge.status-label_text_candidate {
-  border-color: rgba(101, 183, 177, 0.78);
-  color: var(--teal);
-}
-
-.status-badge.status-ocr_extracted,
-.status-badge.status-story_ready,
-.status-badge.status-confirmed_story_ready {
-  border-color: rgba(101, 183, 177, 0.86);
-  color: var(--teal);
-}
-
-.status-badge.status-usable_photo {
-  border-color: rgba(212, 173, 87, 0.72);
-  color: var(--gold);
-}
-
-.status-badge.status-gap,
-.status-badge.status-blocked {
-  border-color: rgba(218, 124, 123, 0.78);
-  color: var(--red);
-}
-
-.status-badge.status-active,
-.status-badge.status-manual_verified,
-.status-badge.status-claim_ready {
-  border-color: rgba(142, 184, 120, 0.78);
-  color: var(--green);
-}
-
-.status-badge.status-deferred,
-.status-badge.status-source_review,
-.status-badge.status-needs_photo_review,
-.status-badge.status-needs_label_transcription,
-.status-badge.status-needs_manual_verification {
-  border-color: rgba(187, 179, 166, 0.66);
-  color: var(--muted);
-}
-
-.status-badge.status-photo_enriched {
-  border-color: rgba(212, 173, 87, 0.84);
-  color: var(--gold);
-}
-
-.status-badge.status-gap_publishable {
-  border-color: rgba(212, 173, 87, 0.84);
-  color: var(--gold);
 }
 
 .facet-list,

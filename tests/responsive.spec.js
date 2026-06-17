@@ -458,6 +458,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
 
   await expect(page.locator("#journey-status")).toContainText("Oreo");
   await expect(page.locator("#cwa-timeline-panel")).toBeVisible();
+  await expect(page.locator(".status-badge")).toHaveCount(0);
+  expect(await page.locator(".status-icon").count()).toBeGreaterThan(0);
+  await expect(page.locator(".readiness-pair .status-icon").first()).toHaveAttribute("aria-label", /Story Ready|Confirmed Story Ready/);
   await expect(page.locator(".source-family-tab")).toHaveCount(5);
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator(".source-family-tab.is-selected")).not.toContainText(/products · \d+ proof/);

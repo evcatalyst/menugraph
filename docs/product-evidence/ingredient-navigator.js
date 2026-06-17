@@ -77,8 +77,28 @@ function truncateText(value, limit = 220) {
   return text.length > limit ? `${text.slice(0, limit - 1).trim()}...` : text;
 }
 
-function statusBadge(status) {
-  return `<span class="status-badge status-${escapeHtml(status || "unknown")}">${escapeHtml(labelFor(status || "unknown"))}</span>`;
+function statusIconName(status) {
+  const value = String(status || "").toLowerCase();
+  if (/photo|usable/.test(value)) return "image";
+  if (/label|ocr|manual|claim|story/.test(value)) return "ingredient";
+  if (/source/.test(value)) return "source";
+  if (/gap|blocked|needs|deferred/.test(value)) return "partial";
+  return "inspect";
+}
+
+function statusTone(status) {
+  const value = String(status || "").toLowerCase();
+  if (/gap_publishable/.test(value)) return "warn";
+  if (/gap|blocked/.test(value)) return "bad";
+  if (/needs|deferred|source_review/.test(value)) return "muted";
+  if (/photo|usable/.test(value)) return "warn";
+  if (/manual|claim_ready|active|confirmed|story_ready/.test(value)) return "good";
+  return "proof";
+}
+
+function statusIcon(status) {
+  const label = labelFor(status || "unknown");
+  return `<span class="status-icon status-${escapeHtml(status || "unknown")} is-${escapeHtml(statusTone(status))}" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">${cwaInlineIcon(statusIconName(status))}</span>`;
 }
 
 const cwaIconSvgs = {
@@ -1371,12 +1391,12 @@ function renderSummary(productRow) {
     <article class="gap-card">
       <strong>Original Label</strong>
       <p>${escapeHtml(productRow.claim_boundary)}</p>
-      ${statusBadge("gap_publishable")}
+      ${statusIcon("gap_publishable")}
     </article>
     <article class="gap-card">
       <strong>Next Unlock</strong>
       <p>${escapeHtml(productRow.next_unlock)}</p>
-      ${statusBadge("label_visible")}
+      ${statusIcon("label_visible")}
     </article>
   `;
 }
@@ -1387,11 +1407,11 @@ function renderStoryReadiness(productRow) {
     <article class="readiness-card">
       <div class="readiness-pair">
         <span>Story</span>
-        ${statusBadge(productRow.pilot_rollup_status || "story_ready")}
+        ${statusIcon(productRow.pilot_rollup_status || "story_ready")}
       </div>
       <div class="readiness-pair">
         <span>Claims</span>
-        ${statusBadge(productRow.claim_rollup_status || "needs_manual_verification")}
+        ${statusIcon(productRow.claim_rollup_status || "needs_manual_verification")}
       </div>
       <div class="readiness-pair">
         <span>Resolved Slots</span>
@@ -1445,10 +1465,10 @@ function renderHero(productRow) {
         <span><strong>${escapeHtml(productRow.story_resolution?.publishable_gap_slots ?? 0)}</strong>Bounded gaps</span>
       </div>
     <div class="lead-meta reader-tags">
-      ${statusBadge(productRow.pilot_rollup_status || "story_ready")}
-      ${statusBadge(productRow.claim_rollup_status || "needs_manual_verification")}
-      ${statusBadge("source_review")}
-      ${statusBadge("gap_publishable")}
+      ${statusIcon(productRow.pilot_rollup_status || "story_ready")}
+      ${statusIcon(productRow.claim_rollup_status || "needs_manual_verification")}
+      ${statusIcon("source_review")}
+      ${statusIcon("gap_publishable")}
       ${productRow.source_domains.slice(0, 4).map((source) => `<span class="source-chip">${escapeHtml(source)}</span>`).join("")}
     </div>
   `;
@@ -1491,7 +1511,7 @@ function renderTimeline(productRow) {
         <span>${escapeHtml(row.label)}</span>
         <strong>${escapeHtml(row.headline)}</strong>
         <p>${escapeHtml(row.ingredient_summary)}</p>
-        ${statusBadge(row.status)}
+        ${statusIcon(row.status)}
       </button>
     `)
     .join("");
@@ -1525,7 +1545,7 @@ function renderFlow(productRow) {
             return `<span class="${className}" title="${escapeHtml(version.label)}: ${escapeHtml(labelFor(version.status))}"></span>`;
           }).join("")}
         </div>
-        ${statusBadge(facet.status)}
+        ${statusIcon(facet.status)}
       </article>
     `)
     .join("");
@@ -1539,7 +1559,7 @@ function renderBlockedMap(productRow) {
         <strong>${escapeHtml(row.lane)}</strong>
         <p>${escapeHtml(row.why)}</p>
         <em>${escapeHtml(row.photo_target)}</em>
-        ${statusBadge(row.status)}
+        ${statusIcon(row.status)}
       </article>
     `)
     .join("");
@@ -1553,7 +1573,7 @@ function renderEvents(productRow) {
         <span>${escapeHtml(event.year)}</span>
         <strong>${escapeHtml(event.label)}</strong>
         <p>${escapeHtml(event.detail)}</p>
-        ${statusBadge(event.status)}
+        ${statusIcon(event.status)}
       </article>
     `)
     .join("");
@@ -1685,11 +1705,11 @@ function renderDetail(productRow, version) {
           </div>
         </dl>
         ${renderLabelExtract(row.visible_extract, true)}
-        ${statusBadge(row.status)}
+        ${statusIcon(row.status)}
         <a href="${escapeHtml(row.url)}" target="_blank" rel="noreferrer">${escapeHtml(row.source)}</a>
       </article>
     `).join("")
-    : `<article class="evidence-card"><strong>No verified source object shown</strong><p>This slot is intentionally held as a publishable evidence gap. The gap can be shown, but no ingredient fact can be claimed.</p>${statusBadge("gap_publishable")}</article>`;
+    : `<article class="evidence-card"><strong>No verified source object shown</strong><p>This slot is intentionally held as a publishable evidence gap. The gap can be shown, but no ingredient fact can be claimed.</p>${statusIcon("gap_publishable")}</article>`;
   els.priceWeight.innerHTML = `
     <span><strong>${escapeHtml(version.price_weight_context.includes("candidate") ? "Candidate" : "Deferred")}</strong>Price/oz</span>
     <span><strong>${escapeHtml(version.package_context.includes("serving") ? "Candidate" : "Deferred")}</strong>Price/100g</span>
@@ -1706,7 +1726,7 @@ function renderReviewQueue(productRow) {
         <p>${escapeHtml(row.missing_fields)}</p>
         ${row.gap_resolution_state ? `<small>${escapeHtml(`${row.gap_resolution_state} · ${row.source_target_count || 0} source targets`)}</small>` : ""}
         <em>${escapeHtml(row.next_action)}</em>
-        ${statusBadge(row.status)}
+        ${statusIcon(row.status)}
       </article>
     `)
     .join("");
@@ -1734,7 +1754,7 @@ function renderClusters(productRow) {
         <span>${escapeHtml(row.status)}</span>
         <strong>${escapeHtml(row.label)}</strong>
         <p>${escapeHtml(row.detail)}</p>
-        ${statusBadge(row.status)}
+        ${statusIcon(row.status)}
       </article>
     `)
     .join("");
