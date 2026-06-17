@@ -294,19 +294,61 @@ a:hover {
   text-transform: uppercase;
 }
 
-.source-family-focus strong {
-  color: var(--ink);
-  font-size: 14px;
-  line-height: 1.16;
-  overflow-wrap: anywhere;
+.source-family-focus-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
-.source-family-focus small {
+.source-family-focus-metric {
+  display: inline-flex;
+  min-width: 31px;
+  height: 19px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--muted);
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.source-family-focus-metric svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.source-family-focus-metric b {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.source-family-focus-metric.is-good {
+  border-color: rgba(119, 196, 140, 0.5);
+  background: rgba(119, 196, 140, 0.11);
+  color: #9ee5af;
+}
+
+.source-family-focus-metric.is-local {
+  border-color: rgba(101, 183, 177, 0.52);
+  background: rgba(101, 183, 177, 0.11);
   color: var(--teal);
-  font-size: 11px;
-  font-weight: 760;
-  line-height: 1.25;
-  overflow-wrap: anywhere;
+}
+
+.source-family-focus-metric.is-warn {
+  border-color: rgba(212, 173, 87, 0.58);
+  background: rgba(212, 173, 87, 0.12);
+  color: var(--gold);
 }
 
 .source-family-focus em {

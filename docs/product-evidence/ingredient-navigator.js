@@ -905,11 +905,34 @@ function renderProductPicker() {
     .join("");
 }
 
+function sourceFamilyFocusMetric(iconName, value, singularLabel, pluralLabel = `${singularLabel}s`, tone = "neutral") {
+  const count = Number(value || 0);
+  const label = count === 1 ? singularLabel : pluralLabel;
+  return `
+    <span class="source-family-focus-metric is-${escapeHtml(tone)}" title="${escapeHtml(`${count} ${label}`)}" aria-label="${escapeHtml(`${count} ${label}`)}">
+      ${cwaInlineIcon(iconName)}
+      <b>${escapeHtml(count)}</b>
+    </span>
+  `;
+}
+
+function sourceFamilyFocusMetrics(metrics) {
+  return `
+    <div class="source-family-focus-metrics">
+      ${sourceFamilyFocusMetric("image", metrics.selectedProducts, "product")}
+      ${sourceFamilyFocusMetric("panel", metrics.selectedRows, "proof row")}
+      ${sourceFamilyFocusMetric("ingredient", metrics.selectedProofs, "proof text candidate", "proof text candidates", "good")}
+      ${sourceFamilyFocusMetric("crop", metrics.selectedLocalVisuals, "local visual", "local visuals", "local")}
+      ${sourceFamilyFocusMetric("ingredient", metrics.selectedStructuredRows, "structured ingredient row", "structured ingredient rows", "good")}
+      ${metrics.selectedReadableGaps ? sourceFamilyFocusMetric("partial", metrics.selectedReadableGaps, "readable panel gap", "readable panel gaps", "warn") : ""}
+    </div>
+  `;
+}
+
 function renderSourceFamilySummary() {
   if (!els.sourceFamilySummary) return;
   const families = state.data.source_family_summary?.families || [];
   const timelineFamilies = state.data.source_family_timeline?.families || [];
-  const board = state.data.ocr_board_summary || {};
   if (!families.length) {
     els.sourceFamilySummary.innerHTML = `
       <article class="source-family-empty">
@@ -943,8 +966,14 @@ function renderSourceFamilySummary() {
     </div>
     <div class="source-family-focus">
       <span>${escapeHtml(selectedSummary.label || "Selected source lane")}</span>
-      <strong>${escapeHtml(`${selectedProducts} products · ${selectedRows} proof rows · ${selectedProofs} proof text candidates`)}</strong>
-      <small>${escapeHtml(`${selectedLocalVisuals}/${selectedTimelineRows.length || selectedRows} local visuals · ${selectedStructuredRows} structured ingredient rows · ${selectedReadableGaps} readable-panel gaps · ${board.scratch_soft_quota || "200GB"} private quota`)}</small>
+      ${sourceFamilyFocusMetrics({
+        selectedProducts,
+        selectedRows,
+        selectedProofs,
+        selectedLocalVisuals,
+        selectedStructuredRows,
+        selectedReadableGaps,
+      })}
       <em>${escapeHtml(selectedSummary.claim_policy || state.data.source_family_timeline?.claim_policy || "Ingredient text remains candidate evidence until manual review.")}</em>
     </div>
   `;
