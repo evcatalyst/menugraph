@@ -104,6 +104,7 @@ const expectedProducts = new Set([
   "dominos_hand_tossed_pepperoni",
   "dunkin_glazed_donut",
   "popeyes_chicken_sandwich",
+  "little_debbie_oatmeal_creme_pies",
 ]);
 
 const allowedOfficialHosts = new Set([
@@ -129,6 +130,7 @@ const allowedOfficialHosts = new Set([
   "www.dominos.com",
   "www.dunkindonuts.com",
   "plk-use1-prod.sites.rbictg.com",
+  "mckeefoodservice.com",
   "www.goodnes.com",
   "www.grapenuts.com",
   "www.generalmillsconvenience.com",
@@ -191,11 +193,11 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 
 assert.strictEqual(visualIndex.schema_version, 1, "official-current visual index should be versioned");
 assert.strictEqual(visualIndex.source_family.id, "official-current-labels", "official-current source family id should be stable");
-assert.strictEqual(visualIndex.totals.products, 95, "official-current lane should cover 95 products");
-assert.strictEqual(visualIndex.totals.rows, 95, "official-current lane should cover 95 rows");
-assert.strictEqual(visualIndex.rows.length, 95, "official-current rows should match totals");
-assert.strictEqual(visualIndex.totals.local_preview_available, 95, "official-current lane should expose local proof previews");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 95, "official-current lane should expose 95 ingredient text candidates");
+assert.strictEqual(visualIndex.totals.products, 96, "official-current lane should cover 96 products");
+assert.strictEqual(visualIndex.totals.rows, 96, "official-current lane should cover 96 rows");
+assert.strictEqual(visualIndex.rows.length, 96, "official-current rows should match totals");
+assert.strictEqual(visualIndex.totals.local_preview_available, 96, "official-current lane should expose local proof previews");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 96, "official-current lane should expose 96 ingredient text candidates");
 assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 0, "official-current rows should have extracted source text");
 
 visualIndex.products.forEach((product) => {
@@ -300,6 +302,7 @@ const mcnuggets = visualIndex.rows.find((row) => row.product_id === "mcdonalds_c
 const dominosHandTossedPepperoni = visualIndex.rows.find((row) => row.product_id === "dominos_hand_tossed_pepperoni");
 const dunkinGlazedDonut = visualIndex.rows.find((row) => row.product_id === "dunkin_glazed_donut");
 const popeyesChickenSandwich = visualIndex.rows.find((row) => row.product_id === "popeyes_chicken_sandwich");
+const littleDebbieOatmeal = visualIndex.rows.find((row) => row.product_id === "little_debbie_oatmeal_creme_pies");
 assert(oreo.ingredient_text.includes("HIGH FRUCTOSE CORN SYRUP"), "Oreo current label should expose source ingredient text");
 assert(doritos.ingredient_text.includes("Monosodium Glutamate"), "Doritos current label should expose source ingredient text");
 assert(hersheys.ingredient_text.includes("Cocoa Butter"), "Hershey's current label should expose source ingredient text");
@@ -532,30 +535,42 @@ assert.strictEqual(popeyesChickenSandwich.source_owner, "Popeyes / Restaurant Br
 assert.strictEqual(popeyesChickenSandwich.ingredient_text_source, "official_current_menu_ingredient_pdf", "Popeyes Chicken Sandwich should identify official PDF as the ingredient source");
 assert.strictEqual(popeyesChickenSandwich.proof_visual_basis, "official_menu_or_api_text", "Popeyes Chicken Sandwich proof basis should identify menu/PDF source text");
 assert(Array.isArray(popeyesChickenSandwich.ingredient_items) && popeyesChickenSandwich.ingredient_items.length === 8, "Popeyes Chicken Sandwich should expose eight component ingredient items from the PDF row");
+assert(littleDebbieOatmeal.ingredient_text.includes("Corn Syrup"), "Little Debbie Oatmeal Creme Pies should expose source ingredient text");
+assert(littleDebbieOatmeal.ingredient_text.includes("Whole Grain Rolled Oats"), "Little Debbie Oatmeal Creme Pies should expose oat ingredient text");
+assert(littleDebbieOatmeal.ingredient_text.includes("TBHQ and Citric Acid"), "Little Debbie Oatmeal Creme Pies should expose preservative context");
+assert(littleDebbieOatmeal.ingredient_text.includes("Sorbic Acid"), "Little Debbie Oatmeal Creme Pies should expose freshness preservative text");
+assert.strictEqual(littleDebbieOatmeal.source_url, "https://mckeefoodservice.com/storage/app/media/Products/2026-spec-sheets/ld-dd-oatmeal-creme-pies-detail-sheet-1.pdf", "Little Debbie Oatmeal Creme Pies should use the official Foodservice PDF URL");
+assert.strictEqual(littleDebbieOatmeal.source_detail_url, "https://mckeefoodservice.com/storage/app/media/Products/2026-spec-sheets/ld-dd-oatmeal-creme-pies-detail-sheet-1.pdf#page=1", "Little Debbie Oatmeal Creme Pies should deep-link to the extracted PDF page");
+assert.strictEqual(littleDebbieOatmeal.source_title, "Little Debbie Double Decker Oatmeal Creme Pies official Foodservice detail sheet", "Little Debbie Oatmeal Creme Pies should expose the exact Foodservice sheet title");
+assert.strictEqual(littleDebbieOatmeal.source_owner, "McKee Foodservice / McKee Foods", "Little Debbie Oatmeal Creme Pies should expose the official source owner");
+assert.strictEqual(littleDebbieOatmeal.ingredient_text_source, "official_current_foodservice_ingredient_pdf", "Little Debbie Oatmeal Creme Pies should identify the Foodservice PDF ingredient source");
+assert.strictEqual(littleDebbieOatmeal.proof_visual_basis, "official_source_text_proof_panel", "Little Debbie Oatmeal Creme Pies proof basis should remain a source-text proof panel");
 
 const family = navigator.source_family_timeline?.families?.find((row) => row.id === "official-current-labels");
 assert(family, "navigator should expose the official-current source-family timeline");
-assert.strictEqual(family.product_count, 95, "navigator official-current timeline should cover 95 products");
-assert.strictEqual(family.row_count, 95, "navigator official-current timeline should cover 95 rows");
-assert.strictEqual(family.ingredient_signal_count, 95, "navigator official-current timeline should expose candidate count");
+assert.strictEqual(family.product_count, 96, "navigator official-current timeline should cover 96 products");
+assert.strictEqual(family.row_count, 96, "navigator official-current timeline should cover 96 rows");
+assert.strictEqual(family.ingredient_signal_count, 96, "navigator official-current timeline should expose candidate count");
 assert(family.products.every((product) => expectedProducts.has(product.product_id)), "navigator official-current timeline has unexpected products");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "official-current-labels");
 assert(summaryFamily, "navigator source-family summary should expose official-current labels");
-assert.strictEqual(summaryFamily.product_count, 95, "official-current summary should cover 95 products");
+assert.strictEqual(summaryFamily.product_count, 96, "official-current summary should cover 96 products");
 assert(summaryFamily.products.every((product) => product.ingredient_panel_visible_count === 1), "official-current summary should reflect current ingredient text candidates");
 
 if (fs.existsSync(privateManifestPath)) {
   const privateManifest = JSON.parse(fs.readFileSync(privateManifestPath, "utf8"));
-  assert.strictEqual(privateManifest.rows.length, 95, "official-current private manifest should have 95 rows");
+  assert.strictEqual(privateManifest.rows.length, 96, "official-current private manifest should have 96 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
   const dunkinPrivate = privateManifest.rows.find((row) => row.product_id === "dunkin_glazed_donut");
   const popeyesPrivate = privateManifest.rows.find((row) => row.product_id === "popeyes_chicken_sandwich");
+  const littleDebbiePrivate = privateManifest.rows.find((row) => row.product_id === "little_debbie_oatmeal_creme_pies");
   assert(hiddenValleyPrivate.ingredient_label_image_path && fs.existsSync(hiddenValleyPrivate.ingredient_label_image_path), "Hidden Valley private manifest should retain the local label-panel image");
   assert(butterfingerPrivate.ingredient_label_image_path && fs.existsSync(butterfingerPrivate.ingredient_label_image_path), "Butterfinger private manifest should retain the local label-panel image");
   assert(dunkinPrivate.source_document_preview_path && fs.existsSync(dunkinPrivate.source_document_preview_path), "Dunkin private manifest should retain the local PDF source-page preview");
   assert(popeyesPrivate.source_document_preview_path && fs.existsSync(popeyesPrivate.source_document_preview_path), "Popeyes private manifest should retain the local PDF source-page preview");
+  assert(littleDebbiePrivate.source_document_preview_path && fs.existsSync(littleDebbiePrivate.source_document_preview_path), "Little Debbie private manifest should retain the local PDF source-page preview");
   for (const row of privateManifest.rows) {
     const resolved = resolvePrivateIngredientCropPath(row.visual_id);
     assert(resolved, `${row.visual_id} should resolve through the shared private crop endpoint`);

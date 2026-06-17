@@ -607,6 +607,15 @@ const curatedRows = {
     source_owner_override: "Popeyes / Restaurant Brands International",
     source_image_match_status: "official_current_menu_ingredient_pdf",
   },
+  "little_debbie_oatmeal_creme_pies__current_2020s__831__5": {
+    ingredient_fragment_strategy: "mckee_pdf_oatmeal_creme_pies",
+    source_fetch_url: "https://mckeefoodservice.com/storage/app/media/Products/2026-spec-sheets/ld-dd-oatmeal-creme-pies-detail-sheet-1.pdf",
+    source_url_override: "https://mckeefoodservice.com/storage/app/media/Products/2026-spec-sheets/ld-dd-oatmeal-creme-pies-detail-sheet-1.pdf",
+    source_detail_url: "https://mckeefoodservice.com/storage/app/media/Products/2026-spec-sheets/ld-dd-oatmeal-creme-pies-detail-sheet-1.pdf#page=1",
+    source_title_override: "Little Debbie Double Decker Oatmeal Creme Pies official Foodservice detail sheet",
+    source_owner_override: "McKee Foodservice / McKee Foods",
+    source_image_match_status: "official_current_foodservice_ingredient_pdf",
+  },
 };
 
 function argValue(name, fallback = "") {
@@ -1254,6 +1263,14 @@ function ingredientItemsFromPopeyesClassicChickenSandwichPdf(text, componentName
   return ingredientItemsFromNamedPdfComponents(text, componentNames);
 }
 
+function ingredientItemsFromMckeeOatmealCremePiesPdf(text) {
+  const statement = statementBetween(String(text || "").replace(/\s+/g, " "), /\bIngredients\s+/i, [
+    /\s+Allergy Information\b/i,
+    /\s+Always refer to the product package\b/i,
+  ]);
+  return ingredientItemsFromStatement(statement);
+}
+
 function ingredientTextFromItems(items) {
   return `Ingredients: ${items.join(", ")}.`;
 }
@@ -1518,6 +1535,7 @@ function ingredientItemsForStrategy(strategy, mainHtml, fragmentHtml, review = {
   if (strategy === "popeyes_pdf_classic_chicken_sandwich") {
     return ingredientItemsFromPopeyesClassicChickenSandwichPdf(mainHtml, review.component_ingredient_names || []);
   }
+  if (strategy === "mckee_pdf_oatmeal_creme_pies") return ingredientItemsFromMckeeOatmealCremePiesPdf(mainHtml);
   if (strategy === "smartlabel_fragment") return ingredientItemsFromFragment(fragmentHtml);
   return ingredientItemsFromStatement(ingredientStatementForStrategy(strategy, mainHtml, fragmentHtml));
 }
@@ -1548,7 +1566,7 @@ function proofVisualBasisFor(review, visual, hasIngredientText) {
 }
 
 function isPdfIngredientStrategy(strategy) {
-  return /^(dunkin|popeyes)_pdf_/.test(strategy);
+  return /_pdf_/.test(strategy);
 }
 
 function ingredientTextSourceForStrategy(strategy) {
@@ -1563,6 +1581,7 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "pizza_hut_pepperoni_page") return "official_current_menu_page_text";
   if (strategy === "dunkin_pdf_glazed_donut") return "official_current_menu_ingredient_pdf";
   if (strategy === "popeyes_pdf_classic_chicken_sandwich") return "official_current_menu_ingredient_pdf";
+  if (strategy === "mckee_pdf_oatmeal_creme_pies") return "official_current_foodservice_ingredient_pdf";
   if (strategy === "manual_source_image_transcription") return "official_current_ingredient_label_image_manual_transcription";
   if (strategy === "kraft_heinz_json" || strategy === "official_json_ingredients" || strategy === "totinos_product_page") return "official_current_product_page_json";
   return "official_current_product_page_text";
