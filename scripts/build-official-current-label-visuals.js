@@ -588,6 +588,25 @@ const curatedRows = {
     source_owner_override: "Dunkin'",
     source_image_match_status: "official_current_menu_ingredient_pdf",
   },
+  "popeyes_chicken_sandwich__current_2020s__667__1": {
+    ingredient_fragment_strategy: "popeyes_pdf_classic_chicken_sandwich",
+    component_ingredient_names: [
+      "Chicken Filet",
+      "Chicken Breader",
+      "Buttermilk Batter",
+      "Tallow",
+      "Brioche Bun",
+      "Buttery Biscuit Dressing",
+      "Mayonnaise",
+      "Pickles",
+    ],
+    source_fetch_url: "https://plk-use1-prod.sites.rbictg.com/nutrition/PLK_US_Ingredient_Information.pdf",
+    source_url_override: "https://plk-use1-prod.sites.rbictg.com/nutrition/PLK_US_Ingredient_Information.pdf",
+    source_detail_url: "https://plk-use1-prod.sites.rbictg.com/nutrition/PLK_US_Ingredient_Information.pdf#page=1",
+    source_title_override: "Popeyes U.S. Ingredient Information official PDF",
+    source_owner_override: "Popeyes / Restaurant Brands International",
+    source_image_match_status: "official_current_menu_ingredient_pdf",
+  },
 };
 
 function argValue(name, fallback = "") {
@@ -1169,6 +1188,32 @@ function ingredientItemsFromDunkinGlazedDonutPdf(text) {
   return ingredientItemsFromStatement(statement);
 }
 
+function ingredientItemsFromNamedPdfComponents(text, componentNames = []) {
+  const source = String(text || "").replace(/\r/g, "");
+  const items = [];
+  const seen = new Set();
+  for (const componentName of componentNames) {
+    const match = source.match(new RegExp(
+      `(?:^|\\n)${escapeRegExp(componentName)}:\\s*([\\s\\S]*?)(?=\\n(?:[A-Z][A-Za-z0-9 '&().,#\\/-]{1,96}:|Page\\s+\\d+\\s+of\\s+\\d+\\b|Specification Number\\b)|$)`,
+      "i",
+    ));
+    const statement = match
+      ? match[1].replace(/\s+/g, " ").trim().replace(/[.;\s]+$/, "")
+      : "";
+    if (!statement) continue;
+    const item = `${componentName}: ${statement}`;
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    items.push(item);
+  }
+  return items;
+}
+
+function ingredientItemsFromPopeyesClassicChickenSandwichPdf(text, componentNames = []) {
+  return ingredientItemsFromNamedPdfComponents(text, componentNames);
+}
+
 function ingredientTextFromItems(items) {
   return `Ingredients: ${items.join(", ")}.`;
 }
@@ -1430,6 +1475,9 @@ function ingredientItemsForStrategy(strategy, mainHtml, fragmentHtml, review = {
   }
   if (strategy === "pizza_hut_pepperoni_page") return ingredientItemsFromPizzaHutPepperoniPage(mainHtml);
   if (strategy === "dunkin_pdf_glazed_donut") return ingredientItemsFromDunkinGlazedDonutPdf(mainHtml);
+  if (strategy === "popeyes_pdf_classic_chicken_sandwich") {
+    return ingredientItemsFromPopeyesClassicChickenSandwichPdf(mainHtml, review.component_ingredient_names || []);
+  }
   if (strategy === "smartlabel_fragment") return ingredientItemsFromFragment(fragmentHtml);
   return ingredientItemsFromStatement(ingredientStatementForStrategy(strategy, mainHtml, fragmentHtml));
 }
@@ -1460,7 +1508,7 @@ function proofVisualBasisFor(review, visual, hasIngredientText) {
 }
 
 function isPdfIngredientStrategy(strategy) {
-  return /^dunkin_pdf_/.test(strategy);
+  return /^(dunkin|popeyes)_pdf_/.test(strategy);
 }
 
 function ingredientTextSourceForStrategy(strategy) {
@@ -1474,6 +1522,7 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "dominos_ingredients_xml_components") return "official_current_menu_ingredient_statement_xml";
   if (strategy === "pizza_hut_pepperoni_page") return "official_current_menu_page_text";
   if (strategy === "dunkin_pdf_glazed_donut") return "official_current_menu_ingredient_pdf";
+  if (strategy === "popeyes_pdf_classic_chicken_sandwich") return "official_current_menu_ingredient_pdf";
   if (strategy === "manual_source_image_transcription") return "official_current_ingredient_label_image_manual_transcription";
   if (strategy === "kraft_heinz_json" || strategy === "official_json_ingredients" || strategy === "totinos_product_page") return "official_current_product_page_json";
   return "official_current_product_page_text";

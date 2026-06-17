@@ -103,6 +103,7 @@ const expectedProducts = new Set([
   "mcdonalds_chicken_mcnuggets",
   "dominos_hand_tossed_pepperoni",
   "dunkin_glazed_donut",
+  "popeyes_chicken_sandwich",
 ]);
 
 const allowedOfficialHosts = new Set([
@@ -127,6 +128,7 @@ const allowedOfficialHosts = new Set([
   "www.coca-cola.com",
   "www.dominos.com",
   "www.dunkindonuts.com",
+  "plk-use1-prod.sites.rbictg.com",
   "www.goodnes.com",
   "www.grapenuts.com",
   "www.generalmillsconvenience.com",
@@ -188,11 +190,11 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 
 assert.strictEqual(visualIndex.schema_version, 1, "official-current visual index should be versioned");
 assert.strictEqual(visualIndex.source_family.id, "official-current-labels", "official-current source family id should be stable");
-assert.strictEqual(visualIndex.totals.products, 94, "official-current lane should cover 94 products");
-assert.strictEqual(visualIndex.totals.rows, 94, "official-current lane should cover 94 rows");
-assert.strictEqual(visualIndex.rows.length, 94, "official-current rows should match totals");
-assert.strictEqual(visualIndex.totals.local_preview_available, 94, "official-current lane should expose local proof previews");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 94, "official-current lane should expose 94 ingredient text candidates");
+assert.strictEqual(visualIndex.totals.products, 95, "official-current lane should cover 95 products");
+assert.strictEqual(visualIndex.totals.rows, 95, "official-current lane should cover 95 rows");
+assert.strictEqual(visualIndex.rows.length, 95, "official-current rows should match totals");
+assert.strictEqual(visualIndex.totals.local_preview_available, 95, "official-current lane should expose local proof previews");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 95, "official-current lane should expose 95 ingredient text candidates");
 assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 0, "official-current rows should have extracted source text");
 
 visualIndex.products.forEach((product) => {
@@ -296,6 +298,7 @@ const fries = visualIndex.rows.find((row) => row.product_id === "mcdonalds_world
 const mcnuggets = visualIndex.rows.find((row) => row.product_id === "mcdonalds_chicken_mcnuggets");
 const dominosHandTossedPepperoni = visualIndex.rows.find((row) => row.product_id === "dominos_hand_tossed_pepperoni");
 const dunkinGlazedDonut = visualIndex.rows.find((row) => row.product_id === "dunkin_glazed_donut");
+const popeyesChickenSandwich = visualIndex.rows.find((row) => row.product_id === "popeyes_chicken_sandwich");
 assert(oreo.ingredient_text.includes("HIGH FRUCTOSE CORN SYRUP"), "Oreo current label should expose source ingredient text");
 assert(doritos.ingredient_text.includes("Monosodium Glutamate"), "Doritos current label should expose source ingredient text");
 assert(hersheys.ingredient_text.includes("Cocoa Butter"), "Hershey's current label should expose source ingredient text");
@@ -516,22 +519,34 @@ assert.strictEqual(dunkinGlazedDonut.source_owner, "Dunkin'", "Dunkin Glazed Don
 assert.strictEqual(dunkinGlazedDonut.ingredient_text_source, "official_current_menu_ingredient_pdf", "Dunkin Glazed Donut should identify official PDF as the ingredient source");
 assert.strictEqual(dunkinGlazedDonut.proof_visual_basis, "official_menu_or_api_text", "Dunkin Glazed Donut proof basis should identify menu/PDF source text");
 assert(Array.isArray(dunkinGlazedDonut.ingredient_items) && dunkinGlazedDonut.ingredient_items.length >= 10, "Dunkin Glazed Donut should expose structured ingredient items from the PDF row");
+assert(popeyesChickenSandwich.ingredient_text.includes("Chicken Filet: Boneless chicken breast meat"), "Popeyes Chicken Sandwich current evidence should expose chicken filet text");
+assert(popeyesChickenSandwich.ingredient_text.includes("Buttermilk Batter: Water"), "Popeyes Chicken Sandwich current evidence should expose batter text");
+assert(popeyesChickenSandwich.ingredient_text.includes("Brioche Bun: Enriched wheat flour"), "Popeyes Chicken Sandwich current evidence should expose bun text");
+assert(popeyesChickenSandwich.ingredient_text.includes("Mayonnaise: Soybean oil"), "Popeyes Chicken Sandwich current evidence should expose mayonnaise text");
+assert(popeyesChickenSandwich.ingredient_text.includes("Pickles: Cucumbers"), "Popeyes Chicken Sandwich current evidence should expose pickle text");
+assert.strictEqual(popeyesChickenSandwich.source_url, "https://plk-use1-prod.sites.rbictg.com/nutrition/PLK_US_Ingredient_Information.pdf", "Popeyes Chicken Sandwich should use the official ingredient PDF URL");
+assert.strictEqual(popeyesChickenSandwich.source_detail_url, "https://plk-use1-prod.sites.rbictg.com/nutrition/PLK_US_Ingredient_Information.pdf#page=1", "Popeyes Chicken Sandwich should deep-link to the extracted PDF page");
+assert.strictEqual(popeyesChickenSandwich.source_title, "Popeyes U.S. Ingredient Information official PDF", "Popeyes Chicken Sandwich should expose the official PDF title");
+assert.strictEqual(popeyesChickenSandwich.source_owner, "Popeyes / Restaurant Brands International", "Popeyes Chicken Sandwich should expose the official source owner");
+assert.strictEqual(popeyesChickenSandwich.ingredient_text_source, "official_current_menu_ingredient_pdf", "Popeyes Chicken Sandwich should identify official PDF as the ingredient source");
+assert.strictEqual(popeyesChickenSandwich.proof_visual_basis, "official_menu_or_api_text", "Popeyes Chicken Sandwich proof basis should identify menu/PDF source text");
+assert(Array.isArray(popeyesChickenSandwich.ingredient_items) && popeyesChickenSandwich.ingredient_items.length === 8, "Popeyes Chicken Sandwich should expose eight component ingredient items from the PDF row");
 
 const family = navigator.source_family_timeline?.families?.find((row) => row.id === "official-current-labels");
 assert(family, "navigator should expose the official-current source-family timeline");
-assert.strictEqual(family.product_count, 94, "navigator official-current timeline should cover 94 products");
-assert.strictEqual(family.row_count, 94, "navigator official-current timeline should cover 94 rows");
-assert.strictEqual(family.ingredient_signal_count, 94, "navigator official-current timeline should expose candidate count");
+assert.strictEqual(family.product_count, 95, "navigator official-current timeline should cover 95 products");
+assert.strictEqual(family.row_count, 95, "navigator official-current timeline should cover 95 rows");
+assert.strictEqual(family.ingredient_signal_count, 95, "navigator official-current timeline should expose candidate count");
 assert(family.products.every((product) => expectedProducts.has(product.product_id)), "navigator official-current timeline has unexpected products");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "official-current-labels");
 assert(summaryFamily, "navigator source-family summary should expose official-current labels");
-assert.strictEqual(summaryFamily.product_count, 94, "official-current summary should cover 94 products");
+assert.strictEqual(summaryFamily.product_count, 95, "official-current summary should cover 95 products");
 assert(summaryFamily.products.every((product) => product.ingredient_panel_visible_count === 1), "official-current summary should reflect current ingredient text candidates");
 
 if (fs.existsSync(privateManifestPath)) {
   const privateManifest = JSON.parse(fs.readFileSync(privateManifestPath, "utf8"));
-  assert.strictEqual(privateManifest.rows.length, 94, "official-current private manifest should have 94 rows");
+  assert.strictEqual(privateManifest.rows.length, 95, "official-current private manifest should have 95 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
   assert(hiddenValleyPrivate.ingredient_label_image_path && fs.existsSync(hiddenValleyPrivate.ingredient_label_image_path), "Hidden Valley private manifest should retain the local label-panel image");
