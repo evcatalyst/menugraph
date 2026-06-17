@@ -149,6 +149,33 @@ function captureClass(product) {
   return "source_discovery_needed";
 }
 
+function collectionBlockersForProduct(product) {
+  if (product.product_id === "starbucks_pumpkin_spice_latte") {
+    return [{
+      status: "official_source_cache_blocked",
+      label: "Official Starbucks source cache blocked",
+      detail: "Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet.",
+      next_step: "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text.",
+      claim_boundary: "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
+    }];
+  }
+  if (product.product_id === "kfc_original_recipe_chicken") {
+    return [{
+      status: "item_level_ingredient_source_needed",
+      label: "Item-level ingredient source needed",
+      detail: "Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement.",
+      next_step: "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row.",
+      claim_boundary: "Use current KFC pages as source-routing and process context only, not formulation evidence.",
+    }];
+  }
+  return [];
+}
+
+function promotionBoundaryForProduct(product) {
+  const blocker = collectionBlockersForProduct(product)[0];
+  return blocker?.claim_boundary || "Missing-product rows are collection targets only; no ingredient, formulation, or historical-change claim is promoted.";
+}
+
 function publicProduct(product, coveredSourceFamilies = []) {
   const rows = product.rows || [];
   const highPriorityRows = rows.filter((row) => row.ocr_priority === "high").length;
@@ -175,6 +202,8 @@ function publicProduct(product, coveredSourceFamilies = []) {
     next_collection_goal: coveredSourceFamilies.length
       ? "continue_archive_era_enrichment_and_manual_review"
       : nextGoalForProduct(product),
+    collection_blockers: coveredSourceFamilies.length ? [] : collectionBlockersForProduct(product),
+    promotion_boundary: coveredSourceFamilies.length ? "" : promotionBoundaryForProduct(product),
   };
 }
 

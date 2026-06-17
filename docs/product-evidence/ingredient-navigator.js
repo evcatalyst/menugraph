@@ -498,6 +498,14 @@ function missingCoverageSearchText(productRow) {
     productRow.category,
     productRow.capture_class,
     productRow.next_collection_goal,
+    productRow.promotion_boundary,
+    ...(productRow.collection_blockers || []).flatMap((blocker) => [
+      blocker.status,
+      blocker.label,
+      blocker.detail,
+      blocker.next_step,
+      blocker.claim_boundary,
+    ]),
     ...(productRow.top_source_domains || []).map((row) => row.domain),
     ...(productRow.representative_rows || []).flatMap((row) => [
       row.vintage_label,
@@ -547,12 +555,21 @@ function renderSourceFamilyCoverageSummary(query = sourceFamilyFilterQuery()) {
         const lead = (productRow.representative_rows || [])[0] || {};
         const sourceLink = lead.source_url || "";
         const topDomain = productRow.top_source_domains?.[0]?.domain || lead.source_domain || "source needed";
+        const blocker = (productRow.collection_blockers || [])[0] || null;
         return `
           <article class="source-family-coverage-card">
             <span>${escapeHtml(labelFor(productRow.capture_class || "capture_queue"))}</span>
             <strong>${escapeHtml(productRow.product_name)}</strong>
             <small>${escapeHtml(`${productRow.high_priority_row_count || 0} high-priority rows · ${productRow.current_row_count || 0} current rows · ${topDomain}`)}</small>
             <p>${escapeHtml(labelFor(productRow.next_collection_goal || lead.next_action || "source_attributable_panel_capture_needed"))}</p>
+            ${blocker ? `
+              <p class="source-family-coverage-blocker">
+                <span>${cwaInlineIcon("partial")}</span>
+                <b>${escapeHtml(blocker.label || labelFor(blocker.status || "blocked"))}</b>
+                ${escapeHtml(blocker.detail || "")}
+              </p>
+              ${blocker.next_step ? `<small class="source-family-coverage-next">${escapeHtml(blocker.next_step)}</small>` : ""}
+            ` : ""}
             <div class="source-family-coverage-actions">
               ${sourceLink ? `<a href="${escapeHtml(sourceLink)}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(`Open lead source for ${productRow.product_name}`)}">${cwaInlineIcon("source")}</a>` : ""}
               <button type="button" data-source-family-filter-value="${escapeHtml(productRow.product_name)}" aria-label="${escapeHtml(`Search proof board for ${productRow.product_name}`)}">${cwaInlineIcon("inspect")}</button>

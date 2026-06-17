@@ -831,6 +831,52 @@ a:hover {
   line-height: 1.28;
 }
 
+.source-family-coverage-card .source-family-coverage-blocker {
+  display: grid;
+  grid-template-columns: 17px minmax(0, 1fr);
+  gap: 3px 6px;
+  color: rgba(248, 242, 229, 0.78);
+}
+
+.source-family-coverage-blocker span {
+  display: inline-grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 1px solid rgba(242, 166, 109, 0.38);
+  border-radius: 4px;
+  color: var(--clay);
+}
+
+.source-family-coverage-blocker svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.source-family-coverage-blocker b {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.source-family-coverage-blocker b,
+.source-family-coverage-blocker span {
+  align-self: start;
+}
+
+.source-family-coverage-next {
+  grid-column: 1 / -1;
+  color: rgba(101, 183, 177, 0.9);
+}
+
 .source-family-coverage-actions {
   display: flex;
   grid-row: 2 / span 2;

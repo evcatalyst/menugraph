@@ -467,6 +467,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-coverage-summary")).toContainText("118/120 products represented");
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Starbucks Pumpkin Spice Latte");
   await expect(page.locator("#source-family-coverage-summary")).toContainText("KFC Original Recipe Chicken");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("Official Starbucks source cache blocked");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("Item-level ingredient source needed");
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);

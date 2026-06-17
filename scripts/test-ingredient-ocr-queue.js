@@ -165,6 +165,12 @@ assert.strictEqual(sourceFamilyCoverage.totals.missing_products, 2, "source fami
 assert.strictEqual(navigator.source_family_coverage?.totals?.missing_products, 2, "navigator should embed the remaining missing product queue");
 assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "starbucks_pumpkin_spice_latte"), "coverage queue should keep Starbucks PSL until a locally cacheable official source is attached");
 assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "kfc_original_recipe_chicken"), "coverage queue should keep KFC Original Recipe Chicken until a stronger item-level source is attached");
+const starbucksMissing = sourceFamilyCoverage.missing_products.find((row) => row.product_id === "starbucks_pumpkin_spice_latte");
+const kfcOriginalMissing = sourceFamilyCoverage.missing_products.find((row) => row.product_id === "kfc_original_recipe_chicken");
+assert(starbucksMissing.collection_blockers.some((blocker) => blocker.status === "official_source_cache_blocked"), "Starbucks PSL should explain the official-source cache blocker");
+assert(starbucksMissing.promotion_boundary.includes("Do not promote PSL"), "Starbucks PSL should publish a promotion boundary");
+assert(kfcOriginalMissing.collection_blockers.some((blocker) => blocker.status === "item_level_ingredient_source_needed"), "KFC Original should explain the item-level source blocker");
+assert(kfcOriginalMissing.collection_blockers[0].detail.includes("11 herbs and spices"), "KFC Original blocker should preserve the source-routing context");
 assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "pearl_milling_pancake_mix_original"), "Pearl Milling should be represented by the official-current source-family lane");
 assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "nilla_wafers"), "Nilla Wafers should be represented by the label-database source-family lane");
 assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "twinkies"), "Twinkies should be represented by the label-database source-family lane");
