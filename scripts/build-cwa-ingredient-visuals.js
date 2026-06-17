@@ -35,6 +35,12 @@ const panelContextPatterns = [
 ];
 
 const curatedIngredientReviews = {
+  "snickers_bar__earliest_verified_label__174__1": {
+    source: "manual_visual_read_candidate",
+    crop_box: { x: 0.30, y: 0.19, width: 0.42, height: 0.20 },
+    crop_rotation_degrees: 0,
+    ingredient_text: "White sugar, sweet milk chocolate, corn syrup, peanuts, milk condensed with sugar, coconut oil, malted milk, whites of eggs and salt.",
+  },
   "snickers_bar__1980s_or_earlier__174__1": {
     source: "manual_visual_read_candidate",
     crop_box: { x: 0.07, y: 0.01, width: 0.64, height: 0.18 },
@@ -779,8 +785,8 @@ function updateNavigatorTimeline(visualIndex) {
     schema_version: visualIndex.schema_version,
     generated_at_utc: visualIndex.generated_at_utc,
     default_family: existingTimeline.default_family || sourceFamilyId,
-    public_image_policy: visualIndex.public_image_policy,
-    claim_policy: visualIndex.claim_policy,
+    public_image_policy: "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots or crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
+    claim_policy: "Ingredient text remains candidate evidence until manually reviewed against source labeling and package context.",
     families,
   };
   writeJson(navigatorPath, data);

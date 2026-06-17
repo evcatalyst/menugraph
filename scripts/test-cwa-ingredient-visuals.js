@@ -54,8 +54,8 @@ assert.strictEqual(visualIndex.totals.rows, 16, "CWA visual index should cover 1
 assert.strictEqual(visualIndex.rows.length, 16, "CWA public rows should match totals");
 assert(visualIndex.totals.unique_source_urls >= 5, "CWA visual index should preserve source URL spread");
 assert.strictEqual(visualIndex.totals.local_preview_available, 16, "CWA visual index should expose local preview availability for every row");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 14, "CWA visual index should expose reviewed ingredient text candidates");
-assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 2, "CWA visual index should preserve remaining readable-panel gaps");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 15, "CWA visual index should expose reviewed ingredient text candidates");
+assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 1, "CWA visual index should preserve remaining readable-panel gaps");
 
 visualIndex.products.forEach((product) => {
   assert(expectedCwaProducts.has(product.product_id), `unexpected CWA product ${product.product_id}`);
@@ -92,6 +92,12 @@ assert(snickers2000s, "CWA index should include the 2000s Snickers row");
 assert(snickers2000s.ingredient_items.includes("peanuts"), "Snickers structured items should include peanuts");
 assert(snickers2000s.ingredient_items.some((item) => item.includes("soybean oil")), "Snickers structured items should include soybean oil");
 
+const snickers1939 = visualIndex.rows.find((row) => row.evidence_id === "snickers_bar__earliest_verified_label__174__1");
+assert(snickers1939, "CWA index should include the 1939 Snickers row");
+assert.strictEqual(snickers1939.crop_focus, "ingredient_text", "1939 Snickers should use an ingredient-panel crop");
+assert(snickers1939.ingredient_items.includes("White sugar"), "1939 Snickers structured items should include white sugar");
+assert(snickers1939.ingredient_items.includes("malted milk"), "1939 Snickers structured items should include malted milk");
+
 const kitKat2000s = visualIndex.rows.find((row) => row.evidence_id === "kit_kat_bar__2000s__173__1");
 assert(kitKat2000s, "CWA index should include the 2000s Kit Kat row");
 assert(kitKat2000s.ingredient_items.some((item) => item.includes("soy lecithin")), "Kit Kat structured items should preserve emulsifier text");
@@ -108,7 +114,7 @@ assert.strictEqual(timeline.product_count, 5, "navigator CWA timeline should cov
 assert.strictEqual(timeline.row_count, 16, "navigator CWA timeline should cover 16 rows");
 assert.strictEqual(timeline.products.length, 5, "navigator CWA timeline should include five product groups");
 assert(timeline.products.every((product) => expectedCwaProducts.has(product.product_id)), "navigator CWA timeline has unexpected products");
-assert.strictEqual(timeline.ingredient_signal_count, 14, "navigator CWA timeline should expose reviewed ingredient candidate count");
+assert.strictEqual(timeline.ingredient_signal_count, 15, "navigator CWA timeline should expose reviewed ingredient candidate count");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "candy-wrapper-archive");
 assert(summaryFamily, "navigator source-family summary should expose CWA");
