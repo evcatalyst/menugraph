@@ -1027,15 +1027,36 @@ function sourceFamilyTrendMetrics(item) {
 
 function sourceFamilyTrendProofStrip(item, localImages) {
   if (!localImages || !item.proofs?.length) return "";
+  const exampleNames = item.proofs
+    .map((proof) => proof.product_name)
+    .filter(Boolean);
+  const visibleExamples = exampleNames.slice(0, 2).join(" · ");
+  const remainingExamples = Math.max(0, exampleNames.length - 2);
+  const exampleLabel = [
+    visibleExamples,
+    remainingExamples ? `+${remainingExamples}` : "",
+  ].filter(Boolean).join(" · ");
   return `
-    <span class="source-family-ingredient-proof-strip" aria-hidden="true">
-      ${item.proofs.map((proof) => `
-        <span class="source-family-ingredient-proof-thumb" title="${escapeHtml(`${proof.product_name} · ${proof.vintage_label} · ${proof.proof_label}`)}">
-          <img src="${escapeHtml(proof.preview_endpoint)}" alt="" loading="lazy" data-private-ingredient-trend-preview="1" />
-        </span>
-      `).join("")}
+    <span class="source-family-ingredient-proof-strip" aria-label="${escapeHtml(`Proof examples: ${exampleNames.join(", ")}`)}">
+      <span class="source-family-ingredient-proof-thumbs" aria-hidden="true">
+        ${item.proofs.map((proof) => `
+          <span class="source-family-ingredient-proof-thumb" title="${escapeHtml(`${proof.product_name} · ${proof.vintage_label} · ${proof.proof_label}`)}">
+            <img src="${escapeHtml(proof.preview_endpoint)}" alt="" loading="lazy" data-private-ingredient-trend-preview="1" />
+          </span>
+        `).join("")}
+      </span>
+      ${exampleLabel ? `<span class="source-family-ingredient-proof-names">${escapeHtml(exampleLabel)}</span>` : ""}
     </span>
   `;
+}
+
+function sourceFamilyTrendAriaLabel(item) {
+  const productCount = item.product_ids?.size || 0;
+  const base = `${item.label}: ${item.count} proof ${item.count === 1 ? "row" : "rows"}, ${productCount} ${productCount === 1 ? "product" : "products"}, ${item.local_visual_count || 0} local visual ${(item.local_visual_count || 0) === 1 ? "preview" : "previews"}`;
+  const examples = (item.proofs || [])
+    .map((proof) => proof.product_name)
+    .filter(Boolean);
+  return examples.length ? `${base}; proof examples: ${examples.join(", ")}` : base;
 }
 
 function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
@@ -1055,7 +1076,7 @@ function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
     </div>
     <div class="source-family-ingredient-bars">
       ${items.map((item) => `
-        <button class="source-family-ingredient-bar" type="button" data-source-family-filter-value="${escapeHtml(item.label)}" aria-label="${escapeHtml(`${item.label}: ${item.count} proof ${item.count === 1 ? "row" : "rows"}, ${item.product_ids?.size || 0} ${item.product_ids?.size === 1 ? "product" : "products"}, ${item.local_visual_count || 0} local visual ${(item.local_visual_count || 0) === 1 ? "preview" : "previews"}`)}">
+        <button class="source-family-ingredient-bar" type="button" data-source-family-filter-value="${escapeHtml(item.label)}" aria-label="${escapeHtml(sourceFamilyTrendAriaLabel(item))}">
           <span class="source-family-ingredient-label">${escapeHtml(truncateText(item.label, 56))}</span>
           <meter min="0" max="${escapeHtml(maxCount)}" value="${escapeHtml(item.count)}"></meter>
           ${sourceFamilyTrendMetrics(item)}

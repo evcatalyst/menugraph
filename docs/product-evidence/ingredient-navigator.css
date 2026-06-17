@@ -623,8 +623,15 @@ a:hover {
   grid-area: proofs;
   display: flex;
   gap: 4px;
+  align-items: center;
   min-width: 0;
   overflow: hidden;
+}
+
+.source-family-ingredient-proof-thumbs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
 }
 
 .source-family-ingredient-proof-thumb {
@@ -647,6 +654,17 @@ a:hover {
 
 .source-family-ingredient-proof-thumb.is-missing-private-preview {
   display: none;
+}
+
+.source-family-ingredient-proof-names {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 720;
+  line-height: 1.16;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .source-family-ingredient-metric {
