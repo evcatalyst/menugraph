@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-06-17T10:12:19.662Z",
+  "generated_at_utc": "2026-06-17T10:24:08.374Z",
   "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
   "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
   "totals": {
     "queue_products": 120,
-    "represented_products": 105,
-    "missing_products": 15,
+    "represented_products": 106,
+    "missing_products": 14,
     "queue_evidence_rows": 1701,
-    "high_priority_missing_rows": 102,
-    "current_missing_rows": 63
+    "high_priority_missing_rows": 99,
+    "current_missing_rows": 61
   },
   "missing_capture_classes": {
-    "candidate_panel_or_text_available": 8,
+    "candidate_panel_or_text_available": 7,
     "menu_component_source_needed": 7
   },
   "missing_products": [
@@ -1399,114 +1399,6 @@
         }
       ],
       "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
-    },
-    {
-      "product_id": "twinkies",
-      "product_name": "Hostess Twinkies",
-      "brand": "Hostess",
-      "category": "snack cakes",
-      "coverage_status": "not_yet_represented_in_source_family",
-      "represented_source_families": [],
-      "capture_class": "candidate_panel_or_text_available",
-      "evidence_row_count": 11,
-      "high_priority_row_count": 3,
-      "current_row_count": 2,
-      "current_official_row_count": 0,
-      "ingredient_panel_visible_row_count": 3,
-      "ingredient_text_available_row_count": 0,
-      "top_source_domains": [
-        {
-          "domain": "www.flickr.com",
-          "count": 7
-        },
-        {
-          "domain": "unknown_source",
-          "count": 1
-        },
-        {
-          "domain": "upcfoodsearch.com",
-          "count": 1
-        },
-        {
-          "domain": "www.kroger.com",
-          "count": 1
-        },
-        {
-          "domain": "www.walmart.com",
-          "count": 1
-        }
-      ],
-      "representative_rows": [
-        {
-          "evidence_id": "twinkies__current_2020s__16__2",
-          "vintage_label": "current_2020s",
-          "ocr_priority": "high",
-          "ocr_gap_category": "panel_capture_needed",
-          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-          "evidence_kind": "retailer_page",
-          "source_domain": "www.kroger.com",
-          "source_url": "https://www.kroger.com/p/hostess-twinkies-single-serve-chocolate-cakes/0088810901090",
-          "source_title": "Hostess Twinkies Single-Serve Chocolate Cakes, 2 ct / 2.7 oz - Kroger",
-          "source_owner": "www.kroger.com",
-          "source_surface": "current_web",
-          "ingredient_panel_visible": true,
-          "ingredient_text_available": false,
-          "next_action": "capture_private_panel_crop_and_run_ocr",
-          "reviewer_note_excerpt": "This is chocolate cakes, not classic golden Twinkies; keep SKU-specific and do not generalize.;Retailer page; useful for current SKU/weight and ingredient candidate, not package-photo verified."
-        },
-        {
-          "evidence_id": "twinkies__current_2020s__299__1",
-          "vintage_label": "current_2020s",
-          "ocr_priority": "high",
-          "ocr_gap_category": "panel_capture_needed",
-          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-          "evidence_kind": "retailer_page",
-          "source_domain": "www.walmart.com",
-          "source_url": "https://www.walmart.com/ip/36462419",
-          "source_title": "HOSTESS Banana Flavored Twinkies, 13.58 oz, 10 Count - Walmart",
-          "source_owner": "www.walmart.com",
-          "source_surface": "current_web",
-          "ingredient_panel_visible": true,
-          "ingredient_text_available": false,
-          "next_action": "capture_private_panel_crop_and_run_ocr",
-          "reviewer_note_excerpt": "Current Twinkies candidate; archive PDP and compare ingredient text against package back/side panel.;Retailer page provides source-attributable package imagery plus ingredient and size context; verify flavor and panel image before using as ground truth."
-        },
-        {
-          "evidence_id": "twinkies__2010s__15__1",
-          "vintage_label": "2010s",
-          "ocr_priority": "high",
-          "ocr_gap_category": "panel_capture_needed",
-          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-          "evidence_kind": "label_database_record",
-          "source_domain": "upcfoodsearch.com",
-          "source_url": "https://upcfoodsearch.com/food-products/other-pastries/045000001008/",
-          "source_title": "Hostess Twinkies (045000001008) - UPC Food Search",
-          "source_owner": "upcfoodsearch.com",
-          "source_surface": "current_web",
-          "ingredient_panel_visible": true,
-          "ingredient_text_available": false,
-          "next_action": "capture_private_panel_crop_and_run_ocr",
-          "reviewer_note_excerpt": "Important trans-fat-era candidate; must verify against package/photo or archived label image.;Third-party UPC database; useful formulation lead, but the original ingredient-statement image requires separate review."
-        },
-        {
-          "evidence_id": "twinkies__1980s_or_earlier__17__1",
-          "vintage_label": "1980s_or_earlier",
-          "ocr_priority": "medium",
-          "ocr_gap_category": "readable_panel_photo_needed",
-          "ocr_recommended_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
-          "evidence_kind": "collector_package_photo",
-          "source_domain": "www.flickr.com",
-          "source_url": "https://www.flickr.com/photos/wafflewhiffer/albums/72157629976913182/",
-          "source_title": "Twinkies Packages - Flickr album by Waffle Whiffer",
-          "source_owner": "Flickr",
-          "source_surface": "current_web",
-          "ingredient_panel_visible": false,
-          "ingredient_text_available": false,
-          "next_action": "find_package_label_or_smartlabel_panel",
-          "reviewer_note_excerpt": "Queue item-level reviews for 1969, 1973, 1974, 1978, 1982, 1985, 1987, and 1989 Twinkies package entries.;Source venue for many Twinkies package vintages. The album itself should drive item-level acquisition; do not treat it as a verified product label."
-        }
-      ],
-      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
     },
     {
       "product_id": "hot_pockets_pepperoni_pizza",

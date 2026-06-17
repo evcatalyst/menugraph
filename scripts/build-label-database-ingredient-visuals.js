@@ -7,10 +7,10 @@ const root = path.join(__dirname, "..");
 const fullQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv");
 const visualIndexPath = path.join(root, "docs/data/product-evidence/label_database_ingredient_visual_index.json");
 const navigatorPath = path.join(root, "docs/data/product-evidence/navigator_data.json");
-const cacheRoot = path.join(root, ".cache/ingredient-ocr/label-database-current-leads");
+const cacheRoot = path.join(root, ".cache/ingredient-ocr/label-database-text-leads");
 const latestPrivateManifestPath = path.join(cacheRoot, "latest-private-manifest.json");
-const sourceFamilyId = "label-database-current-leads";
-const sourceFamilyLabel = "Label Database Current Leads";
+const sourceFamilyId = "label-database-text-leads";
+const sourceFamilyLabel = "Label Database Text Leads";
 const generatedAt = new Date().toISOString();
 
 const curatedRows = {
@@ -27,6 +27,48 @@ const curatedRows = {
     source_disclaimer: "Horizons for the Blind makes no warranties regarding the accuracy of any information provided through this service.",
     ingredient_statement_override: "Unbleached Enriched Flour (Wheat Flour, Niacin, Reduced Iron, Thiamine Mononitrate [Vitamin B1], Riboflavin [Vitamin B2], Folic Acid), Sugar, Soybean and/or Canola Oil, Palm Oil, High Fructose Corn Syrup, Whey (from Milk), Eggs, Salt, Leavening (Baking Soda, Calcium Phosphate), Mono- and Diglycerides, Natural and Artificial Flavor, Soy Lecithin.",
     verification_note: "Accessibility/product database text candidate verified from the public source page on 2026-06-17. Package image review is still required before promoting this as package-label ground truth.",
+  },
+  "twinkies__2010s__15__1": {
+    source_title_override: "Hostess Twinkies (045000001008) - UPC Food Search",
+    source_owner_override: "UPC Food Search",
+    source_detail_url: "https://upcfoodsearch.com/food-products/other-pastries/045000001008/",
+    source_image_match_status: "label_database_source_text_record",
+    source_record_title: "Hostess Twinkies",
+    product_size: "Package size not stated on source page",
+    manufacturer: "Hostess",
+    upc: "045000001008",
+    allergen_statement: "May contain peanuts or traces of peanuts.",
+    source_disclaimer: "Third-party UPC database text; original package image and capture date are not provided on the source page.",
+    ingredient_statement_override: "Enriched Bleached Wheat Flour (Flour, Ferrous Sulfate, B Vitamins (Niacin, Thiamine Mononitrate [B1], Riboflavin [B2], Folic Acid), Sugar, Corn Syrup, Water, High Fructose Corn Syrup, Partially Hydrogenated Vegetable Shortening (Contains One Or More: Soybean, Canola Or Palm Oil), Dextrose, Whole Eggs. Contains 2% Or Less Of: Modified Corn Starch, Cellulose Gum, Whey, Leavenings (Sodium Acid Pyrophosphate, Baking Soda, Monocalcium Phosphate), Salt, Cornstarch, Corn Flour, Corn Dextrins, Mono And Diglycerides, Polysorbate 60, Soy Lecithin, Natural And Artificial Flavors, Soy Protein Isolate, Sodium Stearoyl Lactylate, Sodium And Calcium Caseinate, Calcium Sulfate, Sorbic Acid (To Retain Freshness), Color Added (Yellow 5, Red 40).",
+    ingredient_items_override: [
+      "Enriched Bleached Wheat Flour (Flour, Ferrous Sulfate, B Vitamins: Niacin, Thiamine Mononitrate [B1], Riboflavin [B2], Folic Acid)",
+      "Sugar",
+      "Corn Syrup",
+      "Water",
+      "High Fructose Corn Syrup",
+      "Partially Hydrogenated Vegetable Shortening (Contains One Or More: Soybean, Canola Or Palm Oil)",
+      "Dextrose",
+      "Whole Eggs",
+      "Contains 2% Or Less Of: Modified Corn Starch",
+      "Cellulose Gum",
+      "Whey",
+      "Leavenings (Sodium Acid Pyrophosphate, Baking Soda, Monocalcium Phosphate)",
+      "Salt",
+      "Cornstarch",
+      "Corn Flour",
+      "Corn Dextrins",
+      "Mono And Diglycerides",
+      "Polysorbate 60",
+      "Soy Lecithin",
+      "Natural And Artificial Flavors",
+      "Soy Protein Isolate",
+      "Sodium Stearoyl Lactylate",
+      "Sodium And Calcium Caseinate",
+      "Calcium Sulfate",
+      "Sorbic Acid (To Retain Freshness)",
+      "Color Added (Yellow 5, Red 40)",
+    ],
+    verification_note: "UPC Food Search original ingredient statement verified from the public source page on 2026-06-17. Treat as a formulation lead only until package imagery or an archived label confirms the text and date.",
   },
 };
 
@@ -135,6 +177,10 @@ function privateSafePreviewEndpoint(visualId) {
 
 function ingredientTextFromItems(items) {
   return items.join(", ");
+}
+
+function sourceYearLabel(row) {
+  return row.vintage_label === "current_2020s" ? "current" : row.vintage_label;
 }
 
 function sourceSnapshotText(row, review, ingredientText) {
@@ -296,7 +342,7 @@ function proofHtml(row, review, items) {
         </dl>
       </aside>
       <div class="proof-copy">
-        <p class="proof-kicker">Current Source Text Candidate</p>
+        <p class="proof-kicker">Source Text Candidate</p>
         <h1>${escapeHtml(row.product_name)}</h1>
         <p class="source">${escapeHtml(review.source_title_override || row.source_title)} · ${escapeHtml(new URL(review.source_detail_url || row.source_url).hostname)}</p>
         <ol class="ingredients">${itemRows}</ol>
@@ -378,6 +424,10 @@ function upsertFamily(families, family) {
   return families;
 }
 
+function removeLegacyFamilies(families) {
+  return (families || []).filter((family) => family.id !== "label-database-current-leads");
+}
+
 function publicClaimBoundary() {
   return "Label database text is candidate evidence only. Package image review is required before promoting a package-label ingredient claim or historical formulation comparison.";
 }
@@ -409,7 +459,7 @@ function publicRowFor(row, review, visual, ingredientText, ingredientItems) {
     ocr_status: "source_html_text_extracted",
     crop_status: visual.crop_status,
     source_image_title: review.source_record_title || review.source_title_override || row.source_title,
-    source_image_year: "current",
+    source_image_year: sourceYearLabel(row),
     source_detail_url: sourceUrl,
     source_image_match_status: review.source_image_match_status,
     proof_visual_basis: "label_database_source_text_proof_panel",
@@ -442,7 +492,7 @@ function updateNavigatorTimeline(visualIndex) {
     private_scratch_policy: "Use the configured private scratch root for captures, crops, OCR text, model packets, and review manifests. Public files remain link/status only.",
     families: [],
   };
-  data.source_family_summary.families = upsertFamily(data.source_family_summary.families || [], {
+  data.source_family_summary.families = upsertFamily(removeLegacyFamilies(data.source_family_summary.families), {
     id: sourceFamilyId,
     label: sourceFamilyLabel,
     strategy: "label_database_source_text_leads",
@@ -475,7 +525,7 @@ function updateNavigatorTimeline(visualIndex) {
     default_family: existingTimeline.default_family || "official-current-labels",
     public_image_policy: existingTimeline.public_image_policy || visualIndex.public_image_policy,
     claim_policy: existingTimeline.claim_policy || visualIndex.claim_policy,
-    families: upsertFamily(existingTimeline.families || [], {
+    families: upsertFamily(removeLegacyFamilies(existingTimeline.families), {
       id: sourceFamilyId,
       label: sourceFamilyLabel,
       row_count: visualIndex.totals.rows,
@@ -490,7 +540,7 @@ function updateNavigatorTimeline(visualIndex) {
 
 async function build() {
   const noRender = hasFlag("no-render");
-  const runId = sanitizeId(argValue("run-id", "label_database_current")) || "label_database_current";
+  const runId = sanitizeId(argValue("run-id", "label_database_text")) || "label_database_text";
   const runDir = path.resolve(argValue("result-dir", path.join(cacheRoot, runId)));
   const sourceSnapshotDir = path.join(runDir, "source-snapshots");
   const proofHtmlDir = path.join(runDir, "proof-html");
@@ -512,7 +562,7 @@ async function build() {
   for (const row of rows) {
     const review = curatedRows[row.evidence_id];
     const visualId = visualIdFor(row);
-    const items = ingredientItemsFromStatement(review.ingredient_statement_override);
+    const items = review.ingredient_items_override || ingredientItemsFromStatement(review.ingredient_statement_override);
     const ingredientText = ingredientTextFromItems(items);
     const snapshotPath = path.join(sourceSnapshotDir, `${visualId}.txt`);
     writeTextIfChanged(snapshotPath, sourceSnapshotText(row, review, ingredientText));
@@ -531,7 +581,7 @@ async function build() {
       source_snapshot_path: snapshotPath,
       ingredient_fragment_path: snapshotPath,
       source_image_title: review.source_record_title || row.source_title,
-      source_image_year: "current",
+      source_image_year: sourceYearLabel(row),
       source_detail_url: review.source_detail_url || row.source_url,
       source_image_match_status: review.source_image_match_status,
       preview_path: "",
@@ -554,7 +604,7 @@ async function build() {
     sourceCaptures.push({
       source_url: review.source_detail_url || row.source_url,
       status: "manual_source_text_snapshot_ready",
-      candidates: [{ url: review.source_detail_url || row.source_url, title: `${review.source_record_title || row.product_name} ingredient text`, year: "current" }],
+      candidates: [{ url: review.source_detail_url || row.source_url, title: `${review.source_record_title || row.product_name} ingredient text`, year: sourceYearLabel(row) }],
       downloads: [{ url: review.source_detail_url || row.source_url, file_path: snapshotPath, title: `${review.source_record_title || row.product_name} source text snapshot` }],
       public_error: "",
     });

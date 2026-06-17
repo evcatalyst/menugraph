@@ -21,7 +21,7 @@ const PRIVATE_FLICKR_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "fl
 const PRIVATE_FLICKR_MANIFEST_PATH = path.join(PRIVATE_FLICKR_ROOT, "latest-private-manifest.json");
 const PRIVATE_OFFICIAL_CURRENT_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "official-current-labels");
 const PRIVATE_OFFICIAL_CURRENT_MANIFEST_PATH = path.join(PRIVATE_OFFICIAL_CURRENT_ROOT, "latest-private-manifest.json");
-const PRIVATE_LABEL_DATABASE_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "label-database-current-leads");
+const PRIVATE_LABEL_DATABASE_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "label-database-text-leads");
 const PRIVATE_LABEL_DATABASE_MANIFEST_PATH = path.join(PRIVATE_LABEL_DATABASE_ROOT, "latest-private-manifest.json");
 const PRIVATE_INGREDIENT_MANIFESTS = [
   { manifestPath: PRIVATE_CWA_MANIFEST_PATH, rootDir: PRIVATE_CWA_ROOT },

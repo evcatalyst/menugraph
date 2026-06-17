@@ -464,7 +464,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
   await expect(page.locator("#source-family-gap-summary")).toBeHidden();
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Full-corpus capture queue");
-  await expect(page.locator("#source-family-coverage-summary")).toContainText("105/120 products represented");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("106/120 products represented");
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Starbucks Pumpkin Spice Latte");
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
@@ -638,12 +638,25 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   expect(sevenUpImageSize.width).toBeGreaterThan(sevenUpImageSize.height);
   await expect(sevenUpProofImage).toHaveCSS("transform", "none");
 
-  await page.locator(".source-family-tab").filter({ hasText: "Label Database Current Leads" }).click();
-  await expect(page.locator(".source-family-tab.is-selected")).toContainText("Label Database Current Leads");
-  await expect(page.locator("#source-family-timeline-title")).toContainText("Label Database Current Leads");
-  await expect(page.locator(".cwa-product-chip")).toHaveCount(1);
-  await expect(page.locator(".cwa-product-chip").first()).toContainText("Nilla Wafers");
-  await expect(page.locator("#source-family-filter-status")).toContainText("1 products");
+  await page.locator(".source-family-tab").filter({ hasText: "Label Database Text Leads" }).click();
+  await expect(page.locator(".source-family-tab.is-selected")).toContainText("Label Database Text Leads");
+  await expect(page.locator("#source-family-timeline-title")).toContainText("Label Database Text Leads");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(2);
+  await expect(page.locator("#source-family-filter-status")).toContainText("2 products");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Hostess Twinkies" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "label_database_source_text_proof_panel");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Partially Hydrogenated Vegetable Shortening");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Color Added");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Yellow 5");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Ingredient text candidate from a label database source']")).toBeVisible();
+  const twinkiesPreview = page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame");
+  const twinkiesOverlay = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay");
+  await expect(twinkiesPreview.locator("img")).toBeVisible();
+  await twinkiesPreview.hover();
+  await expect(twinkiesOverlay).toContainText("Ingredient source text");
+  await expect(twinkiesOverlay).toContainText("Partially Hydrogenated");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Nilla Wafers" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "label_database_source_text_proof_panel");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Unbleached Enriched Flour");
@@ -652,6 +665,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Ingredient text candidate from a label database source']")).toBeVisible();
   const labelDatabasePreview = page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame");
   const labelDatabaseOverlay = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay");
+  await expect(labelDatabasePreview.locator("img")).toBeVisible();
   await labelDatabasePreview.hover();
   await expect(labelDatabaseOverlay).toContainText("Ingredient source text");
   await expect(labelDatabaseOverlay).toContainText("Unbleached Enriched Flour");

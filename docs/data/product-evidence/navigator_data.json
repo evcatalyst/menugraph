@@ -9992,16 +9992,34 @@
         ]
       },
       {
-        "id": "label-database-current-leads",
-        "label": "Label Database Current Leads",
+        "id": "label-database-text-leads",
+        "label": "Label Database Text Leads",
         "strategy": "label_database_source_text_leads",
         "public_image_policy": "Public artifacts publish source links, candidate ingredient text, hashes, and status only. Localhost may render cached proof panels through /api/private/ingredient-crops/:visual_id when a private cache exists.",
         "claim_policy": "Label database text remains candidate evidence until manually reviewed against package labeling.",
-        "evidence_row_count": 1,
-        "product_count": 1,
-        "top_domains": "www.directionsforme.org",
+        "evidence_row_count": 2,
+        "product_count": 2,
+        "top_domains": "upcfoodsearch.com; www.directionsforme.org",
         "gap_categories": "package_label_photo_review_needed",
         "products": [
+          {
+            "product_id": "twinkies",
+            "product_name": "Hostess Twinkies",
+            "brand": "Hostess",
+            "category": "snack cakes",
+            "evidence_count": 1,
+            "vintages": [
+              "2010s"
+            ],
+            "source_urls": [
+              "https://upcfoodsearch.com/food-products/other-pastries/045000001008/"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "verify_label_database_text_against_package_photo",
+            "vintage_count": 1
+          },
           {
             "product_id": "nilla_wafers",
             "product_name": "Nilla Wafers",
@@ -10236,7 +10254,7 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T10:12:13.818Z",
+    "generated_at_utc": "2026-06-17T10:24:01.547Z",
     "default_family": "official-current-labels",
     "public_image_policy": "Public artifacts stay link/status-only. Localhost may render cached crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
     "claim_policy": "Wrapper lineage can support visual provenance only. OCR output remains candidate evidence until corrected and manually verified.",
@@ -19661,19 +19679,109 @@
         ]
       },
       {
-        "id": "label-database-current-leads",
-        "label": "Label Database Current Leads",
-        "row_count": 1,
-        "product_count": 1,
-        "local_preview_available_count": 1,
-        "ingredient_signal_count": 1,
+        "id": "label-database-text-leads",
+        "label": "Label Database Text Leads",
+        "row_count": 2,
+        "product_count": 2,
+        "local_preview_available_count": 2,
+        "ingredient_signal_count": 2,
         "products": [
+          {
+            "product_id": "twinkies",
+            "product_name": "Hostess Twinkies",
+            "brand": "Hostess",
+            "category": "snack cakes",
+            "source_family": "label-database-text-leads",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "2010s"
+            ],
+            "rows": [
+              {
+                "product_id": "twinkies",
+                "product_name": "Hostess Twinkies",
+                "brand": "Hostess",
+                "category": "snack cakes",
+                "vintage_label": "2010s",
+                "vintage_start": "2010-01-01",
+                "vintage_end": "2019-12-31",
+                "evidence_id": "twinkies__2010s__15__1",
+                "ocr_priority": "high",
+                "ocr_gap_category": "panel_capture_needed",
+                "source_domain": "upcfoodsearch.com",
+                "source_url": "https://upcfoodsearch.com/food-products/other-pastries/045000001008/",
+                "source_title": "Hostess Twinkies (045000001008) - UPC Food Search",
+                "source_owner": "UPC Food Search",
+                "rights_note": "",
+                "visual_id": "twinkies__2010s__bbfdbb6089",
+                "preview_endpoint": "/api/private/ingredient-crops/twinkies__2010s__bbfdbb6089",
+                "visual_status": "local_source_text_proof_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "label_database_source_text_proof_panel_ready",
+                "source_image_title": "Hostess Twinkies",
+                "source_image_year": "2010s",
+                "source_detail_url": "https://upcfoodsearch.com/food-products/other-pastries/045000001008/",
+                "source_image_match_status": "label_database_source_text_record",
+                "proof_visual_basis": "label_database_source_text_proof_panel",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Enriched Bleached Wheat Flour (Flour, Ferrous Sulfate, B Vitamins: Niacin, Thiamine Mononitrate [B1], Riboflavin [B2], Folic Acid), Sugar, Corn Syrup, Water, High Fructose Corn Syrup, Partially Hydrogenated Vegetable Shortening (Contains One Or More: Soybean, Canola Or Palm Oil), Dextrose, Whole Eggs, Contains 2% Or Less Of: Modified Corn Starch, Cellulose Gum, Whey, Leavenings (Sodium Acid Pyrophosphate, Baking Soda, Monocalcium Phosphate), Salt, Cornstarch, Corn Flour, Corn Dextrins, Mono And Diglycerides, Polysorbate 60, Soy Lecithin, Natural And Artificial Flavors, Soy Protein Isolate, Sodium Stearoyl Lactylate, Sodium And Calcium Caseinate, Calcium Sulfate, Sorbic Acid (To Retain Freshness), Color Added (Yellow 5, Red 40)",
+                "ingredient_items": [
+                  "Enriched Bleached Wheat Flour (Flour, Ferrous Sulfate, B Vitamins: Niacin, Thiamine Mononitrate [B1], Riboflavin [B2], Folic Acid)",
+                  "Sugar",
+                  "Corn Syrup",
+                  "Water",
+                  "High Fructose Corn Syrup",
+                  "Partially Hydrogenated Vegetable Shortening (Contains One Or More: Soybean, Canola Or Palm Oil)",
+                  "Dextrose",
+                  "Whole Eggs",
+                  "Contains 2% Or Less Of: Modified Corn Starch",
+                  "Cellulose Gum",
+                  "Whey",
+                  "Leavenings (Sodium Acid Pyrophosphate, Baking Soda, Monocalcium Phosphate)",
+                  "Salt",
+                  "Cornstarch",
+                  "Corn Flour",
+                  "Corn Dextrins",
+                  "Mono And Diglycerides",
+                  "Polysorbate 60",
+                  "Soy Lecithin",
+                  "Natural And Artificial Flavors",
+                  "Soy Protein Isolate",
+                  "Sodium Stearoyl Lactylate",
+                  "Sodium And Calcium Caseinate",
+                  "Calcium Sulfate",
+                  "Sorbic Acid (To Retain Freshness)",
+                  "Color Added (Yellow 5, Red 40)"
+                ],
+                "ingredient_text_source": "label_database_source_text",
+                "ingredient_text_status": "label_database_candidate_needs_package_review",
+                "candidate_excerpt": "Enriched Bleached Wheat Flour (Flour, Ferrous Sulfate, B Vitamins: Niacin, Thiamine Mononitrate [B1], Riboflavin [B2], Folic Acid), Sugar, Corn Syrup, Water, High Fructose Corn Syrup, Partially Hydrogenated Vegetable Shortening (Contains O...",
+                "candidate_status": "source_text_candidate_needs_package_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "manual_source_text_snapshot_ready",
+                "source_candidate_image_count": 0,
+                "product_size": "Package size not stated on source page",
+                "manufacturer": "Hostess",
+                "upc": "045000001008",
+                "allergen_statement": "May contain peanuts or traces of peanuts.",
+                "source_disclaimer_excerpt": "Third-party UPC database text; original package image and capture date are not provided on the source page.",
+                "source_text_hash": "5510b5e8c3ac3fad",
+                "claim_boundary": "Label database text is candidate evidence only. Package image review is required before promoting a package-label ingredient claim or historical formulation comparison."
+              }
+            ]
+          },
           {
             "product_id": "nilla_wafers",
             "product_name": "Nilla Wafers",
             "brand": "Nilla",
             "category": "cookies",
-            "source_family": "label-database-current-leads",
+            "source_family": "label-database-text-leads",
             "evidence_count": 1,
             "local_preview_available_count": 1,
             "ingredient_signal_count": 1,
@@ -19750,19 +19858,19 @@
   },
   "source_family_coverage": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T10:12:19.662Z",
+    "generated_at_utc": "2026-06-17T10:24:08.374Z",
     "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
     "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
     "totals": {
       "queue_products": 120,
-      "represented_products": 105,
-      "missing_products": 15,
+      "represented_products": 106,
+      "missing_products": 14,
       "queue_evidence_rows": 1701,
-      "high_priority_missing_rows": 102,
-      "current_missing_rows": 63
+      "high_priority_missing_rows": 99,
+      "current_missing_rows": 61
     },
     "missing_capture_classes": {
-      "candidate_panel_or_text_available": 8,
+      "candidate_panel_or_text_available": 7,
       "menu_component_source_needed": 7
     },
     "missing_products": [
@@ -21149,114 +21257,6 @@
           }
         ],
         "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
-      },
-      {
-        "product_id": "twinkies",
-        "product_name": "Hostess Twinkies",
-        "brand": "Hostess",
-        "category": "snack cakes",
-        "coverage_status": "not_yet_represented_in_source_family",
-        "represented_source_families": [],
-        "capture_class": "candidate_panel_or_text_available",
-        "evidence_row_count": 11,
-        "high_priority_row_count": 3,
-        "current_row_count": 2,
-        "current_official_row_count": 0,
-        "ingredient_panel_visible_row_count": 3,
-        "ingredient_text_available_row_count": 0,
-        "top_source_domains": [
-          {
-            "domain": "www.flickr.com",
-            "count": 7
-          },
-          {
-            "domain": "unknown_source",
-            "count": 1
-          },
-          {
-            "domain": "upcfoodsearch.com",
-            "count": 1
-          },
-          {
-            "domain": "www.kroger.com",
-            "count": 1
-          },
-          {
-            "domain": "www.walmart.com",
-            "count": 1
-          }
-        ],
-        "representative_rows": [
-          {
-            "evidence_id": "twinkies__current_2020s__16__2",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "panel_capture_needed",
-            "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-            "evidence_kind": "retailer_page",
-            "source_domain": "www.kroger.com",
-            "source_url": "https://www.kroger.com/p/hostess-twinkies-single-serve-chocolate-cakes/0088810901090",
-            "source_title": "Hostess Twinkies Single-Serve Chocolate Cakes, 2 ct / 2.7 oz - Kroger",
-            "source_owner": "www.kroger.com",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": false,
-            "next_action": "capture_private_panel_crop_and_run_ocr",
-            "reviewer_note_excerpt": "This is chocolate cakes, not classic golden Twinkies; keep SKU-specific and do not generalize.;Retailer page; useful for current SKU/weight and ingredient candidate, not package-photo verified."
-          },
-          {
-            "evidence_id": "twinkies__current_2020s__299__1",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "panel_capture_needed",
-            "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-            "evidence_kind": "retailer_page",
-            "source_domain": "www.walmart.com",
-            "source_url": "https://www.walmart.com/ip/36462419",
-            "source_title": "HOSTESS Banana Flavored Twinkies, 13.58 oz, 10 Count - Walmart",
-            "source_owner": "www.walmart.com",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": false,
-            "next_action": "capture_private_panel_crop_and_run_ocr",
-            "reviewer_note_excerpt": "Current Twinkies candidate; archive PDP and compare ingredient text against package back/side panel.;Retailer page provides source-attributable package imagery plus ingredient and size context; verify flavor and panel image before using as ground truth."
-          },
-          {
-            "evidence_id": "twinkies__2010s__15__1",
-            "vintage_label": "2010s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "panel_capture_needed",
-            "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-            "evidence_kind": "label_database_record",
-            "source_domain": "upcfoodsearch.com",
-            "source_url": "https://upcfoodsearch.com/food-products/other-pastries/045000001008/",
-            "source_title": "Hostess Twinkies (045000001008) - UPC Food Search",
-            "source_owner": "upcfoodsearch.com",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": false,
-            "next_action": "capture_private_panel_crop_and_run_ocr",
-            "reviewer_note_excerpt": "Important trans-fat-era candidate; must verify against package/photo or archived label image.;Third-party UPC database; useful formulation lead, but the original ingredient-statement image requires separate review."
-          },
-          {
-            "evidence_id": "twinkies__1980s_or_earlier__17__1",
-            "vintage_label": "1980s_or_earlier",
-            "ocr_priority": "medium",
-            "ocr_gap_category": "readable_panel_photo_needed",
-            "ocr_recommended_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
-            "evidence_kind": "collector_package_photo",
-            "source_domain": "www.flickr.com",
-            "source_url": "https://www.flickr.com/photos/wafflewhiffer/albums/72157629976913182/",
-            "source_title": "Twinkies Packages - Flickr album by Waffle Whiffer",
-            "source_owner": "Flickr",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": false,
-            "ingredient_text_available": false,
-            "next_action": "find_package_label_or_smartlabel_panel",
-            "reviewer_note_excerpt": "Queue item-level reviews for 1969, 1973, 1974, 1978, 1982, 1985, 1987, and 1989 Twinkies package entries.;Source venue for many Twinkies package vintages. The album itself should drive item-level acquisition; do not treat it as a verified product label."
-          }
-        ],
-        "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
       },
       {
         "product_id": "hot_pockets_pepperoni_pizza",

@@ -212,9 +212,10 @@ function ingredientOverlay(row) {
   }
 
   const items = ingredientItemsForRow(row);
-  const visibleItems = items.slice(0, 3);
+  const basis = proofVisualBasis(row);
+  const visibleItems = items.slice(0, basis === "label_database_source_text_proof_panel" ? 6 : 3);
   const overflowCount = Math.max(0, items.length - visibleItems.length);
-  const overlayTitle = proofVisualBasis(row) === "label_database_source_text_proof_panel"
+  const overlayTitle = basis === "label_database_source_text_proof_panel"
     ? "Ingredient source text"
     : "Ingredients on label";
   return `
