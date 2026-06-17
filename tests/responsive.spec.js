@@ -587,8 +587,15 @@ test("ingredient navigator renders CWA visual timeline without relying on public
     }));
     expect(drilldownPaneMetrics.scrollWidth).toBeGreaterThan(drilldownPaneMetrics.clientWidth);
   }
-  await page.locator(".ingredient-drilldown-close").click();
+  await page.locator("#ingredient-drilldown .ingredient-filter-link").filter({ hasText: "artificial coloring" }).click();
   await expect(page.locator("#ingredient-drilldown")).toBeHidden();
+  await expect(page.locator("#source-family-search")).toHaveValue("artificial coloring");
+  await expect(page.locator("#source-family-filter-status")).toContainText("1 of 14 products");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(1);
+  await expect(page.locator(".cwa-product-chip").first()).toContainText("Kellogg's Froot Loops");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("artificial coloring");
+  await page.locator("#source-family-filter-clear").click();
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(14);
 
   await page.locator(".cwa-product-chip").filter({ hasText: "7UP Original" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(2);

@@ -190,6 +190,11 @@ function ingredientItemsForRow(row) {
   return splitIngredientText(row?.ingredient_text || "");
 }
 
+function ingredientFilterButton(item) {
+  const value = String(item || "").replace(/\s+/g, " ").trim();
+  return `<button class="ingredient-filter-link" type="button" data-source-family-filter-value="${escapeHtml(value)}" title="${escapeHtml(`Find proof cards with ${value}`)}">${escapeHtml(value)}</button>`;
+}
+
 function ingredientOverlay(row) {
   if (!row.ingredient_text) {
     return `
@@ -222,7 +227,7 @@ function ingredientTextBlock(row, options = {}) {
     ? truncateText(row.candidate_excerpt || row.ingredient_text, 230)
     : row.ingredient_text;
   const list = items.length
-    ? `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+    ? `<ul>${items.map((item) => `<li>${ingredientFilterButton(item)}</li>`).join("")}</ul>`
     : "";
   const label = compact && items.length
     ? `${items.length} ingredient ${items.length === 1 ? "entry" : "entries"}`
@@ -342,6 +347,18 @@ function moveSourceFamilyProduct(delta) {
   const nextIndex = Math.min(products.length - 1, Math.max(0, currentIndex + delta));
   state.cwaProductId = products[nextIndex].product_id;
   renderCwaTimeline();
+}
+
+function applySourceFamilyFilter(value, options = {}) {
+  const query = String(value || "").replace(/\s+/g, " ").trim();
+  if (!query) return;
+  state.sourceFamilyQuery = query;
+  state.cwaProductId = "";
+  if (els.sourceFamilySearch) els.sourceFamilySearch.value = query;
+  renderCwaTimeline();
+  if (options.closeDrilldown) closeIngredientDrilldown();
+  els.cwaTimelinePanel?.scrollIntoView({ block: "start", behavior: "smooth" });
+  els.sourceFamilySearch?.focus();
 }
 
 function sourceFamilyRowByVisualId(visualId) {
@@ -1118,6 +1135,12 @@ function attachEvents() {
   els.sourceFamilyNext?.addEventListener("click", () => {
     moveSourceFamilyProduct(1);
   });
+  els.cwaTimelinePanel?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-source-family-filter-value]");
+    if (!button) return;
+    event.preventDefault();
+    applySourceFamilyFilter(button.dataset.sourceFamilyFilterValue);
+  });
   els.cwaTimelineTrack?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-cwa-inspect]");
     if (!button) return;
@@ -1158,6 +1181,12 @@ function attachEvents() {
     els.compareToggle.textContent = state.compare ? "Compare Mode On" : "Compare Mode";
   });
   els.ingredientDrilldown?.addEventListener("click", (event) => {
+    const ingredientButton = event.target.closest("[data-source-family-filter-value]");
+    if (ingredientButton) {
+      event.preventDefault();
+      applySourceFamilyFilter(ingredientButton.dataset.sourceFamilyFilterValue, { closeDrilldown: true });
+      return;
+    }
     if (event.target.closest("[data-ingredient-drilldown-close]")) {
       closeIngredientDrilldown();
     }
