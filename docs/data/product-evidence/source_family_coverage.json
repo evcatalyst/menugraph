@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-06-17T10:24:08.374Z",
+  "generated_at_utc": "2026-06-17T10:33:33.315Z",
   "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
   "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
   "totals": {
     "queue_products": 120,
-    "represented_products": 106,
-    "missing_products": 14,
+    "represented_products": 107,
+    "missing_products": 13,
     "queue_evidence_rows": 1701,
-    "high_priority_missing_rows": 99,
-    "current_missing_rows": 61
+    "high_priority_missing_rows": 92,
+    "current_missing_rows": 54
   },
   "missing_capture_classes": {
-    "candidate_panel_or_text_available": 7,
-    "menu_component_source_needed": 7
+    "menu_component_source_needed": 7,
+    "candidate_panel_or_text_available": 6
   },
   "missing_products": [
     {
@@ -656,114 +656,6 @@
           "ingredient_text_available": false,
           "next_action": "capture_private_panel_crop_and_run_ocr",
           "reviewer_note_excerpt": "Capture image carousel, ingredient text, package count/weight, price/store context, and exact Chocolate CupCakes variant.;Retailer current source. Use for package-image review and current ingredient candidate; verify exact count/weight and image panels."
-        }
-      ],
-      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
-    },
-    {
-      "product_id": "pearl_milling_pancake_mix_original",
-      "product_name": "Pearl Milling Company Original Pancake Mix",
-      "brand": "Pearl Milling Company",
-      "category": "breakfast",
-      "coverage_status": "not_yet_represented_in_source_family",
-      "represented_source_families": [],
-      "capture_class": "candidate_panel_or_text_available",
-      "evidence_row_count": 14,
-      "high_priority_row_count": 7,
-      "current_row_count": 7,
-      "current_official_row_count": 1,
-      "ingredient_panel_visible_row_count": 6,
-      "ingredient_text_available_row_count": 0,
-      "top_source_domains": [
-        {
-          "domain": "en.wikipedia.org",
-          "count": 2
-        },
-        {
-          "domain": "unknown_source",
-          "count": 2
-        },
-        {
-          "domain": "www.flickr.com",
-          "count": 2
-        },
-        {
-          "domain": "www.pearlmillingcompany.com",
-          "count": 2
-        },
-        {
-          "domain": "www.walmart.com",
-          "count": 2
-        }
-      ],
-      "representative_rows": [
-        {
-          "evidence_id": "pearl_milling_pancake_mix_original__current_2020s__742__6",
-          "vintage_label": "current_2020s",
-          "ocr_priority": "high",
-          "ocr_gap_category": "panel_capture_needed",
-          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-          "evidence_kind": "current_web_page",
-          "source_domain": "www.pearlmillingcompany.com",
-          "source_url": "https://www.pearlmillingcompany.com/productos-esp/pancake_waffle_mixes/original_pancakes",
-          "source_title": "Pearl Milling Company Original pancake and waffle mix page",
-          "source_owner": "Pearl Milling Company / PepsiCo",
-          "source_surface": "current_web",
-          "ingredient_panel_visible": true,
-          "ingredient_text_available": false,
-          "next_action": "capture_private_panel_crop_and_run_ocr",
-          "reviewer_note_excerpt": "Capture English/US equivalent page if available, ingredient text, package size, allergen text, and any recall/undeclared milk caveat separately.;Official brand page, but localized Spanish path. Use as current label candidate after market/language review and e..."
-        },
-        {
-          "evidence_id": "pearl_milling_pancake_mix_original__current_2020s__636__7",
-          "vintage_label": "current_2020s",
-          "ocr_priority": "high",
-          "ocr_gap_category": "document_text_pipeline_needed",
-          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-          "evidence_kind": "brand_label_page",
-          "source_domain": "contact.pepsico.com",
-          "source_url": "https://contact.pepsico.com/files/pearlmillingcompany/documents/1736899789/PMC%20Original%20Recall%20Press%20Release.pdf",
-          "source_title": "Pearl Milling Company Original recall press release PDF",
-          "source_owner": "PepsiCo / Quaker Oats",
-          "source_surface": "current_web",
-          "ingredient_panel_visible": false,
-          "ingredient_text_available": false,
-          "next_action": "find_package_label_or_smartlabel_panel",
-          "reviewer_note_excerpt": "Store as product-change/allergen-risk evidence. Do not treat undeclared milk as normal ingredient text without affected-lot review.;Official recall/change-event evidence for allergen disclosure and package identity. It is not a normal ingredient label stateme..."
-        },
-        {
-          "evidence_id": "pearl_milling_pancake_mix_original__current_2020s__123__1",
-          "vintage_label": "current_2020s",
-          "ocr_priority": "high",
-          "ocr_gap_category": "panel_capture_needed",
-          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-          "evidence_kind": "current_web_page",
-          "source_domain": "www.pearlmillingcompany.com",
-          "source_url": "https://www.pearlmillingcompany.com/products/pancake_waffle_mixes/original_pancakes",
-          "source_title": "Pearl Milling Company Original Pancake & Waffle Mix",
-          "source_owner": "www.pearlmillingcompany.com",
-          "source_surface": "current_web",
-          "ingredient_panel_visible": true,
-          "ingredient_text_available": false,
-          "next_action": "capture_private_panel_crop_and_run_ocr",
-          "reviewer_note_excerpt": "Current pancake-mix baseline and post-Aunt-Jemima identity transition candidate.;Brand product page with current label text; package photo remains authoritative. Current source also provides attributable product/package imagery for photo-review triage."
-        },
-        {
-          "evidence_id": "pearl_milling_pancake_mix_original__current_2020s__807__2",
-          "vintage_label": "current_2020s",
-          "ocr_priority": "high",
-          "ocr_gap_category": "panel_capture_needed",
-          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-          "evidence_kind": "retailer_page",
-          "source_domain": "www.walmart.com",
-          "source_url": "https://www.walmart.com/ip/11210709777",
-          "source_title": "Pearl Milling Company Original Pancake Mix, 32 oz - Walmart",
-          "source_owner": "Walmart",
-          "source_surface": "current_web",
-          "ingredient_panel_visible": true,
-          "ingredient_text_available": false,
-          "next_action": "capture_private_panel_crop_and_run_ocr",
-          "reviewer_note_excerpt": "Review media, ingredients, package size, price/unit price, UPC, brand-transition text, and distinguish Original from Complete variant.;Retailer current package/price candidate. Contains historical brand text but must remain current Pearl Milling package evide..."
         }
       ],
       "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"

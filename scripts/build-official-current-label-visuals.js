@@ -433,6 +433,15 @@ const curatedRows = {
     source_detail_url: "https://wheaties.com/nutrition#ingredients",
     source_image_match_status: "official_current_product_page",
   },
+  "pearl_milling_pancake_mix_original__current_2020s__123__1": {
+    ingredient_fragment_strategy: "manual_official_source_text",
+    ingredient_statement_override: "Enriched Bleached Flour (Bleached Wheat Flour, Niacinamide, Reduced Iron, Thiamin Mononitrate, Riboflavin, Folic Acid), Sugar, Leavening (Baking Soda, Sodium Aluminum Phosphate, Monocalcium Phosphate), Salt, Calcium Carbonate.",
+    source_fetch_url: "https://www.pearlmillingcompany.com/products/pancake_waffle_mixes/original_pancakes",
+    source_detail_url: "https://www.pearlmillingcompany.com/products/pancake_waffle_mixes/original_pancakes#ingredients",
+    source_title_override: "Pearl Milling Company Original Pancake & Waffle Mix official product page",
+    source_owner_override: "Pearl Milling Company / The Quaker Oats Company",
+    source_image_match_status: "official_current_product_page",
+  },
   "ball_park_franks__current_2020s__794__16": {
     ingredient_fragment_strategy: "tyson_foodservice_page",
     source_detail_url: "https://www.tysonfoodservice.com/products/ball-park/beef/hot-dogs/10054500167159#ingredients",
@@ -1720,6 +1729,29 @@ function proofHtml(row, sourceTitle, sourceDomain, items, imagePath, ingredientI
   const productImage = fileDataUri(imagePath);
   const ingredientPanelImage = fileDataUri(ingredientImagePath);
   const itemRows = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const visualMarkup = productImage || ingredientPanelImage
+    ? `
+      <div class="proof-visual">
+        <div class="visual-frame">
+          ${productImage ? `<img class="product-image" alt="" src="${productImage}">` : ""}
+        </div>
+        <p class="visual-label">Official source visual</p>
+        ${ingredientPanelImage ? `
+        <div class="visual-frame visual-frame--label">
+          <img class="product-image" alt="" src="${ingredientPanelImage}">
+        </div>
+        <p class="visual-label">Official ingredient panel visual</p>` : ""}
+      </div>`
+    : `
+      <aside class="source-record" aria-label="Official source record">
+        <span>Official Source Text</span>
+        <strong>${escapeHtml(sourceTitle || row.source_title || row.product_name)}</strong>
+        <dl>
+          <div><dt>Source</dt><dd>${escapeHtml(sourceDomain || row.source_domain || "Official source")}</dd></div>
+          <div><dt>Vintage</dt><dd>${escapeHtml(row.vintage_label || "current")}</dd></div>
+          <div><dt>Review</dt><dd>Package label review required</dd></div>
+        </dl>
+      </aside>`;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -1778,6 +1810,53 @@ function proofHtml(row, sourceTitle, sourceDomain, items, imagePath, ingredientI
     line-height: 1.25;
     font-weight: 720;
   }
+  .source-record {
+    min-height: 540px;
+    padding: 28px;
+    background: #ffffff;
+    border: 2px solid #1f302d;
+    box-shadow: inset 0 0 0 8px #edf4ef;
+    box-sizing: border-box;
+  }
+  .source-record span {
+    display: block;
+    margin-bottom: 18px;
+    color: #8b3d29;
+    font-size: 17px;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .source-record strong {
+    display: block;
+    margin-bottom: 24px;
+    color: #1d1f1b;
+    font-size: 36px;
+    line-height: 1.05;
+  }
+  .source-record dl {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+  }
+  .source-record div {
+    border-top: 1px solid #d9dfd8;
+    padding-top: 13px;
+  }
+  .source-record dt {
+    margin: 0 0 4px;
+    color: #5e655c;
+    font-size: 16px;
+    font-weight: 750;
+    text-transform: uppercase;
+  }
+  .source-record dd {
+    margin: 0;
+    color: #20211d;
+    font-size: 23px;
+    line-height: 1.2;
+    font-weight: 720;
+  }
   .proof-copy {
     min-width: 0;
   }
@@ -1830,17 +1909,7 @@ function proofHtml(row, sourceTitle, sourceDomain, items, imagePath, ingredientI
 <body>
   <main class="proof-panel">
     <section class="proof-layout">
-      <div class="proof-visual">
-        <div class="visual-frame">
-          ${productImage ? `<img class="product-image" alt="" src="${productImage}">` : ""}
-        </div>
-        <p class="visual-label">Official source visual</p>
-        ${ingredientPanelImage ? `
-        <div class="visual-frame visual-frame--label">
-          <img class="product-image" alt="" src="${ingredientPanelImage}">
-        </div>
-        <p class="visual-label">Official ingredient panel visual</p>` : ""}
-      </div>
+      ${visualMarkup}
       <div class="proof-copy">
         <p class="proof-kicker">Official Current Ingredient Page</p>
         <h1>${escapeHtml(row.product_name)}</h1>

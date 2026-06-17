@@ -160,11 +160,11 @@ assert(!JSON.stringify(sourceFamilySummary).includes("/Volumes/azssd/scratch"), 
 assert.strictEqual(typeof buildCoverage, "function", "source-family coverage builder should export buildCoverage");
 assert.strictEqual(sourceFamilyCoverage.schema_version, 1, "source family coverage should be versioned");
 assert.strictEqual(sourceFamilyCoverage.totals.queue_products, 120, "source family coverage should audit the 120-product queue");
-assert.strictEqual(sourceFamilyCoverage.totals.represented_products, 106, "source family coverage should include label-database enrichment");
-assert.strictEqual(sourceFamilyCoverage.totals.missing_products, 14, "source family coverage should expose the remaining missing product queue");
-assert.strictEqual(navigator.source_family_coverage?.totals?.missing_products, 14, "navigator should embed the remaining missing product queue");
+assert.strictEqual(sourceFamilyCoverage.totals.represented_products, 107, "source family coverage should include source-family enrichment");
+assert.strictEqual(sourceFamilyCoverage.totals.missing_products, 13, "source family coverage should expose the remaining missing product queue");
+assert.strictEqual(navigator.source_family_coverage?.totals?.missing_products, 13, "navigator should embed the remaining missing product queue");
 assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "starbucks_pumpkin_spice_latte"), "coverage queue should include Starbucks PSL");
-assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "pearl_milling_pancake_mix_original"), "coverage queue should include Pearl Milling");
+assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "pearl_milling_pancake_mix_original"), "Pearl Milling should be represented by the official-current source-family lane");
 assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "nilla_wafers"), "Nilla Wafers should be represented by the label-database source-family lane");
 assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "twinkies"), "Twinkies should be represented by the label-database source-family lane");
 assert(sourceFamilyCoverage.missing_products.every((row) => row.coverage_status === "not_yet_represented_in_source_family"), "missing queue should not mix represented products");

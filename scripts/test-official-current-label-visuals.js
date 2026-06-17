@@ -85,6 +85,7 @@ const expectedProducts = new Set([
   "panera_broccoli_cheddar_soup",
   "twix_bar",
   "wheaties",
+  "pearl_milling_pancake_mix_original",
   "ball_park_franks",
   "frenchs_yellow_mustard",
   "pepperidge_farm_goldfish_cheddar",
@@ -151,6 +152,7 @@ const allowedOfficialHosts = new Set([
   "www.nutella.com",
   "www.oscarmayer.com",
   "www.paneraathome.com",
+  "www.pearlmillingcompany.com",
   "www.pepperidgefarm.com",
   "www.pizzahut.com",
   "www.poptarts.com",
@@ -197,11 +199,11 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 
 assert.strictEqual(visualIndex.schema_version, 1, "official-current visual index should be versioned");
 assert.strictEqual(visualIndex.source_family.id, "official-current-labels", "official-current source family id should be stable");
-assert.strictEqual(visualIndex.totals.products, 99, "official-current lane should cover 99 products");
-assert.strictEqual(visualIndex.totals.rows, 99, "official-current lane should cover 99 rows");
-assert.strictEqual(visualIndex.rows.length, 99, "official-current rows should match totals");
-assert.strictEqual(visualIndex.totals.local_preview_available, 99, "official-current lane should expose local proof previews");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 99, "official-current lane should expose 99 ingredient text candidates");
+assert.strictEqual(visualIndex.totals.products, 100, "official-current lane should cover 100 products");
+assert.strictEqual(visualIndex.totals.rows, 100, "official-current lane should cover 100 rows");
+assert.strictEqual(visualIndex.rows.length, 100, "official-current rows should match totals");
+assert.strictEqual(visualIndex.totals.local_preview_available, 100, "official-current lane should expose local proof previews");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 100, "official-current lane should expose 100 ingredient text candidates");
 assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 0, "official-current rows should have extracted source text");
 
 visualIndex.products.forEach((product) => {
@@ -287,6 +289,7 @@ const smuckers = visualIndex.rows.find((row) => row.product_id === "smuckers_str
 const paneraSoup = visualIndex.rows.find((row) => row.product_id === "panera_broccoli_cheddar_soup");
 const twix = visualIndex.rows.find((row) => row.product_id === "twix_bar");
 const wheaties = visualIndex.rows.find((row) => row.product_id === "wheaties");
+const pearlMilling = visualIndex.rows.find((row) => row.product_id === "pearl_milling_pancake_mix_original");
 const ballPark = visualIndex.rows.find((row) => row.product_id === "ball_park_franks");
 const frenchs = visualIndex.rows.find((row) => row.product_id === "frenchs_yellow_mustard");
 const goldfish = visualIndex.rows.find((row) => row.product_id === "pepperidge_farm_goldfish_cheddar");
@@ -425,6 +428,10 @@ assert(twix.ingredient_text.includes("Enriched Wheat Flour"), "Twix current labe
 assert(twix.ingredient_text.includes("Modified Corn Starch"), "Twix current label should expose source ingredient text");
 assert(wheaties.ingredient_text.includes("Whole Grain Wheat"), "Wheaties current label should expose source ingredient text");
 assert(wheaties.ingredient_text.includes("Vitamin B 12"), "Wheaties current label should expose source ingredient text");
+assert(pearlMilling.ingredient_text.includes("Enriched Bleached Flour"), "Pearl Milling current label should expose source ingredient text");
+assert(pearlMilling.ingredient_items.includes("Leavening (Baking Soda, Sodium Aluminum Phosphate, Monocalcium Phosphate)"), "Pearl Milling row should expose leavening text");
+assert.strictEqual(pearlMilling.proof_visual_basis, "official_source_text_proof_panel", "Pearl Milling should use an official source-text proof panel");
+assert(pearlMilling.claim_boundary.includes("package-label review"), "Pearl Milling claim boundary should require package-label review");
 assert(ballPark.ingredient_text.includes("hydrolyzed beef stock"), "Ball Park current label should expose source ingredient text");
 assert(ballPark.ingredient_text.includes("sodium nitrite"), "Ball Park current label should expose source ingredient text");
 assert(frenchs.ingredient_text.includes("Distilled Vinegar"), "French's current label should expose source ingredient text");
@@ -574,19 +581,19 @@ assert.strictEqual(littleDebbieOatmeal.proof_visual_basis, "official_source_text
 
 const family = navigator.source_family_timeline?.families?.find((row) => row.id === "official-current-labels");
 assert(family, "navigator should expose the official-current source-family timeline");
-assert.strictEqual(family.product_count, 99, "navigator official-current timeline should cover 99 products");
-assert.strictEqual(family.row_count, 99, "navigator official-current timeline should cover 99 rows");
-assert.strictEqual(family.ingredient_signal_count, 99, "navigator official-current timeline should expose candidate count");
+assert.strictEqual(family.product_count, 100, "navigator official-current timeline should cover 100 products");
+assert.strictEqual(family.row_count, 100, "navigator official-current timeline should cover 100 rows");
+assert.strictEqual(family.ingredient_signal_count, 100, "navigator official-current timeline should expose candidate count");
 assert(family.products.every((product) => expectedProducts.has(product.product_id)), "navigator official-current timeline has unexpected products");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "official-current-labels");
 assert(summaryFamily, "navigator source-family summary should expose official-current labels");
-assert.strictEqual(summaryFamily.product_count, 99, "official-current summary should cover 99 products");
+assert.strictEqual(summaryFamily.product_count, 100, "official-current summary should cover 100 products");
 assert(summaryFamily.products.every((product) => product.ingredient_panel_visible_count === 1), "official-current summary should reflect current ingredient text candidates");
 
 if (fs.existsSync(privateManifestPath)) {
   const privateManifest = JSON.parse(fs.readFileSync(privateManifestPath, "utf8"));
-  assert.strictEqual(privateManifest.rows.length, 99, "official-current private manifest should have 99 rows");
+  assert.strictEqual(privateManifest.rows.length, 100, "official-current private manifest should have 100 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
   const riceKrispiesPrivate = privateManifest.rows.find((row) => row.product_id === "rice_krispies");
