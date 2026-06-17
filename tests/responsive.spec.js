@@ -496,6 +496,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(firstProofOverlay).toContainText("Beef");
   const firstProofHighlightOpacity = await firstProofPreview.evaluate((element) => getComputedStyle(element, "::before").opacity);
   expect(Number(firstProofHighlightOpacity)).toBeGreaterThan(0);
+  const firstProofGuideOpacity = await firstProofPreview.locator(".cwa-preview-reader-guide").evaluate((element) => getComputedStyle(element).opacity);
+  expect(Number(firstProofGuideOpacity)).toBeGreaterThan(0);
   await page.mouse.move(8, 8);
   await expect(firstProofCard).not.toHaveClass(/is-ingredient-preview/);
   await firstProofPreview.click();
@@ -536,7 +538,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(archiveProofPreview).toHaveAttribute("aria-pressed", "true");
   await expect(archiveProofPreview).toHaveAttribute("aria-label", /Hide ingredient proof text/);
   await expect(archiveProofOverlay).toContainText("Milk chocolate");
-  expect(await archiveProofCard.locator(".cwa-overlay-ingredient-list li").count()).toBeGreaterThan(3);
+  expect(await archiveProofCard.locator(".cwa-label-reader li").count()).toBeGreaterThan(3);
 
   await page.locator(".cwa-product-chip").filter({ hasText: "Tootsie Roll" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(3);
@@ -575,7 +577,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("partially hydrogenated vegetable oil");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy li").first()).toContainText("sugar");
   await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
-  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("artificial coloring");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader")).toContainText("artificial coloring");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Ingredients");
   await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
   await expect(page.locator("#ingredient-drilldown")).toBeVisible();
@@ -800,7 +802,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("red 40");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("blue 1");
   await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
-  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("red 40");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader")).toContainText("red 40");
   await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Frosted Flakes" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_ingredient_label_image");

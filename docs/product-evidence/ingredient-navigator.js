@@ -207,15 +207,15 @@ function ingredientOverlay(row) {
   }
 
   const items = ingredientItemsForRow(row);
-  const visibleItems = items.slice(0, 12);
+  const visibleItems = items.slice(0, 3);
   const overflowCount = Math.max(0, items.length - visibleItems.length);
   return `
     <div class="cwa-ingredient-overlay has-ingredient-list">
       <span>Ingredients on label</span>
       ${visibleItems.length
-        ? `<ul class="cwa-overlay-ingredient-list">${visibleItems.map((item) => `<li>${escapeHtml(truncateText(item, 142))}</li>`).join("")}</ul>`
+        ? `<p>${visibleItems.map((item) => escapeHtml(truncateText(item, 78))).join(" · ")}</p>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}
-      ${overflowCount ? `<em>+${escapeHtml(overflowCount)} more in text below</em>` : ""}
+      <em>${escapeHtml(overflowCount ? `${items.length} ingredient entries` : "Ingredient text")}</em>
     </div>
   `;
 }
@@ -706,6 +706,7 @@ function renderCwaTimeline() {
               ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ${proofVisualLabel(row).toLowerCase()}`)}" loading="lazy" data-private-preview="1" />`
               : ""}
             <div class="cwa-preview-placeholder"><span>${escapeHtml(String(row.vintage_label || "").slice(0, 4))}</span></div>
+            <span class="cwa-preview-reader-guide" aria-hidden="true"></span>
             <span class="cwa-preview-lens" aria-hidden="true">${cwaInlineIcon(ingredientText ? "ingredient" : "inspect")}</span>
             ${ingredientOverlay(row)}
           </button>
