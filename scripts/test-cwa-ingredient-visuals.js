@@ -87,6 +87,10 @@ visualIndex.rows.forEach((row) => {
     assert.strictEqual(row.proof_visual_basis, "source_visual_lineage_only", `${row.evidence_id} gap row should publish lineage-only proof basis`);
     assert(Array.isArray(row.ingredient_items) && row.ingredient_items.length === 0, `${row.evidence_id} without ingredient text should not expose ingredient items`);
     assert.strictEqual(row.ingredient_item_count, 0, `${row.evidence_id} ingredient item count should remain zero`);
+    assert(row.gap_source_status, `${row.evidence_id} gap row should publish source requirement status`);
+    assert(row.gap_next_step?.includes("same-era"), `${row.evidence_id} gap row should publish a same-era next step`);
+    assert(row.gap_accepted_source_types?.some((value) => value.includes("ingredient")), `${row.evidence_id} gap row should publish accepted proof source types`);
+    assert(row.gap_rejected_source_types?.some((value) => value.includes("front-only")), `${row.evidence_id} gap row should reject front-only visuals`);
   }
 });
 

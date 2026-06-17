@@ -10470,7 +10470,7 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T15:05:21.142Z",
+    "generated_at_utc": "2026-06-17T15:19:02.294Z",
     "default_family": "official-current-labels",
     "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
     "claim_policy": "Manual visual transcription remains candidate evidence until corrected and manually verified.",
@@ -10547,6 +10547,10 @@
                 "candidate_excerpt": "White sugar, sweet milk chocolate, corn syrup, peanuts, milk condensed with sugar, coconut oil, malted milk, whites of eggs and salt.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 20,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -10603,6 +10607,10 @@
                 "candidate_excerpt": "Milk chocolate, peanuts, corn syrup, sugar, milk, butter, salt, egg whites, soybean oil, chocolate, lecithin, natural and artificial flavors.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 20,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -10655,6 +10663,10 @@
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin and artificial flavor), peanut butter (peanuts, salt, hydrogenated vegetable oil), monoglycerides, sugar, corn syrup, egg whites,...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 20,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -10710,6 +10722,10 @@
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), peanuts, corn syrup, sugar, milk, butter, partially hydrogenated soybean oil, salt, egg whites, chocolate, n...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 20,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -10784,6 +10800,10 @@
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 11,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -10840,6 +10860,10 @@
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 11,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -10896,6 +10920,10 @@
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 11,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -10952,6 +10980,10 @@
                 "candidate_excerpt": "Ingredients: milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, PGPR, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powde...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 11,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -11012,6 +11044,18 @@
                 "candidate_excerpt": "",
                 "candidate_status": "readable_panel_still_needed",
                 "ingredient_signal_status": "readable_panel_still_needed",
+                "gap_source_status": "same_era_readable_panel_required",
+                "gap_next_step": "Find a same-era Kit Kat Bar back or side wrapper image with readable ingredient text before promoting earliest_verified_label ingredients.",
+                "gap_accepted_source_types": [
+                  "same-era back or side wrapper photo with ingredients visible",
+                  "higher-resolution Candy Wrapper Archive image exposing the ingredient panel",
+                  "source-attributed package label scan with date or era evidence"
+                ],
+                "gap_rejected_source_types": [
+                  "front-only wrapper art",
+                  "nearby-decade wrapper used as an exact formulation claim",
+                  "unsourced ingredient text without package imagery"
+                ],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 20,
                 "claim_boundary": "Wrapper imagery can support visual lineage only; a readable back/side ingredient panel is still needed before ingredient claims."
@@ -11069,6 +11113,10 @@
                 "candidate_excerpt": "Ingredients: milk chocolate (contains condensed milk, cocoa butter, chocolate, sugar, soya lecithin, natural and artificial flavour), sugar, flour, hydrogenated vegetable oil, chocolate, yeast, sodium bicarbonate, calci...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 20,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -11128,6 +11176,10 @@
                 "candidate_excerpt": "Ingredients: sugar, wheat flour, cocoa butter, nonfat milk, chocolate, refined palm kernel oil, lactose (milk), milk fat. Contains 2% or less of: soy lecithin, PGPR (emulsifier), yeast, artificial flavor, salt, and sodi...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 20,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -11196,6 +11248,10 @@
                 "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, condensed milk, cocoa, salt, lecithin, natural and artificial flavors.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 3,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -11249,6 +11305,10 @@
                 "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, cocoa, condensed skim milk, whey powder, salt, vegetable lecithin, natural and artificial flavors.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 3,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -11302,6 +11362,10 @@
                 "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, cocoa, condensed skim milk, whey powder, salt, vegetable lecithin, natural and artificial flavors.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 3,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -11371,6 +11435,10 @@
                 "candidate_excerpt": "White sugar, sweet milk chocolate, corn syrup, milk, sugar, malted milk, coconut oil, whites of eggs, breakfast cocoa and salt.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 7,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -11425,6 +11493,10 @@
                 "candidate_excerpt": "Milk chocolate, sugar, corn syrup, malted milk, sweetened condensed whole milk, vegetable oil, egg whites, cocoa, salt, lecithin.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 7,
                 "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -11500,6 +11572,10 @@
                 "candidate_excerpt": "Seven-Up contains carbonated water, sugar, citric acid, sodium citrate, flavor derived from lemon and lime oils.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -11549,6 +11625,10 @@
                 "candidate_excerpt": "Seven-Up contains carbonated water, sugar, citric acid, sodium citrate, flavor derived from lemon and lime oils.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -11615,6 +11695,10 @@
                 "candidate_excerpt": "A beverage syrup: Prepared with sugar and water; phosphoric acid, caffeine, extractives from coca leaves (cocaine removed) and cola nuts, and other flavoring material; colored with caramel.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -11665,6 +11749,10 @@
                 "candidate_excerpt": "A beverage syrup: Prepared with sugar and water; phosphoric acid, caffeine, extractives from coca leaves (cocaine removed) and cola nuts, and other flavoring material; colored with caramel.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -11737,6 +11825,10 @@
                 "candidate_excerpt": "Ingredients: beef broth, potatoes, beef, carrots, cooked beef, corn flour, beef fat, salt, tomato paste, sugar, caramel coloring, flavoring and monosodium glutamate.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -11793,6 +11885,10 @@
                 "candidate_excerpt": "Ingredients: beef broth, potatoes, beef, carrots, cooked beef, corn flour, beef fat, salt, tomato paste, sugar, caramel coloring, flavoring and monosodium glutamate.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -11869,6 +11965,10 @@
                 "candidate_excerpt": "Ingredients: corn, vegetable oil with BHA and BHT as preservatives, processed Romano, Cheddar and Parmesan cheese, salt, flour, whey, tomato, buttermilk, onion and garlic powders, monosodium glutamate, disodium inosinat...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -11929,6 +12029,10 @@
                 "candidate_excerpt": "Ingredients: corn, vegetable oil with BHA and BHT as preservatives, processed Romano, Cheddar and Parmesan cheese, salt, flour, whey, tomato, buttermilk, onion and garlic powders, monosodium glutamate, disodium inosinat...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -11996,6 +12100,10 @@
                 "candidate_excerpt": "Ingredients: sugar, gelatin, adipic acid, sodium citrate, fumaric acid, artificial flavor, U.S. certified color.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12047,6 +12155,10 @@
                 "candidate_excerpt": "Ingredients: sugar, gelatin, adipic acid, sodium citrate, fumaric acid, artificial flavor, U.S. certified color.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12127,6 +12239,10 @@
                 "candidate_excerpt": "Ingredients: sugar; corn, wheat and oat flour; partially hydrogenated vegetable oil (one or more of: cottonseed, coconut, soybean and palm); salt; artificial coloring; sodium ascorbate (vitamin C); ascorbic acid (vitami...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12191,6 +12307,10 @@
                 "candidate_excerpt": "Ingredients: sugar; corn, wheat and oat flour; partially hydrogenated vegetable oil (one or more of: cottonseed, coconut, soybean and palm); salt; artificial coloring; sodium ascorbate (vitamin C); ascorbic acid (vitami...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12252,6 +12372,10 @@
                 "candidate_excerpt": "Label formula statement: 1/20 of 1% benzoate of soda as a preservative.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12297,6 +12421,10 @@
                 "candidate_excerpt": "Label formula statement: 1/20 of 1% benzoate of soda as a preservative.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12370,6 +12498,10 @@
                 "candidate_excerpt": "Ingredients: sugar, citric acid (for tartness), natural flavor, gum arabic (vegetable gum - provides body), monosodium phosphate and potassium citrate (regulate tartness), calcium phosphate (prevents caking), vitamin C,...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12427,6 +12559,10 @@
                 "candidate_excerpt": "Ingredients: sugar, citric acid (for tartness), natural flavor, gum arabic (vegetable gum - provides body), monosodium phosphate and potassium citrate (regulate tartness), calcium phosphate (prevents caking), vitamin C,...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12486,6 +12622,18 @@
                 "candidate_excerpt": "Visible promotion/top-flap panel only; readable ingredient panel still needed before ingredient claims.",
                 "candidate_status": "full_transcription_needed",
                 "ingredient_signal_status": "readable_panel_still_needed",
+                "gap_source_status": "same_package_ingredient_panel_required",
+                "gap_next_step": "Capture a readable ingredient panel for Trix Cereal from the same package, same Flickr source family, or another source-attributed earliest_verified_label box image.",
+                "gap_accepted_source_types": [
+                  "same-package ingredient panel crop with readable text",
+                  "higher-resolution Flickr image or alternate photo showing the ingredient list",
+                  "source-attributed cereal box label scan with date or era evidence"
+                ],
+                "gap_rejected_source_types": [
+                  "promotion or top-flap copy only",
+                  "front-only box art",
+                  "OCR from non-ingredient package text"
+                ],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Visible package-panel imagery can support provenance only; a full corrected transcription is still needed before ingredient claims."
@@ -12529,6 +12677,18 @@
                 "candidate_excerpt": "Visible promotion/top-flap panel only; readable ingredient panel still needed before ingredient claims.",
                 "candidate_status": "full_transcription_needed",
                 "ingredient_signal_status": "readable_panel_still_needed",
+                "gap_source_status": "same_package_ingredient_panel_required",
+                "gap_next_step": "Capture a readable ingredient panel for Trix Cereal from the same package, same Flickr source family, or another source-attributed 1980s_or_earlier box image.",
+                "gap_accepted_source_types": [
+                  "same-package ingredient panel crop with readable text",
+                  "higher-resolution Flickr image or alternate photo showing the ingredient list",
+                  "source-attributed cereal box label scan with date or era evidence"
+                ],
+                "gap_rejected_source_types": [
+                  "promotion or top-flap copy only",
+                  "front-only box art",
+                  "OCR from non-ingredient package text"
+                ],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Visible package-panel imagery can support provenance only; a full corrected transcription is still needed before ingredient claims."
@@ -12596,6 +12756,10 @@
                 "candidate_excerpt": "Ingredients: whole grain oats, corn starch, sugar, salt, trisodium phosphate, calcium carbonate, wheat starch, vitamin E (mixed tocopherols) added to preserve freshness.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12682,6 +12846,10 @@
                 "candidate_excerpt": "Ingredients: whole grain corn, sugar, corn syrup, modified corn starch, cocoa processed with alkali, canola and/or rice bran oil, color added, salt, fructose, tricalcium phosphate, corn starch, natural and artificial fl...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12754,6 +12922,10 @@
                 "candidate_excerpt": "Ingredients: water, glucose, citric acid, salt, .053% calcium cyclamate (non-nutritive), gum acacia, sodium bicarbonate, sodium orthophosphate, potassium orthophosphate, potassium chloride, natural and artificial flavor...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12822,6 +12994,10 @@
                 "candidate_excerpt": "Ingredients: pasteurized nonfat milk and milkfat, whey protein concentrate, cheese culture, salt, whey, stabilizers (xanthan and/or carob bean and/or guar gums), sorbic acid as a preservative, vitamin A palmitate. Conta...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -12887,6 +13063,10 @@
                 "candidate_excerpt": "Ingredients: pork with ham, salt, water, modified potato starch, sugar, sodium nitrite.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
+                "gap_source_status": "",
+                "gap_next_step": "",
+                "gap_accepted_source_types": [],
+                "gap_rejected_source_types": [],
                 "source_capture_status": "cached",
                 "source_candidate_image_count": 1,
                 "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
@@ -21555,7 +21735,7 @@
   },
   "source_family_coverage": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T15:05:54.867Z",
+    "generated_at_utc": "2026-06-17T15:19:33.238Z",
     "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
     "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
     "totals": {

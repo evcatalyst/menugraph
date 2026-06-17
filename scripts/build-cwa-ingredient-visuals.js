@@ -556,6 +556,26 @@ function publicClaimBoundary(row, hasIngredientSignal) {
   return "Wrapper imagery can support visual lineage only; a readable back/side ingredient panel is still needed before ingredient claims.";
 }
 
+function gapSourceRequirements(row, hasIngredientSignal) {
+  if (hasIngredientSignal) {
+    return { status: "", next_step: "", accepted: [], rejected: [] };
+  }
+  return {
+    status: "same_era_readable_panel_required",
+    next_step: `Find a same-era ${row.product_name} back or side wrapper image with readable ingredient text before promoting ${row.vintage_label} ingredients.`,
+    accepted: [
+      "same-era back or side wrapper photo with ingredients visible",
+      "higher-resolution Candy Wrapper Archive image exposing the ingredient panel",
+      "source-attributed package label scan with date or era evidence",
+    ],
+    rejected: [
+      "front-only wrapper art",
+      "nearby-decade wrapper used as an exact formulation claim",
+      "unsourced ingredient text without package imagery",
+    ],
+  };
+}
+
 function privateSafePreviewEndpoint(visualId) {
   return `/api/private/ingredient-crops/${visualId}`;
 }
@@ -796,6 +816,7 @@ function publicRowFor(row, visual, sourceCapture) {
   const hasIngredientSignal = Boolean(visual.ingredient_signal_lines?.length || visual.ingredient_text);
   const localPreviewAvailable = Boolean(visual.upscaled_preview_path || visual.preview_path);
   const ingredientItems = visual.ingredient_text ? ingredientItemsFromStatement(visual.ingredient_text) : [];
+  const gapRequirements = gapSourceRequirements(row, hasIngredientSignal);
   const visualStatus = localPreviewAvailable
     ? hasIngredientSignal ? "local_ingredient_crop_ready" : visual.crop_focus === "panel_context" ? "local_panel_context_crop_ready" : "local_visual_lineage_ready"
     : "source_capture_needed";
@@ -840,6 +861,10 @@ function publicRowFor(row, visual, sourceCapture) {
     candidate_excerpt: shortText(visual.ingredient_text || (visual.ingredient_signal_lines || []).slice(0, 2).join(" "), 220),
     candidate_status: hasIngredientSignal ? "ingredient_text_candidate_needs_review" : "readable_panel_still_needed",
     ingredient_signal_status: hasIngredientSignal ? "ingredient_signal_found" : "readable_panel_still_needed",
+    gap_source_status: gapRequirements.status,
+    gap_next_step: gapRequirements.next_step,
+    gap_accepted_source_types: gapRequirements.accepted,
+    gap_rejected_source_types: gapRequirements.rejected,
     source_capture_status: sourceCapture?.status || "source_not_fetched",
     source_candidate_image_count: sourceCapture?.candidates?.length || 0,
     claim_boundary: publicClaimBoundary(row, hasIngredientSignal),

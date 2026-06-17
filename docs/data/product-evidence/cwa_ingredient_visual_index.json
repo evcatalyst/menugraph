@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-06-17T15:05:01.928Z",
+  "generated_at_utc": "2026-06-17T15:16:42.744Z",
   "source_family": {
     "id": "candy-wrapper-archive",
     "label": "Candy Wrapper Archive",
@@ -127,6 +127,10 @@
           "candidate_excerpt": "White sugar, sweet milk chocolate, corn syrup, peanuts, milk condensed with sugar, coconut oil, malted milk, whites of eggs and salt.",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 20,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -183,6 +187,10 @@
           "candidate_excerpt": "Milk chocolate, peanuts, corn syrup, sugar, milk, butter, salt, egg whites, soybean oil, chocolate, lecithin, natural and artificial flavors.",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 20,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -235,6 +243,10 @@
           "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin and artificial flavor), peanut butter (peanuts, salt, hydrogenated vegetable oil), monoglycerides, sugar, corn syrup, egg whites,...",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 20,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -290,6 +302,10 @@
           "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), peanuts, corn syrup, sugar, milk, butter, partially hydrogenated soybean oil, salt, egg whites, chocolate, n...",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 20,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -364,6 +380,10 @@
           "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 11,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -420,6 +440,10 @@
           "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 11,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -476,6 +500,10 @@
           "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 11,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -532,6 +560,10 @@
           "candidate_excerpt": "Ingredients: milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, PGPR, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powde...",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 11,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -592,6 +624,18 @@
           "candidate_excerpt": "",
           "candidate_status": "readable_panel_still_needed",
           "ingredient_signal_status": "readable_panel_still_needed",
+          "gap_source_status": "same_era_readable_panel_required",
+          "gap_next_step": "Find a same-era Kit Kat Bar back or side wrapper image with readable ingredient text before promoting earliest_verified_label ingredients.",
+          "gap_accepted_source_types": [
+            "same-era back or side wrapper photo with ingredients visible",
+            "higher-resolution Candy Wrapper Archive image exposing the ingredient panel",
+            "source-attributed package label scan with date or era evidence"
+          ],
+          "gap_rejected_source_types": [
+            "front-only wrapper art",
+            "nearby-decade wrapper used as an exact formulation claim",
+            "unsourced ingredient text without package imagery"
+          ],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 20,
           "claim_boundary": "Wrapper imagery can support visual lineage only; a readable back/side ingredient panel is still needed before ingredient claims."
@@ -649,6 +693,10 @@
           "candidate_excerpt": "Ingredients: milk chocolate (contains condensed milk, cocoa butter, chocolate, sugar, soya lecithin, natural and artificial flavour), sugar, flour, hydrogenated vegetable oil, chocolate, yeast, sodium bicarbonate, calci...",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 20,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -708,6 +756,10 @@
           "candidate_excerpt": "Ingredients: sugar, wheat flour, cocoa butter, nonfat milk, chocolate, refined palm kernel oil, lactose (milk), milk fat. Contains 2% or less of: soy lecithin, PGPR (emulsifier), yeast, artificial flavor, salt, and sodi...",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 20,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -776,6 +828,10 @@
           "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, condensed milk, cocoa, salt, lecithin, natural and artificial flavors.",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 3,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -829,6 +885,10 @@
           "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, cocoa, condensed skim milk, whey powder, salt, vegetable lecithin, natural and artificial flavors.",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 3,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -882,6 +942,10 @@
           "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, cocoa, condensed skim milk, whey powder, salt, vegetable lecithin, natural and artificial flavors.",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 3,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -951,6 +1015,10 @@
           "candidate_excerpt": "White sugar, sweet milk chocolate, corn syrup, milk, sugar, malted milk, coconut oil, whites of eggs, breakfast cocoa and salt.",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 7,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1005,6 +1073,10 @@
           "candidate_excerpt": "Milk chocolate, sugar, corn syrup, malted milk, sweetened condensed whole milk, vegetable oil, egg whites, cocoa, salt, lecithin.",
           "candidate_status": "ingredient_text_candidate_needs_review",
           "ingredient_signal_status": "ingredient_signal_found",
+          "gap_source_status": "",
+          "gap_next_step": "",
+          "gap_accepted_source_types": [],
+          "gap_rejected_source_types": [],
           "source_capture_status": "source_page_cached",
           "source_candidate_image_count": 7,
           "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1061,6 +1133,10 @@
       "candidate_excerpt": "White sugar, sweet milk chocolate, corn syrup, peanuts, milk condensed with sugar, coconut oil, malted milk, whites of eggs and salt.",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 20,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1116,6 +1192,10 @@
       "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), peanuts, corn syrup, sugar, milk, butter, partially hydrogenated soybean oil, salt, egg whites, chocolate, n...",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 20,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1159,6 +1239,18 @@
       "candidate_excerpt": "",
       "candidate_status": "readable_panel_still_needed",
       "ingredient_signal_status": "readable_panel_still_needed",
+      "gap_source_status": "same_era_readable_panel_required",
+      "gap_next_step": "Find a same-era Kit Kat Bar back or side wrapper image with readable ingredient text before promoting earliest_verified_label ingredients.",
+      "gap_accepted_source_types": [
+        "same-era back or side wrapper photo with ingredients visible",
+        "higher-resolution Candy Wrapper Archive image exposing the ingredient panel",
+        "source-attributed package label scan with date or era evidence"
+      ],
+      "gap_rejected_source_types": [
+        "front-only wrapper art",
+        "nearby-decade wrapper used as an exact formulation claim",
+        "unsourced ingredient text without package imagery"
+      ],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 20,
       "claim_boundary": "Wrapper imagery can support visual lineage only; a readable back/side ingredient panel is still needed before ingredient claims."
@@ -1211,6 +1303,10 @@
       "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin and artificial flavor), peanut butter (peanuts, salt, hydrogenated vegetable oil), monoglycerides, sugar, corn syrup, egg whites,...",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 20,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1267,6 +1363,10 @@
       "candidate_excerpt": "Milk chocolate, peanuts, corn syrup, sugar, milk, butter, salt, egg whites, soybean oil, chocolate, lecithin, natural and artificial flavors.",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 20,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1326,6 +1426,10 @@
       "candidate_excerpt": "Ingredients: sugar, wheat flour, cocoa butter, nonfat milk, chocolate, refined palm kernel oil, lactose (milk), milk fat. Contains 2% or less of: soy lecithin, PGPR (emulsifier), yeast, artificial flavor, salt, and sodi...",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 20,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1383,6 +1487,10 @@
       "candidate_excerpt": "Ingredients: milk chocolate (contains condensed milk, cocoa butter, chocolate, sugar, soya lecithin, natural and artificial flavour), sugar, flour, hydrogenated vegetable oil, chocolate, yeast, sodium bicarbonate, calci...",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 20,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1439,6 +1547,10 @@
       "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 11,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1492,6 +1604,10 @@
       "candidate_excerpt": "White sugar, sweet milk chocolate, corn syrup, milk, sugar, malted milk, coconut oil, whites of eggs, breakfast cocoa and salt.",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 7,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1545,6 +1661,10 @@
       "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, cocoa, condensed skim milk, whey powder, salt, vegetable lecithin, natural and artificial flavors.",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 3,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1601,6 +1721,10 @@
       "candidate_excerpt": "Ingredients: milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, PGPR, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powde...",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 11,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1657,6 +1781,10 @@
       "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 11,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1709,6 +1837,10 @@
       "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, condensed milk, cocoa, salt, lecithin, natural and artificial flavors.",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 3,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1765,6 +1897,10 @@
       "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 11,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1819,6 +1955,10 @@
       "candidate_excerpt": "Milk chocolate, sugar, corn syrup, malted milk, sweetened condensed whole milk, vegetable oil, egg whites, cocoa, salt, lecithin.",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 7,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."
@@ -1872,6 +2012,10 @@
       "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, cocoa, condensed skim milk, whey powder, salt, vegetable lecithin, natural and artificial flavors.",
       "candidate_status": "ingredient_text_candidate_needs_review",
       "ingredient_signal_status": "ingredient_signal_found",
+      "gap_source_status": "",
+      "gap_next_step": "",
+      "gap_accepted_source_types": [],
+      "gap_rejected_source_types": [],
       "source_capture_status": "source_page_cached",
       "source_candidate_image_count": 3,
       "claim_boundary": "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified."

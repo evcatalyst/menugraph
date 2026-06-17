@@ -507,11 +507,32 @@ function panelClaimBoundary() {
   return "Visible package-panel imagery can support provenance only; a full corrected transcription is still needed before ingredient claims.";
 }
 
+function gapSourceRequirements(row, hasIngredientText) {
+  if (hasIngredientText) {
+    return { status: "", next_step: "", accepted: [], rejected: [] };
+  }
+  return {
+    status: "same_package_ingredient_panel_required",
+    next_step: `Capture a readable ingredient panel for ${row.product_name} from the same package, same Flickr source family, or another source-attributed ${row.vintage_label} box image.`,
+    accepted: [
+      "same-package ingredient panel crop with readable text",
+      "higher-resolution Flickr image or alternate photo showing the ingredient list",
+      "source-attributed cereal box label scan with date or era evidence",
+    ],
+    rejected: [
+      "promotion or top-flap copy only",
+      "front-only box art",
+      "OCR from non-ingredient package text",
+    ],
+  };
+}
+
 function publicRowFor(row, review, visual) {
   const localPreviewAvailable = Boolean(visual.upscaled_preview_path || visual.preview_path);
   const hasIngredientText = Boolean(review.ingredient_text);
   const cropFocus = review.crop_focus || (hasIngredientText ? "ingredient_text" : "panel_context");
   const ingredientItems = hasIngredientText ? ingredientItemsFromStatement(review.ingredient_text) : [];
+  const gapRequirements = gapSourceRequirements(row, hasIngredientText);
   return {
     product_id: row.product_id,
     product_name: row.product_name,
@@ -553,6 +574,10 @@ function publicRowFor(row, review, visual) {
     candidate_excerpt: shortText(review.ingredient_text || review.candidate_excerpt || "", 220),
     candidate_status: hasIngredientText ? "ingredient_text_candidate_needs_review" : "full_transcription_needed",
     ingredient_signal_status: hasIngredientText ? "ingredient_signal_found" : "readable_panel_still_needed",
+    gap_source_status: gapRequirements.status,
+    gap_next_step: gapRequirements.next_step,
+    gap_accepted_source_types: gapRequirements.accepted,
+    gap_rejected_source_types: gapRequirements.rejected,
     source_capture_status: visual.source_capture_status,
     source_candidate_image_count: 1,
     claim_boundary: hasIngredientText ? publicClaimBoundary() : panelClaimBoundary(),

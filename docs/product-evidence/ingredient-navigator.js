@@ -437,15 +437,20 @@ function collectionLeadFacts(row) {
 }
 
 function collectionSourceRequirements(row, options = {}) {
-  const accepted = row?.collection_acceptable_source_types || [];
-  const rejected = row?.collection_rejected_source_types || [];
+  const accepted = row?.collection_acceptable_source_types?.length
+    ? row.collection_acceptable_source_types
+    : row?.gap_accepted_source_types || [];
+  const rejected = row?.collection_rejected_source_types?.length
+    ? row.collection_rejected_source_types
+    : row?.gap_rejected_source_types || [];
   if (!accepted.length && !rejected.length) return "";
   const compact = Boolean(options.compact);
   const acceptedRows = accepted.slice(0, compact ? 2 : 4);
   const rejectedRows = rejected.slice(0, compact ? 2 : 4);
+  const status = row.collection_source_status || row.gap_source_status || "";
   return `
     <div class="collection-source-requirements">
-      ${row.collection_source_status ? `<span>${escapeHtml(labelFor(row.collection_source_status))}</span>` : ""}
+      ${status ? `<span>${escapeHtml(labelFor(status))}</span>` : ""}
       <dl>
         ${acceptedRows.length ? `
           <div>
@@ -611,6 +616,10 @@ function sourceFamilyRowSearchText(row) {
     row.collection_source_status,
     ...(row.collection_acceptable_source_types || []),
     ...(row.collection_rejected_source_types || []),
+    row.gap_source_status,
+    row.gap_next_step,
+    ...(row.gap_accepted_source_types || []),
+    ...(row.gap_rejected_source_types || []),
     row.vintage_label,
     row.source_title,
     row.source_image_title,
@@ -864,6 +873,7 @@ function sourceFamilyGapThumb(row, localImages) {
 function sourceFamilyGapAction(row) {
   if (row.collection_next_step) return row.collection_next_step;
   if (row.collection_lead_action) return row.collection_lead_action;
+  if (row.gap_next_step) return row.gap_next_step;
   if (row.ocr_recommended_action) return labelFor(row.ocr_recommended_action);
   if (row.ocr_gap_category === "document_text_pipeline_needed") return "Extract the source document or API text before promoting ingredient claims.";
   if (row.ocr_gap_category === "panel_capture_needed") return "Capture a readable ingredient panel from the same source family.";

@@ -97,6 +97,10 @@ visualIndex.rows.forEach((row) => {
     assert.strictEqual(row.crop_focus, "visual_lineage", `${row.evidence_id} should be visual lineage only`);
     assert(row.candidate_excerpt.includes("promotion/top-flap panel only"), `${row.evidence_id} should identify the non-ingredient panel`);
     assert(row.candidate_excerpt.includes("readable ingredient panel still needed"), `${row.evidence_id} should explain the ingredient-panel gap`);
+    assert(row.gap_source_status, `${row.evidence_id} gap row should publish source requirement status`);
+    assert(row.gap_next_step?.includes("same package"), `${row.evidence_id} gap row should publish a same-package next step`);
+    assert(row.gap_accepted_source_types?.some((value) => value.includes("ingredient panel")), `${row.evidence_id} gap row should publish accepted proof source types`);
+    assert(row.gap_rejected_source_types?.some((value) => value.includes("promotion")), `${row.evidence_id} gap row should reject promotion-only visuals`);
   }
 });
 

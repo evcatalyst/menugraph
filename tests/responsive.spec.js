@@ -503,11 +503,15 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-gap-summary")).toContainText("Document Text Pipeline Needed");
   await expect(page.locator("#source-family-gap-summary .source-family-gap-kind")).toHaveCount(11);
   await expect(page.locator("#source-family-gap-summary .source-family-gap-copy em")).toHaveCount(0);
-  await expect(page.locator("#source-family-gap-summary")).toContainText("Find a back or side panel photo");
+  await expect(page.locator("#source-family-gap-summary")).toContainText("Find a same-era Kit Kat Bar back or side wrapper image");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Capture a Starbucks-owned menu");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Resolve KFC US nutrition/allergen data");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Accepted proof");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Do not use");
+  await expect(page.locator("#source-family-gap-summary")).toContainText("same-era back or side wrapper photo");
+  await expect(page.locator("#source-family-gap-summary")).toContainText("front-only wrapper art");
+  await expect(page.locator("#source-family-gap-summary")).toContainText("same-package ingredient panel crop");
+  await expect(page.locator("#source-family-gap-summary")).toContainText("promotion or top-flap copy only");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Starbucks-owned menu or product API");
   await expect(page.locator("#source-family-gap-summary")).toContainText("secondary nutrition articles or recipes");
   await expect(page.locator("#source-family-gap-summary")).toContainText("KFC-owned US nutrition/allergen/ingredient document");
