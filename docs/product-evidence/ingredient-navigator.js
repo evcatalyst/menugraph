@@ -438,7 +438,9 @@ function ingredientTrendKey(value) {
   return String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
-function ingredientTrendItems(rows, limit = 8) {
+function ingredientTrendItems(rows, limit = 8, options = {}) {
+  const proofLimit = Number(options.proofLimit || 4);
+  const dedupeProofsByProduct = options.dedupeProofsByProduct !== false;
   const counts = new Map();
   for (const row of rows) {
     for (const item of ingredientItemsForRow(row)) {
@@ -456,11 +458,15 @@ function ingredientTrendItems(rows, limit = 8) {
       existing.count += 1;
       if (row.local_preview_available) existing.local_visual_count += 1;
       if (row.product_id) existing.product_ids.add(row.product_id);
+      const proofKey = dedupeProofsByProduct
+        ? row.product_id
+        : row.visual_id || row.evidence_id || `${row.product_id}:${row.vintage_label}`;
       if (row.local_preview_available
         && row.preview_endpoint
-        && !existing.proof_product_ids.has(row.product_id)
-        && existing.proofs.length < 4) {
-        existing.proof_product_ids.add(row.product_id);
+        && proofKey
+        && !existing.proof_product_ids.has(proofKey)
+        && existing.proofs.length < proofLimit) {
+        existing.proof_product_ids.add(proofKey);
         existing.proofs.push({
           product_name: row.product_name,
           vintage_label: row.vintage_label,
@@ -832,7 +838,8 @@ function ingredientDrilldownFacts(row, canShowPreview) {
 function ingredientDrilldownTrendBlock(row) {
   const context = sourceFamilyContextForRow(row);
   const rows = context?.productRow?.rows || [];
-  const items = ingredientTrendItems(rows, 8);
+  const localImages = isLocalPreviewHost();
+  const items = ingredientTrendItems(rows, 8, { dedupeProofsByProduct: false, proofLimit: 3 });
   if (!items.length) return "";
   return `
     <div class="ingredient-drilldown-trends">
@@ -840,8 +847,19 @@ function ingredientDrilldownTrendBlock(row) {
       <div>
         ${items.map((item) => `
           <button type="button" data-source-family-filter-value="${escapeHtml(item.label)}">
-            <strong>${escapeHtml(truncateText(item.label, 48))}</strong>
-            <small>${escapeHtml(item.count)}</small>
+            <span class="ingredient-drilldown-trend-copy">
+              <strong>${escapeHtml(truncateText(item.label, 48))}</strong>
+              ${localImages && item.proofs?.length ? `
+                <span class="ingredient-drilldown-trend-thumbs" aria-label="${escapeHtml(`Proof examples for ${item.label}`)}">
+                  ${item.proofs.map((proof) => `
+                    <span class="ingredient-drilldown-trend-thumb" title="${escapeHtml(`${proof.product_name} · ${proof.vintage_label} · ${proof.proof_label}`)}">
+                      <img src="${escapeHtml(proof.preview_endpoint)}" alt="" loading="lazy" data-private-drilldown-trend-preview="1" />
+                    </span>
+                  `).join("")}
+                </span>
+              ` : ""}
+            </span>
+            <small title="${escapeHtml(`${item.count} proof ${item.count === 1 ? "row" : "rows"}`)}">${escapeHtml(item.count)}</small>
           </button>
         `).join("")}
       </div>
@@ -945,6 +963,12 @@ function openIngredientDrilldown(row) {
       frame.innerHTML = drilldownPlaceholder(row, "Private crop missing");
     }
   }, { once: true });
+  els.ingredientDrilldownContent.querySelectorAll("[data-private-drilldown-trend-preview]").forEach((image) => {
+    image.addEventListener("error", () => {
+      image.closest(".ingredient-drilldown-trend-thumb")?.classList.add("is-missing-private-preview");
+      image.remove();
+    }, { once: true });
+  });
   els.ingredientDrilldown.querySelector(".ingredient-drilldown-close")?.focus();
 }
 
