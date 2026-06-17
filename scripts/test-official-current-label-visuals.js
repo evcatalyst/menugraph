@@ -66,6 +66,9 @@ const expectedProducts = new Set([
   "tootsie_roll",
   "rice_krispies",
   "raisin_bran_kelloggs",
+  "corn_flakes",
+  "froot_loops",
+  "frosted_flakes",
   "rice_krispies_treats_original",
   "betty_crocker_super_moist_yellow_cake_mix",
   "bisquick_original",
@@ -160,6 +163,7 @@ const allowedOfficialHosts = new Set([
   "www.twix.com",
   "www.tysonfoodservice.com",
   "www.totinos.com",
+  "www.wkkellogg.com",
   "wheaties.com",
 ]);
 
@@ -193,11 +197,11 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 
 assert.strictEqual(visualIndex.schema_version, 1, "official-current visual index should be versioned");
 assert.strictEqual(visualIndex.source_family.id, "official-current-labels", "official-current source family id should be stable");
-assert.strictEqual(visualIndex.totals.products, 96, "official-current lane should cover 96 products");
-assert.strictEqual(visualIndex.totals.rows, 96, "official-current lane should cover 96 rows");
-assert.strictEqual(visualIndex.rows.length, 96, "official-current rows should match totals");
-assert.strictEqual(visualIndex.totals.local_preview_available, 96, "official-current lane should expose local proof previews");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 96, "official-current lane should expose 96 ingredient text candidates");
+assert.strictEqual(visualIndex.totals.products, 99, "official-current lane should cover 99 products");
+assert.strictEqual(visualIndex.totals.rows, 99, "official-current lane should cover 99 rows");
+assert.strictEqual(visualIndex.rows.length, 99, "official-current rows should match totals");
+assert.strictEqual(visualIndex.totals.local_preview_available, 99, "official-current lane should expose local proof previews");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 99, "official-current lane should expose 99 ingredient text candidates");
 assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 0, "official-current rows should have extracted source text");
 
 visualIndex.products.forEach((product) => {
@@ -264,6 +268,9 @@ const mms = visualIndex.rows.find((row) => row.product_id === "mms_milk_chocolat
 const tootsie = visualIndex.rows.find((row) => row.product_id === "tootsie_roll");
 const riceKrispies = visualIndex.rows.find((row) => row.product_id === "rice_krispies");
 const raisinBran = visualIndex.rows.find((row) => row.product_id === "raisin_bran_kelloggs");
+const cornFlakes = visualIndex.rows.find((row) => row.product_id === "corn_flakes");
+const frootLoops = visualIndex.rows.find((row) => row.product_id === "froot_loops");
+const frostedFlakes = visualIndex.rows.find((row) => row.product_id === "frosted_flakes");
 const riceKrispiesTreats = visualIndex.rows.find((row) => row.product_id === "rice_krispies_treats_original");
 const bettyCrockerCake = visualIndex.rows.find((row) => row.product_id === "betty_crocker_super_moist_yellow_cake_mix");
 const bisquick = visualIndex.rows.find((row) => row.product_id === "bisquick_original");
@@ -366,6 +373,21 @@ assert(riceKrispies.ingredient_text.includes("Rice"), "Rice Krispies current lab
 assert(riceKrispies.ingredient_text.includes("malt flavor"), "Rice Krispies current label should expose source ingredient text");
 assert(raisinBran.ingredient_text.includes("Whole grain wheat"), "Raisin Bran current label should expose source ingredient text");
 assert(raisinBran.ingredient_text.includes("brown sugar syrup"), "Raisin Bran current label should expose source ingredient text");
+assert(cornFlakes.ingredient_text.includes("Milled corn"), "Corn Flakes current label should expose source ingredient text");
+assert(cornFlakes.ingredient_text.includes("ferric phosphate"), "Corn Flakes current label should expose vitamin/mineral text");
+assert.strictEqual(cornFlakes.ingredient_text_source, "official_current_label_api_json", "Corn Flakes should identify the WK SmartLabel API as the ingredient source");
+assert.strictEqual(cornFlakes.proof_visual_basis, "official_ingredient_label_image", "Corn Flakes proof basis should identify the official ingredient-label image");
+assert(frootLoops.ingredient_text.includes("Corn flour blend"), "Froot Loops current label should expose source ingredient text");
+assert(frootLoops.ingredient_text.includes("red 40"), "Froot Loops current label should expose color ingredient text");
+assert(frootLoops.ingredient_text.includes("blue 1"), "Froot Loops current label should expose color ingredient text");
+assert(frootLoops.ingredient_text.includes("BHT added to packaging for freshness"), "Froot Loops current label should expose package freshness text");
+assert.strictEqual(frootLoops.ingredient_text_source, "official_current_label_api_json", "Froot Loops should identify the WK SmartLabel API as the ingredient source");
+assert.strictEqual(frootLoops.proof_visual_basis, "official_ingredient_label_image", "Froot Loops proof basis should identify the official ingredient-label image");
+assert(frostedFlakes.ingredient_text.includes("Milled corn"), "Frosted Flakes current label should expose source ingredient text");
+assert(frostedFlakes.ingredient_text.includes("malt flavor"), "Frosted Flakes current label should expose source ingredient text");
+assert(frostedFlakes.ingredient_text.includes("vitamin D 3"), "Frosted Flakes current label should expose vitamin/mineral text");
+assert.strictEqual(frostedFlakes.ingredient_text_source, "official_current_label_api_json", "Frosted Flakes should identify the WK SmartLabel API as the ingredient source");
+assert.strictEqual(frostedFlakes.proof_visual_basis, "official_ingredient_label_image", "Frosted Flakes proof basis should identify the official ingredient-label image");
 assert(riceKrispiesTreats.ingredient_text.includes("Toasted rice cereal"), "Rice Krispies Treats current label should expose source ingredient text");
 assert(riceKrispiesTreats.ingredient_text.includes("TBHQ for freshness"), "Rice Krispies Treats current label should expose source ingredient text");
 assert(bettyCrockerCake.ingredient_text.includes("Modified Corn Starch"), "Betty Crocker cake mix current label should expose source ingredient text");
@@ -548,26 +570,32 @@ assert.strictEqual(littleDebbieOatmeal.proof_visual_basis, "official_source_text
 
 const family = navigator.source_family_timeline?.families?.find((row) => row.id === "official-current-labels");
 assert(family, "navigator should expose the official-current source-family timeline");
-assert.strictEqual(family.product_count, 96, "navigator official-current timeline should cover 96 products");
-assert.strictEqual(family.row_count, 96, "navigator official-current timeline should cover 96 rows");
-assert.strictEqual(family.ingredient_signal_count, 96, "navigator official-current timeline should expose candidate count");
+assert.strictEqual(family.product_count, 99, "navigator official-current timeline should cover 99 products");
+assert.strictEqual(family.row_count, 99, "navigator official-current timeline should cover 99 rows");
+assert.strictEqual(family.ingredient_signal_count, 99, "navigator official-current timeline should expose candidate count");
 assert(family.products.every((product) => expectedProducts.has(product.product_id)), "navigator official-current timeline has unexpected products");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "official-current-labels");
 assert(summaryFamily, "navigator source-family summary should expose official-current labels");
-assert.strictEqual(summaryFamily.product_count, 96, "official-current summary should cover 96 products");
+assert.strictEqual(summaryFamily.product_count, 99, "official-current summary should cover 99 products");
 assert(summaryFamily.products.every((product) => product.ingredient_panel_visible_count === 1), "official-current summary should reflect current ingredient text candidates");
 
 if (fs.existsSync(privateManifestPath)) {
   const privateManifest = JSON.parse(fs.readFileSync(privateManifestPath, "utf8"));
-  assert.strictEqual(privateManifest.rows.length, 96, "official-current private manifest should have 96 rows");
+  assert.strictEqual(privateManifest.rows.length, 99, "official-current private manifest should have 99 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
+  const cornFlakesPrivate = privateManifest.rows.find((row) => row.product_id === "corn_flakes");
+  const frootLoopsPrivate = privateManifest.rows.find((row) => row.product_id === "froot_loops");
+  const frostedFlakesPrivate = privateManifest.rows.find((row) => row.product_id === "frosted_flakes");
   const dunkinPrivate = privateManifest.rows.find((row) => row.product_id === "dunkin_glazed_donut");
   const popeyesPrivate = privateManifest.rows.find((row) => row.product_id === "popeyes_chicken_sandwich");
   const littleDebbiePrivate = privateManifest.rows.find((row) => row.product_id === "little_debbie_oatmeal_creme_pies");
   assert(hiddenValleyPrivate.ingredient_label_image_path && fs.existsSync(hiddenValleyPrivate.ingredient_label_image_path), "Hidden Valley private manifest should retain the local label-panel image");
   assert(butterfingerPrivate.ingredient_label_image_path && fs.existsSync(butterfingerPrivate.ingredient_label_image_path), "Butterfinger private manifest should retain the local label-panel image");
+  assert(cornFlakesPrivate.ingredient_label_image_path && fs.existsSync(cornFlakesPrivate.ingredient_label_image_path), "Corn Flakes private manifest should retain the local label-panel image");
+  assert(frootLoopsPrivate.ingredient_label_image_path && fs.existsSync(frootLoopsPrivate.ingredient_label_image_path), "Froot Loops private manifest should retain the local label-panel image");
+  assert(frostedFlakesPrivate.ingredient_label_image_path && fs.existsSync(frostedFlakesPrivate.ingredient_label_image_path), "Frosted Flakes private manifest should retain the local label-panel image");
   assert(dunkinPrivate.source_document_preview_path && fs.existsSync(dunkinPrivate.source_document_preview_path), "Dunkin private manifest should retain the local PDF source-page preview");
   assert(popeyesPrivate.source_document_preview_path && fs.existsSync(popeyesPrivate.source_document_preview_path), "Popeyes private manifest should retain the local PDF source-page preview");
   assert(littleDebbiePrivate.source_document_preview_path && fs.existsSync(littleDebbiePrivate.source_document_preview_path), "Little Debbie private manifest should retain the local PDF source-page preview");

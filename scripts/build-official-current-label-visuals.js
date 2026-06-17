@@ -311,6 +311,36 @@ const curatedRows = {
     source_detail_url: "https://smartlabel.wkkellogg.com/Product/Index?gtin=00038000270840#ingredients",
     source_image_match_status: "official_current_label_page",
   },
+  "corn_flakes__current_2020s__255__1": {
+    ingredient_fragment_strategy: "wkkellogg_yext_product",
+    source_fetch_url: "https://cdn.yextapis.com/v2/accounts/me/content/products?api_key=ebb4ac611dd26217320c751b4b519276&v=20250103&c_SEOName=kellogg-s-corn-flakes-cereal-product&c_locale=en_US",
+    source_url_override: "https://www.wkkellogg.com/products/kellogg-s-corn-flakes-cereal-product",
+    source_detail_url: "https://www.wkkellogg.com/products/kellogg-s-corn-flakes-cereal-product#ingredients",
+    source_title_override: "Kellogg's Corn Flakes official WK Kellogg product page",
+    source_owner_override: "WK Kellogg Co",
+    yext_smartlabel_gtin: "00038000001208",
+    source_image_match_status: "official_current_ingredient_label_image",
+  },
+  "froot_loops__current_2020s__256__1": {
+    ingredient_fragment_strategy: "wkkellogg_yext_product",
+    source_fetch_url: "https://cdn.yextapis.com/v2/accounts/me/content/products?api_key=ebb4ac611dd26217320c751b4b519276&v=20250103&c_SEOName=froot-loops-cereal&c_locale=en_US",
+    source_url_override: "https://www.wkkellogg.com/products/froot-loops-cereal",
+    source_detail_url: "https://www.wkkellogg.com/products/froot-loops-cereal#ingredients",
+    source_title_override: "Kellogg's Froot Loops official WK Kellogg product page",
+    source_owner_override: "WK Kellogg Co",
+    yext_smartlabel_gtin: "00038000281860",
+    source_image_match_status: "official_current_ingredient_label_image",
+  },
+  "frosted_flakes__current_2020s__257__1": {
+    ingredient_fragment_strategy: "wkkellogg_yext_product",
+    source_fetch_url: "https://cdn.yextapis.com/v2/accounts/me/content/products?api_key=ebb4ac611dd26217320c751b4b519276&v=20250103&c_SEOName=kellogg-s-frosted-flakes-cereal-product&c_locale=en_US",
+    source_url_override: "https://www.wkkellogg.com/products/kellogg-s-frosted-flakes-cereal-product",
+    source_detail_url: "https://www.wkkellogg.com/products/kellogg-s-frosted-flakes-cereal-product#ingredients",
+    source_title_override: "Kellogg's Frosted Flakes official WK Kellogg product page",
+    source_owner_override: "WK Kellogg Co",
+    yext_smartlabel_gtin: "00038000199042",
+    source_image_match_status: "official_current_ingredient_label_image",
+  },
   "rice_krispies_treats_original__current_2020s__112__2": {
     ingredient_fragment_strategy: "kelloggs_ingredients_list",
     source_detail_url: "https://smartlabel.kelloggs.com/Product/Index/038000126710#ingredients",
@@ -920,6 +950,14 @@ function jsonStringValues(html, key) {
   return values;
 }
 
+function parseJsonObject(text) {
+  try {
+    return JSON.parse(String(text || ""));
+  } catch {
+    return null;
+  }
+}
+
 function htmlAttr(html, pattern) {
   const match = html.match(pattern);
   return match ? decodeEntities(match[1]) : "";
@@ -1020,6 +1058,76 @@ function ingredientItemsFromKelloggsIngredientsList(html) {
       .trim())
     .filter((item) => item && !isNonIngredientSmartLabelItem(item))
     .filter(Boolean);
+}
+
+function wkkelloggYextSmartLabelUrl(gtin) {
+  if (!gtin) return "";
+  return `https://cdn.yextapis.com/v2/accounts/me/content/smartLabel?api_key=ebb4ac611dd26217320c751b4b519276&v=20250103&c_GTINListContent=${encodeURIComponent(gtin)}`;
+}
+
+function wkkelloggYextProductDoc(jsonText) {
+  const payload = parseJsonObject(jsonText);
+  return payload?.response?.docs?.[0] || null;
+}
+
+function wkkelloggYextSelectedGtin(jsonText, preferredGtin = "") {
+  if (preferredGtin) return preferredGtin;
+  const product = wkkelloggYextProductDoc(jsonText);
+  const gtins = Array.isArray(product?.c_gTINs) ? product.c_gTINs : [];
+  const activeUsSmartLabel = gtins.filter((item) => (
+    item?.smartLabelComplete === "SmartLabelv2"
+    && !item?.culledDate
+    && Array.isArray(item?.targetMarket)
+    && item.targetMarket.includes("US")
+  ));
+  return (activeUsSmartLabel.find((item) => item.primaryItem)?.gTIN || activeUsSmartLabel[0]?.gTIN || "").trim();
+}
+
+function firstCsvUrl(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .find((item) => /^https?:\/\//i.test(item)) || "";
+}
+
+function wkkelloggYextProductImageUrl(jsonText, selectedGtin = "") {
+  const product = wkkelloggYextProductDoc(jsonText);
+  const gtins = Array.isArray(product?.c_gTINs) ? product.c_gTINs : [];
+  const selected = gtins.find((item) => item.gTIN === selectedGtin);
+  return product?.c_primaryImage || firstCsvUrl(selected?.imageURL) || "";
+}
+
+function wkkelloggYextIngredientLabelImageUrl(selectedGtin = "") {
+  return selectedGtin ? `https://s7d9.scene7.com/is/image/wkkellogg/${encodeURIComponent(selectedGtin)}_L4` : "";
+}
+
+function titleFromWkKelloggYextProduct(jsonText) {
+  const product = wkkelloggYextProductDoc(jsonText);
+  return stripTags(product?.c_webProductFullName || product?.c_webProductName || product?.name || "");
+}
+
+function latestEnUsWkKelloggSmartLabelRecord(jsonText) {
+  const payload = parseJsonObject(jsonText);
+  const docs = Array.isArray(payload?.response?.docs) ? payload.response.docs : [];
+  return docs
+    .filter((doc) => String(doc?.$key?.locale || "").toLowerCase() === "en-us")
+    .filter((doc) => doc?.c_nL_Ingredients_Portal)
+    .sort((a, b) => new Date(b.c_lastUpdatedDate || 0) - new Date(a.c_lastUpdatedDate || 0))[0] || null;
+}
+
+function ingredientStatementFromWkKelloggYextSmartLabel(jsonText) {
+  const record = latestEnUsWkKelloggSmartLabelRecord(jsonText);
+  return stripTags(record?.c_nL_Ingredients_Portal || "")
+    .replace(/^ingredients?:\s*/i, "")
+    .replace(/\.\s+Vitamins and Minerals\s*:/i, ", Vitamins and Minerals:")
+    .replace(/\.\s+BHT\b/i, ", BHT")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[.;\s]+$/, "");
+}
+
+function ingredientItemsFromWkKelloggYextSmartLabel(jsonText) {
+  return ingredientItemsFromStatement(ingredientStatementFromWkKelloggYextSmartLabel(jsonText));
 }
 
 function ingredientItemsFromHormelPage(html) {
@@ -1521,6 +1629,7 @@ function ingredientStatementForStrategy(strategy, html, fragmentHtml) {
 function ingredientItemsForStrategy(strategy, mainHtml, fragmentHtml, review = {}) {
   if (strategy === "hormel_page") return ingredientItemsFromHormelPage(mainHtml);
   if (strategy === "wkkellogg_smartlabel") return ingredientItemsFromWkKelloggSmartLabel(mainHtml);
+  if (strategy === "wkkellogg_yext_product") return ingredientItemsFromWkKelloggYextSmartLabel(fragmentHtml);
   if (strategy === "kelloggs_ingredients_list") return ingredientItemsFromKelloggsIngredientsList(mainHtml);
   if (strategy === "mcdonalds_item_details") return ingredientItemsFromMcdonaldsItemDetails(mainHtml);
   if (strategy === "wendys_order_page") return ingredientItemsFromWendysOrderPage(mainHtml);
@@ -1573,6 +1682,7 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "hormel_page") return "official_current_label_page";
   if (strategy === "smartlabel_fragment") return "official_current_label_fragment";
   if (strategy === "wkkellogg_smartlabel") return "official_current_label_page";
+  if (strategy === "wkkellogg_yext_product") return "official_current_label_api_json";
   if (strategy === "kelloggs_ingredients_list") return "official_current_label_page";
   if (strategy === "mcdonalds_item_details") return "official_current_product_api_json";
   if (strategy === "wendys_order_page") return "official_current_menu_page_json";
@@ -1953,18 +2063,29 @@ async function build() {
         noFetch,
       )
       : await fetchTextToCache(sourceFetchUrl, mainHtmlPath, noFetch);
+    const selectedYextGtin = strategy === "wkkellogg_yext_product"
+      ? wkkelloggYextSelectedGtin(mainCapture.text, review.yext_smartlabel_gtin)
+      : "";
     const productId = strategy === "smartlabel_fragment" ? productIdFromMainHtml(mainCapture.text) : "";
-    const fragmentUrl = strategy === "smartlabel_fragment"
-      ? productId ? smartLabelFragmentUrl(sourceFetchUrl, productId) : ""
-      : sourceFetchUrl;
     const fragmentPath = path.join(htmlDir, `${visualId}-ingredients.html`);
-    const fragmentCapture = strategy !== "smartlabel_fragment"
-      ? { file_path: mainCapture.file_path, status: mainCapture.status, text: mainCapture.text }
-      : fragmentUrl
-      ? await fetchTextToCache(fragmentUrl, fragmentPath, noFetch)
-      : { file_path: "", status: "missing_product_id", text: "" };
-    const sourceTitle = review.source_title_override || titleFromMainHtml(mainCapture.text) || row.source_title;
-    const productImageUrl = review.source_image_url || imageUrlFromMainHtml(mainCapture.text, sourceFetchUrl);
+    let fragmentUrl = sourceFetchUrl;
+    let fragmentCapture = { file_path: mainCapture.file_path, status: mainCapture.status, text: mainCapture.text };
+    if (strategy === "smartlabel_fragment") {
+      fragmentUrl = productId ? smartLabelFragmentUrl(sourceFetchUrl, productId) : "";
+      fragmentCapture = fragmentUrl
+        ? await fetchTextToCache(fragmentUrl, fragmentPath, noFetch)
+        : { file_path: "", status: "missing_product_id", text: "" };
+    } else if (strategy === "wkkellogg_yext_product") {
+      fragmentUrl = wkkelloggYextSmartLabelUrl(selectedYextGtin);
+      fragmentCapture = fragmentUrl
+        ? await fetchTextToCache(fragmentUrl, fragmentPath, noFetch)
+        : { file_path: "", status: "missing_yext_gtin", text: "" };
+    }
+    const sourceTitle = review.source_title_override
+      || (strategy === "wkkellogg_yext_product" ? titleFromWkKelloggYextProduct(mainCapture.text) : titleFromMainHtml(mainCapture.text))
+      || row.source_title;
+    const productImageUrl = review.source_image_url
+      || (strategy === "wkkellogg_yext_product" ? wkkelloggYextProductImageUrl(mainCapture.text, selectedYextGtin) : imageUrlFromMainHtml(mainCapture.text, sourceFetchUrl));
     const productImage = productImageUrl
       ? await fetchBinaryToCache(productImageUrl, path.join(imageDir, `${sha(productImageUrl, 16)}.jpg`), noFetch)
       : { file_path: "", status: "no_product_image" };
@@ -1977,7 +2098,8 @@ async function build() {
         noRender,
       )
       : { file_path: "", status: productImage.file_path ? "product_image_available" : "not_pdf_source" };
-    const ingredientLabelImageUrl = review.source_label_image_url || "";
+    const ingredientLabelImageUrl = review.source_label_image_url
+      || (strategy === "wkkellogg_yext_product" ? wkkelloggYextIngredientLabelImageUrl(selectedYextGtin) : "");
     const ingredientLabelImage = ingredientLabelImageUrl
       ? await fetchBinaryToCache(ingredientLabelImageUrl, path.join(imageDir, `${sha(ingredientLabelImageUrl, 16)}.jpg`), noFetch)
       : { file_path: "", status: "no_ingredient_label_image" };

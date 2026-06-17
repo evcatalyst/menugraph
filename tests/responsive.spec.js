@@ -461,7 +461,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab")).toHaveCount(3);
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
-  await expect(page.locator(".cwa-product-chip")).toHaveCount(96);
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_source_text_proof_panel");
@@ -551,7 +551,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
 
   await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
-  await expect(page.locator(".cwa-product-chip")).toHaveCount(96);
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
   await page.locator(".cwa-product-chip").filter({ hasText: "Oreo Original Chocolate Sandwich Cookies" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("HIGH FRUCTOSE CORN SYRUP");
@@ -683,6 +683,22 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Monosodium Glutamate");
   await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Rice Krispies" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("malt flavor");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Corn Flakes" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_ingredient_label_image");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Milled corn");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Froot Loops" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_ingredient_label_image");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Corn flour blend");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("red 40");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("blue 1");
+  await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("red 40");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Frosted Flakes" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_ingredient_label_image");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("malt flavor");
   await page.locator(".cwa-product-chip").filter({ hasText: "Rice Krispies Treats Original" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
