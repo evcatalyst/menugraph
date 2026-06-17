@@ -613,6 +613,13 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
   await expect(page.locator("#source-family-filter-status")).toContainText("99 products");
+  await expect(page.locator("#source-family-ingredient-summary")).toContainText("Frequent ingredients");
+  await expect(page.locator(".source-family-ingredient-bar").filter({ hasText: "sugar" }).first()).toBeVisible();
+  await page.locator(".source-family-ingredient-bar").filter({ hasText: "sugar" }).first().click();
+  await expect(page.locator("#source-family-search")).toHaveValue(/sugar/i);
+  await expect(page.locator("#source-family-filter-status")).toContainText("of 99 products");
+  await expect(page.locator(".cwa-product-chip")).not.toHaveCount(99);
+  await page.locator("#source-family-filter-clear").click();
   await page.locator("#source-family-search").fill("sodium alginate");
   await expect(page.locator("#source-family-filter-status")).toContainText("1 of 99 products");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(1);
@@ -638,6 +645,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-filter-status")).toContainText("0 of 99 products");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(0);
   await expect(page.locator(".cwa-timeline-empty")).toBeVisible();
+  await expect(page.locator("#source-family-ingredient-summary")).toContainText("No structured ingredient trend rows");
   await expect(page.locator("#source-family-position")).toContainText("0 / 0");
   await page.locator("#source-family-filter-clear").click();
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);

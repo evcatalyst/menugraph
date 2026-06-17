@@ -470,6 +470,114 @@ a:hover {
   white-space: nowrap;
 }
 
+.source-family-ingredient-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-height: 46px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+  padding: 8px 0;
+}
+
+.source-family-ingredient-summary > span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.source-family-ingredient-summary-title {
+  display: grid;
+  gap: 3px;
+  min-width: 138px;
+}
+
+.source-family-ingredient-summary-title span {
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.source-family-ingredient-summary-title small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.source-family-ingredient-bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.source-family-ingredient-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(62px, 0.44fr) auto;
+  gap: 7px;
+  align-items: center;
+  min-height: 28px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.source-family-ingredient-bar span {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-family-ingredient-bar strong {
+  color: var(--teal);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.source-family-ingredient-bar meter {
+  width: 100%;
+  height: 7px;
+}
+
+.source-family-ingredient-bar meter::-webkit-meter-bar {
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.source-family-ingredient-bar meter::-webkit-meter-optimum-value {
+  border-radius: 999px;
+  background: var(--teal);
+}
+
+.source-family-ingredient-bar meter::-moz-meter-bar {
+  border-radius: 999px;
+  background: var(--teal);
+}
+
+.source-family-ingredient-bar:hover span,
+.source-family-ingredient-bar:focus-visible span {
+  color: var(--teal);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.source-family-ingredient-bar:focus-visible {
+  outline: 1px solid rgba(101, 183, 177, 0.72);
+  outline-offset: 2px;
+}
+
 .source-family-tab {
   flex: 0 0 188px;
   min-height: 44px;
@@ -2066,6 +2174,10 @@ a:hover {
 
   .source-family-pager {
     justify-content: start;
+  }
+
+  .source-family-ingredient-summary {
+    grid-template-columns: 1fr;
   }
 
   .cwa-ingredient-overlay {

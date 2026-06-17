@@ -15,6 +15,7 @@ const els = {
   sourceFamilyPrev: document.querySelector("#source-family-prev"),
   sourceFamilyNext: document.querySelector("#source-family-next"),
   sourceFamilyPosition: document.querySelector("#source-family-position"),
+  sourceFamilyIngredientSummary: document.querySelector("#source-family-ingredient-summary"),
   cwaProductStrip: document.querySelector("#cwa-product-strip"),
   cwaTimelineTrack: document.querySelector("#cwa-timeline-track"),
   status: document.querySelector("#journey-status"),
@@ -329,6 +330,38 @@ function filteredSourceFamilyProducts(family) {
   return (family?.products || []).filter((productRow) => sourceFamilyProductMatches(productRow, query));
 }
 
+function sourceFamilyRowsForProduct(productRow, query = sourceFamilyFilterQuery()) {
+  const productMatch = sourceFamilyProductSearchText(productRow).includes(query);
+  return query && !productMatch
+    ? (productRow.rows || []).filter((row) => sourceFamilyRowMatches(row, query))
+    : productRow.rows || [];
+}
+
+function ingredientTrendRows(products, query = sourceFamilyFilterQuery()) {
+  return products.flatMap((productRow) => sourceFamilyRowsForProduct(productRow, query));
+}
+
+function ingredientTrendKey(value) {
+  return String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function ingredientTrendItems(rows, limit = 8) {
+  const counts = new Map();
+  for (const row of rows) {
+    for (const item of ingredientItemsForRow(row)) {
+      const label = String(item || "").replace(/\s+/g, " ").trim();
+      const key = ingredientTrendKey(label);
+      if (!key) continue;
+      const existing = counts.get(key) || { label, count: 0 };
+      existing.count += 1;
+      counts.set(key, existing);
+    }
+  }
+  return [...counts.values()]
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+    .slice(0, limit);
+}
+
 function selectedCwaProduct() {
   const family = cwaTimeline();
   const products = filteredSourceFamilyProducts(family);
@@ -527,6 +560,32 @@ function renderSourceFamilySummary() {
   `;
 }
 
+function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
+  if (!els.sourceFamilyIngredientSummary) return;
+  const rows = ingredientTrendRows(visibleProducts, query);
+  const items = ingredientTrendItems(rows);
+  if (!items.length) {
+    els.sourceFamilyIngredientSummary.innerHTML = `<span>No structured ingredient trend rows in this view.</span>`;
+    return;
+  }
+  const maxCount = Math.max(...items.map((item) => item.count), 1);
+  els.sourceFamilyIngredientSummary.innerHTML = `
+    <div class="source-family-ingredient-summary-title">
+      <span>Frequent ingredients</span>
+      <small>${escapeHtml(`${rows.length} proof ${rows.length === 1 ? "row" : "rows"}`)}</small>
+    </div>
+    <div class="source-family-ingredient-bars">
+      ${items.map((item) => `
+        <button class="source-family-ingredient-bar" type="button" data-source-family-filter-value="${escapeHtml(item.label)}">
+          <span>${escapeHtml(truncateText(item.label, 56))}</span>
+          <meter min="0" max="${escapeHtml(maxCount)}" value="${escapeHtml(item.count)}"></meter>
+          <strong>${escapeHtml(item.count)}</strong>
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderCwaTimeline() {
   if (!els.cwaTimelinePanel || !els.cwaProductStrip || !els.cwaTimelineTrack) return;
   const families = state.data.source_family_timeline?.families || [];
@@ -565,16 +624,12 @@ function renderCwaTimeline() {
     els.sourceFamilyFilterClear.disabled = !query;
   }
   if (els.sourceFamilyFilterStatus) {
-    const visibleRows = visibleProducts.reduce((sum, productRow) => {
-      const productMatch = sourceFamilyProductSearchText(productRow).includes(query);
-      return sum + (query && !productMatch
-        ? (productRow.rows || []).filter((row) => sourceFamilyRowMatches(row, query)).length
-        : (productRow.rows || []).length);
-    }, 0);
+    const visibleRows = ingredientTrendRows(visibleProducts, query).length;
     els.sourceFamilyFilterStatus.textContent = query
       ? `${visibleProducts.length} of ${allProducts.length} products · ${visibleRows} matching proof rows`
       : `${allProducts.length} products · ${family.row_count || allProducts.reduce((sum, row) => sum + Number(row.evidence_count || 0), 0)} proof rows`;
   }
+  renderSourceFamilyIngredientSummary(family, visibleProducts, query);
   if (!visibleProducts.length) {
     state.cwaProductId = "";
     els.cwaProductStrip.innerHTML = "";
@@ -605,10 +660,7 @@ function renderCwaTimeline() {
     .join("");
 
   const localImages = isLocalPreviewHost();
-  const productMatch = sourceFamilyProductSearchText(productRow).includes(query);
-  const timelineRows = query && !productMatch
-    ? (productRow.rows || []).filter((row) => sourceFamilyRowMatches(row, query))
-    : productRow.rows || [];
+  const timelineRows = sourceFamilyRowsForProduct(productRow, query);
   els.cwaTimelineTrack.classList.toggle("is-single-proof-row", timelineRows.length === 1);
   els.cwaTimelineTrack.innerHTML = timelineRows
     .map((row, index) => {
