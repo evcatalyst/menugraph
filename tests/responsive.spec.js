@@ -873,6 +873,12 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(sugarTrend).toHaveAttribute("aria-label", /proof examples:/);
   await expect(sugarTrend.locator(".source-family-ingredient-proof-strip")).toBeVisible();
   expect(await sugarTrend.locator(".source-family-ingredient-proof-thumb img").count()).toBeGreaterThan(0);
+  await expect(sugarTrend.locator(".source-family-ingredient-proof-thumbs")).not.toHaveAttribute("aria-hidden", "true");
+  await expect(sugarTrend.locator(".source-family-ingredient-proof-thumb").first()).toHaveAttribute("role", "img");
+  await expect(sugarTrend.locator(".source-family-ingredient-proof-thumb").first()).toHaveAttribute("aria-label", /source text proof|ingredient/i);
+  await expect(sugarTrend.locator(".source-family-ingredient-proof-thumb").first()).toHaveAttribute("data-proof-product", /[A-Za-z]/);
+  await expect(sugarTrend.locator(".source-family-ingredient-proof-thumb").first()).toHaveAttribute("data-proof-vintage", /[A-Za-z0-9]/);
+  await expect(sugarTrend.locator(".source-family-ingredient-proof-thumb").first()).toHaveAttribute("data-proof-basis", /source text proof|ingredient/i);
   await expect(sugarTrend.locator(".source-family-ingredient-proof-thumb img").first()).toHaveAttribute("src", /\/api\/private\/ingredient-crops\//);
   await expect(sugarTrend.locator(".source-family-ingredient-proof-names")).toContainText(/[A-Za-z]/);
   await page.locator(".source-family-ingredient-bar").filter({ hasText: "sugar" }).first().click();

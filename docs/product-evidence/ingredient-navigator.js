@@ -1116,12 +1116,22 @@ function sourceFamilyTrendProofStrip(item, localImages) {
   ].filter(Boolean).join(" · ");
   return `
     <span class="source-family-ingredient-proof-strip" aria-label="${escapeHtml(`Proof examples: ${exampleNames.join(", ")}`)}">
-      <span class="source-family-ingredient-proof-thumbs" aria-hidden="true">
-        ${item.proofs.map((proof) => `
-          <span class="source-family-ingredient-proof-thumb" title="${escapeHtml(`${proof.product_name} · ${proof.vintage_label} · ${proof.proof_label}`)}">
+      <span class="source-family-ingredient-proof-thumbs">
+        ${item.proofs.map((proof) => {
+          const proofLabel = [proof.product_name, proof.vintage_label, proof.proof_label].filter(Boolean).join(" · ");
+          return `
+          <span
+            class="source-family-ingredient-proof-thumb"
+            role="img"
+            aria-label="${escapeHtml(proofLabel)}"
+            title="${escapeHtml(proofLabel)}"
+            data-proof-basis="${escapeHtml(proof.proof_label || "")}"
+            data-proof-product="${escapeHtml(proof.product_name || "")}"
+            data-proof-vintage="${escapeHtml(proof.vintage_label || "")}"
+          >
             <img src="${escapeHtml(proof.preview_endpoint)}" alt="" loading="lazy" data-private-ingredient-trend-preview="1" />
           </span>
-        `).join("")}
+        `; }).join("")}
       </span>
       ${exampleLabel ? `<span class="source-family-ingredient-proof-names">${escapeHtml(exampleLabel)}</span>` : ""}
     </span>
