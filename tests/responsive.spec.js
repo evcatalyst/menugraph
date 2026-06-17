@@ -519,6 +519,15 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label^='Open source']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open local private crop']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open ingredient drill-in']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-card-body")).toHaveAttribute("data-cwa-body-inspect", /./);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-body-inspect-hint")).toBeVisible();
+  const firstProofProductName = await page.locator(".cwa-timeline-card").first().locator(".cwa-card-body > strong").innerText();
+  await page.locator(".cwa-timeline-card").first().locator(".cwa-card-body > strong").click();
+  await expect(page.locator("#ingredient-drilldown")).toBeVisible();
+  await expect(page.locator("#ingredient-drilldown-title")).toContainText(firstProofProductName);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#ingredient-drilldown")).toBeHidden();
+  await page.mouse.move(8, 8);
   await expect(page.locator(".cwa-timeline-card .status-badge")).toHaveCount(0);
   expect(await page.locator(".cwa-status-icon").count()).toBeGreaterThan(0);
   const firstProofCard = page.locator(".cwa-timeline-card").first();

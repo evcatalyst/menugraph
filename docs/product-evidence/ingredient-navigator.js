@@ -1378,7 +1378,8 @@ function renderCwaTimeline() {
               ${cwaActionButton("inspect", "Open ingredient drill-in", row.visual_id)}
             </div>
           </div>
-          <div class="cwa-card-body">
+          <div class="cwa-card-body" data-cwa-body-inspect="${escapeHtml(row.visual_id || "")}" title="${escapeHtml(`Open ingredient drill-in for ${row.product_name} ${row.vintage_label}`)}">
+            <span class="cwa-body-inspect-hint" aria-hidden="true">${cwaInlineIcon("inspect")}</span>
             <span>${escapeHtml(row.vintage_label)}</span>
             <strong>${escapeHtml(row.product_name)}</strong>
             <small class="cwa-source-title">${escapeHtml(sourceTitle)}</small>
@@ -1897,8 +1898,15 @@ function attachEvents() {
   });
   els.cwaTimelineTrack?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-cwa-inspect]");
-    if (!button) return;
-    const row = sourceFamilyRowByVisualId(button.dataset.cwaInspect);
+    if (button) {
+      const row = sourceFamilyRowByVisualId(button.dataset.cwaInspect);
+      if (row) openIngredientDrilldown(row);
+      return;
+    }
+    if (event.target.closest("button, a, summary, details, input, select, textarea, [data-cwa-toggle]")) return;
+    const body = event.target.closest("[data-cwa-body-inspect]");
+    if (!body) return;
+    const row = sourceFamilyRowByVisualId(body.dataset.cwaBodyInspect);
     if (row) openIngredientDrilldown(row);
   });
   els.sourceFamilyTabs?.addEventListener("click", (event) => {
