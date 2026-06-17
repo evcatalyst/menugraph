@@ -1030,11 +1030,53 @@ a:hover {
   color: var(--ink);
 }
 
-.cwa-ingredient-copy > span {
+.cwa-label-reader {
+  align-self: start;
+  border: 1px solid rgba(101, 183, 177, 0.28);
+  border-left: 3px solid var(--teal);
+  border-radius: 7px;
+  background: rgba(15, 18, 14, 0.28);
+  padding: 8px;
+  transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.cwa-label-reader.needs-readable-panel {
+  border-color: rgba(212, 173, 87, 0.34);
+  border-left-color: var(--gold);
+}
+
+.cwa-timeline-card:hover .cwa-label-reader,
+.cwa-timeline-card:focus-within .cwa-label-reader,
+.cwa-timeline-card.is-ingredient-preview .cwa-label-reader,
+.cwa-timeline-card.is-ingredient-open .cwa-label-reader {
+  border-color: rgba(212, 173, 87, 0.58);
+  background: rgba(15, 18, 14, 0.48);
+  box-shadow: inset 0 0 0 1px rgba(245, 240, 230, 0.05);
+}
+
+.cwa-label-reader-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.cwa-ingredient-copy > span,
+.cwa-label-reader-title span {
   color: var(--gold);
   font-size: 10px;
   font-weight: 850;
   line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.cwa-label-reader-meta {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 760;
+  line-height: 1.12;
+  text-align: right;
   text-transform: uppercase;
 }
 
@@ -1045,9 +1087,12 @@ a:hover {
 
 .cwa-ingredient-copy.is-compact .cwa-ingredient-source-line {
   display: -webkit-box;
+  border-top: 1px solid rgba(245, 240, 230, 0.1);
   color: var(--muted) !important;
   font-size: 12px;
   line-height: 1.35;
+  margin-top: 2px;
+  padding-top: 6px;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -1065,6 +1110,7 @@ a:hover {
   grid-template-columns: minmax(0, 1fr);
   max-height: 280px;
   overflow: auto;
+  padding-bottom: 2px;
   padding-right: 6px;
   scrollbar-width: thin;
 }
@@ -1335,6 +1381,11 @@ a:hover {
 
 .ingredient-drilldown-copy .cwa-ingredient-copy {
   border-top: 1px solid var(--line);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
   padding-top: 10px;
 }
 

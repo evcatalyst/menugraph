@@ -223,6 +223,7 @@ function ingredientOverlay(row) {
 function ingredientTextBlock(row, options = {}) {
   if (!row.ingredient_text) return "";
   const compact = Boolean(options.compact);
+  const idAttr = options.id ? ` id="${escapeHtml(options.id)}"` : "";
   const items = ingredientItemsForRow(row);
   const sourceText = compact
     ? truncateText(row.candidate_excerpt || row.ingredient_text, 230)
@@ -231,15 +232,37 @@ function ingredientTextBlock(row, options = {}) {
     ? `<ul>${items.map((item) => `<li>${ingredientFilterButton(item)}</li>`).join("")}</ul>`
     : "";
   const label = compact && items.length
-    ? `${items.length} ingredient ${items.length === 1 ? "entry" : "entries"}`
+    ? "Label reader"
     : compact ? "Ingredients listed" : "Readable ingredient text";
+  const readerMeta = compact && items.length
+    ? `<small class="cwa-label-reader-meta">${escapeHtml(`${items.length} ingredient ${items.length === 1 ? "entry" : "entries"} · candidate text`)}</small>`
+    : "";
   const sourceLine = sourceText
     ? `<p class="cwa-ingredient-source-line">${escapeHtml(sourceText)}</p>`
     : "";
   return `
-    <div class="cwa-ingredient-copy ${compact ? "is-compact" : ""}">
-      <span>${escapeHtml(label)}</span>
+    <div${idAttr} class="cwa-ingredient-copy ${compact ? "is-compact cwa-label-reader has-ingredients" : ""}">
+      <div class="cwa-label-reader-title">
+        <span>${escapeHtml(label)}</span>
+        ${readerMeta}
+      </div>
       ${compact ? `${list}${sourceLine}` : `${sourceLine}${list}`}
+    </div>
+  `;
+}
+
+function missingIngredientTextBlock(row, fallbackText, options = {}) {
+  const idAttr = options.id ? ` id="${escapeHtml(options.id)}"` : "";
+  const sourceStatus = row.crop_focus === "panel_context"
+    ? "package text crop"
+    : "visual lineage";
+  return `
+    <div${idAttr} class="cwa-ingredient-copy is-compact cwa-label-reader needs-readable-panel">
+      <div class="cwa-label-reader-title">
+        <span>Readable panel needed</span>
+        <small class="cwa-label-reader-meta">${escapeHtml(sourceStatus)}</small>
+      </div>
+      <p>${escapeHtml(fallbackText)}</p>
     </div>
   `;
 }
@@ -675,9 +698,10 @@ function renderCwaTimeline() {
       const proofClass = ingredientText ? "has-ingredient-proof" : "needs-readable-panel";
       const previewClass = ingredientText ? "has-transcript-overlay" : "needs-transcript-overlay";
       const visualBasis = proofVisualBasis(row);
+      const readerId = `cwa-label-reader-${row.visual_id || index}`;
       return `
         <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}" data-proof-basis="${escapeHtml(visualBasis)}">
-          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" data-cwa-product-name="${escapeHtml(row.product_name)}" data-cwa-vintage-label="${escapeHtml(row.vintage_label)}" aria-pressed="false" aria-label="${escapeHtml(`Show ingredient proof text for ${row.product_name} ${row.vintage_label}`)}">
+          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" data-cwa-product-name="${escapeHtml(row.product_name)}" data-cwa-vintage-label="${escapeHtml(row.vintage_label)}" aria-pressed="false" aria-describedby="${escapeHtml(readerId)}" aria-label="${escapeHtml(`Show ingredient proof text for ${row.product_name} ${row.vintage_label}`)}">
             ${canShowPreview
               ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ${proofVisualLabel(row).toLowerCase()}`)}" loading="lazy" data-private-preview="1" />`
               : ""}
@@ -697,7 +721,9 @@ function renderCwaTimeline() {
             <span>${escapeHtml(row.vintage_label)}</span>
             <strong>${escapeHtml(row.product_name)}</strong>
             <small class="cwa-source-title">${escapeHtml(sourceTitle)}</small>
-            ${ingredientText ? ingredientTextBlock(row, { compact: true }) : `<p>${escapeHtml(evidenceText)}</p>`}
+            ${ingredientText
+              ? ingredientTextBlock(row, { compact: true, id: readerId })
+              : missingIngredientTextBlock(row, evidenceText, { id: readerId })}
           </div>
         </article>
       `;

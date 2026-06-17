@@ -466,6 +466,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_source_text_proof_panel");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy.is-compact")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader-title")).toContainText("Label reader");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader-meta")).toContainText(/ingredient entr/);
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy.is-compact ul li").first()).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-source-line")).toBeVisible();
   const defaultProofCard = await page.locator(".cwa-timeline-card").first().boundingBox();
@@ -482,6 +485,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   const firstProofPreview = firstProofCard.locator(".cwa-preview-frame");
   const firstProofOverlay = firstProofCard.locator(".cwa-ingredient-overlay");
   await expect(firstProofPreview).toHaveAttribute("aria-label", /Show ingredient proof text/);
+  await expect(firstProofPreview).toHaveAttribute("aria-describedby", /cwa-label-reader-/);
+  const firstReaderId = await firstProofCard.locator(".cwa-label-reader").getAttribute("id");
+  await expect(firstProofPreview).toHaveAttribute("aria-describedby", firstReaderId || "");
   await expect(firstProofOverlay).toHaveCSS("opacity", "0");
   await firstProofPreview.hover();
   await expect(firstProofCard).toHaveClass(/is-ingredient-preview/);
@@ -503,6 +509,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-product-chip")).toHaveCount(5);
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText(/readable ingredient panel still needed/i);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader.needs-readable-panel")).toContainText(/Readable panel needed/i);
   await expect(page.locator(".cwa-timeline-card").nth(1)).toContainText("Milk chocolate, peanuts");
   await expect(page.locator(".cwa-timeline-card").nth(1)).toHaveAttribute("data-proof-basis", "archive_ingredient_label_crop");
   await expect(page.locator(".cwa-timeline-card .status-badge")).toHaveCount(0);
