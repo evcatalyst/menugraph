@@ -461,7 +461,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab")).toHaveCount(3);
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
-  await expect(page.locator(".cwa-product-chip")).toHaveCount(91);
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(93);
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_source_text_proof_panel");
@@ -551,7 +551,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
 
   await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
-  await expect(page.locator(".cwa-product-chip")).toHaveCount(91);
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(93);
   await page.locator(".cwa-product-chip").filter({ hasText: "Oreo Original Chocolate Sandwich Cookies" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("HIGH FRUCTOSE CORN SYRUP");
@@ -581,6 +581,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".cwa-product-chip").filter({ hasText: "Totino's Pizza Rolls" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Tomato Puree");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Pizza Hut Original Pan Pepperoni" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Pepperoni topping");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("natural spice extractives");
   await page.locator(".cwa-product-chip").filter({ hasText: "Wendy's Dave's Single" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Potato Bun");
@@ -593,6 +597,12 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_menu_or_api_text");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Taco Shell");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Seasoned Beef");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Domino's Hand Tossed Pepperoni" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_menu_or_api_text");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("HAND TOSSED CRUST");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("PIZZA SAUCE");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("PEPPERONI");
   await page.locator(".cwa-product-chip").filter({ hasText: "Taco Bell Bean Burrito" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Flour Tortilla");

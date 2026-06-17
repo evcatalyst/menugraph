@@ -8165,9 +8165,9 @@
         "strategy": "official_current_ingredient_fragments",
         "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
         "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
-        "evidence_row_count": 91,
-        "product_count": 91,
-        "top_domains": "order.wendys.com; smartlabel.conagra.com; smartlabel.congra.net; smartlabel.hersheys.com; smartlabel.hormelfoods.com; smartlabel.kelloggs.com; smartlabel.mondelez.info; smartlabel.pepsico.info; smartlabel.unileverusa.com; smartlabel.wkkellogg.com; tootsie.com; wheaties.com; www.bettycrocker.com; www.butterfinger.com; www.campbells.com; www.campbellsfoodservice.com; www.cheerios.com; www.cheezit.com; www.chick-fil-a.com; www.coca-cola.com; www.generalmillsconvenience.com; www.goodnes.com; www.grapenuts.com; www.hamburgerhelper.com; www.heinz.com; www.hiddenvalley.com; www.jif.com; www.kraftheinz.com; www.leggomyeggo.com; www.luckycharms.com; www.mccormick.com; www.mcdonalds.com; www.milkywaybar.com; www.mms.com; www.nutella.com; www.oscarmayer.com; www.paneraathome.com; www.pepperidgefarm.com; www.pillsbury.com; www.poptarts.com; www.pringles.com; www.skittles.com; www.smuckers.com; www.starburst.com; www.tacobell.com; www.totinos.com; www.twix.com; www.tysonfoodservice.com",
+        "evidence_row_count": 93,
+        "product_count": 93,
+        "top_domains": "order.wendys.com; smartlabel.conagra.com; smartlabel.congra.net; smartlabel.hersheys.com; smartlabel.hormelfoods.com; smartlabel.kelloggs.com; smartlabel.mondelez.info; smartlabel.pepsico.info; smartlabel.unileverusa.com; smartlabel.wkkellogg.com; tootsie.com; wheaties.com; www.bettycrocker.com; www.butterfinger.com; www.campbells.com; www.campbellsfoodservice.com; www.cheerios.com; www.cheezit.com; www.chick-fil-a.com; www.coca-cola.com; www.dominos.com; www.generalmillsconvenience.com; www.goodnes.com; www.grapenuts.com; www.hamburgerhelper.com; www.heinz.com; www.hiddenvalley.com; www.jif.com; www.kraftheinz.com; www.leggomyeggo.com; www.luckycharms.com; www.mccormick.com; www.mcdonalds.com; www.milkywaybar.com; www.mms.com; www.nutella.com; www.oscarmayer.com; www.paneraathome.com; www.pepperidgefarm.com; www.pillsbury.com; www.pizzahut.com; www.poptarts.com; www.pringles.com; www.skittles.com; www.smuckers.com; www.starburst.com; www.tacobell.com; www.totinos.com; www.twix.com; www.tysonfoodservice.com",
         "gap_categories": "panel_capture_needed",
         "products": [
           {
@@ -8451,6 +8451,24 @@
             ],
             "source_urls": [
               "https://smartlabel.hormelfoods.com/product-info/00037600249348"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "review_current_official_label_against_package_panel",
+            "vintage_count": 1
+          },
+          {
+            "product_id": "dominos_hand_tossed_pepperoni",
+            "product_name": "Domino's Hand Tossed Pepperoni Pizza",
+            "brand": "Domino's",
+            "category": "fast food",
+            "evidence_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "source_urls": [
+              "https://www.dominos.com/en/pages/content/nutritional/ingredients"
             ],
             "ingredient_panel_visible_count": 1,
             "local_image_ready_count": 1,
@@ -9225,6 +9243,24 @@
             ],
             "source_urls": [
               "https://www.pillsbury.com/products/toaster-strudel/strawberry-12ct"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "review_current_official_label_against_package_panel",
+            "vintage_count": 1
+          },
+          {
+            "product_id": "pizza_hut_original_pan_pepperoni",
+            "product_name": "Pizza Hut Original Pan Pepperoni Pizza",
+            "brand": "Pizza Hut",
+            "category": "fast food",
+            "evidence_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "source_urls": [
+              "https://www.pizzahut.com/c/content/pepperoni-pizza"
             ],
             "ingredient_panel_visible_count": 1,
             "local_image_ready_count": 1,
@@ -10024,7 +10060,7 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T05:17:23.462Z",
+    "generated_at_utc": "2026-06-17T05:41:35.768Z",
     "default_family": "official-current-labels",
     "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
     "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
@@ -11765,10 +11801,10 @@
       {
         "id": "official-current-labels",
         "label": "Official Current Labels",
-        "row_count": 91,
-        "product_count": 91,
-        "local_preview_available_count": 91,
-        "ingredient_signal_count": 91,
+        "row_count": 93,
+        "product_count": 93,
+        "local_preview_available_count": 93,
+        "ingredient_signal_count": 93,
         "products": [
           {
             "product_id": "ball_park_franks",
@@ -12945,6 +12981,68 @@
                 "ingredient_text_source": "official_current_label_page",
                 "ingredient_text_status": "official_current_label_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: Beef Stock, Beef, Potatoes, Carrots, Contains 2% or less of, Beef Fat, Corn Flour, Textured Soy Flour, Tomato Paste, Salt, Modified Cornstarch, Potato Starch, Mushroom Extract, Mushrooms, Maltodextrin, Disodium Inosinate and D...",
+                "candidate_status": "ingredient_text_candidate_needs_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "source_fragment_ready",
+                "source_candidate_image_count": 1,
+                "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
+              }
+            ]
+          },
+          {
+            "product_id": "dominos_hand_tossed_pepperoni",
+            "product_name": "Domino's Hand Tossed Pepperoni Pizza",
+            "brand": "Domino's",
+            "category": "fast food",
+            "source_family": "official-current-labels",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "rows": [
+              {
+                "product_id": "dominos_hand_tossed_pepperoni",
+                "product_name": "Domino's Hand Tossed Pepperoni Pizza",
+                "brand": "Domino's",
+                "category": "fast food",
+                "vintage_label": "current_2020s",
+                "vintage_start": "2020-01-01",
+                "vintage_end": "",
+                "evidence_id": "dominos_hand_tossed_pepperoni__current_2020s__613__2",
+                "ocr_priority": "high",
+                "ocr_gap_category": "document_text_pipeline_needed",
+                "source_domain": "www.dominos.com",
+                "source_url": "https://www.dominos.com/en/pages/content/nutritional/ingredients",
+                "source_title": "Domino's U.S. Pizza Ingredients official XML",
+                "source_owner": "Domino's Pizza",
+                "rights_note": "",
+                "visual_id": "dominos_hand_tossed_pepperoni__current_2020s__adcadfbae9",
+                "preview_endpoint": "/api/private/ingredient-crops/dominos_hand_tossed_pepperoni__current_2020s__adcadfbae9",
+                "visual_status": "local_ingredient_crop_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "ingredient_source_fragment_ready",
+                "source_image_title": "Domino's U.S. Pizza Ingredients official XML",
+                "source_image_year": "2020",
+                "source_detail_url": "https://www.dominos.com/en/pages/content/nutritional/ingredients",
+                "source_image_match_status": "official_current_menu_ingredient_statement_table",
+                "proof_visual_basis": "official_menu_or_api_text",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Ingredients: HAND TOSSED CRUST: Enriched Flour (Wheat Flour, Niacin, Reduced Iron, Thiamine Mononitrate, Riboflavin, Folic Acid), Water, Soybean and/or Canola Oil, Contains 2% or Less of The Following: Sugar, Salt, Dough Conditioners (Sodium Stearoyl Lactylate, Enzyme with Wheat Starch, Ascorbic Acid, L-Cysteine Monohydrochloride), Yeast, Whey, Maltodextrin, Dextrose, Corn Meal (used in preparation), PIZZA SAUCE (ROBUST INSPIRED TOMATO SAUCE): Water, Tomato Paste, Sugar, Salt, Spices, Dehydrated Garlic, Soybean Oil, and Citric Acid, PIZZA CHEESE: Part Skim Mozzarella Cheese (Pasteurized Milk, Cultures, Salt, Enzymes), Modified Food Starch, Cellulose (Added to Prevent Caking), Nonfat Milk, Whey Protein Concentrate, Flavors, Sodium Propionate (Added as A Preservative), PEPPERONI: Pork and Beef, Salt, Spices, Dextrose, Lactic Acid Starter Culture, Natural Flavors, Oleoresin of Paprika, Sodium Ascorbate, Sodium Nitrite, Citric Acid.",
+                "ingredient_items": [
+                  "HAND TOSSED CRUST: Enriched Flour (Wheat Flour, Niacin, Reduced Iron, Thiamine Mononitrate, Riboflavin, Folic Acid), Water, Soybean and/or Canola Oil, Contains 2% or Less of The Following: Sugar, Salt, Dough Conditioners (Sodium Stearoyl Lactylate, Enzyme with Wheat Starch, Ascorbic Acid, L-Cysteine Monohydrochloride), Yeast, Whey, Maltodextrin, Dextrose, Corn Meal (used in preparation)",
+                  "PIZZA SAUCE (ROBUST INSPIRED TOMATO SAUCE): Water, Tomato Paste, Sugar, Salt, Spices, Dehydrated Garlic, Soybean Oil, and Citric Acid",
+                  "PIZZA CHEESE: Part Skim Mozzarella Cheese (Pasteurized Milk, Cultures, Salt, Enzymes), Modified Food Starch, Cellulose (Added to Prevent Caking), Nonfat Milk, Whey Protein Concentrate, Flavors, Sodium Propionate (Added as A Preservative)",
+                  "PEPPERONI: Pork and Beef, Salt, Spices, Dextrose, Lactic Acid Starter Culture, Natural Flavors, Oleoresin of Paprika, Sodium Ascorbate, Sodium Nitrite, Citric Acid"
+                ],
+                "ingredient_text_source": "official_current_menu_ingredient_statement_xml",
+                "ingredient_text_status": "official_current_label_candidate_needs_review",
+                "candidate_excerpt": "Ingredients: HAND TOSSED CRUST: Enriched Flour (Wheat Flour, Niacin, Reduced Iron, Thiamine Mononitrate, Riboflavin, Folic Acid), Water, Soybean and/or Canola Oil, Contains 2% or Less of The Following: Sugar, Salt, Dough Conditioners (Sodi...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "source_fragment_ready",
@@ -16005,6 +16103,65 @@
                 "ingredient_text_source": "official_current_product_page_text",
                 "ingredient_text_status": "official_current_label_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: Enriched Flour Bleached (wheat flour, malted barley flour, ferrous sulfate, niacin, thiamin mononitrate, riboflavin, folic acid), Water, Palm and/or Soybean Oil, Sugar, High Fructose Corn Syrup, Corn Syrup, Dextrose. Contains...",
+                "candidate_status": "ingredient_text_candidate_needs_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "source_fragment_ready",
+                "source_candidate_image_count": 1,
+                "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
+              }
+            ]
+          },
+          {
+            "product_id": "pizza_hut_original_pan_pepperoni",
+            "product_name": "Pizza Hut Original Pan Pepperoni Pizza",
+            "brand": "Pizza Hut",
+            "category": "fast food",
+            "source_family": "official-current-labels",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "rows": [
+              {
+                "product_id": "pizza_hut_original_pan_pepperoni",
+                "product_name": "Pizza Hut Original Pan Pepperoni Pizza",
+                "brand": "Pizza Hut",
+                "category": "fast food",
+                "vintage_label": "current_2020s",
+                "vintage_start": "2020-01-01",
+                "vintage_end": "",
+                "evidence_id": "pizza_hut_original_pan_pepperoni__current_2020s__583__2",
+                "ocr_priority": "high",
+                "ocr_gap_category": "document_text_pipeline_needed",
+                "source_domain": "www.pizzahut.com",
+                "source_url": "https://www.pizzahut.com/c/content/pepperoni-pizza",
+                "source_title": "Pizza Hut Pepperoni Pizza official menu page",
+                "source_owner": "Pizza Hut",
+                "rights_note": "",
+                "visual_id": "pizza_hut_original_pan_pepperoni__current_2020s__13f565ade8",
+                "preview_endpoint": "/api/private/ingredient-crops/pizza_hut_original_pan_pepperoni__current_2020s__13f565ade8",
+                "visual_status": "local_ingredient_crop_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "ingredient_source_fragment_ready",
+                "source_image_title": "Pizza Hut Pepperoni Pizza official menu page",
+                "source_image_year": "2020",
+                "source_detail_url": "https://www.pizzahut.com/c/content/pepperoni-pizza#ingredients",
+                "source_image_match_status": "official_current_menu_ingredient_statement_table",
+                "proof_visual_basis": "official_menu_or_api_text",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Ingredients: Pepperoni topping: pork, beef, salt, contains 2% or less of: spices, dextrose, lactic acid starter culture, natural spice extractives, extractives of paprika, extractives of rosemary, sodium nitrite.",
+                "ingredient_items": [
+                  "Pepperoni topping: pork, beef, salt, contains 2% or less of: spices, dextrose, lactic acid starter culture, natural spice extractives, extractives of paprika, extractives of rosemary, sodium nitrite"
+                ],
+                "ingredient_text_source": "official_current_menu_page_text",
+                "ingredient_text_status": "official_current_label_candidate_needs_review",
+                "candidate_excerpt": "Ingredients: Pepperoni topping: pork, beef, salt, contains 2% or less of: spices, dextrose, lactic acid starter culture, natural spice extractives, extractives of paprika, extractives of rosemary, sodium nitrite.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "source_fragment_ready",

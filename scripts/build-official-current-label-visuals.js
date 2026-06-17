@@ -456,6 +456,16 @@ const curatedRows = {
     source_owner_override: "General Mills",
     source_image_match_status: "official_current_product_page",
   },
+  "pizza_hut_original_pan_pepperoni__current_2020s__583__2": {
+    ingredient_fragment_strategy: "pizza_hut_pepperoni_page",
+    source_fetch_url: "https://www.pizzahut.com/c/content/pepperoni-pizza",
+    source_url_override: "https://www.pizzahut.com/c/content/pepperoni-pizza",
+    source_detail_url: "https://www.pizzahut.com/c/content/pepperoni-pizza#ingredients",
+    source_title_override: "Pizza Hut Pepperoni Pizza official menu page",
+    source_owner_override: "Pizza Hut",
+    source_image_url: "https://www.pizzahut.com/c/assets/img/pepperoni-pizza_875x300.jpg",
+    source_image_match_status: "official_current_menu_ingredient_statement_table",
+  },
   "cinnamon_toast_crunch__current_2020s__511__2": {
     ingredient_fragment_strategy: "general_mills_product_page",
     source_fetch_url: "https://www.generalmillsconvenience.com/products/cinnamon-toast-crunch-12oz",
@@ -551,6 +561,22 @@ const curatedRows = {
     source_detail_url: "https://www.mcdonalds.com/us/en-us/product/chicken-mcnuggets-4-piece.html#ingredients",
     source_image_url: "https://s7d1.scene7.com/is/image/mcdonalds/DC_202006_0483_4McNuggets_Stacked_1564x1564-1:nutrition-calculator-tile?resmode=sharp2",
     source_image_match_status: "official_current_product_api",
+  },
+  "dominos_hand_tossed_pepperoni__current_2020s__613__2": {
+    ingredient_fragment_strategy: "dominos_ingredients_xml_components",
+    component_ingredient_names: [
+      "HAND TOSSED CRUST",
+      "PIZZA SAUCE (ROBUST INSPIRED TOMATO SAUCE)",
+      "PIZZA CHEESE",
+      "PEPPERONI",
+    ],
+    source_fetch_url: "https://cache.dominos.com/olo/6_168_0/assets/build/market/US/_en/xml/ingredients.xml",
+    source_url_override: "https://www.dominos.com/en/pages/content/nutritional/ingredients",
+    source_detail_url: "https://www.dominos.com/en/pages/content/nutritional/ingredients",
+    source_title_override: "Domino's U.S. Pizza Ingredients official XML",
+    source_owner_override: "Domino's Pizza",
+    source_image_url: "https://cache.dominos.com/olo/6_168_0/assets/build/images/promo/dominos_social_logo.jpg",
+    source_image_match_status: "official_current_menu_ingredient_statement_table",
   },
 };
 
@@ -1045,6 +1071,44 @@ function ingredientItemsFromTacoBellNutritionixComponents(html, componentNames =
   return items;
 }
 
+function ingredientItemsFromDominosIngredientsXml(xml, componentNames = []) {
+  const components = new Map();
+  const regex = /<item\b([^>]*)>([\s\S]*?)<\/item>/gi;
+  let match;
+  while ((match = regex.exec(String(xml || "")))) {
+    const tag = `<item ${match[1]}>`;
+    const title = decodeEntities(attrValue(tag, "title")).replace(/\s+/g, " ").trim();
+    const statement = stripTags(decodeEntities(match[2]))
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/[.;\s]+$/, "");
+    if (title && statement) components.set(title.toLowerCase(), { title, statement });
+  }
+
+  const names = componentNames.length ? componentNames : [...components.keys()];
+  const items = [];
+  const seen = new Set();
+  for (const name of names) {
+    const component = components.get(String(name || "").toLowerCase());
+    if (!component) continue;
+    const item = `${component.title}: ${component.statement}`;
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    items.push(item);
+  }
+  return items;
+}
+
+function ingredientItemsFromPizzaHutPepperoniPage(html) {
+  const statement = statementBetween(visibleTextFromHtml(html), /\bWhat is in Pizza hut pepperoni\?\s+Our pepperoni is made with:\s*/i, [
+    /\s+Click here\b/i,
+    /\s+Trending searches\b/i,
+    /\s+Menu\s+Deals\b/i,
+  ]);
+  return statement ? [`Pepperoni topping: ${statement}`] : [];
+}
+
 function ingredientTextFromItems(items) {
   return `Ingredients: ${items.join(", ")}.`;
 }
@@ -1301,6 +1365,10 @@ function ingredientItemsForStrategy(strategy, mainHtml, fragmentHtml, review = {
   if (strategy === "taco_bell_nutritionix_components") {
     return ingredientItemsFromTacoBellNutritionixComponents(mainHtml, review.component_ingredient_names || []);
   }
+  if (strategy === "dominos_ingredients_xml_components") {
+    return ingredientItemsFromDominosIngredientsXml(mainHtml, review.component_ingredient_names || []);
+  }
+  if (strategy === "pizza_hut_pepperoni_page") return ingredientItemsFromPizzaHutPepperoniPage(mainHtml);
   if (strategy === "smartlabel_fragment") return ingredientItemsFromFragment(fragmentHtml);
   return ingredientItemsFromStatement(ingredientStatementForStrategy(strategy, mainHtml, fragmentHtml));
 }
@@ -1337,6 +1405,8 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "mcdonalds_item_details") return "official_current_product_api_json";
   if (strategy === "wendys_order_page") return "official_current_menu_page_json";
   if (strategy === "taco_bell_nutritionix_components") return "official_current_menu_ingredient_statement_table";
+  if (strategy === "dominos_ingredients_xml_components") return "official_current_menu_ingredient_statement_xml";
+  if (strategy === "pizza_hut_pepperoni_page") return "official_current_menu_page_text";
   if (strategy === "manual_source_image_transcription") return "official_current_ingredient_label_image_manual_transcription";
   if (strategy === "kraft_heinz_json" || strategy === "official_json_ingredients" || strategy === "totinos_product_page") return "official_current_product_page_json";
   return "official_current_product_page_text";
