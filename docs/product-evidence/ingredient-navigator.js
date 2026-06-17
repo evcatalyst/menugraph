@@ -1378,7 +1378,7 @@ function renderCwaTimeline() {
               ${cwaActionButton("inspect", "Open ingredient drill-in", row.visual_id)}
             </div>
           </div>
-          <div class="cwa-card-body" data-cwa-body-inspect="${escapeHtml(row.visual_id || "")}" title="${escapeHtml(`Open ingredient drill-in for ${row.product_name} ${row.vintage_label}`)}">
+          <div class="cwa-card-body" role="button" tabindex="0" data-cwa-body-inspect="${escapeHtml(row.visual_id || "")}" aria-label="${escapeHtml(`Open ingredient drill-in for ${row.product_name} ${row.vintage_label}`)}" title="${escapeHtml(`Open ingredient drill-in for ${row.product_name} ${row.vintage_label}`)}">
             <span class="cwa-body-inspect-hint" aria-hidden="true">${cwaInlineIcon("inspect")}</span>
             <span>${escapeHtml(row.vintage_label)}</span>
             <strong>${escapeHtml(row.product_name)}</strong>
@@ -1906,6 +1906,14 @@ function attachEvents() {
     if (event.target.closest("button, a, summary, details, input, select, textarea, [data-cwa-toggle]")) return;
     const body = event.target.closest("[data-cwa-body-inspect]");
     if (!body) return;
+    const row = sourceFamilyRowByVisualId(body.dataset.cwaBodyInspect);
+    if (row) openIngredientDrilldown(row);
+  });
+  els.cwaTimelineTrack?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const body = event.target.closest("[data-cwa-body-inspect]");
+    if (!body || event.target !== body) return;
+    event.preventDefault();
     const row = sourceFamilyRowByVisualId(body.dataset.cwaBodyInspect);
     if (row) openIngredientDrilldown(row);
   });
