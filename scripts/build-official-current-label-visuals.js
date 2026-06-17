@@ -676,6 +676,32 @@ const curatedRows = {
     source_owner_override: "Subway / Franchise World Headquarters, LLC",
     source_image_match_status: "official_current_menu_ingredient_pdf",
   },
+  "kfc_famous_bowl__current_2020s__581__1": {
+    ingredient_fragment_strategy: "manual_official_menu_source_text",
+    ingredient_items_override: [
+      "Famous Bowl composition: creamy mashed potatoes, sweet corn, and bite-sized chunks of crispy chicken layered together, drizzled with homestyle gravy, and topped with a blend of three shredded cheeses",
+      "Variant boundary: the same source distinguishes the regular Famous Bowl from a version with KFC's signature Nashville Hot sauce",
+    ],
+    source_fetch_url: "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery",
+    source_url_override: "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery",
+    source_detail_url: "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery#popular-delivery-items-near-you",
+    source_title_override: "KFC location delivery page with Famous Bowl product description",
+    source_owner_override: "KFC",
+    source_image_match_status: "official_current_menu_page_text",
+  },
+  "burger_king_whopper__current_2020s__746__1": {
+    ingredient_fragment_strategy: "manual_official_menu_source_text",
+    ingredient_items_override: [
+      "Nutrition Explorer commitment text: Burger King describes its iconic Whopper sandwiches as crafted with flame-grilled, 100% real beef and freshly cut toppings",
+      "Source-routing boundary: Burger King's help page, updated March 17, 2026, directs customers to the BK Nutrition Explorer - USA for up-to-date nutrition and allergen information",
+    ],
+    source_fetch_url: "https://www.bk.com/nutrition-explorer",
+    source_url_override: "https://www.bk.com/nutrition-explorer",
+    source_detail_url: "https://help.bk.com/hc/en-us/articles/36913083446935-Where-can-I-view-the-nutrition-and-allergen-information-for-Burger-King-menu-items",
+    source_title_override: "Burger King Nutrition Explorer official app text",
+    source_owner_override: "Burger King",
+    source_image_match_status: "official_current_menu_page_text",
+  },
   "dunkin_glazed_donut__current_2020s__697__3": {
     ingredient_fragment_strategy: "dunkin_pdf_glazed_donut",
     source_fetch_url: "https://www.dunkindonuts.com/content/dam/dd/pdf/allergy_ingredient_guide.pdf",
@@ -1735,6 +1761,7 @@ function proofVisualBasisFor(review, visual, hasIngredientText) {
   }
   if (review.source_image_match_status === "official_current_menu_ingredient_statement_table"
     || review.source_image_match_status === "official_current_menu_ingredient_pdf"
+    || review.source_image_match_status === "official_current_menu_page_text"
     || review.source_image_match_status === "official_current_product_api") {
     return "official_menu_or_api_text";
   }
@@ -1757,6 +1784,7 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "taco_bell_nutritionix_components") return "official_current_menu_ingredient_statement_table";
   if (strategy === "dominos_ingredients_xml_components") return "official_current_menu_ingredient_statement_xml";
   if (strategy === "pizza_hut_pepperoni_page") return "official_current_menu_page_text";
+  if (strategy === "manual_official_menu_source_text") return "official_current_menu_page_text";
   if (strategy === "manual_official_menu_pdf_text") return "official_current_menu_ingredient_pdf";
   if (strategy === "dunkin_pdf_glazed_donut") return "official_current_menu_ingredient_pdf";
   if (strategy === "popeyes_pdf_classic_chicken_sandwich") return "official_current_menu_ingredient_pdf";

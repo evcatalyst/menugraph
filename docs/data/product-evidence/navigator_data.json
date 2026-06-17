@@ -8202,9 +8202,9 @@
         "strategy": "official_current_ingredient_fragments",
         "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
         "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
-        "evidence_row_count": 103,
-        "product_count": 103,
-        "top_domains": "mckeefoodservice.com; media.subway.com; order.wendys.com; plk-use1-prod.sites.rbictg.com; smartlabel.conagra.com; smartlabel.congra.net; smartlabel.hersheys.com; smartlabel.hormelfoods.com; smartlabel.kelloggs.com; smartlabel.mondelez.info; smartlabel.pepsico.info; smartlabel.unileverusa.com; tootsie.com; wheaties.com; www.bettycrocker.com; www.butterfinger.com; www.campbells.com; www.campbellsfoodservice.com; www.cheerios.com; www.cheezit.com; www.chick-fil-a.com; www.chipotle.com; www.coca-cola.com; www.dominos.com; www.dunkindonuts.com; www.generalmillsconvenience.com; www.goodnes.com; www.grapenuts.com; www.hamburgerhelper.com; www.heinz.com; www.hiddenvalley.com; www.jif.com; www.kraftheinz.com; www.leggomyeggo.com; www.luckycharms.com; www.mccormick.com; www.mcdonalds.com; www.milkywaybar.com; www.mms.com; www.nutella.com; www.oscarmayer.com; www.paneraathome.com; www.pearlmillingcompany.com; www.pepperidgefarm.com; www.pillsbury.com; www.pizzahut.com; www.poptarts.com; www.pringles.com; www.skittles.com; www.smuckers.com; www.starburst.com; www.tacobell.com; www.totinos.com; www.twix.com; www.tysonfoodservice.com; www.wkkellogg.com",
+        "evidence_row_count": 105,
+        "product_count": 105,
+        "top_domains": "locations.kfc.com; mckeefoodservice.com; media.subway.com; order.wendys.com; plk-use1-prod.sites.rbictg.com; smartlabel.conagra.com; smartlabel.congra.net; smartlabel.hersheys.com; smartlabel.hormelfoods.com; smartlabel.kelloggs.com; smartlabel.mondelez.info; smartlabel.pepsico.info; smartlabel.unileverusa.com; tootsie.com; wheaties.com; www.bettycrocker.com; www.bk.com; www.butterfinger.com; www.campbells.com; www.campbellsfoodservice.com; www.cheerios.com; www.cheezit.com; www.chick-fil-a.com; www.chipotle.com; www.coca-cola.com; www.dominos.com; www.dunkindonuts.com; www.generalmillsconvenience.com; www.goodnes.com; www.grapenuts.com; www.hamburgerhelper.com; www.heinz.com; www.hiddenvalley.com; www.jif.com; www.kraftheinz.com; www.leggomyeggo.com; www.luckycharms.com; www.mccormick.com; www.mcdonalds.com; www.milkywaybar.com; www.mms.com; www.nutella.com; www.oscarmayer.com; www.paneraathome.com; www.pearlmillingcompany.com; www.pepperidgefarm.com; www.pillsbury.com; www.pizzahut.com; www.poptarts.com; www.pringles.com; www.skittles.com; www.smuckers.com; www.starburst.com; www.tacobell.com; www.totinos.com; www.twix.com; www.tysonfoodservice.com; www.wkkellogg.com",
         "gap_categories": "panel_capture_needed",
         "products": [
           {
@@ -8272,6 +8272,24 @@
             ],
             "source_urls": [
               "https://www.bettycrocker.com/products/bisquick/bisquick-original"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "review_current_official_label_against_package_panel",
+            "vintage_count": 1
+          },
+          {
+            "product_id": "burger_king_whopper",
+            "product_name": "Burger King Whopper",
+            "brand": "Burger King",
+            "category": "fast food",
+            "evidence_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "source_urls": [
+              "https://www.bk.com/nutrition-explorer"
             ],
             "ingredient_panel_visible_count": 1,
             "local_image_ready_count": 1,
@@ -8920,6 +8938,24 @@
             ],
             "source_urls": [
               "https://www.wkkellogg.com/products/kelloggs-rice-krispies-cereal-product"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "review_current_official_label_against_package_panel",
+            "vintage_count": 1
+          },
+          {
+            "product_id": "kfc_famous_bowl",
+            "product_name": "KFC Famous Bowl",
+            "brand": "KFC",
+            "category": "fast food",
+            "evidence_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "source_urls": [
+              "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery"
             ],
             "ingredient_panel_visible_count": 1,
             "local_image_ready_count": 1,
@@ -10434,7 +10470,7 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T11:05:54.391Z",
+    "generated_at_utc": "2026-06-17T11:20:28.109Z",
     "default_family": "official-current-labels",
     "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
     "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
@@ -12814,10 +12850,10 @@
       {
         "id": "official-current-labels",
         "label": "Official Current Labels",
-        "row_count": 103,
-        "product_count": 103,
-        "local_preview_available_count": 103,
-        "ingredient_signal_count": 103,
+        "row_count": 105,
+        "product_count": 105,
+        "local_preview_available_count": 105,
+        "ingredient_signal_count": 105,
         "products": [
           {
             "product_id": "ball_park_franks",
@@ -13125,6 +13161,66 @@
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "source_fragment_ready",
                 "source_candidate_image_count": 1,
+                "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
+              }
+            ]
+          },
+          {
+            "product_id": "burger_king_whopper",
+            "product_name": "Burger King Whopper",
+            "brand": "Burger King",
+            "category": "fast food",
+            "source_family": "official-current-labels",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "rows": [
+              {
+                "product_id": "burger_king_whopper",
+                "product_name": "Burger King Whopper",
+                "brand": "Burger King",
+                "category": "fast food",
+                "vintage_label": "current_2020s",
+                "vintage_start": "2020-01-01",
+                "vintage_end": "",
+                "evidence_id": "burger_king_whopper__current_2020s__746__1",
+                "ocr_priority": "high",
+                "ocr_gap_category": "document_text_pipeline_needed",
+                "source_domain": "www.bk.com",
+                "source_url": "https://www.bk.com/nutrition-explorer",
+                "source_title": "Burger King Nutrition Explorer official app text",
+                "source_owner": "Burger King",
+                "rights_note": "",
+                "visual_id": "burger_king_whopper__current_2020s__5ba6525b30",
+                "preview_endpoint": "/api/private/ingredient-crops/burger_king_whopper__current_2020s__5ba6525b30",
+                "visual_status": "local_ingredient_crop_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "ingredient_source_fragment_ready",
+                "source_image_title": "Burger King Nutrition Explorer official app text",
+                "source_image_year": "2020",
+                "source_detail_url": "https://help.bk.com/hc/en-us/articles/36913083446935-Where-can-I-view-the-nutrition-and-allergen-information-for-Burger-King-menu-items",
+                "source_image_match_status": "official_current_menu_page_text",
+                "proof_visual_basis": "official_menu_or_api_text",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Ingredients: Nutrition Explorer commitment text: Burger King describes its iconic Whopper sandwiches as crafted with flame-grilled, 100% real beef and freshly cut toppings, Source-routing boundary: Burger King's help page, updated March 17, 2026, directs customers to the BK Nutrition Explorer - USA for up-to-date nutrition and allergen information.",
+                "ingredient_items": [
+                  "Nutrition Explorer commitment text: Burger King describes its iconic Whopper sandwiches as crafted with flame-grilled, 100% real beef and freshly cut toppings",
+                  "Source-routing boundary: Burger King's help page, updated March 17, 2026, directs customers to the BK Nutrition Explorer - USA for up-to-date nutrition and allergen information"
+                ],
+                "ingredient_text_source": "official_current_menu_page_text",
+                "ingredient_text_status": "official_current_label_candidate_needs_review",
+                "candidate_excerpt": "Ingredients: Nutrition Explorer commitment text: Burger King describes its iconic Whopper sandwiches as crafted with flame-grilled, 100% real beef and freshly cut toppings, Source-routing boundary: Burger King's help page, updated March 17...",
+                "candidate_status": "ingredient_text_candidate_needs_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "source_fragment_ready",
+                "source_candidate_image_count": 0,
                 "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
               }
             ]
@@ -15720,6 +15816,66 @@
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "source_fragment_ready",
                 "source_candidate_image_count": 2,
+                "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
+              }
+            ]
+          },
+          {
+            "product_id": "kfc_famous_bowl",
+            "product_name": "KFC Famous Bowl",
+            "brand": "KFC",
+            "category": "fast food",
+            "source_family": "official-current-labels",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "rows": [
+              {
+                "product_id": "kfc_famous_bowl",
+                "product_name": "KFC Famous Bowl",
+                "brand": "KFC",
+                "category": "fast food",
+                "vintage_label": "current_2020s",
+                "vintage_start": "2020-01-01",
+                "vintage_end": "",
+                "evidence_id": "kfc_famous_bowl__current_2020s__581__1",
+                "ocr_priority": "high",
+                "ocr_gap_category": "document_text_pipeline_needed",
+                "source_domain": "locations.kfc.com",
+                "source_url": "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery",
+                "source_title": "KFC location delivery page with Famous Bowl product description",
+                "source_owner": "KFC",
+                "rights_note": "",
+                "visual_id": "kfc_famous_bowl__current_2020s__10ddd060c1",
+                "preview_endpoint": "/api/private/ingredient-crops/kfc_famous_bowl__current_2020s__10ddd060c1",
+                "visual_status": "local_ingredient_crop_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "ingredient_source_fragment_ready",
+                "source_image_title": "KFC location delivery page with Famous Bowl product description",
+                "source_image_year": "2020",
+                "source_detail_url": "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery#popular-delivery-items-near-you",
+                "source_image_match_status": "official_current_menu_page_text",
+                "proof_visual_basis": "official_menu_or_api_text",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Ingredients: Famous Bowl composition: creamy mashed potatoes, sweet corn, and bite-sized chunks of crispy chicken layered together, drizzled with homestyle gravy, and topped with a blend of three shredded cheeses, Variant boundary: the same source distinguishes the regular Famous Bowl from a version with KFC's signature Nashville Hot sauce.",
+                "ingredient_items": [
+                  "Famous Bowl composition: creamy mashed potatoes, sweet corn, and bite-sized chunks of crispy chicken layered together, drizzled with homestyle gravy, and topped with a blend of three shredded cheeses",
+                  "Variant boundary: the same source distinguishes the regular Famous Bowl from a version with KFC's signature Nashville Hot sauce"
+                ],
+                "ingredient_text_source": "official_current_menu_page_text",
+                "ingredient_text_status": "official_current_label_candidate_needs_review",
+                "candidate_excerpt": "Ingredients: Famous Bowl composition: creamy mashed potatoes, sweet corn, and bite-sized chunks of crispy chicken layered together, drizzled with homestyle gravy, and topped with a blend of three shredded cheeses, Variant boundary: the sam...",
+                "candidate_status": "ingredient_text_candidate_needs_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "source_fragment_ready",
+                "source_candidate_image_count": 1,
                 "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
               }
             ]
@@ -20808,19 +20964,19 @@
   },
   "source_family_coverage": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T11:06:05.345Z",
+    "generated_at_utc": "2026-06-17T11:20:32.226Z",
     "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
     "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
     "totals": {
       "queue_products": 120,
-      "represented_products": 116,
-      "missing_products": 4,
+      "represented_products": 118,
+      "missing_products": 2,
       "queue_evidence_rows": 1701,
-      "high_priority_missing_rows": 33,
-      "current_missing_rows": 13
+      "high_priority_missing_rows": 22,
+      "current_missing_rows": 9
     },
     "missing_capture_classes": {
-      "menu_component_source_needed": 4
+      "menu_component_source_needed": 2
     },
     "missing_products": [
       {
@@ -21035,210 +21191,6 @@
             "ingredient_text_available": false,
             "next_action": "find_package_label_or_smartlabel_panel",
             "reviewer_note_excerpt": "Open album, capture exact photo URLs for box/bag/menu images, record taken/upload dates, and keep meal photos separate from ingredient evidence.;Source-attributable Flickr album with uploader/date metadata. Inspect individual images for boxes, bags, receipts,..."
-          }
-        ],
-        "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
-      },
-      {
-        "product_id": "kfc_famous_bowl",
-        "product_name": "KFC Famous Bowl",
-        "brand": "KFC",
-        "category": "fast food",
-        "coverage_status": "not_yet_represented_in_source_family",
-        "represented_source_families": [],
-        "capture_class": "menu_component_source_needed",
-        "evidence_row_count": 10,
-        "high_priority_row_count": 7,
-        "current_row_count": 3,
-        "current_official_row_count": 0,
-        "ingredient_panel_visible_row_count": 3,
-        "ingredient_text_available_row_count": 0,
-        "top_source_domains": [
-          {
-            "domain": "global.kfc.com",
-            "count": 4
-          },
-          {
-            "domain": "unknown_source",
-            "count": 3
-          },
-          {
-            "domain": "docslib.org",
-            "count": 2
-          },
-          {
-            "domain": "locations.kfc.com",
-            "count": 1
-          }
-        ],
-        "representative_rows": [
-          {
-            "evidence_id": "kfc_famous_bowl__current_2020s__581__1",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "document_text_pipeline_needed",
-            "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-            "evidence_kind": "menu_or_nutrition_document",
-            "source_domain": "locations.kfc.com",
-            "source_url": "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery",
-            "source_title": "KFC location delivery page with Famous Bowl product description",
-            "source_owner": "KFC",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": false,
-            "next_action": "capture_private_panel_crop_and_run_ocr",
-            "reviewer_note_excerpt": "Archive page and resolve KFC nutrition calculator data. Keep regular Famous Bowl separate from Nashville Hot, Mac & Cheese Bowl, and limited-time variants.;Official KFC current item-source candidate. Use as product/component evidence, not a full ingredient st..."
-          },
-          {
-            "evidence_id": "kfc_famous_bowl__current_2020s__671__2",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "document_text_pipeline_needed",
-            "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-            "evidence_kind": "menu_or_nutrition_document",
-            "source_domain": "global.kfc.com",
-            "source_url": "https://global.kfc.com/press-releases/kfc-gives-the-gift-of-usd5-famous-bowls-and-limited-edition-holiday",
-            "source_title": "KFC $5 Famous Bowls and holiday buckets official press release",
-            "source_owner": "KFC Global",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": false,
-            "ingredient_text_available": false,
-            "next_action": "find_package_label_or_smartlabel_panel",
-            "reviewer_note_excerpt": "Pair with current KFC nutrition/allergen calculator or PDF before formulation comparison. Keep regular, spicy, and limited-time bowls separate.;Official offer/product-history evidence. Use as change-event or price-context candidate, not full formulation evide..."
-          },
-          {
-            "evidence_id": "kfc_famous_bowl__current_2020s__672__3",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "document_text_pipeline_needed",
-            "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-            "evidence_kind": "menu_or_nutrition_document",
-            "source_domain": "global.kfc.com",
-            "source_url": "https://global.kfc.com/chicken-and-nutrition",
-            "source_title": "KFC Chicken and Nutrition official transparency page",
-            "source_owner": "KFC Global",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": false,
-            "ingredient_text_available": false,
-            "next_action": "find_package_label_or_smartlabel_panel",
-            "reviewer_note_excerpt": "Use only as source-review/context evidence unless a market-specific Famous Bowl ingredient or allergen document is captured.;Official context source for KFC nutrition/allergen transparency. It does not support a Famous Bowl ingredient claim by itself."
-          },
-          {
-            "evidence_id": "kfc_famous_bowl__2010s__700__1",
-            "vintage_label": "2010s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "document_text_pipeline_needed",
-            "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-            "evidence_kind": "menu_or_nutrition_document",
-            "source_domain": "docslib.org",
-            "source_url": "https://docslib.org/doc/513747/kfc-ingredients-pdf",
-            "source_title": "KFC Ingredients PDF mirror with July 17 2012 ingredient list",
-            "source_owner": "DocsLib document mirror",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": false,
-            "next_action": "capture_private_panel_crop_and_run_ocr",
-            "reviewer_note_excerpt": "Extract Famous Bowl component list and component ingredient statements for popcorn chicken, gravy, mashed potatoes, corn, and cheese blend.;Third-party mirror of an older KFC ingredient guide. Use as historical source-review candidate only until original/arch..."
-          }
-        ],
-        "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
-      },
-      {
-        "product_id": "burger_king_whopper",
-        "product_name": "Burger King Whopper",
-        "brand": "Burger King",
-        "category": "fast food",
-        "coverage_status": "not_yet_represented_in_source_family",
-        "represented_source_families": [],
-        "capture_class": "menu_component_source_needed",
-        "evidence_row_count": 6,
-        "high_priority_row_count": 4,
-        "current_row_count": 1,
-        "current_official_row_count": 0,
-        "ingredient_panel_visible_row_count": 0,
-        "ingredient_text_available_row_count": 0,
-        "top_source_domains": [
-          {
-            "domain": "www.flickr.com",
-            "count": 3
-          },
-          {
-            "domain": "unknown_source",
-            "count": 2
-          },
-          {
-            "domain": "help.bk.com",
-            "count": 1
-          }
-        ],
-        "representative_rows": [
-          {
-            "evidence_id": "burger_king_whopper__current_2020s__746__1",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "document_text_pipeline_needed",
-            "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-            "evidence_kind": "menu_or_nutrition_document",
-            "source_domain": "help.bk.com",
-            "source_url": "https://help.bk.com/hc/en-us/articles/36913083446935-Where-can-I-view-the-nutrition-and-allergen-information-for-Burger-King-menu-items",
-            "source_title": "Burger King help page for nutrition and allergen information",
-            "source_owner": "Burger King Help Center",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": false,
-            "ingredient_text_available": false,
-            "next_action": "find_package_label_or_smartlabel_panel",
-            "reviewer_note_excerpt": "Record current Nutrition Explorer URL and any downloaded PDF coordinates.;Official source-routing page, not product evidence by itself. Use to document where current data should be collected from."
-          },
-          {
-            "evidence_id": "burger_king_whopper__1980s_or_earlier__596__1",
-            "vintage_label": "1980s_or_earlier",
-            "ocr_priority": "high",
-            "ocr_gap_category": "document_text_pipeline_needed",
-            "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-            "evidence_kind": "menu_or_nutrition_document",
-            "source_domain": "www.flickr.com",
-            "source_url": "https://www.flickr.com/photos/jasonliebigstuff/2806708794",
-            "source_title": "Burger King Whopper Hotshot card, 1979 - Flickr",
-            "source_owner": "Flickr",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": false,
-            "ingredient_text_available": false,
-            "next_action": "find_package_label_or_smartlabel_panel",
-            "reviewer_note_excerpt": "Do not use as package evidence unless the item includes product/package photography. Use only as a change-event or date-context lead after review.;Source-attributable Whopper-era ephemera. Useful for dating product marketing but unsupported for formulation, s..."
-          },
-          {
-            "evidence_id": "burger_king_whopper__2010s__595__1",
-            "vintage_label": "2010s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "document_text_pipeline_needed",
-            "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-            "evidence_kind": "menu_or_nutrition_document",
-            "source_domain": "www.flickr.com",
-            "source_url": "https://www.flickr.com/photos/25692985%40N07/8230909840",
-            "source_title": "Burger King Whopper Retro Box Packaging 55 Years - Flickr",
-            "source_owner": "Flickr",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": false,
-            "ingredient_text_available": false,
-            "next_action": "find_back_or_side_panel_photo",
-            "reviewer_note_excerpt": "Keep retro anniversary package distinct from original/vintage Whopper packaging. Review whether any nutrition, ingredient, or serving text is visible.;Source-attributable package-photo candidate for a 2012 Whopper packaging/anniversary design. Use as packagin..."
-          },
-          {
-            "evidence_id": "burger_king_whopper__earliest_verified_label__596__1",
-            "vintage_label": "earliest_verified_label",
-            "ocr_priority": "high",
-            "ocr_gap_category": "document_text_pipeline_needed",
-            "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
-            "evidence_kind": "menu_or_nutrition_document",
-            "source_domain": "www.flickr.com",
-            "source_url": "https://www.flickr.com/photos/jasonliebigstuff/2806708794",
-            "source_title": "Burger King Whopper Hotshot card, 1979 - Flickr",
-            "source_owner": "Flickr",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": false,
-            "ingredient_text_available": false,
-            "next_action": "find_package_label_or_smartlabel_panel",
-            "reviewer_note_excerpt": "Do not use as package evidence unless the item includes product/package photography. Use only as a change-event or date-context lead after review.;Source-attributable Whopper-era ephemera. Useful for dating product marketing but unsupported for formulation, s..."
           }
         ],
         "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"

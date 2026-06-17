@@ -109,12 +109,16 @@ const expectedProducts = new Set([
   "chipotle_chicken_burrito",
   "subway_italian_bmt",
   "subway_tuna_sub",
+  "kfc_famous_bowl",
+  "burger_king_whopper",
   "dunkin_glazed_donut",
   "popeyes_chicken_sandwich",
   "little_debbie_oatmeal_creme_pies",
 ]);
 
 const allowedOfficialHosts = new Set([
+  "locations.kfc.com",
+  "www.bk.com",
   "smartlabel.conagra.com",
   "smartlabel.congra.net",
   "smartlabel.hersheys.com",
@@ -204,11 +208,11 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 
 assert.strictEqual(visualIndex.schema_version, 1, "official-current visual index should be versioned");
 assert.strictEqual(visualIndex.source_family.id, "official-current-labels", "official-current source family id should be stable");
-assert.strictEqual(visualIndex.totals.products, 103, "official-current lane should cover 103 products");
-assert.strictEqual(visualIndex.totals.rows, 103, "official-current lane should cover 103 rows");
-assert.strictEqual(visualIndex.rows.length, 103, "official-current rows should match totals");
-assert.strictEqual(visualIndex.totals.local_preview_available, 103, "official-current lane should expose local proof previews");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 103, "official-current lane should expose 103 ingredient text candidates");
+assert.strictEqual(visualIndex.totals.products, 105, "official-current lane should cover 105 products");
+assert.strictEqual(visualIndex.totals.rows, 105, "official-current lane should cover 105 rows");
+assert.strictEqual(visualIndex.rows.length, 105, "official-current rows should match totals");
+assert.strictEqual(visualIndex.totals.local_preview_available, 105, "official-current lane should expose local proof previews");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 105, "official-current lane should expose 105 ingredient text candidates");
 assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 0, "official-current rows should have extracted source text");
 
 visualIndex.products.forEach((product) => {
@@ -318,6 +322,8 @@ const dominosHandTossedPepperoni = visualIndex.rows.find((row) => row.product_id
 const chipotleChickenBurrito = visualIndex.rows.find((row) => row.product_id === "chipotle_chicken_burrito");
 const subwayItalianBmt = visualIndex.rows.find((row) => row.product_id === "subway_italian_bmt");
 const subwayTunaSub = visualIndex.rows.find((row) => row.product_id === "subway_tuna_sub");
+const kfcFamousBowl = visualIndex.rows.find((row) => row.product_id === "kfc_famous_bowl");
+const burgerKingWhopper = visualIndex.rows.find((row) => row.product_id === "burger_king_whopper");
 const dunkinGlazedDonut = visualIndex.rows.find((row) => row.product_id === "dunkin_glazed_donut");
 const popeyesChickenSandwich = visualIndex.rows.find((row) => row.product_id === "popeyes_chicken_sandwich");
 const littleDebbieOatmeal = visualIndex.rows.find((row) => row.product_id === "little_debbie_oatmeal_creme_pies");
@@ -580,6 +586,24 @@ assert.strictEqual(subwayTunaSub.source_owner, "Subway / Franchise World Headqua
 assert.strictEqual(subwayTunaSub.ingredient_text_source, "official_current_menu_ingredient_pdf", "Subway Tuna Sub should identify official PDF as the ingredient source");
 assert.strictEqual(subwayTunaSub.proof_visual_basis, "official_menu_or_api_text", "Subway Tuna Sub proof basis should identify menu/PDF source text");
 assert(Array.isArray(subwayTunaSub.ingredient_items) && subwayTunaSub.ingredient_items.length === 3, "Subway Tuna Sub should expose three explicit component/context proof items");
+assert(kfcFamousBowl.ingredient_text.includes("creamy mashed potatoes"), "KFC Famous Bowl should expose mashed potato component text");
+assert(kfcFamousBowl.ingredient_text.includes("bite-sized chunks of crispy chicken"), "KFC Famous Bowl should expose crispy chicken component text");
+assert(kfcFamousBowl.ingredient_text.includes("Nashville Hot sauce"), "KFC Famous Bowl should expose the variant boundary");
+assert.strictEqual(kfcFamousBowl.source_url, "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery", "KFC Famous Bowl should use the official KFC location/menu URL");
+assert.strictEqual(kfcFamousBowl.source_title, "KFC location delivery page with Famous Bowl product description", "KFC Famous Bowl should expose the official source title");
+assert.strictEqual(kfcFamousBowl.source_owner, "KFC", "KFC Famous Bowl should expose the official source owner");
+assert.strictEqual(kfcFamousBowl.ingredient_text_source, "official_current_menu_page_text", "KFC Famous Bowl should identify official menu/source page text");
+assert.strictEqual(kfcFamousBowl.proof_visual_basis, "official_menu_or_api_text", "KFC Famous Bowl proof basis should identify menu/source text");
+assert(Array.isArray(kfcFamousBowl.ingredient_items) && kfcFamousBowl.ingredient_items.length === 2, "KFC Famous Bowl should expose two explicit component/context proof items");
+assert(burgerKingWhopper.ingredient_text.includes("flame-grilled, 100% real beef"), "Burger King Whopper should expose official Whopper source text");
+assert(burgerKingWhopper.ingredient_text.includes("BK Nutrition Explorer - USA"), "Burger King Whopper should expose the Nutrition Explorer routing boundary");
+assert.strictEqual(burgerKingWhopper.source_url, "https://www.bk.com/nutrition-explorer", "Burger King Whopper should use the official Nutrition Explorer URL");
+assert.strictEqual(burgerKingWhopper.source_detail_url, "https://help.bk.com/hc/en-us/articles/36913083446935-Where-can-I-view-the-nutrition-and-allergen-information-for-Burger-King-menu-items", "Burger King Whopper should deep-link to the official help/source-routing page");
+assert.strictEqual(burgerKingWhopper.source_title, "Burger King Nutrition Explorer official app text", "Burger King Whopper should expose the official source title");
+assert.strictEqual(burgerKingWhopper.source_owner, "Burger King", "Burger King Whopper should expose the official source owner");
+assert.strictEqual(burgerKingWhopper.ingredient_text_source, "official_current_menu_page_text", "Burger King Whopper should identify official menu/source page text");
+assert.strictEqual(burgerKingWhopper.proof_visual_basis, "official_menu_or_api_text", "Burger King Whopper proof basis should identify menu/source text");
+assert(Array.isArray(burgerKingWhopper.ingredient_items) && burgerKingWhopper.ingredient_items.length === 2, "Burger King Whopper should expose two explicit component/context proof items");
 assert(dunkinGlazedDonut.ingredient_text.includes("Donut: Enriched Wheat Flour"), "Dunkin Glazed Donut current evidence should expose donut component text");
 assert(dunkinGlazedDonut.ingredient_text.includes("Yeast Donut Concentrate"), "Dunkin Glazed Donut current evidence should expose donut concentrate text");
 assert(dunkinGlazedDonut.ingredient_text.includes("Glaze: Sugar"), "Dunkin Glazed Donut current evidence should expose glaze component text");
@@ -616,19 +640,19 @@ assert.strictEqual(littleDebbieOatmeal.proof_visual_basis, "official_source_text
 
 const family = navigator.source_family_timeline?.families?.find((row) => row.id === "official-current-labels");
 assert(family, "navigator should expose the official-current source-family timeline");
-assert.strictEqual(family.product_count, 103, "navigator official-current timeline should cover 103 products");
-assert.strictEqual(family.row_count, 103, "navigator official-current timeline should cover 103 rows");
-assert.strictEqual(family.ingredient_signal_count, 103, "navigator official-current timeline should expose candidate count");
+assert.strictEqual(family.product_count, 105, "navigator official-current timeline should cover 105 products");
+assert.strictEqual(family.row_count, 105, "navigator official-current timeline should cover 105 rows");
+assert.strictEqual(family.ingredient_signal_count, 105, "navigator official-current timeline should expose candidate count");
 assert(family.products.every((product) => expectedProducts.has(product.product_id)), "navigator official-current timeline has unexpected products");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "official-current-labels");
 assert(summaryFamily, "navigator source-family summary should expose official-current labels");
-assert.strictEqual(summaryFamily.product_count, 103, "official-current summary should cover 103 products");
+assert.strictEqual(summaryFamily.product_count, 105, "official-current summary should cover 105 products");
 assert(summaryFamily.products.every((product) => product.ingredient_panel_visible_count === 1), "official-current summary should reflect current ingredient text candidates");
 
 if (fs.existsSync(privateManifestPath)) {
   const privateManifest = JSON.parse(fs.readFileSync(privateManifestPath, "utf8"));
-  assert.strictEqual(privateManifest.rows.length, 103, "official-current private manifest should have 103 rows");
+  assert.strictEqual(privateManifest.rows.length, 105, "official-current private manifest should have 105 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
   const riceKrispiesPrivate = privateManifest.rows.find((row) => row.product_id === "rice_krispies");
@@ -655,7 +679,10 @@ if (fs.existsSync(privateManifestPath)) {
     assert(fs.existsSync(resolved), `${row.visual_id} resolved crop should exist`);
     assert.strictEqual(path.resolve(resolved), path.resolve(row.upscaled_preview_path || row.preview_path), `${row.visual_id} should resolve to the upscaled proof crop`);
     assert(resolved.includes(`${path.sep}.cache${path.sep}ingredient-ocr${path.sep}official-current-labels${path.sep}`), "resolved official-current crop should stay under its private cache root");
-    assert(row.ingredient_fragment_path && fs.existsSync(row.ingredient_fragment_path), `${row.visual_id} should keep a private ingredient fragment`);
+    assert(row.source_html_path && fs.existsSync(row.source_html_path), `${row.visual_id} should keep a private source page capture`);
+    if (row.ingredient_fragment_url) {
+      assert(row.ingredient_fragment_path && fs.existsSync(row.ingredient_fragment_path), `${row.visual_id} should keep a private ingredient fragment`);
+    }
   }
 }
 

@@ -215,9 +215,11 @@ function ingredientOverlay(row) {
   const basis = proofVisualBasis(row);
   const visibleItems = items.slice(0, basis === "label_database_source_text_proof_panel" ? 10 : 8);
   const overflowCount = Math.max(0, items.length - visibleItems.length);
-  const overlayTitle = basis === "label_database_source_text_proof_panel"
-    ? "Ingredient source text"
-    : "Ingredients on label";
+  const overlayTitle = basis === "official_menu_or_api_text"
+    ? "Menu source text"
+    : basis === "label_database_source_text_proof_panel"
+      ? "Ingredient source text"
+      : "Ingredients on label";
   return `
     <div class="cwa-ingredient-overlay has-ingredient-list">
       <span>${escapeHtml(overlayTitle)}</span>
@@ -240,8 +242,13 @@ function ingredientTextBlock(row, options = {}) {
   const list = items.length
     ? `<ul>${items.map((item) => `<li>${ingredientFilterButton(item)}</li>`).join("")}</ul>`
     : "";
+  const basis = proofVisualBasis(row);
   const label = compact && items.length
-    ? "Label reader"
+    ? basis === "official_menu_or_api_text"
+      ? "Menu reader"
+      : basis === "label_database_source_text_proof_panel"
+        ? "Source reader"
+        : "Label reader"
     : compact ? "Ingredients listed" : "Readable ingredient text";
   const readerMeta = compact && items.length
     ? `<small class="cwa-label-reader-meta">${escapeHtml(`${items.length} ingredient ${items.length === 1 ? "entry" : "entries"} · candidate text`)}</small>`
