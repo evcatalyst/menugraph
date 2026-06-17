@@ -12,6 +12,7 @@ const navigatorPath = path.join(root, "docs/data/product-evidence/navigator_data
 const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
 const sourceFamilySummaryPath = path.join(root, "docs/data/product-evidence/source_family_summary.json");
 const sourceFamilyCoveragePath = path.join(root, "docs/data/product-evidence/source_family_coverage.json");
+const sourceFamilyGapWorklistPath = path.join(root, "docs/data/product-evidence/source_family_gap_worklist.json");
 const labelDatabaseVisualIndexPath = path.join(root, "docs/data/product-evidence/label_database_ingredient_visual_index.json");
 const ocrBoardSummaryPath = path.join(root, "docs/data/product-evidence/ocr_board_summary.json");
 const productStoryIndexPath = path.join(root, "docs/data/product-evidence/product_story_index.json");
@@ -67,6 +68,7 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 const sourceFamilySummary = JSON.parse(fs.readFileSync(sourceFamilySummaryPath, "utf8"));
 const sourceFamilyCoverage = JSON.parse(fs.readFileSync(sourceFamilyCoveragePath, "utf8"));
+const sourceFamilyGapWorklist = JSON.parse(fs.readFileSync(sourceFamilyGapWorklistPath, "utf8"));
 const labelDatabaseVisualIndex = JSON.parse(fs.readFileSync(labelDatabaseVisualIndexPath, "utf8"));
 const ocrBoardSummary = JSON.parse(fs.readFileSync(ocrBoardSummaryPath, "utf8"));
 const productStoryIndex = JSON.parse(fs.readFileSync(productStoryIndexPath, "utf8"));
@@ -165,6 +167,19 @@ assert.strictEqual(sourceFamilyCoverage.totals.collection_target_products, 2, "s
 assert.strictEqual(sourceFamilyCoverage.totals.timeline_products, 120, "source-family timeline should show the full 120-product queue scope");
 assert.strictEqual(sourceFamilyCoverage.totals.missing_products, 2, "source family coverage should expose the remaining missing product queue");
 assert.strictEqual(navigator.source_family_coverage?.totals?.missing_products, 2, "navigator should embed the remaining missing product queue");
+assert.strictEqual(sourceFamilyGapWorklist.schema_version, 1, "source-family gap worklist should be versioned");
+assert.strictEqual(sourceFamilyGapWorklist.totals.rows, 11, "gap worklist should expose the 11 remaining no-ingredient proof rows");
+assert.strictEqual(sourceFamilyGapWorklist.totals.products, 4, "gap worklist should cover the four remaining products with no-ingredient rows");
+assert.strictEqual(sourceFamilyGapWorklist.totals.local_preview_rows, 3, "gap worklist should distinguish the three archive visual gaps with local previews");
+assert.strictEqual(sourceFamilyGapWorklist.totals.collection_target_rows, 8, "gap worklist should distinguish the eight collection-target rows");
+assert.strictEqual(navigator.source_family_gap_worklist?.totals?.rows, 11, "navigator should expose the public gap worklist summary");
+assert.strictEqual(navigator.source_family_gap_worklist?.public_path, "data/product-evidence/source_family_gap_worklist.json", "navigator should point to the public gap worklist artifact");
+assert(sourceFamilyGapWorklist.rows.some((row) => row.product_id === "kit_kat_bar" && row.workstream === "same_era_panel_photo"), "gap worklist should include the Kit Kat same-era panel-photo target");
+assert(sourceFamilyGapWorklist.rows.some((row) => row.product_id === "trix_cereal" && row.workstream === "same_source_panel_crop"), "gap worklist should include Trix same-source panel targets");
+assert(sourceFamilyGapWorklist.rows.some((row) => row.product_id === "starbucks_pumpkin_spice_latte" && row.workstream === "document_or_api_text_capture"), "gap worklist should include Starbucks document/API target rows");
+assert(sourceFamilyGapWorklist.rows.some((row) => row.product_id === "kfc_original_recipe_chicken" && row.workstream === "document_or_api_text_capture"), "gap worklist should include KFC document/API target rows");
+assert(sourceFamilyGapWorklist.rows.every((row) => row.visual_id && row.evidence_id && row.next_step), "gap worklist rows should be directly drillable and actionable");
+assert(sourceFamilyGapWorklist.rows.every((row) => row.accepted_source_types?.length && row.rejected_source_types?.length), "gap worklist rows should publish accepted and rejected source criteria");
 assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "starbucks_pumpkin_spice_latte"), "coverage queue should keep Starbucks PSL until a locally cacheable official source is attached");
 assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "kfc_original_recipe_chicken"), "coverage queue should keep KFC Original Recipe Chicken until a stronger item-level source is attached");
 const starbucksMissing = sourceFamilyCoverage.missing_products.find((row) => row.product_id === "starbucks_pumpkin_spice_latte");
@@ -208,6 +223,7 @@ assert(collectionTargetFamily.products.every((product) => product.rows.every((ro
 assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.collection_source_status && row.collection_acceptable_source_types?.length && row.collection_rejected_source_types?.length)), "collection-target rows should publish accepted and rejected proof-source requirements");
 assert(collectionTargetFamily.claim_policy.includes("do not promote ingredient"), "collection-target lane should publish a claim boundary");
 assertPublicSafeJson(sourceFamilyCoveragePath);
+assertPublicSafeJson(sourceFamilyGapWorklistPath);
 assertPublicSafeJson(navigatorPath);
 assertPublicSafeJson(labelDatabaseVisualIndexPath);
 

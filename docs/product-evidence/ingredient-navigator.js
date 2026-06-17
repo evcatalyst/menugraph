@@ -902,6 +902,12 @@ function sourceFamilyGapIcon(row) {
   return "partial";
 }
 
+function sourceFamilyGapWorklistHref() {
+  const publicPath = state.data?.source_family_gap_worklist?.public_path || "data/product-evidence/source_family_gap_worklist.json";
+  if (/^https?:\/\//.test(publicPath) || publicPath.startsWith("../")) return publicPath;
+  return `../${publicPath}`;
+}
+
 function renderSourceFamilyGapSummary(family, visibleProducts, query, localImages) {
   if (!els.sourceFamilyGapSummary) return;
   const gaps = sourceFamilyGapRows(visibleProducts, query, family);
@@ -916,6 +922,7 @@ function renderSourceFamilyGapSummary(family, visibleProducts, query, localImage
     <div class="source-family-gap-summary-title">
       <span>Readable panel queue</span>
       <small>${escapeHtml(`${gaps.length} ${gaps.length === 1 ? "row" : "rows"}${overflowCount ? ` · showing ${visibleGaps.length}` : ""}`)}</small>
+      <a class="source-family-gap-export" href="${escapeHtml(sourceFamilyGapWorklistHref())}">${cwaInlineIcon("source")}Worklist JSON</a>
     </div>
     <div class="source-family-gap-list">
       ${visibleGaps.map((row) => {

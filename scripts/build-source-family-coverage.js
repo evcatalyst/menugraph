@@ -5,6 +5,7 @@ const root = path.join(__dirname, "..");
 const queuePath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv");
 const navigatorPath = path.join(root, "docs/data/product-evidence/navigator_data.json");
 const coveragePath = path.join(root, "docs/data/product-evidence/source_family_coverage.json");
+const gapWorklistPath = path.join(root, "docs/data/product-evidence/source_family_gap_worklist.json");
 const generatedAt = new Date().toISOString();
 const collectionTargetFamilyId = "collection-targets";
 
@@ -307,6 +308,97 @@ function upsertCollectionTargetFamily(navigator, missing) {
   };
 }
 
+function gapKind(row) {
+  return row.ocr_gap_category || row.ingredient_signal_status || "readable_panel_needed";
+}
+
+function gapWorkstream(row) {
+  const kind = gapKind(row);
+  if (kind === "document_text_pipeline_needed") return "document_or_api_text_capture";
+  if (kind === "panel_capture_needed") return "same_source_panel_crop";
+  if (kind === "readable_panel_photo_needed") return "same_era_panel_photo";
+  return "readable_panel_review";
+}
+
+function gapNextStep(row) {
+  return row.collection_next_step
+    || row.collection_lead_action
+    || row.gap_next_step
+    || row.ocr_recommended_action
+    || "Capture a source-attributable readable ingredient panel before promoting claims.";
+}
+
+function gapAcceptedSourceTypes(row) {
+  return row.collection_acceptable_source_types?.length
+    ? row.collection_acceptable_source_types
+    : row.gap_accepted_source_types || [];
+}
+
+function gapRejectedSourceTypes(row) {
+  return row.collection_rejected_source_types?.length
+    ? row.collection_rejected_source_types
+    : row.gap_rejected_source_types || [];
+}
+
+function sourceFamilyGapWorklist(navigator) {
+  const rows = [];
+  for (const family of navigator.source_family_timeline?.families || []) {
+    for (const product of family.products || []) {
+      for (const row of product.rows || []) {
+        if (row.ingredient_text) continue;
+        rows.push({
+          visual_id: row.visual_id,
+          evidence_id: row.evidence_id,
+          product_id: row.product_id || product.product_id,
+          product_name: row.product_name || product.product_name,
+          source_family_id: family.id,
+          source_family_label: family.label,
+          vintage_label: row.vintage_label,
+          gap_kind: gapKind(row),
+          workstream: gapWorkstream(row),
+          source_requirement_status: row.collection_source_status || row.gap_source_status || "",
+          next_step: gapNextStep(row),
+          accepted_source_types: gapAcceptedSourceTypes(row),
+          rejected_source_types: gapRejectedSourceTypes(row),
+          source_domain: row.source_domain,
+          source_url: row.source_detail_url || row.source_url,
+          source_title: row.source_image_title || row.source_title,
+          local_preview_available: Boolean(row.local_preview_available),
+          preview_endpoint: row.preview_endpoint || "",
+          crop_focus: row.crop_focus || "",
+          proof_visual_basis: row.proof_visual_basis || "",
+          candidate_excerpt: shortText(row.candidate_excerpt, 260),
+          claim_boundary: row.claim_boundary || "",
+        });
+      }
+    }
+  }
+  rows.sort((a, b) => Number(b.local_preview_available) - Number(a.local_preview_available)
+    || a.workstream.localeCompare(b.workstream)
+    || a.product_name.localeCompare(b.product_name)
+    || String(a.vintage_label).localeCompare(String(b.vintage_label)));
+
+  const products = new Set(rows.map((row) => row.product_id).filter(Boolean));
+  const workstreams = rows.reduce((map, row) => {
+    map.set(row.workstream, (map.get(row.workstream) || 0) + 1);
+    return map;
+  }, new Map());
+  return {
+    schema_version: 1,
+    generated_at_utc: generatedAt,
+    public_image_policy: "Gap worklist exposes source URLs, local preview endpoint IDs, status, and collection criteria only. Private screenshots, crop files, OCR dumps, and absolute local paths stay out of this artifact.",
+    claim_policy: "Rows without ingredient text are collection targets only. They do not promote ingredient, formulation, or historical-change claims.",
+    totals: {
+      rows: rows.length,
+      products: products.size,
+      local_preview_rows: rows.filter((row) => row.local_preview_available).length,
+      collection_target_rows: rows.filter((row) => row.source_family_id === collectionTargetFamilyId).length,
+      workstreams: Object.fromEntries([...workstreams.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))),
+    },
+    rows,
+  };
+}
+
 function publicProduct(product, coveredSourceFamilies = []) {
   const rows = product.rows || [];
   const highPriorityRows = rows.filter((row) => row.ocr_priority === "high").length;
@@ -391,8 +483,17 @@ function buildCoverage() {
   };
 
   upsertCollectionTargetFamily(navigator, missing);
+  const gapWorklist = sourceFamilyGapWorklist(navigator);
   navigator.source_family_coverage = coverage;
+  navigator.source_family_gap_worklist = {
+    schema_version: gapWorklist.schema_version,
+    generated_at_utc: gapWorklist.generated_at_utc,
+    public_path: "data/product-evidence/source_family_gap_worklist.json",
+    totals: gapWorklist.totals,
+    claim_policy: gapWorklist.claim_policy,
+  };
   writeJson(coveragePath, coverage);
+  writeJson(gapWorklistPath, gapWorklist);
   writeJson(navigatorPath, navigator);
   return coverage;
 }

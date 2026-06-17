@@ -1,0 +1,371 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-06-17T15:41:49.981Z",
+  "public_image_policy": "Gap worklist exposes source URLs, local preview endpoint IDs, status, and collection criteria only. Private screenshots, crop files, OCR dumps, and absolute local paths stay out of this artifact.",
+  "claim_policy": "Rows without ingredient text are collection targets only. They do not promote ingredient, formulation, or historical-change claims.",
+  "totals": {
+    "rows": 11,
+    "products": 4,
+    "local_preview_rows": 3,
+    "collection_target_rows": 8,
+    "workstreams": {
+      "document_or_api_text_capture": 8,
+      "same_source_panel_crop": 2,
+      "same_era_panel_photo": 1
+    }
+  },
+  "rows": [
+    {
+      "visual_id": "kit_kat_bar__earliest_verified_label__b82ad5a836",
+      "evidence_id": "kit_kat_bar__earliest_verified_label__173__3",
+      "product_id": "kit_kat_bar",
+      "product_name": "Kit Kat Bar",
+      "source_family_id": "candy-wrapper-archive",
+      "source_family_label": "Candy Wrapper Archive",
+      "vintage_label": "earliest_verified_label",
+      "gap_kind": "readable_panel_photo_needed",
+      "workstream": "same_era_panel_photo",
+      "source_requirement_status": "same_era_readable_panel_required",
+      "next_step": "Find a same-era Kit Kat Bar back or side wrapper image with readable ingredient text before promoting earliest_verified_label ingredients.",
+      "accepted_source_types": [
+        "same-era back or side wrapper photo with ingredients visible",
+        "higher-resolution Candy Wrapper Archive image exposing the ingredient panel",
+        "source-attributed package label scan with date or era evidence"
+      ],
+      "rejected_source_types": [
+        "front-only wrapper art",
+        "nearby-decade wrapper used as an exact formulation claim",
+        "unsourced ingredient text without package imagery"
+      ],
+      "source_domain": "www.candywrapperarchive.com",
+      "source_url": "https://www.candywrapperarchive.com/candy-collector/1960s-kit-kat/",
+      "source_title": "1960s Kit Kat Candy Wrapper",
+      "local_preview_available": true,
+      "preview_endpoint": "/api/private/ingredient-crops/kit_kat_bar__earliest_verified_label__b82ad5a836",
+      "crop_focus": "whole_wrapper",
+      "proof_visual_basis": "source_visual_lineage_only",
+      "candidate_excerpt": "",
+      "claim_boundary": "Wrapper imagery can support visual lineage only; a readable back/side ingredient panel is still needed before ingredient claims."
+    },
+    {
+      "visual_id": "trix_cereal__1980s_or_earlier__39a205d7bb",
+      "evidence_id": "trix_cereal__1980s_or_earlier__437__2",
+      "product_id": "trix_cereal",
+      "product_name": "Trix Cereal",
+      "source_family_id": "flickr-package-archive",
+      "source_family_label": "Flickr Package Archive",
+      "vintage_label": "1980s_or_earlier",
+      "gap_kind": "panel_capture_needed",
+      "workstream": "same_source_panel_crop",
+      "source_requirement_status": "same_package_ingredient_panel_required",
+      "next_step": "Capture a readable ingredient panel for Trix Cereal from the same package, same Flickr source family, or another source-attributed 1980s_or_earlier box image.",
+      "accepted_source_types": [
+        "same-package ingredient panel crop with readable text",
+        "higher-resolution Flickr image or alternate photo showing the ingredient list",
+        "source-attributed cereal box label scan with date or era evidence"
+      ],
+      "rejected_source_types": [
+        "promotion or top-flap copy only",
+        "front-only box art",
+        "OCR from non-ingredient package text"
+      ],
+      "source_domain": "www.flickr.com",
+      "source_url": "https://www.flickr.com/photos/jasonliebigstuff/2306104603",
+      "source_title": "Trix Cereal Mr Men Little Miss stickers cereal box back, 1987",
+      "local_preview_available": true,
+      "preview_endpoint": "/api/private/ingredient-crops/trix_cereal__1980s_or_earlier__39a205d7bb",
+      "crop_focus": "visual_lineage",
+      "proof_visual_basis": "source_visual_lineage_only",
+      "candidate_excerpt": "Visible promotion/top-flap panel only; readable ingredient panel still needed before ingredient claims.",
+      "claim_boundary": "Visible package-panel imagery can support provenance only; a full corrected transcription is still needed before ingredient claims."
+    },
+    {
+      "visual_id": "trix_cereal__earliest_verified_label__c8b976a6ae",
+      "evidence_id": "trix_cereal__earliest_verified_label__208__1",
+      "product_id": "trix_cereal",
+      "product_name": "Trix Cereal",
+      "source_family_id": "flickr-package-archive",
+      "source_family_label": "Flickr Package Archive",
+      "vintage_label": "earliest_verified_label",
+      "gap_kind": "panel_capture_needed",
+      "workstream": "same_source_panel_crop",
+      "source_requirement_status": "same_package_ingredient_panel_required",
+      "next_step": "Capture a readable ingredient panel for Trix Cereal from the same package, same Flickr source family, or another source-attributed earliest_verified_label box image.",
+      "accepted_source_types": [
+        "same-package ingredient panel crop with readable text",
+        "higher-resolution Flickr image or alternate photo showing the ingredient list",
+        "source-attributed cereal box label scan with date or era evidence"
+      ],
+      "rejected_source_types": [
+        "promotion or top-flap copy only",
+        "front-only box art",
+        "OCR from non-ingredient package text"
+      ],
+      "source_domain": "www.flickr.com",
+      "source_url": "https://www.flickr.com/photos/jasonliebigstuff/2037147592/",
+      "source_title": "General Mills Trix Cereal Box with Back Panel, 1978",
+      "local_preview_available": true,
+      "preview_endpoint": "/api/private/ingredient-crops/trix_cereal__earliest_verified_label__c8b976a6ae",
+      "crop_focus": "visual_lineage",
+      "proof_visual_basis": "source_visual_lineage_only",
+      "candidate_excerpt": "Visible promotion/top-flap panel only; readable ingredient panel still needed before ingredient claims.",
+      "claim_boundary": "Visible package-panel imagery can support provenance only; a full corrected transcription is still needed before ingredient claims."
+    },
+    {
+      "visual_id": "kfc_original_recipe_chicken__1980s_or_earlier__623__1__collection_target",
+      "evidence_id": "kfc_original_recipe_chicken__1980s_or_earlier__623__1",
+      "product_id": "kfc_original_recipe_chicken",
+      "product_name": "KFC Original Recipe Chicken",
+      "source_family_id": "collection-targets",
+      "source_family_label": "Collection Targets",
+      "vintage_label": "1980s_or_earlier",
+      "gap_kind": "document_text_pipeline_needed",
+      "workstream": "document_or_api_text_capture",
+      "source_requirement_status": "item_level_official_source_required",
+      "next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row.",
+      "accepted_source_types": [
+        "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+        "KFC-owned product API or menu data with item-level ingredients",
+        "Original KFC PDF/page whose text can be extracted and reviewed"
+      ],
+      "rejected_source_types": [
+        "global process pages about chicken quality",
+        "secret-recipe articles or recreation recipes",
+        "general takeout bag or meal photos without ingredient text"
+      ],
+      "source_domain": "www.flickr.com",
+      "source_url": "https://www.flickr.com/photos/jasonliebigstuff/3524102231",
+      "source_title": "Kentucky Fried Chicken Colonel Sanders fast food bag, 1970s - Flickr",
+      "local_preview_available": false,
+      "preview_endpoint": "",
+      "crop_focus": "source_lead",
+      "proof_visual_basis": "collection_target_source_lead",
+      "candidate_excerpt": "Item-level ingredient source needed Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement. Review whether exact item context is Origina...",
+      "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence."
+    },
+    {
+      "visual_id": "kfc_original_recipe_chicken__2000s__766__1__collection_target",
+      "evidence_id": "kfc_original_recipe_chicken__2000s__766__1",
+      "product_id": "kfc_original_recipe_chicken",
+      "product_name": "KFC Original Recipe Chicken",
+      "source_family_id": "collection-targets",
+      "source_family_label": "Collection Targets",
+      "vintage_label": "2000s",
+      "gap_kind": "document_text_pipeline_needed",
+      "workstream": "document_or_api_text_capture",
+      "source_requirement_status": "item_level_official_source_required",
+      "next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row.",
+      "accepted_source_types": [
+        "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+        "KFC-owned product API or menu data with item-level ingredients",
+        "Original KFC PDF/page whose text can be extracted and reviewed"
+      ],
+      "rejected_source_types": [
+        "global process pages about chicken quality",
+        "secret-recipe articles or recreation recipes",
+        "general takeout bag or meal photos without ingredient text"
+      ],
+      "source_domain": "www.flickr.com",
+      "source_url": "https://www.flickr.com/photos/yummyinthetummyblog/albums/72157603838448014/",
+      "source_title": "KFC Flickr album by yummyinthetummyblog, 2008",
+      "local_preview_available": false,
+      "preview_endpoint": "",
+      "crop_focus": "source_lead",
+      "proof_visual_basis": "collection_target_source_lead",
+      "candidate_excerpt": "Item-level ingredient source needed Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement. Open album, capture exact photo URLs for box...",
+      "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence."
+    },
+    {
+      "visual_id": "kfc_original_recipe_chicken__current_2020s__576__1__collection_target",
+      "evidence_id": "kfc_original_recipe_chicken__current_2020s__576__1",
+      "product_id": "kfc_original_recipe_chicken",
+      "product_name": "KFC Original Recipe Chicken",
+      "source_family_id": "collection-targets",
+      "source_family_label": "Collection Targets",
+      "vintage_label": "current_2020s",
+      "gap_kind": "document_text_pipeline_needed",
+      "workstream": "document_or_api_text_capture",
+      "source_requirement_status": "item_level_official_source_required",
+      "next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row.",
+      "accepted_source_types": [
+        "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+        "KFC-owned product API or menu data with item-level ingredients",
+        "Original KFC PDF/page whose text can be extracted and reviewed"
+      ],
+      "rejected_source_types": [
+        "global process pages about chicken quality",
+        "secret-recipe articles or recreation recipes",
+        "general takeout bag or meal photos without ingredient text"
+      ],
+      "source_domain": "global.kfc.com",
+      "source_url": "https://global.kfc.com/chicken-and-nutrition",
+      "source_title": "KFC Chicken and Nutrition official page",
+      "local_preview_available": false,
+      "preview_endpoint": "",
+      "crop_focus": "source_lead",
+      "proof_visual_basis": "collection_target_source_lead",
+      "candidate_excerpt": "Item-level ingredient source needed Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement. Pair with US market nutrition/allergen/ingre...",
+      "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence."
+    },
+    {
+      "visual_id": "kfc_original_recipe_chicken__current_2020s__615__2__collection_target",
+      "evidence_id": "kfc_original_recipe_chicken__current_2020s__615__2",
+      "product_id": "kfc_original_recipe_chicken",
+      "product_name": "KFC Original Recipe Chicken",
+      "source_family_id": "collection-targets",
+      "source_family_label": "Collection Targets",
+      "vintage_label": "current_2020s",
+      "gap_kind": "document_text_pipeline_needed",
+      "workstream": "document_or_api_text_capture",
+      "source_requirement_status": "item_level_official_source_required",
+      "next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row.",
+      "accepted_source_types": [
+        "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+        "KFC-owned product API or menu data with item-level ingredients",
+        "Original KFC PDF/page whose text can be extracted and reviewed"
+      ],
+      "rejected_source_types": [
+        "global process pages about chicken quality",
+        "secret-recipe articles or recreation recipes",
+        "general takeout bag or meal photos without ingredient text"
+      ],
+      "source_domain": "global.kfc.com",
+      "source_url": "https://global.kfc.com/stories/in-the-kitchen-with-fit-food-innovation-and-technology",
+      "source_title": "KFC Food Innovation and Technology story",
+      "local_preview_available": false,
+      "preview_endpoint": "",
+      "crop_focus": "source_lead",
+      "proof_visual_basis": "collection_target_source_lead",
+      "candidate_excerpt": "Item-level ingredient source needed Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement. Do not promote ingredient details from this...",
+      "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence."
+    },
+    {
+      "visual_id": "starbucks_pumpkin_spice_latte__current_2020s__966__1__collection_target",
+      "evidence_id": "starbucks_pumpkin_spice_latte__current_2020s__966__1",
+      "product_id": "starbucks_pumpkin_spice_latte",
+      "product_name": "Starbucks Pumpkin Spice Latte",
+      "source_family_id": "collection-targets",
+      "source_family_label": "Collection Targets",
+      "vintage_label": "current_2020s",
+      "gap_kind": "document_text_pipeline_needed",
+      "workstream": "document_or_api_text_capture",
+      "source_requirement_status": "official_owned_source_required",
+      "next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text.",
+      "accepted_source_types": [
+        "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+        "Starbucks-owned allergen or ingredient document with PSL rows",
+        "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+      ],
+      "rejected_source_types": [
+        "brand-history pages without ingredient rows",
+        "secondary nutrition articles or recipes",
+        "availability press releases without ingredient text"
+      ],
+      "source_domain": "www.starbucks.co.uk",
+      "source_url": "https://www.starbucks.co.uk/sites/starbucks-uk-pwa/files/2025-09/AUT25_UK_AllergenBook_CORE_BEVERAGE_v1509.pdf",
+      "source_title": "Starbucks UK Autumn 2025 beverage allergen guide with Pumpkin Spice Latte rows",
+      "local_preview_available": false,
+      "preview_endpoint": "",
+      "crop_focus": "panel_context",
+      "proof_visual_basis": "collection_target_source_lead",
+      "candidate_excerpt": "Official Starbucks source cache blocked Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet. Extract document version/date, market, PSL ro...",
+      "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone."
+    },
+    {
+      "visual_id": "starbucks_pumpkin_spice_latte__current_2020s__768__2__collection_target",
+      "evidence_id": "starbucks_pumpkin_spice_latte__current_2020s__768__2",
+      "product_id": "starbucks_pumpkin_spice_latte",
+      "product_name": "Starbucks Pumpkin Spice Latte",
+      "source_family_id": "collection-targets",
+      "source_family_label": "Collection Targets",
+      "vintage_label": "current_2020s",
+      "gap_kind": "document_text_pipeline_needed",
+      "workstream": "document_or_api_text_capture",
+      "source_requirement_status": "official_owned_source_required",
+      "next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text.",
+      "accepted_source_types": [
+        "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+        "Starbucks-owned allergen or ingredient document with PSL rows",
+        "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+      ],
+      "rejected_source_types": [
+        "brand-history pages without ingredient rows",
+        "secondary nutrition articles or recipes",
+        "availability press releases without ingredient text"
+      ],
+      "source_domain": "stories.starbucks.com",
+      "source_url": "https://stories.starbucks.com/uploads/2023/08/PA082-Fall-Promo-PSL-20-Timeline-US-EN.pdf",
+      "source_title": "Starbucks PSL 20th season timeline PDF",
+      "local_preview_available": false,
+      "preview_endpoint": "",
+      "crop_focus": "source_lead",
+      "proof_visual_basis": "collection_target_source_lead",
+      "candidate_excerpt": "Official Starbucks source cache blocked Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet. Capture timeline milestone text and dates, es...",
+      "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone."
+    },
+    {
+      "visual_id": "starbucks_pumpkin_spice_latte__current_2020s__617__3__collection_target",
+      "evidence_id": "starbucks_pumpkin_spice_latte__current_2020s__617__3",
+      "product_id": "starbucks_pumpkin_spice_latte",
+      "product_name": "Starbucks Pumpkin Spice Latte",
+      "source_family_id": "collection-targets",
+      "source_family_label": "Collection Targets",
+      "vintage_label": "current_2020s",
+      "gap_kind": "document_text_pipeline_needed",
+      "workstream": "document_or_api_text_capture",
+      "source_requirement_status": "official_owned_source_required",
+      "next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text.",
+      "accepted_source_types": [
+        "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+        "Starbucks-owned allergen or ingredient document with PSL rows",
+        "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+      ],
+      "rejected_source_types": [
+        "brand-history pages without ingredient rows",
+        "secondary nutrition articles or recipes",
+        "availability press releases without ingredient text"
+      ],
+      "source_domain": "about.starbucks.com",
+      "source_url": "https://about.starbucks.com/press/2025/starbucks-pumpkin-spice-latte-psl-returns-august-26/",
+      "source_title": "Starbucks Pumpkin Spice Latte returns August 26, 2025 - official press release",
+      "local_preview_available": false,
+      "preview_endpoint": "",
+      "crop_focus": "source_lead",
+      "proof_visual_basis": "collection_target_source_lead",
+      "candidate_excerpt": "Official Starbucks source cache blocked Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet. Use for availability timeline and product-fam...",
+      "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone."
+    },
+    {
+      "visual_id": "starbucks_pumpkin_spice_latte__current_2020s__575__4__collection_target",
+      "evidence_id": "starbucks_pumpkin_spice_latte__current_2020s__575__4",
+      "product_id": "starbucks_pumpkin_spice_latte",
+      "product_name": "Starbucks Pumpkin Spice Latte",
+      "source_family_id": "collection-targets",
+      "source_family_label": "Collection Targets",
+      "vintage_label": "current_2020s",
+      "gap_kind": "document_text_pipeline_needed",
+      "workstream": "document_or_api_text_capture",
+      "source_requirement_status": "official_owned_source_required",
+      "next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text.",
+      "accepted_source_types": [
+        "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+        "Starbucks-owned allergen or ingredient document with PSL rows",
+        "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+      ],
+      "rejected_source_types": [
+        "brand-history pages without ingredient rows",
+        "secondary nutrition articles or recipes",
+        "availability press releases without ingredient text"
+      ],
+      "source_domain": "about.starbucks.com",
+      "source_url": "https://about.starbucks.com/history/pumpkin-spice-latte/",
+      "source_title": "Starbucks history page for Pumpkin Spice Latte",
+      "local_preview_available": false,
+      "preview_endpoint": "",
+      "crop_focus": "source_lead",
+      "proof_visual_basis": "collection_target_source_lead",
+      "candidate_excerpt": "Official Starbucks source cache blocked Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet. Record launch claim and high-level formulatio...",
+      "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone."
+    }
+  ]
+}

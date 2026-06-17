@@ -21735,7 +21735,7 @@
   },
   "source_family_coverage": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T15:19:33.238Z",
+    "generated_at_utc": "2026-06-17T15:41:49.981Z",
     "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
     "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
     "totals": {
@@ -22011,5 +22011,22 @@
         "promotion_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence."
       }
     ]
+  },
+  "source_family_gap_worklist": {
+    "schema_version": 1,
+    "generated_at_utc": "2026-06-17T15:41:49.981Z",
+    "public_path": "data/product-evidence/source_family_gap_worklist.json",
+    "totals": {
+      "rows": 11,
+      "products": 4,
+      "local_preview_rows": 3,
+      "collection_target_rows": 8,
+      "workstreams": {
+        "document_or_api_text_capture": 8,
+        "same_source_panel_crop": 2,
+        "same_era_panel_photo": 1
+      }
+    },
+    "claim_policy": "Rows without ingredient text are collection targets only. They do not promote ingredient, formulation, or historical-change claims."
   }
 }

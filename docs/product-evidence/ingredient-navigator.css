@@ -825,6 +825,30 @@ a:hover {
   line-height: 1.2;
 }
 
+.source-family-gap-export {
+  display: inline-grid;
+  grid-template-columns: 14px auto;
+  width: fit-content;
+  gap: 5px;
+  align-items: center;
+  color: var(--teal);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.12;
+  text-transform: uppercase;
+}
+
+.source-family-gap-export svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
 .source-family-gap-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));

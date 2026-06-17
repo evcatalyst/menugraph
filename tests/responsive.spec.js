@@ -489,6 +489,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(sourceFamilySummary.locator(".source-family-focus-metric[aria-label='11 readable panel gaps']")).toBeVisible();
   await expect(page.locator(".cwa-product-chip")).toHaveCount(120);
   await expect(page.locator("#source-family-gap-summary")).toContainText("Readable panel queue");
+  await expect(page.locator("#source-family-gap-summary .source-family-gap-export")).toHaveAttribute("href", "../data/product-evidence/source_family_gap_worklist.json");
+  await expect(page.locator("#source-family-gap-summary .source-family-gap-export")).toContainText("Worklist JSON");
   await expect(page.locator("#source-family-gap-summary")).toContainText("11 rows");
   await expect(page.locator("#source-family-gap-summary .source-family-gap-card")).toHaveCount(11);
   await expect(page.locator("#source-family-gap-summary")).toContainText("Candy Wrapper Archive");
