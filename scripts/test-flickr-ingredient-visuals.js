@@ -82,10 +82,15 @@ visualIndex.rows.forEach((row) => {
   assert(["ingredient_signal_found", "readable_panel_still_needed"].includes(row.ingredient_signal_status), `${row.evidence_id} has unknown ingredient signal status`);
   if (row.ingredient_signal_status === "ingredient_signal_found") {
     assert(row.ingredient_text, `${row.evidence_id} ingredient candidate should include public-safe text`);
+    assert(Array.isArray(row.ingredient_items), `${row.evidence_id} should expose structured ingredient items`);
+    assert(row.ingredient_items.length >= 1, `${row.evidence_id} should expose at least one structured ingredient item`);
+    assert.strictEqual(row.ingredient_item_count, row.ingredient_items.length, `${row.evidence_id} ingredient item count should match item array`);
     assert(row.ingredient_text_status.includes("candidate"), `${row.evidence_id} ingredient text should remain candidate-gated`);
     assert.strictEqual(row.crop_focus, "ingredient_text", `${row.evidence_id} should use ingredient crop focus`);
   } else {
     assert.strictEqual(row.product_id, "trix_cereal", `${row.evidence_id} should be a known pending Flickr transcription row`);
+    assert(Array.isArray(row.ingredient_items) && row.ingredient_items.length === 0, `${row.evidence_id} without ingredient text should not expose ingredient items`);
+    assert.strictEqual(row.ingredient_item_count, 0, `${row.evidence_id} ingredient item count should remain zero`);
     assert.strictEqual(row.crop_focus, "visual_lineage", `${row.evidence_id} should be visual lineage only`);
     assert(row.candidate_excerpt.includes("promotion/top-flap panel only"), `${row.evidence_id} should identify the non-ingredient panel`);
     assert(row.candidate_excerpt.includes("readable ingredient panel still needed"), `${row.evidence_id} should explain the ingredient-panel gap`);
@@ -98,6 +103,8 @@ assert.strictEqual(cheeriosRow.ingredient_signal_status, "ingredient_signal_foun
 assert.strictEqual(cheeriosRow.crop_focus, "ingredient_text", "Cheerios crop should focus the ingredient block");
 assert(cheeriosRow.ingredient_text.includes("whole grain oats"), "Cheerios candidate should include visible ingredient text");
 assert(cheeriosRow.ingredient_text.includes("trisodium phosphate"), "Cheerios candidate should include the visible phosphate ingredient");
+assert(cheeriosRow.ingredient_items.includes("whole grain oats"), "Cheerios structured items should include whole grain oats");
+assert(cheeriosRow.ingredient_items.includes("trisodium phosphate"), "Cheerios structured items should include trisodium phosphate");
 
 const cocoaPuffsRow = visualIndex.rows.find((row) => row.evidence_id === "cocoa_puffs__2000s__423__2");
 assert(cocoaPuffsRow, "Flickr index should include the 2009 Cocoa Puffs row");
@@ -106,6 +113,8 @@ assert.strictEqual(cocoaPuffsRow.crop_focus, "ingredient_text", "Cocoa Puffs cro
 assert(cocoaPuffsRow.ingredient_text.includes("whole grain corn"), "Cocoa Puffs candidate should include visible ingredient text");
 assert(cocoaPuffsRow.ingredient_text.includes("BHT added to preserve freshness"), "Cocoa Puffs candidate should include the preservative line");
 assert(cocoaPuffsRow.ingredient_text.includes("Contains wheat ingredients"), "Cocoa Puffs candidate should include the allergen line");
+assert(cocoaPuffsRow.ingredient_items.some((item) => item.includes("BHT added to preserve freshness")), "Cocoa Puffs structured items should preserve the preservative line");
+assert(cocoaPuffsRow.ingredient_items.some((item) => item.includes("Contains wheat ingredients")), "Cocoa Puffs structured items should preserve the allergen line");
 
 const doritosRows = visualIndex.rows.filter((row) => row.product_id === "doritos_nacho_cheese");
 assert.strictEqual(doritosRows.length, 2, "Flickr index should include two Doritos timeline rows from the readable 1970s bag");
@@ -115,6 +124,8 @@ doritosRows.forEach((row) => {
   assert(row.ingredient_text.includes("vegetable oil with BHA and BHT"), `${row.evidence_id} should include the visible preservative/oil line`);
   assert(row.ingredient_text.includes("monosodium glutamate"), `${row.evidence_id} should include the visible seasoning line`);
   assert(row.ingredient_text.includes("artificial color"), `${row.evidence_id} should include the visible color line`);
+  assert(row.ingredient_items.includes("corn"), `${row.evidence_id} structured items should include corn`);
+  assert(row.ingredient_items.some((item) => item.includes("monosodium glutamate")), `${row.evidence_id} structured items should include the seasoning line`);
 });
 
 assert.deepStrictEqual(

@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { spawnSync } = require("child_process");
+const { ingredientItemsFromStatement } = require("./ingredient-statement-utils");
 
 const root = path.join(__dirname, "..");
 const fullQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv");
@@ -510,6 +511,7 @@ function publicRowFor(row, review, visual) {
   const localPreviewAvailable = Boolean(visual.upscaled_preview_path || visual.preview_path);
   const hasIngredientText = Boolean(review.ingredient_text);
   const cropFocus = review.crop_focus || (hasIngredientText ? "ingredient_text" : "panel_context");
+  const ingredientItems = hasIngredientText ? ingredientItemsFromStatement(review.ingredient_text) : [];
   return {
     product_id: row.product_id,
     product_name: row.product_name,
@@ -543,6 +545,8 @@ function publicRowFor(row, review, visual) {
     crop_focus: cropFocus,
     crop_rotation_degrees: review.crop_rotation_degrees || 0,
     ingredient_text: review.ingredient_text || "",
+    ingredient_items: ingredientItems,
+    ingredient_item_count: ingredientItems.length,
     ingredient_text_source: hasIngredientText ? "manual_visual_read_candidate" : "",
     ingredient_text_status: hasIngredientText ? "manual_visual_read_candidate_needs_review" : "full_transcription_needed",
     candidate_excerpt: shortText(review.ingredient_text || review.candidate_excerpt || "", 220),

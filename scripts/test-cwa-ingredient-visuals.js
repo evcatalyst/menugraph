@@ -76,10 +76,25 @@ visualIndex.rows.forEach((row) => {
   assert(Number.isFinite(Number(row.crop_rotation_degrees || 0)), `${row.evidence_id} crop rotation should be numeric`);
   if (row.ingredient_signal_status === "ingredient_signal_found") {
     assert(row.ingredient_text, `${row.evidence_id} ingredient candidate should include public-safe ingredient text`);
+    assert(Array.isArray(row.ingredient_items), `${row.evidence_id} should expose structured ingredient items`);
+    assert(row.ingredient_items.length >= 3, `${row.evidence_id} should expose multiple structured ingredient items`);
+    assert.strictEqual(row.ingredient_item_count, row.ingredient_items.length, `${row.evidence_id} ingredient item count should match item array`);
     assert(row.ingredient_text_status.includes("candidate"), `${row.evidence_id} ingredient text should remain candidate-gated`);
     assert.strictEqual(row.crop_focus, "ingredient_text", `${row.evidence_id} ingredient row should use ingredient crop focus`);
+  } else {
+    assert(Array.isArray(row.ingredient_items) && row.ingredient_items.length === 0, `${row.evidence_id} without ingredient text should not expose ingredient items`);
+    assert.strictEqual(row.ingredient_item_count, 0, `${row.evidence_id} ingredient item count should remain zero`);
   }
 });
+
+const snickers2000s = visualIndex.rows.find((row) => row.evidence_id === "snickers_bar__2000s__174__1");
+assert(snickers2000s, "CWA index should include the 2000s Snickers row");
+assert(snickers2000s.ingredient_items.includes("peanuts"), "Snickers structured items should include peanuts");
+assert(snickers2000s.ingredient_items.some((item) => item.includes("soybean oil")), "Snickers structured items should include soybean oil");
+
+const kitKat2000s = visualIndex.rows.find((row) => row.evidence_id === "kit_kat_bar__2000s__173__1");
+assert(kitKat2000s, "CWA index should include the 2000s Kit Kat row");
+assert(kitKat2000s.ingredient_items.some((item) => item.includes("soy lecithin")), "Kit Kat structured items should preserve emulsifier text");
 
 assert.deepStrictEqual(
   navigator.product_index.map((row) => row.id),

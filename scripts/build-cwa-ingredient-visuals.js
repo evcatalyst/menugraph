@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { spawnSync } = require("child_process");
+const { ingredientItemsFromStatement } = require("./ingredient-statement-utils");
 
 const root = path.join(__dirname, "..");
 const fullQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv");
@@ -139,6 +140,11 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function readJsonIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
 function sha(value, length = 16) {
   return crypto.createHash("sha256").update(String(value || "")).digest("hex").slice(0, length);
 }
@@ -223,6 +229,13 @@ function readQueueRows() {
 
 function sourceUrls(rows) {
   return [...new Set(rows.map((row) => row.source_url).filter(Boolean))].sort();
+}
+
+function cachedSourceCapturesByUrl() {
+  const latest = readJsonIfExists(latestPrivateManifestPath);
+  return new Map((latest?.source_captures || [])
+    .filter((capture) => capture.source_url)
+    .map((capture) => [capture.source_url, capture]));
 }
 
 function htmlDecode(value) {
@@ -776,6 +789,7 @@ function updateNavigatorTimeline(visualIndex) {
 function publicRowFor(row, visual, sourceCapture) {
   const hasIngredientSignal = Boolean(visual.ingredient_signal_lines?.length || visual.ingredient_text);
   const localPreviewAvailable = Boolean(visual.upscaled_preview_path || visual.preview_path);
+  const ingredientItems = visual.ingredient_text ? ingredientItemsFromStatement(visual.ingredient_text) : [];
   const visualStatus = localPreviewAvailable
     ? hasIngredientSignal ? "local_ingredient_crop_ready" : visual.crop_focus === "panel_context" ? "local_panel_context_crop_ready" : "local_visual_lineage_ready"
     : "source_capture_needed";
@@ -810,6 +824,8 @@ function publicRowFor(row, visual, sourceCapture) {
     crop_focus: visual.crop_focus || "",
     crop_rotation_degrees: visual.crop_rotation_degrees || 0,
     ingredient_text: visual.ingredient_text || "",
+    ingredient_items: ingredientItems,
+    ingredient_item_count: ingredientItems.length,
     ingredient_text_source: visual.ingredient_text_source || "",
     ingredient_text_status: visual.ingredient_text
       ? "manual_visual_read_candidate_needs_review"
@@ -839,8 +855,14 @@ async function build() {
 
   const rows = readQueueRows();
   const sourceCaptures = new Map();
+  const cachedSourceCaptures = noFetch ? cachedSourceCapturesByUrl() : new Map();
 
   for (const url of sourceUrls(rows)) {
+    const cachedCapture = cachedSourceCaptures.get(url);
+    if (noFetch && cachedCapture) {
+      sourceCaptures.set(url, cachedCapture);
+      continue;
+    }
     const pageHash = sha(url, 14);
     const pagePath = path.join(pageDir, `${pageHash}.html`);
     const capture = {
