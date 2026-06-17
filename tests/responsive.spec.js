@@ -517,7 +517,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-gap-summary")).toContainText("KFC-owned US nutrition/allergen/ingredient document");
   await expect(page.locator("#source-family-gap-summary")).toContainText("secret-recipe articles or recreation recipes");
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Full-corpus capture queue");
-  await expect(page.locator("#source-family-coverage-summary")).toContainText("118/120 products represented");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("120/120 timeline products");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("118 proof-visual products");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("2 collection targets");
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Starbucks Pumpkin Spice Latte");
   await expect(page.locator("#source-family-coverage-summary")).toContainText("KFC Original Recipe Chicken");
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Official Starbucks source cache blocked");
@@ -611,6 +613,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   expect(Number(firstProofGuideOpacity)).toBeGreaterThan(0);
   await expect(firstProofOverlay).toHaveClass(/has-ingredient-list/);
   await expect(firstProofOverlay).toHaveCSS("bottom", "12px");
+  expect((await firstProofOverlay.boundingBox())?.width || 0).toBeGreaterThan(300);
   await page.mouse.move(8, 8);
   await expect(firstProofCard).not.toHaveClass(/is-ingredient-preview/);
   await firstProofPreview.click();

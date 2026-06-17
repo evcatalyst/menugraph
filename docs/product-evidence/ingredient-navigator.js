@@ -997,11 +997,16 @@ function renderSourceFamilyCoverageSummary(query = sourceFamilyFilterQuery()) {
   const rows = sourceFamilyCoverageRows(query);
   const totals = coverage.totals || {};
   const visibleRows = rows.slice(0, 6);
+  const totalProducts = totals.queue_products || 0;
+  const timelineProducts = totals.timeline_products || totalProducts;
+  const proofVisualProducts = totals.represented_products || 0;
+  const collectionTargetProducts = totals.collection_target_products || totals.missing_products || coverage.missing_products.length;
+  const coverageLabel = `${timelineProducts}/${totalProducts} timeline products · ${proofVisualProducts} proof-visual products · ${collectionTargetProducts} collection targets`;
   if (!visibleRows.length) {
     els.sourceFamilyCoverageSummary.innerHTML = `
       <div class="source-family-coverage-title">
         <span>Full-corpus capture queue</span>
-        <small>${escapeHtml(`0 of ${totals.missing_products || coverage.missing_products.length} missing products match`)}</small>
+        <small>${escapeHtml(`0 of ${collectionTargetProducts} collection targets match · ${coverageLabel}`)}</small>
       </div>
     `;
     return;
@@ -1010,8 +1015,8 @@ function renderSourceFamilyCoverageSummary(query = sourceFamilyFilterQuery()) {
     <div class="source-family-coverage-title">
       <span>Full-corpus capture queue</span>
       <small>${escapeHtml(query
-        ? `${rows.length} of ${totals.missing_products || coverage.missing_products.length} missing products match`
-        : `${totals.represented_products || 0}/${totals.queue_products || 0} products represented · ${totals.missing_products || coverage.missing_products.length} missing`)}</small>
+        ? `${rows.length} of ${collectionTargetProducts} collection targets match · ${coverageLabel}`
+        : coverageLabel)}</small>
     </div>
     <div class="source-family-coverage-list">
       ${visibleRows.map((productRow) => {
