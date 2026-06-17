@@ -628,6 +628,54 @@ const curatedRows = {
     source_image_url: "https://cache.dominos.com/olo/6_168_0/assets/build/images/promo/dominos_social_logo.jpg",
     source_image_match_status: "official_current_menu_ingredient_statement_table",
   },
+  "chipotle_chicken_burrito__current_2020s__573__4": {
+    ingredient_fragment_strategy: "manual_official_menu_pdf_text",
+    ingredient_items_override: [
+      "Burrito format: Flour tortilla with a choice of cilantro-lime rice, black or pinto beans, meat, salsa, and cheese or sour cream",
+      "Chicken: Responsibly raised, marinated in chipotle adobo, then grilled",
+      "Flour Tortilla (burrito): 1 each; 320 calories; 600 mg sodium; 50 g carbohydrates",
+      "Cilantro-Lime White Rice: 4 oz; 210 calories; 350 mg sodium",
+      "Black Beans: 4 oz; 130 calories; 210 mg sodium",
+      "Fresh Tomato Salsa: 4 oz; 25 calories; 550 mg sodium",
+      "Cheese: 1 oz; 110 calories; 190 mg sodium",
+    ],
+    source_fetch_url: "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+    source_url_override: "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+    source_detail_url: "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf#page=1",
+    source_title_override: "Chipotle US Nutrition Facts Paper Menu, March 2025",
+    source_owner_override: "Chipotle Mexican Grill",
+    source_image_match_status: "official_current_menu_ingredient_pdf",
+  },
+  "subway_italian_bmt__current_2020s__570__1": {
+    ingredient_fragment_strategy: "manual_official_menu_pdf_text",
+    ingredient_items_override: [
+      "Sandwich configuration note: bread, cheese, vegetables, sauces, and size materially change the finished item; this proof rows the Italian B.M.T. meats plus default bread component",
+      "Artisan Italian (White) Bread: Enriched Flour (Wheat Flour, Malted Barley Flour, Niacin, Reduced Iron, Thiamine Mononitrate, Riboflavin, Folic Acid), Water, Yeast, Sugar, Contains 2% or Less Of: Wheat Gluten, Wheat Sourdough Blend (Cultured Wheat Flour, Natural Flavor), Salt, Palm Oil, Cultured Wheat Flour, Mono- and Diglycerides, Ascorbic Acid, Enzymes. Contains: Wheat",
+      "Genoa Salami: Pork, Beef, Salt, contains 2% or less of Water, Corn Syrup, Dextrose, Sugar, Flavorings, Wine, Sodium Erythorbate, Sodium Nitrate, Spices, Garlic, Lactic Acid Starter Culture, Sodium Nitrite",
+      "Ham (Black Forest): Ham, Water, Dextrose, 2% or Less of, Modified Food Starch, Salt, Vinegar, Sodium Phosphates, Natural Smoke Flavor, Sodium Erythorbate, Sodium Nitrite",
+      "Pepperoni: Pork, Beef, Salt, contains 2% or less of Water, Spices, Dextrose, Corn Syrup, Flavorings, Paprika, Oleoresin of Paprika, Sodium Erythorbate, Lactic Acid Starter Culture, Sodium Nitrite",
+    ],
+    source_fetch_url: "https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf",
+    source_url_override: "https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf",
+    source_detail_url: "https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf#page=4",
+    source_title_override: "Subway US Product Ingredient Guide, January 2026",
+    source_owner_override: "Subway / Franchise World Headquarters, LLC",
+    source_image_match_status: "official_current_menu_ingredient_pdf",
+  },
+  "subway_tuna_sub__current_2020s__587__1": {
+    ingredient_fragment_strategy: "manual_official_menu_pdf_text",
+    ingredient_items_override: [
+      "Sandwich configuration note: bread, vegetables, sauces, cheese, and size materially change the finished item; this proof rows the Tuna Salad plus default bread component",
+      "Tuna Salad: Flaked Tuna in Brine (tuna, water, salt), Mayonnaise (soybean oil, eggs, water, distilled vinegar, contains less than 2% of salt, sugar, spice, lemon juice concentrate, calcium disodium EDTA added to protect flavor). Contains: Eggs, Fish",
+      "Artisan Italian (White) Bread: Enriched Flour (Wheat Flour, Malted Barley Flour, Niacin, Reduced Iron, Thiamine Mononitrate, Riboflavin, Folic Acid), Water, Yeast, Sugar, Contains 2% or Less Of: Wheat Gluten, Wheat Sourdough Blend (Cultured Wheat Flour, Natural Flavor), Salt, Palm Oil, Cultured Wheat Flour, Mono- and Diglycerides, Ascorbic Acid, Enzymes. Contains: Wheat",
+    ],
+    source_fetch_url: "https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf",
+    source_url_override: "https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf",
+    source_detail_url: "https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf#page=7",
+    source_title_override: "Subway US Product Ingredient Guide, January 2026",
+    source_owner_override: "Subway / Franchise World Headquarters, LLC",
+    source_image_match_status: "official_current_menu_ingredient_pdf",
+  },
   "dunkin_glazed_donut__current_2020s__697__3": {
     ingredient_fragment_strategy: "dunkin_pdf_glazed_donut",
     source_fetch_url: "https://www.dunkindonuts.com/content/dam/dd/pdf/allergy_ingredient_guide.pdf",
@@ -1709,6 +1757,7 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "taco_bell_nutritionix_components") return "official_current_menu_ingredient_statement_table";
   if (strategy === "dominos_ingredients_xml_components") return "official_current_menu_ingredient_statement_xml";
   if (strategy === "pizza_hut_pepperoni_page") return "official_current_menu_page_text";
+  if (strategy === "manual_official_menu_pdf_text") return "official_current_menu_ingredient_pdf";
   if (strategy === "dunkin_pdf_glazed_donut") return "official_current_menu_ingredient_pdf";
   if (strategy === "popeyes_pdf_classic_chicken_sandwich") return "official_current_menu_ingredient_pdf";
   if (strategy === "mckee_pdf_oatmeal_creme_pies") return "official_current_foodservice_ingredient_pdf";
@@ -2183,9 +2232,11 @@ async function build() {
     const ingredientLabelImage = ingredientLabelImageUrl
       ? await fetchBinaryToCache(ingredientLabelImageUrl, path.join(imageDir, `${sha(ingredientLabelImageUrl, 16)}.jpg`), noFetch)
       : { file_path: "", status: "no_ingredient_label_image" };
-    const items = review.ingredient_statement_override
-      ? ingredientItemsFromStatement(review.ingredient_statement_override)
-      : ingredientItemsForStrategy(strategy, mainCapture.text, fragmentCapture.text, review);
+    const items = Array.isArray(review.ingredient_items_override) && review.ingredient_items_override.length
+      ? review.ingredient_items_override
+      : review.ingredient_statement_override
+        ? ingredientItemsFromStatement(review.ingredient_statement_override)
+        : ingredientItemsForStrategy(strategy, mainCapture.text, fragmentCapture.text, review);
     const ingredientText = items.length ? ingredientTextFromItems(items) : "";
     const proofPath = path.join(proofHtmlDir, `${visualId}.html`);
     writeTextIfChanged(proofPath, proofHtml(

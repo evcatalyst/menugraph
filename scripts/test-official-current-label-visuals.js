@@ -106,6 +106,9 @@ const expectedProducts = new Set([
   "mcdonalds_world_famous_fries",
   "mcdonalds_chicken_mcnuggets",
   "dominos_hand_tossed_pepperoni",
+  "chipotle_chicken_burrito",
+  "subway_italian_bmt",
+  "subway_tuna_sub",
   "dunkin_glazed_donut",
   "popeyes_chicken_sandwich",
   "little_debbie_oatmeal_creme_pies",
@@ -130,9 +133,11 @@ const allowedOfficialHosts = new Set([
   "www.chick-fil-a.com",
   "www.cheerios.com",
   "www.cheezit.com",
+  "www.chipotle.com",
   "www.coca-cola.com",
   "www.dominos.com",
   "www.dunkindonuts.com",
+  "media.subway.com",
   "plk-use1-prod.sites.rbictg.com",
   "mckeefoodservice.com",
   "www.goodnes.com",
@@ -199,11 +204,11 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 
 assert.strictEqual(visualIndex.schema_version, 1, "official-current visual index should be versioned");
 assert.strictEqual(visualIndex.source_family.id, "official-current-labels", "official-current source family id should be stable");
-assert.strictEqual(visualIndex.totals.products, 100, "official-current lane should cover 100 products");
-assert.strictEqual(visualIndex.totals.rows, 100, "official-current lane should cover 100 rows");
-assert.strictEqual(visualIndex.rows.length, 100, "official-current rows should match totals");
-assert.strictEqual(visualIndex.totals.local_preview_available, 100, "official-current lane should expose local proof previews");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 100, "official-current lane should expose 100 ingredient text candidates");
+assert.strictEqual(visualIndex.totals.products, 103, "official-current lane should cover 103 products");
+assert.strictEqual(visualIndex.totals.rows, 103, "official-current lane should cover 103 rows");
+assert.strictEqual(visualIndex.rows.length, 103, "official-current rows should match totals");
+assert.strictEqual(visualIndex.totals.local_preview_available, 103, "official-current lane should expose local proof previews");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 103, "official-current lane should expose 103 ingredient text candidates");
 assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 0, "official-current rows should have extracted source text");
 
 visualIndex.products.forEach((product) => {
@@ -310,6 +315,9 @@ const bigMac = visualIndex.rows.find((row) => row.product_id === "mcdonalds_big_
 const fries = visualIndex.rows.find((row) => row.product_id === "mcdonalds_world_famous_fries");
 const mcnuggets = visualIndex.rows.find((row) => row.product_id === "mcdonalds_chicken_mcnuggets");
 const dominosHandTossedPepperoni = visualIndex.rows.find((row) => row.product_id === "dominos_hand_tossed_pepperoni");
+const chipotleChickenBurrito = visualIndex.rows.find((row) => row.product_id === "chipotle_chicken_burrito");
+const subwayItalianBmt = visualIndex.rows.find((row) => row.product_id === "subway_italian_bmt");
+const subwayTunaSub = visualIndex.rows.find((row) => row.product_id === "subway_tuna_sub");
 const dunkinGlazedDonut = visualIndex.rows.find((row) => row.product_id === "dunkin_glazed_donut");
 const popeyesChickenSandwich = visualIndex.rows.find((row) => row.product_id === "popeyes_chicken_sandwich");
 const littleDebbieOatmeal = visualIndex.rows.find((row) => row.product_id === "little_debbie_oatmeal_creme_pies");
@@ -545,6 +553,33 @@ assert.strictEqual(dominosHandTossedPepperoni.source_owner, "Domino's Pizza", "D
 assert.strictEqual(dominosHandTossedPepperoni.ingredient_text_source, "official_current_menu_ingredient_statement_xml", "Domino's Hand Tossed Pepperoni should identify official XML as the ingredient source");
 assert.strictEqual(dominosHandTossedPepperoni.proof_visual_basis, "official_menu_or_api_text", "Domino's Hand Tossed Pepperoni proof basis should identify menu/API source text");
 assert(Array.isArray(dominosHandTossedPepperoni.ingredient_items) && dominosHandTossedPepperoni.ingredient_items.length === 4, "Domino's Hand Tossed Pepperoni should expose four structured component ingredient items");
+assert(chipotleChickenBurrito.ingredient_text.includes("Burrito format: Flour tortilla with a choice of cilantro-lime rice"), "Chipotle Chicken Burrito should expose burrito-format source text");
+assert(chipotleChickenBurrito.ingredient_text.includes("Chicken: Responsibly raised, marinated in chipotle adobo, then grilled"), "Chipotle Chicken Burrito should expose selected chicken component text");
+assert.strictEqual(chipotleChickenBurrito.source_url, "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf", "Chipotle Chicken Burrito should use the official March 2025 PDF URL");
+assert.strictEqual(chipotleChickenBurrito.source_title, "Chipotle US Nutrition Facts Paper Menu, March 2025", "Chipotle Chicken Burrito should expose the official PDF title");
+assert.strictEqual(chipotleChickenBurrito.source_owner, "Chipotle Mexican Grill", "Chipotle Chicken Burrito should expose the official source owner");
+assert.strictEqual(chipotleChickenBurrito.ingredient_text_source, "official_current_menu_ingredient_pdf", "Chipotle Chicken Burrito should identify official PDF as the ingredient source");
+assert.strictEqual(chipotleChickenBurrito.proof_visual_basis, "official_menu_or_api_text", "Chipotle Chicken Burrito proof basis should identify menu/PDF source text");
+assert(Array.isArray(chipotleChickenBurrito.ingredient_items) && chipotleChickenBurrito.ingredient_items.length === 7, "Chipotle Chicken Burrito should expose seven component proof items from the PDF row");
+assert(subwayItalianBmt.ingredient_text.includes("Genoa Salami: Pork, Beef, Salt"), "Subway Italian B.M.T. should expose Genoa salami component text");
+assert(subwayItalianBmt.ingredient_text.includes("Ham (Black Forest): Ham, Water, Dextrose"), "Subway Italian B.M.T. should expose ham component text");
+assert(subwayItalianBmt.ingredient_text.includes("Pepperoni: Pork, Beef, Salt"), "Subway Italian B.M.T. should expose pepperoni component text");
+assert(subwayItalianBmt.ingredient_text.includes("Artisan Italian (White) Bread: Enriched Flour"), "Subway Italian B.M.T. should expose default bread component text");
+assert.strictEqual(subwayItalianBmt.source_url, "https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf", "Subway Italian B.M.T. should use the current official ingredient guide PDF URL");
+assert.strictEqual(subwayItalianBmt.source_title, "Subway US Product Ingredient Guide, January 2026", "Subway Italian B.M.T. should expose the current ingredient guide title");
+assert.strictEqual(subwayItalianBmt.source_owner, "Subway / Franchise World Headquarters, LLC", "Subway Italian B.M.T. should expose the official source owner");
+assert.strictEqual(subwayItalianBmt.ingredient_text_source, "official_current_menu_ingredient_pdf", "Subway Italian B.M.T. should identify official PDF as the ingredient source");
+assert.strictEqual(subwayItalianBmt.proof_visual_basis, "official_menu_or_api_text", "Subway Italian B.M.T. proof basis should identify menu/PDF source text");
+assert(Array.isArray(subwayItalianBmt.ingredient_items) && subwayItalianBmt.ingredient_items.length === 5, "Subway Italian B.M.T. should expose five explicit component/context proof items");
+assert(subwayTunaSub.ingredient_text.includes("Tuna Salad: Flaked Tuna in Brine"), "Subway Tuna Sub should expose tuna salad component text");
+assert(subwayTunaSub.ingredient_text.includes("Mayonnaise (soybean oil, eggs"), "Subway Tuna Sub should expose mayonnaise subcomponent text");
+assert(subwayTunaSub.ingredient_text.includes("Artisan Italian (White) Bread: Enriched Flour"), "Subway Tuna Sub should expose default bread component text");
+assert.strictEqual(subwayTunaSub.source_url, "https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf", "Subway Tuna Sub should use the current official ingredient guide PDF URL");
+assert.strictEqual(subwayTunaSub.source_title, "Subway US Product Ingredient Guide, January 2026", "Subway Tuna Sub should expose the current ingredient guide title");
+assert.strictEqual(subwayTunaSub.source_owner, "Subway / Franchise World Headquarters, LLC", "Subway Tuna Sub should expose the official source owner");
+assert.strictEqual(subwayTunaSub.ingredient_text_source, "official_current_menu_ingredient_pdf", "Subway Tuna Sub should identify official PDF as the ingredient source");
+assert.strictEqual(subwayTunaSub.proof_visual_basis, "official_menu_or_api_text", "Subway Tuna Sub proof basis should identify menu/PDF source text");
+assert(Array.isArray(subwayTunaSub.ingredient_items) && subwayTunaSub.ingredient_items.length === 3, "Subway Tuna Sub should expose three explicit component/context proof items");
 assert(dunkinGlazedDonut.ingredient_text.includes("Donut: Enriched Wheat Flour"), "Dunkin Glazed Donut current evidence should expose donut component text");
 assert(dunkinGlazedDonut.ingredient_text.includes("Yeast Donut Concentrate"), "Dunkin Glazed Donut current evidence should expose donut concentrate text");
 assert(dunkinGlazedDonut.ingredient_text.includes("Glaze: Sugar"), "Dunkin Glazed Donut current evidence should expose glaze component text");
@@ -581,19 +616,19 @@ assert.strictEqual(littleDebbieOatmeal.proof_visual_basis, "official_source_text
 
 const family = navigator.source_family_timeline?.families?.find((row) => row.id === "official-current-labels");
 assert(family, "navigator should expose the official-current source-family timeline");
-assert.strictEqual(family.product_count, 100, "navigator official-current timeline should cover 100 products");
-assert.strictEqual(family.row_count, 100, "navigator official-current timeline should cover 100 rows");
-assert.strictEqual(family.ingredient_signal_count, 100, "navigator official-current timeline should expose candidate count");
+assert.strictEqual(family.product_count, 103, "navigator official-current timeline should cover 103 products");
+assert.strictEqual(family.row_count, 103, "navigator official-current timeline should cover 103 rows");
+assert.strictEqual(family.ingredient_signal_count, 103, "navigator official-current timeline should expose candidate count");
 assert(family.products.every((product) => expectedProducts.has(product.product_id)), "navigator official-current timeline has unexpected products");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "official-current-labels");
 assert(summaryFamily, "navigator source-family summary should expose official-current labels");
-assert.strictEqual(summaryFamily.product_count, 100, "official-current summary should cover 100 products");
+assert.strictEqual(summaryFamily.product_count, 103, "official-current summary should cover 103 products");
 assert(summaryFamily.products.every((product) => product.ingredient_panel_visible_count === 1), "official-current summary should reflect current ingredient text candidates");
 
 if (fs.existsSync(privateManifestPath)) {
   const privateManifest = JSON.parse(fs.readFileSync(privateManifestPath, "utf8"));
-  assert.strictEqual(privateManifest.rows.length, 100, "official-current private manifest should have 100 rows");
+  assert.strictEqual(privateManifest.rows.length, 103, "official-current private manifest should have 103 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
   const riceKrispiesPrivate = privateManifest.rows.find((row) => row.product_id === "rice_krispies");
