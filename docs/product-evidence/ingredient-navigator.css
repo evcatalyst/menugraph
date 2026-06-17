@@ -579,6 +579,9 @@ a:hover {
 
 .source-family-ingredient-bar {
   display: grid;
+  grid-template-areas:
+    "label meter metrics"
+    "proofs proofs proofs";
   grid-template-columns: minmax(0, 1fr) minmax(62px, 0.36fr) auto;
   gap: 7px;
   align-items: center;
@@ -592,7 +595,8 @@ a:hover {
   text-align: left;
 }
 
-.source-family-ingredient-bar span {
+.source-family-ingredient-label {
+  grid-area: label;
   min-width: 0;
   font-size: 12px;
   line-height: 1.2;
@@ -601,11 +605,48 @@ a:hover {
   white-space: nowrap;
 }
 
+.source-family-ingredient-bar meter {
+  grid-area: meter;
+  width: 100%;
+  height: 7px;
+}
+
 .source-family-ingredient-metrics {
+  grid-area: metrics;
   display: inline-flex;
   gap: 4px;
   align-items: center;
   justify-content: flex-end;
+}
+
+.source-family-ingredient-proof-strip {
+  grid-area: proofs;
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.source-family-ingredient-proof-thumb {
+  display: inline-grid;
+  width: 38px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid rgba(245, 240, 230, 0.16);
+  border-radius: 4px;
+  background: rgba(255, 250, 240, 0.08);
+  overflow: hidden;
+}
+
+.source-family-ingredient-proof-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.source-family-ingredient-proof-thumb.is-missing-private-preview {
+  display: none;
 }
 
 .source-family-ingredient-metric {
@@ -653,11 +694,6 @@ a:hover {
   color: var(--teal);
 }
 
-.source-family-ingredient-bar meter {
-  width: 100%;
-  height: 7px;
-}
-
 .source-family-ingredient-bar meter::-webkit-meter-bar {
   border: 0;
   border-radius: 999px;
@@ -674,8 +710,8 @@ a:hover {
   background: var(--teal);
 }
 
-.source-family-ingredient-bar:hover span,
-.source-family-ingredient-bar:focus-visible span {
+.source-family-ingredient-bar:hover .source-family-ingredient-label,
+.source-family-ingredient-bar:focus-visible .source-family-ingredient-label {
   color: var(--teal);
   text-decoration: underline;
   text-underline-offset: 2px;

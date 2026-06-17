@@ -396,10 +396,24 @@ function ingredientTrendItems(rows, limit = 8) {
         count: 0,
         local_visual_count: 0,
         product_ids: new Set(),
+        proofs: [],
+        proof_product_ids: new Set(),
       };
       existing.count += 1;
       if (row.local_preview_available) existing.local_visual_count += 1;
       if (row.product_id) existing.product_ids.add(row.product_id);
+      if (row.local_preview_available
+        && row.preview_endpoint
+        && !existing.proof_product_ids.has(row.product_id)
+        && existing.proofs.length < 4) {
+        existing.proof_product_ids.add(row.product_id);
+        existing.proofs.push({
+          product_name: row.product_name,
+          vintage_label: row.vintage_label,
+          preview_endpoint: row.preview_endpoint,
+          proof_label: proofVisualLabel(row),
+        });
+      }
       counts.set(key, existing);
     }
   }
@@ -1011,6 +1025,19 @@ function sourceFamilyTrendMetrics(item) {
   `;
 }
 
+function sourceFamilyTrendProofStrip(item, localImages) {
+  if (!localImages || !item.proofs?.length) return "";
+  return `
+    <span class="source-family-ingredient-proof-strip" aria-hidden="true">
+      ${item.proofs.map((proof) => `
+        <span class="source-family-ingredient-proof-thumb" title="${escapeHtml(`${proof.product_name} · ${proof.vintage_label} · ${proof.proof_label}`)}">
+          <img src="${escapeHtml(proof.preview_endpoint)}" alt="" loading="lazy" data-private-ingredient-trend-preview="1" />
+        </span>
+      `).join("")}
+    </span>
+  `;
+}
+
 function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
   if (!els.sourceFamilyIngredientSummary) return;
   const rows = ingredientTrendRows(visibleProducts, query);
@@ -1020,6 +1047,7 @@ function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
     return;
   }
   const maxCount = Math.max(...items.map((item) => item.count), 1);
+  const localImages = isLocalPreviewHost();
   els.sourceFamilyIngredientSummary.innerHTML = `
     <div class="source-family-ingredient-summary-title">
       <span>Frequent ingredients</span>
@@ -1028,13 +1056,20 @@ function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
     <div class="source-family-ingredient-bars">
       ${items.map((item) => `
         <button class="source-family-ingredient-bar" type="button" data-source-family-filter-value="${escapeHtml(item.label)}" aria-label="${escapeHtml(`${item.label}: ${item.count} proof ${item.count === 1 ? "row" : "rows"}, ${item.product_ids?.size || 0} ${item.product_ids?.size === 1 ? "product" : "products"}, ${item.local_visual_count || 0} local visual ${(item.local_visual_count || 0) === 1 ? "preview" : "previews"}`)}">
-          <span>${escapeHtml(truncateText(item.label, 56))}</span>
+          <span class="source-family-ingredient-label">${escapeHtml(truncateText(item.label, 56))}</span>
           <meter min="0" max="${escapeHtml(maxCount)}" value="${escapeHtml(item.count)}"></meter>
           ${sourceFamilyTrendMetrics(item)}
+          ${sourceFamilyTrendProofStrip(item, localImages)}
         </button>
       `).join("")}
     </div>
   `;
+  els.sourceFamilyIngredientSummary.querySelectorAll("[data-private-ingredient-trend-preview]").forEach((image) => {
+    image.addEventListener("error", () => {
+      image.closest(".source-family-ingredient-proof-thumb")?.classList.add("is-missing-private-preview");
+      image.remove();
+    }, { once: true });
+  });
 }
 
 function renderCwaTimeline() {

@@ -845,6 +845,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(sugarTrend.locator(".source-family-ingredient-metric[aria-label='58 proof rows']")).toBeVisible();
   await expect(sugarTrend.locator(".source-family-ingredient-metric[aria-label='58 products']")).toBeVisible();
   await expect(sugarTrend.locator(".source-family-ingredient-metric[aria-label='58 local visual previews']")).toBeVisible();
+  await expect(sugarTrend.locator(".source-family-ingredient-proof-strip")).toBeVisible();
+  expect(await sugarTrend.locator(".source-family-ingredient-proof-thumb img").count()).toBeGreaterThan(0);
+  await expect(sugarTrend.locator(".source-family-ingredient-proof-thumb img").first()).toHaveAttribute("src", /\/api\/private\/ingredient-crops\//);
   await page.locator(".source-family-ingredient-bar").filter({ hasText: "sugar" }).first().click();
   await expect(page.locator("#source-family-search")).toHaveValue(/sugar/i);
   await expect(page.locator("#source-family-filter-status")).toContainText("of 105 products");
