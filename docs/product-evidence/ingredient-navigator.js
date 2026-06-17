@@ -12,6 +12,9 @@ const els = {
   sourceFamilySearch: document.querySelector("#source-family-search"),
   sourceFamilyFilterClear: document.querySelector("#source-family-filter-clear"),
   sourceFamilyFilterStatus: document.querySelector("#source-family-filter-status"),
+  sourceFamilyPrev: document.querySelector("#source-family-prev"),
+  sourceFamilyNext: document.querySelector("#source-family-next"),
+  sourceFamilyPosition: document.querySelector("#source-family-position"),
   cwaProductStrip: document.querySelector("#cwa-product-strip"),
   cwaTimelineTrack: document.querySelector("#cwa-timeline-track"),
   status: document.querySelector("#journey-status"),
@@ -328,6 +331,19 @@ function selectedCwaProduct() {
   return products.find((row) => row.product_id === state.cwaProductId) || products[0];
 }
 
+function selectedSourceFamilyProductIndex(products) {
+  return Math.max(0, products.findIndex((row) => row.product_id === state.cwaProductId));
+}
+
+function moveSourceFamilyProduct(delta) {
+  const products = filteredSourceFamilyProducts(cwaTimeline());
+  if (!products.length) return;
+  const currentIndex = selectedSourceFamilyProductIndex(products);
+  const nextIndex = Math.min(products.length - 1, Math.max(0, currentIndex + delta));
+  state.cwaProductId = products[nextIndex].product_id;
+  renderCwaTimeline();
+}
+
 function sourceFamilyRowByVisualId(visualId) {
   if (!visualId) return null;
   const families = state.data?.source_family_timeline?.families || [];
@@ -545,6 +561,9 @@ function renderCwaTimeline() {
   if (!visibleProducts.length) {
     state.cwaProductId = "";
     els.cwaProductStrip.innerHTML = "";
+    if (els.sourceFamilyPrev) els.sourceFamilyPrev.disabled = true;
+    if (els.sourceFamilyNext) els.sourceFamilyNext.disabled = true;
+    if (els.sourceFamilyPosition) els.sourceFamilyPosition.textContent = "0 / 0";
     els.cwaTimelineTrack.classList.remove("is-single-proof-row");
     els.cwaTimelineTrack.innerHTML = `<article class="cwa-timeline-empty">No matching proof rows.</article>`;
     return;
@@ -553,6 +572,12 @@ function renderCwaTimeline() {
     state.cwaProductId = visibleProducts[0].product_id;
   }
   const productRow = selectedCwaProduct();
+  const selectedProductIndex = selectedSourceFamilyProductIndex(visibleProducts);
+  if (els.sourceFamilyPrev) els.sourceFamilyPrev.disabled = selectedProductIndex <= 0;
+  if (els.sourceFamilyNext) els.sourceFamilyNext.disabled = selectedProductIndex >= visibleProducts.length - 1;
+  if (els.sourceFamilyPosition) {
+    els.sourceFamilyPosition.textContent = `${selectedProductIndex + 1} / ${visibleProducts.length}`;
+  }
   els.cwaProductStrip.innerHTML = visibleProducts
     .map((row) => `
       <button class="cwa-product-chip ${row.product_id === state.cwaProductId ? "is-selected" : ""}" type="button" data-cwa-product-id="${escapeHtml(row.product_id)}">
@@ -1082,9 +1107,16 @@ function attachEvents() {
   });
   els.sourceFamilyFilterClear?.addEventListener("click", () => {
     state.sourceFamilyQuery = "";
+    state.cwaProductId = "";
     if (els.sourceFamilySearch) els.sourceFamilySearch.value = "";
     renderCwaTimeline();
     els.sourceFamilySearch?.focus();
+  });
+  els.sourceFamilyPrev?.addEventListener("click", () => {
+    moveSourceFamilyProduct(-1);
+  });
+  els.sourceFamilyNext?.addEventListener("click", () => {
+    moveSourceFamilyProduct(1);
   });
   els.cwaTimelineTrack?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-cwa-inspect]");

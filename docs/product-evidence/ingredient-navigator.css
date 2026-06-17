@@ -368,7 +368,7 @@ a:hover {
 
 .source-family-filter {
   display: grid;
-  grid-template-columns: minmax(220px, 360px) 30px minmax(120px, 1fr);
+  grid-template-columns: minmax(220px, 360px) 30px minmax(120px, 1fr) auto;
   gap: 7px;
   align-items: center;
   margin-bottom: 8px;
@@ -421,6 +421,53 @@ a:hover {
   font-size: 11px;
   line-height: 1.2;
   overflow-wrap: anywhere;
+}
+
+.source-family-pager {
+  display: inline-grid;
+  grid-template-columns: 30px minmax(54px, auto) 30px;
+  gap: 5px;
+  align-items: center;
+  justify-content: end;
+}
+
+.source-family-pager button {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--teal);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0;
+}
+
+.source-family-pager button:hover,
+.source-family-pager button:focus-visible {
+  border-color: rgba(101, 183, 177, 0.72);
+  background: rgba(101, 183, 177, 0.12);
+  color: var(--ink);
+  outline: 0;
+}
+
+.source-family-pager button:disabled,
+.source-family-filter-clear:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.source-family-pager span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 780;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .source-family-tab {
@@ -1990,8 +2037,13 @@ a:hover {
     grid-template-columns: minmax(0, 1fr) 30px;
   }
 
-  .source-family-filter small {
+  .source-family-filter small,
+  .source-family-pager {
     grid-column: 1 / -1;
+  }
+
+  .source-family-pager {
+    justify-content: start;
   }
 
   .cwa-ingredient-overlay {
