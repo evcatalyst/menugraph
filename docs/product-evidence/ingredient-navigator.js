@@ -452,7 +452,28 @@ function sourceFamilyRowByVisualId(visualId) {
   for (const family of families) {
     for (const productRow of family.products || []) {
       const match = (productRow.rows || []).find((row) => row.visual_id === visualId);
-      if (match) return { ...match, source_family_label: family.label };
+      if (match) {
+        return {
+          ...match,
+          source_family_id: family.id,
+          source_family_label: family.label,
+          source_family_product_count: family.product_count || family.products?.length || 0,
+        };
+      }
+    }
+  }
+  return null;
+}
+
+function sourceFamilyContextForRow(row) {
+  const families = state.data?.source_family_timeline?.families || [];
+  for (const family of families) {
+    if (row?.source_family_id && row.source_family_id !== family.id) continue;
+    for (const productRow of family.products || []) {
+      const match = (productRow.rows || []).some((sourceRow) => sourceRow.visual_id === row?.visual_id);
+      if (match || (row?.product_id && row.product_id === productRow.product_id && row?.source_family_id === family.id)) {
+        return { family, productRow };
+      }
     }
   }
   return null;
@@ -469,6 +490,40 @@ function statusDetail(row) {
 
 function drilldownPlaceholder(row, label = "Local crop unavailable") {
   return `<div class="ingredient-drilldown-placeholder"><strong>${escapeHtml(String(row.vintage_label || "").slice(0, 4))}</strong><span>${escapeHtml(label)}</span></div>`;
+}
+
+function ingredientDrilldownFacts(row, canShowPreview) {
+  const items = ingredientItemsForRow(row);
+  const context = sourceFamilyContextForRow(row);
+  const familyLabel = row.source_family_label || context?.family?.label || row.source_family || "Source family";
+  return `
+    <div class="ingredient-drilldown-facts">
+      <span><strong>${escapeHtml(items.length || "0")}</strong> ingredient entries</span>
+      <span><strong>${escapeHtml(canShowPreview ? "local" : "linked")}</strong> ${escapeHtml(canShowPreview ? "crop available" : "source only")}</span>
+      <span><strong>${escapeHtml(proofVisualLabel(row))}</strong> proof basis</span>
+      <span><strong>${escapeHtml(familyLabel)}</strong> ${escapeHtml(`${context?.family?.product_count || row.source_family_product_count || 0} products`)}</span>
+    </div>
+  `;
+}
+
+function ingredientDrilldownTrendBlock(row) {
+  const context = sourceFamilyContextForRow(row);
+  const rows = context?.productRow?.rows || [];
+  const items = ingredientTrendItems(rows, 8);
+  if (!items.length) return "";
+  return `
+    <div class="ingredient-drilldown-trends">
+      <span>Product ingredient signals</span>
+      <div>
+        ${items.map((item) => `
+          <button type="button" data-source-family-filter-value="${escapeHtml(item.label)}">
+            <strong>${escapeHtml(truncateText(item.label, 48))}</strong>
+            <small>${escapeHtml(item.count)}</small>
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
 }
 
 function renderIngredientDrilldown(row) {
@@ -497,7 +552,9 @@ function renderIngredientDrilldown(row) {
       </div>
       <div class="ingredient-drilldown-copy">
         <span>${escapeHtml(previewTitle)}</span>
+        ${ingredientDrilldownFacts(row, canShowPreview)}
         ${ingredientCopy || `<p>${escapeHtml(fallbackText)}</p>`}
+        ${ingredientDrilldownTrendBlock(row)}
         <dl class="ingredient-drilldown-meta">
           <div>
             <dt>Status</dt>

@@ -588,6 +588,11 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#ingredient-drilldown-title")).toContainText("Kellogg's Froot Loops");
   await expect(page.locator("#ingredient-drilldown")).toContainText("partially hydrogenated vegetable oil");
   await expect(page.locator("#ingredient-drilldown")).toContainText("Claim Boundary");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-facts")).toContainText("ingredient entries");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-facts")).toContainText("local crop available");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-facts")).toContainText("Flickr Package Archive");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-trends")).toContainText("Product ingredient signals");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-trends button").filter({ hasText: "artificial coloring" })).toBeVisible();
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-image img, #ingredient-drilldown .ingredient-drilldown-placeholder")).toBeVisible();
   const drilldownImagePane = page.locator("#ingredient-drilldown .ingredient-drilldown-image");
   const drilldownImage = page.locator("#ingredient-drilldown .ingredient-drilldown-image img");

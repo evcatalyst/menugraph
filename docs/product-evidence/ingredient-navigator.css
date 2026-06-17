@@ -1491,6 +1491,32 @@ a:hover {
   text-transform: uppercase;
 }
 
+.ingredient-drilldown-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.ingredient-drilldown-facts span {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 780;
+  line-height: 1.2;
+  padding-top: 7px;
+  text-transform: uppercase;
+}
+
+.ingredient-drilldown-facts strong {
+  display: block;
+  color: var(--teal);
+  font-size: 13px;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+  text-transform: none;
+}
+
 .ingredient-drilldown-copy .cwa-ingredient-copy {
   border-top: 1px solid var(--line);
   border-right: 0;
@@ -1518,6 +1544,71 @@ a:hover {
 .ingredient-drilldown-copy .cwa-ingredient-copy li {
   font-size: 13px;
   line-height: 1.32;
+}
+
+.ingredient-drilldown-trends {
+  display: grid;
+  gap: 7px;
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+}
+
+.ingredient-drilldown-trends > span {
+  color: var(--clay);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.ingredient-drilldown-trends > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.ingredient-drilldown-trends button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(15, 18, 14, 0.34);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.ingredient-drilldown-trends button:hover,
+.ingredient-drilldown-trends button:focus-visible {
+  border-color: rgba(101, 183, 177, 0.7);
+  outline: 0;
+}
+
+.ingredient-drilldown-trends button strong {
+  min-width: 0;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.18;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingredient-drilldown-trends button small {
+  display: grid;
+  min-width: 19px;
+  height: 19px;
+  place-items: center;
+  border: 1px solid rgba(101, 183, 177, 0.38);
+  border-radius: 50%;
+  color: var(--teal);
+  font-size: 10px;
+  font-weight: 850;
 }
 
 .ingredient-drilldown-meta {
@@ -2392,6 +2483,11 @@ a:hover {
   .ingredient-drilldown-image.has-private-preview img {
     width: max(100%, 760px);
     max-height: none;
+  }
+
+  .ingredient-drilldown-facts,
+  .ingredient-drilldown-trends > div {
+    grid-template-columns: 1fr;
   }
 
   .timeline-axis {
