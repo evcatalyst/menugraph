@@ -65,6 +65,16 @@ const curatedIngredientReviews = {
     crop_rotation_degrees: 0,
     ingredient_text: "Ingredients: milk chocolate (contains condensed milk, cocoa butter, chocolate, sugar, soya lecithin, natural and artificial flavour), sugar, flour, hydrogenated vegetable oil, chocolate, yeast, sodium bicarbonate, calcium sulphate, salt, ammonium chloride, potassium bromate, citric acid, natural and artificial flavour.",
   },
+  "kit_kat_bar__earliest_verified_label__173__3": {
+    source: "manual_visual_partial_ingredient_panel",
+    crop_box: { x: 0.525, y: 0.05, width: 0.13, height: 0.90 },
+    crop_padding: 0.01,
+    crop_min_output_width: 3600,
+    crop_rotation_degrees: 270,
+    ingredient_signal_lines: [
+      "Partial ingredient strip visible: begins with INGREDIENTS:- MILK CHOCOLATE EMULSIFIER; visible lines include SUGAR, FLOUR, WATER, PALM KERNEL OIL, HAZEL NUTS, COCOA LIQUOR, BUTTER, SODIUM BICARBONATE, YEAST, and ARTIFICIAL AND NATURAL FLAVOURS. Full transcription still needs a sharper or complete panel.",
+    ],
+  },
   "kit_kat_bar__2000s__173__1": {
     source: "manual_visual_read_candidate",
     crop_box: { x: 0.34, y: 0.21, width: 0.55, height: 0.24 },
@@ -549,16 +559,36 @@ function upscaledMinOutputWidth(focus = "whole_wrapper") {
   return 2200;
 }
 
-function publicClaimBoundary(row, hasIngredientSignal) {
-  if (hasIngredientSignal) {
+function publicClaimBoundary(row, hasIngredientText, hasIngredientSignal) {
+  if (hasIngredientText) {
     return "OCR text is a candidate only; do not publish an ingredient claim until corrected and manually verified.";
+  }
+  if (hasIngredientSignal) {
+    return "Partial ingredient text is visible, but the full statement is not transcribed; do not publish an ingredient claim until a complete panel is captured and manually verified.";
   }
   return "Wrapper imagery can support visual lineage only; a readable back/side ingredient panel is still needed before ingredient claims.";
 }
 
-function gapSourceRequirements(row, hasIngredientSignal) {
-  if (hasIngredientSignal) {
+function gapSourceRequirements(row, hasIngredientText, hasIngredientSignal) {
+  if (hasIngredientText) {
     return { status: "", next_step: "", accepted: [], rejected: [] };
+  }
+  if (hasIngredientSignal) {
+    return {
+      status: "partial_same_era_panel_needs_full_transcription",
+      next_step: `Capture a sharper or complete same-era ${row.product_name} ingredient strip before promoting ${row.vintage_label} ingredients.`,
+      accepted: [
+        "higher-resolution Candy Wrapper Archive image exposing the complete ingredient strip",
+        "same-era back or side wrapper photo with the full ingredient statement visible",
+        "source-attributed package label scan with date or era evidence and complete ingredient text",
+      ],
+      rejected: [
+        "partial ingredient strip used as a full formulation claim",
+        "front-only wrapper art",
+        "nearby-decade wrapper used as an exact formulation claim",
+        "unsourced ingredient text without package imagery",
+      ],
+    };
   }
   return {
     status: "same_era_readable_panel_required",
@@ -813,13 +843,38 @@ function updateNavigatorTimeline(visualIndex) {
 }
 
 function publicRowFor(row, visual, sourceCapture) {
-  const hasIngredientSignal = Boolean(visual.ingredient_signal_lines?.length || visual.ingredient_text);
+  const hasIngredientText = Boolean(visual.ingredient_text);
+  const hasIngredientSignal = Boolean(visual.ingredient_signal_lines?.length || hasIngredientText);
   const localPreviewAvailable = Boolean(visual.upscaled_preview_path || visual.preview_path);
-  const ingredientItems = visual.ingredient_text ? ingredientItemsFromStatement(visual.ingredient_text) : [];
-  const gapRequirements = gapSourceRequirements(row, hasIngredientSignal);
+  const ingredientItems = hasIngredientText ? ingredientItemsFromStatement(visual.ingredient_text) : [];
+  const gapRequirements = gapSourceRequirements(row, hasIngredientText, hasIngredientSignal);
   const visualStatus = localPreviewAvailable
-    ? hasIngredientSignal ? "local_ingredient_crop_ready" : visual.crop_focus === "panel_context" ? "local_panel_context_crop_ready" : "local_visual_lineage_ready"
+    ? hasIngredientText
+      ? "local_ingredient_crop_ready"
+      : hasIngredientSignal
+        ? "local_partial_ingredient_panel_ready"
+        : visual.crop_focus === "panel_context" ? "local_panel_context_crop_ready" : "local_visual_lineage_ready"
     : "source_capture_needed";
+  const proofVisualBasis = hasIngredientText
+    ? "archive_ingredient_label_crop"
+    : hasIngredientSignal
+      ? "archive_partial_ingredient_label_crop"
+      : "source_visual_lineage_only";
+  const ingredientTextStatus = hasIngredientText
+    ? "manual_visual_read_candidate_needs_review"
+    : hasIngredientSignal
+      ? "partial_ingredient_panel_needs_full_transcription"
+      : "readable_panel_still_needed";
+  const candidateStatus = hasIngredientText
+    ? "ingredient_text_candidate_needs_review"
+    : hasIngredientSignal
+      ? "partial_ingredient_panel_needs_full_transcription"
+      : "readable_panel_still_needed";
+  const ingredientSignalStatus = hasIngredientText
+    ? "ingredient_signal_found"
+    : hasIngredientSignal
+      ? "partial_ingredient_signal_found"
+      : "readable_panel_still_needed";
   return {
     product_id: row.product_id,
     product_name: row.product_name,
@@ -848,26 +903,24 @@ function publicRowFor(row, visual, sourceCapture) {
     source_image_year: visual.source_image_year || "",
     source_detail_url: visual.source_detail_url || "",
     source_image_match_status: visual.source_image_match_status || "",
-    proof_visual_basis: hasIngredientSignal ? "archive_ingredient_label_crop" : "source_visual_lineage_only",
+    proof_visual_basis: proofVisualBasis,
     crop_focus: visual.crop_focus || "",
     crop_rotation_degrees: visual.crop_rotation_degrees || 0,
     ingredient_text: visual.ingredient_text || "",
     ingredient_items: ingredientItems,
     ingredient_item_count: ingredientItems.length,
     ingredient_text_source: visual.ingredient_text_source || "",
-    ingredient_text_status: visual.ingredient_text
-      ? "manual_visual_read_candidate_needs_review"
-      : hasIngredientSignal ? "ocr_text_candidate_needs_review" : "readable_panel_still_needed",
+    ingredient_text_status: ingredientTextStatus,
     candidate_excerpt: shortText(visual.ingredient_text || (visual.ingredient_signal_lines || []).slice(0, 2).join(" "), 220),
-    candidate_status: hasIngredientSignal ? "ingredient_text_candidate_needs_review" : "readable_panel_still_needed",
-    ingredient_signal_status: hasIngredientSignal ? "ingredient_signal_found" : "readable_panel_still_needed",
+    candidate_status: candidateStatus,
+    ingredient_signal_status: ingredientSignalStatus,
     gap_source_status: gapRequirements.status,
     gap_next_step: gapRequirements.next_step,
     gap_accepted_source_types: gapRequirements.accepted,
     gap_rejected_source_types: gapRequirements.rejected,
     source_capture_status: sourceCapture?.status || "source_not_fetched",
     source_candidate_image_count: sourceCapture?.candidates?.length || 0,
-    claim_boundary: publicClaimBoundary(row, hasIngredientSignal),
+    claim_boundary: publicClaimBoundary(row, hasIngredientText, hasIngredientSignal),
   };
 }
 
@@ -1049,16 +1102,18 @@ async function build() {
         visual.crop_rotation_degrees = curatedReview.crop_rotation_degrees || 0;
         visual.ingredient_text = curatedReview.ingredient_text || "";
         visual.ingredient_text_source = curatedReview.source || "manual_visual_read_candidate";
-        visual.ingredient_signal_lines = visual.ingredient_text ? [visual.ingredient_text] : visual.ingredient_signal_lines;
+        visual.ingredient_signal_lines = visual.ingredient_text
+          ? [visual.ingredient_text]
+          : curatedReview.ingredient_signal_lines || visual.ingredient_signal_lines;
       }
       const focus = curatedReview
-        ? { box: curatedReview.crop_box, focus: "ingredient_text" }
+        ? { box: curatedReview.crop_box, focus: curatedReview.crop_focus || "ingredient_text" }
         : focusedRegion(best.lines);
       visual.crop_focus = focus.focus;
       const box = focus.box || wholeImageBox();
       const cropPath = path.join(cropDir, `${visualId}.png`);
-      const cropPadding = focus.focus === "ingredient_text" ? 0.07 : focus.focus === "panel_context" ? 0.06 : 0;
-      const cropMinOutputWidth = focus.focus === "ingredient_text" ? 1800 : focus.focus === "panel_context" ? 1500 : 1000;
+      const cropPadding = curatedReview?.crop_padding ?? (focus.focus === "ingredient_text" ? 0.07 : focus.focus === "panel_context" ? 0.06 : 0);
+      const cropMinOutputWidth = curatedReview?.crop_min_output_width ?? (focus.focus === "ingredient_text" ? 1800 : focus.focus === "panel_context" ? 1500 : 1000);
       const crop = runCrop(
         best.file_path,
         cropPath,

@@ -10470,10 +10470,10 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T15:19:02.294Z",
+    "generated_at_utc": "2026-06-17T16:01:31.650Z",
     "default_family": "official-current-labels",
-    "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
-    "claim_policy": "Manual visual transcription remains candidate evidence until corrected and manually verified.",
+    "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots or crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
+    "claim_policy": "Ingredient text remains candidate evidence until manually reviewed against source labeling and package context.",
     "families": [
       {
         "id": "candy-wrapper-archive",
@@ -11023,42 +11023,43 @@
                 "rights_note": "",
                 "visual_id": "kit_kat_bar__earliest_verified_label__b82ad5a836",
                 "preview_endpoint": "/api/private/ingredient-crops/kit_kat_bar__earliest_verified_label__b82ad5a836",
-                "visual_status": "local_visual_lineage_ready",
+                "visual_status": "local_partial_ingredient_panel_ready",
                 "local_preview_available": true,
                 "local_upscaled_preview_available": true,
                 "preview_render_variant": "upscaled_crop",
                 "ocr_status": "ocr_skipped",
-                "crop_status": "visual_lineage_preview_ready",
+                "crop_status": "ingredient_crop_ready",
                 "source_image_title": "1960s Kit Kat Candy Wrapper",
                 "source_image_year": 1960,
                 "source_detail_url": "https://www.candywrapperarchive.com/candy-collector/1960s-kit-kat/",
                 "source_image_match_status": "earliest_available_source_image",
-                "proof_visual_basis": "source_visual_lineage_only",
-                "crop_focus": "whole_wrapper",
-                "crop_rotation_degrees": 0,
+                "proof_visual_basis": "archive_partial_ingredient_label_crop",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 270,
                 "ingredient_text": "",
                 "ingredient_items": [],
                 "ingredient_item_count": 0,
-                "ingredient_text_source": "",
-                "ingredient_text_status": "readable_panel_still_needed",
-                "candidate_excerpt": "",
-                "candidate_status": "readable_panel_still_needed",
-                "ingredient_signal_status": "readable_panel_still_needed",
-                "gap_source_status": "same_era_readable_panel_required",
-                "gap_next_step": "Find a same-era Kit Kat Bar back or side wrapper image with readable ingredient text before promoting earliest_verified_label ingredients.",
+                "ingredient_text_source": "manual_visual_partial_ingredient_panel",
+                "ingredient_text_status": "partial_ingredient_panel_needs_full_transcription",
+                "candidate_excerpt": "Partial ingredient strip visible: begins with INGREDIENTS:- MILK CHOCOLATE EMULSIFIER; visible lines include SUGAR, FLOUR, WATER, PALM KERNEL OIL, HAZEL NUTS, COCOA LIQUOR, BUTTER, SODIUM BICARBONATE, YEAST, and ARTIFIC...",
+                "candidate_status": "partial_ingredient_panel_needs_full_transcription",
+                "ingredient_signal_status": "partial_ingredient_signal_found",
+                "gap_source_status": "partial_same_era_panel_needs_full_transcription",
+                "gap_next_step": "Capture a sharper or complete same-era Kit Kat Bar ingredient strip before promoting earliest_verified_label ingredients.",
                 "gap_accepted_source_types": [
-                  "same-era back or side wrapper photo with ingredients visible",
-                  "higher-resolution Candy Wrapper Archive image exposing the ingredient panel",
-                  "source-attributed package label scan with date or era evidence"
+                  "higher-resolution Candy Wrapper Archive image exposing the complete ingredient strip",
+                  "same-era back or side wrapper photo with the full ingredient statement visible",
+                  "source-attributed package label scan with date or era evidence and complete ingredient text"
                 ],
                 "gap_rejected_source_types": [
+                  "partial ingredient strip used as a full formulation claim",
                   "front-only wrapper art",
                   "nearby-decade wrapper used as an exact formulation claim",
                   "unsourced ingredient text without package imagery"
                 ],
                 "source_capture_status": "source_page_cached",
                 "source_candidate_image_count": 20,
-                "claim_boundary": "Wrapper imagery can support visual lineage only; a readable back/side ingredient panel is still needed before ingredient claims."
+                "claim_boundary": "Partial ingredient text is visible, but the full statement is not transcribed; do not publish an ingredient claim until a complete panel is captured and manually verified."
               },
               {
                 "product_id": "kit_kat_bar",
@@ -21735,7 +21736,7 @@
   },
   "source_family_coverage": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T15:41:49.981Z",
+    "generated_at_utc": "2026-06-17T16:01:59.699Z",
     "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
     "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
     "totals": {
@@ -22014,7 +22015,7 @@
   },
   "source_family_gap_worklist": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T15:41:49.981Z",
+    "generated_at_utc": "2026-06-17T16:01:59.699Z",
     "public_path": "data/product-evidence/source_family_gap_worklist.json",
     "totals": {
       "rows": 11,

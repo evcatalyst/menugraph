@@ -175,6 +175,7 @@ function proofVisualLabel(row) {
   if (basis === "official_source_text_proof_panel") return "Source text proof panel";
   if (basis === "label_database_source_text_proof_panel") return "Label database proof panel";
   if (basis === "archive_ingredient_label_crop") return "Archive ingredient label crop";
+  if (basis === "archive_partial_ingredient_label_crop") return "Partial archive ingredient crop";
   if (basis === "collection_target_source_lead") return "Collection source lead";
   return row?.ingredient_text ? "Ingredient source proof" : "Visual lineage only";
 }
@@ -191,6 +192,7 @@ function cwaStatusIcons(row) {
     icons.push(cwaStatusIcon("ingredient", title, "good"));
   }
   else if (basis === "collection_target_source_lead") icons.push(cwaStatusIcon("source", "Collection source lead; readable ingredient source still needed", "warn"));
+  else if (basis === "archive_partial_ingredient_label_crop") icons.push(cwaStatusIcon("panel", "Partial ingredient panel visible; full transcription still needed", "warn"));
   else if (row.crop_focus === "panel_context") icons.push(cwaStatusIcon("panel", "Package text crop, ingredient panel still needed", "warn"));
   else icons.push(cwaStatusIcon("image", "Visual lineage only; readable ingredient panel still needed", "muted"));
 
@@ -309,6 +311,7 @@ function ingredientTranscriptDetails(sourceText) {
 function missingProofTitle(row) {
   const basis = proofVisualBasis(row);
   if (basis === "collection_target_source_lead") return "Source lead only";
+  if (basis === "archive_partial_ingredient_label_crop") return "Partial ingredient strip";
   if (row?.crop_focus === "panel_context") return "Panel context only";
   return "Visual proof only";
 }
@@ -865,7 +868,7 @@ function sourceFamilyGapThumb(row, localImages) {
     <span class="source-family-gap-thumb" aria-hidden="true">
       ${canShowPreview
         ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="" loading="lazy" data-private-gap-preview="1" />`
-        : cwaInlineIcon(row.crop_focus === "panel_context" ? "panel" : "image")}
+        : cwaInlineIcon(row.crop_focus === "panel_context" || row.crop_focus === "ingredient_text" ? "panel" : "image")}
       <span>${cwaInlineIcon("panel")}</span>
     </span>
   `;

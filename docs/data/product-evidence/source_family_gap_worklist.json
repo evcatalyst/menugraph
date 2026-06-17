@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-06-17T15:41:49.981Z",
+  "generated_at_utc": "2026-06-17T16:01:59.699Z",
   "public_image_policy": "Gap worklist exposes source URLs, local preview endpoint IDs, status, and collection criteria only. Private screenshots, crop files, OCR dumps, and absolute local paths stay out of this artifact.",
   "claim_policy": "Rows without ingredient text are collection targets only. They do not promote ingredient, formulation, or historical-change claims.",
   "totals": {
@@ -25,14 +25,15 @@
       "vintage_label": "earliest_verified_label",
       "gap_kind": "readable_panel_photo_needed",
       "workstream": "same_era_panel_photo",
-      "source_requirement_status": "same_era_readable_panel_required",
-      "next_step": "Find a same-era Kit Kat Bar back or side wrapper image with readable ingredient text before promoting earliest_verified_label ingredients.",
+      "source_requirement_status": "partial_same_era_panel_needs_full_transcription",
+      "next_step": "Capture a sharper or complete same-era Kit Kat Bar ingredient strip before promoting earliest_verified_label ingredients.",
       "accepted_source_types": [
-        "same-era back or side wrapper photo with ingredients visible",
-        "higher-resolution Candy Wrapper Archive image exposing the ingredient panel",
-        "source-attributed package label scan with date or era evidence"
+        "higher-resolution Candy Wrapper Archive image exposing the complete ingredient strip",
+        "same-era back or side wrapper photo with the full ingredient statement visible",
+        "source-attributed package label scan with date or era evidence and complete ingredient text"
       ],
       "rejected_source_types": [
+        "partial ingredient strip used as a full formulation claim",
         "front-only wrapper art",
         "nearby-decade wrapper used as an exact formulation claim",
         "unsourced ingredient text without package imagery"
@@ -42,10 +43,10 @@
       "source_title": "1960s Kit Kat Candy Wrapper",
       "local_preview_available": true,
       "preview_endpoint": "/api/private/ingredient-crops/kit_kat_bar__earliest_verified_label__b82ad5a836",
-      "crop_focus": "whole_wrapper",
-      "proof_visual_basis": "source_visual_lineage_only",
-      "candidate_excerpt": "",
-      "claim_boundary": "Wrapper imagery can support visual lineage only; a readable back/side ingredient panel is still needed before ingredient claims."
+      "crop_focus": "ingredient_text",
+      "proof_visual_basis": "archive_partial_ingredient_label_crop",
+      "candidate_excerpt": "Partial ingredient strip visible: begins with INGREDIENTS:- MILK CHOCOLATE EMULSIFIER; visible lines include SUGAR, FLOUR, WATER, PALM KERNEL OIL, HAZEL NUTS, COCOA LIQUOR, BUTTER, SODIUM BICARBONATE, YEAST, and ARTIFIC...",
+      "claim_boundary": "Partial ingredient text is visible, but the full statement is not transcribed; do not publish an ingredient claim until a complete panel is captured and manually verified."
     },
     {
       "visual_id": "trix_cereal__1980s_or_earlier__39a205d7bb",

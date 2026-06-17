@@ -505,7 +505,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-gap-summary")).toContainText("Document Text Pipeline Needed");
   await expect(page.locator("#source-family-gap-summary .source-family-gap-kind")).toHaveCount(11);
   await expect(page.locator("#source-family-gap-summary .source-family-gap-copy em")).toHaveCount(0);
-  await expect(page.locator("#source-family-gap-summary")).toContainText("Find a same-era Kit Kat Bar back or side wrapper image");
+  await expect(page.locator("#source-family-gap-summary")).toContainText("Capture a sharper or complete same-era Kit Kat Bar ingredient strip");
+  await expect(page.locator("#source-family-gap-summary")).toContainText("Partial Same Era Panel Needs Full Transcription");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Capture a Starbucks-owned menu");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Resolve KFC US nutrition/allergen data");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Accepted proof");

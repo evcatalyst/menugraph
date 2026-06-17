@@ -72,8 +72,8 @@ visualIndex.rows.forEach((row) => {
   assert(["upscaled_crop", "base_crop", "none"].includes(row.preview_render_variant), `${row.evidence_id} has unknown preview render variant`);
   assert(/^https:\/\/www\.candywrapperarchive\.com\//.test(row.source_url), `${row.evidence_id} source should remain a CWA link`);
   assert(row.claim_boundary.includes("claim"), `${row.evidence_id} missing claim boundary`);
-  assert(["ingredient_signal_found", "readable_panel_still_needed"].includes(row.ingredient_signal_status), `${row.evidence_id} has unknown ingredient signal state`);
-  assert(["archive_ingredient_label_crop", "source_visual_lineage_only"].includes(row.proof_visual_basis), `${row.evidence_id} has unknown proof visual basis`);
+  assert(["ingredient_signal_found", "partial_ingredient_signal_found", "readable_panel_still_needed"].includes(row.ingredient_signal_status), `${row.evidence_id} has unknown ingredient signal state`);
+  assert(["archive_ingredient_label_crop", "archive_partial_ingredient_label_crop", "source_visual_lineage_only"].includes(row.proof_visual_basis), `${row.evidence_id} has unknown proof visual basis`);
   assert(Number.isFinite(Number(row.crop_rotation_degrees || 0)), `${row.evidence_id} crop rotation should be numeric`);
   if (row.ingredient_signal_status === "ingredient_signal_found") {
     assert.strictEqual(row.proof_visual_basis, "archive_ingredient_label_crop", `${row.evidence_id} ingredient row should publish archive proof basis`);
@@ -83,6 +83,16 @@ visualIndex.rows.forEach((row) => {
     assert.strictEqual(row.ingredient_item_count, row.ingredient_items.length, `${row.evidence_id} ingredient item count should match item array`);
     assert(row.ingredient_text_status.includes("candidate"), `${row.evidence_id} ingredient text should remain candidate-gated`);
     assert.strictEqual(row.crop_focus, "ingredient_text", `${row.evidence_id} ingredient row should use ingredient crop focus`);
+  } else if (row.ingredient_signal_status === "partial_ingredient_signal_found") {
+    assert.strictEqual(row.proof_visual_basis, "archive_partial_ingredient_label_crop", `${row.evidence_id} partial row should publish partial ingredient proof basis`);
+    assert.strictEqual(row.ingredient_text, "", `${row.evidence_id} partial row should not publish a full ingredient transcript`);
+    assert(Array.isArray(row.ingredient_items) && row.ingredient_items.length === 0, `${row.evidence_id} partial row should not expose structured ingredient items`);
+    assert.strictEqual(row.ingredient_item_count, 0, `${row.evidence_id} partial row ingredient item count should remain zero`);
+    assert.strictEqual(row.ingredient_text_status, "partial_ingredient_panel_needs_full_transcription", `${row.evidence_id} partial row should require full transcription`);
+    assert.strictEqual(row.crop_focus, "ingredient_text", `${row.evidence_id} partial row should still use an ingredient-strip crop`);
+    assert(row.candidate_excerpt.includes("Partial ingredient strip visible"), `${row.evidence_id} partial row should explain the visible ingredient strip`);
+    assert(row.gap_source_status.includes("partial"), `${row.evidence_id} partial row should publish partial-source requirement status`);
+    assert(row.gap_next_step?.includes("sharper or complete"), `${row.evidence_id} partial row should request a sharper or complete panel`);
   } else {
     assert.strictEqual(row.proof_visual_basis, "source_visual_lineage_only", `${row.evidence_id} gap row should publish lineage-only proof basis`);
     assert(Array.isArray(row.ingredient_items) && row.ingredient_items.length === 0, `${row.evidence_id} without ingredient text should not expose ingredient items`);
@@ -108,6 +118,13 @@ assert(snickers1939.ingredient_items.includes("malted milk"), "1939 Snickers str
 const kitKat2000s = visualIndex.rows.find((row) => row.evidence_id === "kit_kat_bar__2000s__173__1");
 assert(kitKat2000s, "CWA index should include the 2000s Kit Kat row");
 assert(kitKat2000s.ingredient_items.some((item) => item.includes("soy lecithin")), "Kit Kat structured items should preserve emulsifier text");
+
+const kitKatEarliest = visualIndex.rows.find((row) => row.evidence_id === "kit_kat_bar__earliest_verified_label__173__3");
+assert(kitKatEarliest, "CWA index should include the earliest Kit Kat row");
+assert.strictEqual(kitKatEarliest.ingredient_signal_status, "partial_ingredient_signal_found", "earliest Kit Kat should expose only a partial ingredient-strip signal");
+assert.strictEqual(kitKatEarliest.proof_visual_basis, "archive_partial_ingredient_label_crop", "earliest Kit Kat should not be promoted as a full ingredient proof");
+assert.strictEqual(kitKatEarliest.preview_render_variant, "upscaled_crop", "earliest Kit Kat should render the focused upscaled strip crop locally");
+assert.strictEqual(Number(kitKatEarliest.crop_rotation_degrees), 270, "earliest Kit Kat ingredient strip should be rotated upright");
 
 assert.deepStrictEqual(
   navigator.product_index.map((row) => row.id),
