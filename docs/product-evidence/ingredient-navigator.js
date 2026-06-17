@@ -77,6 +77,38 @@ function truncateText(value, limit = 220) {
   return text.length > limit ? `${text.slice(0, limit - 1).trim()}...` : text;
 }
 
+function yearFromValue(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  if (/^\d{4}$/.test(text) && Number.isFinite(Number(text))) return Number(text);
+  const match = text.match(/\b(?:18|19|20)\d{2}\b/);
+  return match ? Number(match[0]) : null;
+}
+
+function vintageSortYear(row) {
+  const label = String(row?.vintage_label || "").toLowerCase();
+  const explicitYear = yearFromValue(row?.source_image_year)
+    ?? yearFromValue(row?.source_year)
+    ?? yearFromValue(row?.source_image_title)
+    ?? yearFromValue(row?.source_title);
+  if (label.includes("earliest")) return explicitYear ?? 0;
+  if (label.includes("1980s_or_earlier")) return explicitYear && explicitYear < 1980 ? explicitYear : 1980;
+  const decadeMatch = label.match(/\b(?:18|19|20)\d0s\b/);
+  const decade = decadeMatch ? Number(decadeMatch[0].slice(0, 4)) : yearFromValue(label);
+  if (decade) return decade;
+  if (label.includes("current")) return explicitYear ?? 2020;
+  return explicitYear ?? 9999;
+}
+
+function sortedSourceFamilyRows(rows) {
+  return (rows || [])
+    .map((row, index) => ({ row, index }))
+    .sort((a, b) => vintageSortYear(a.row) - vintageSortYear(b.row)
+      || (yearFromValue(a.row.source_image_year) ?? yearFromValue(a.row.source_year) ?? 9999) - (yearFromValue(b.row.source_image_year) ?? yearFromValue(b.row.source_year) ?? 9999)
+      || a.index - b.index)
+    .map((entry) => entry.row);
+}
+
 function statusIconName(status) {
   const value = String(status || "").toLowerCase();
   if (/photo|usable/.test(value)) return "image";
@@ -495,9 +527,10 @@ function filteredSourceFamilyProducts(family) {
 
 function sourceFamilyRowsForProduct(productRow, query = sourceFamilyFilterQuery()) {
   const productMatch = sourceFamilyProductSearchText(productRow).includes(query);
-  return query && !productMatch
+  const rows = query && !productMatch
     ? (productRow.rows || []).filter((row) => sourceFamilyRowMatches(row, query))
     : productRow.rows || [];
+  return sortedSourceFamilyRows(rows);
 }
 
 function ingredientTrendRows(products, query = sourceFamilyFilterQuery()) {

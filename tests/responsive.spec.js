@@ -886,7 +886,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Collection source lead']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("High priority");
   await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Menu Or Nutrition Document");
-  await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Panel visible");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Panel not visible");
   await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Document Text Pipeline Needed");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open local private crop']")).toHaveCount(0);
   await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
@@ -900,7 +900,11 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.keyboard.press("Escape");
   await page.locator(".cwa-product-chip").filter({ hasText: "KFC Original Recipe Chicken" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
-  await expect(page.locator(".cwa-timeline-card").first()).toContainText("KFC Chicken and Nutrition official page");
+  const kfcSourceTitles = await page.locator(".cwa-timeline-card .cwa-source-title").allInnerTexts();
+  expect(kfcSourceTitles[0]).toMatch(/1970s|Colonel Sanders/i);
+  expect(kfcSourceTitles[1]).toMatch(/2008|Flickr album/i);
+  expect(kfcSourceTitles.slice(2).join(" ")).toMatch(/KFC Chicken and Nutrition|Food Innovation/i);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Kentucky Fried Chicken Colonel Sanders");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Item-level ingredient source needed");
   await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Panel not visible");
 
