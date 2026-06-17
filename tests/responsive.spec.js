@@ -488,6 +488,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(firstProofOverlay).toHaveCSS("opacity", "1");
   await expect(firstProofOverlay).toContainText("Ingredients");
   await expect(firstProofOverlay).toContainText("Beef");
+  const firstProofHighlightOpacity = await firstProofPreview.evaluate((element) => getComputedStyle(element, "::before").opacity);
+  expect(Number(firstProofHighlightOpacity)).toBeGreaterThan(0);
   await page.mouse.move(8, 8);
   await expect(firstProofCard).not.toHaveClass(/is-ingredient-preview/);
   await firstProofPreview.click();
@@ -574,9 +576,16 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#ingredient-drilldown")).toContainText("partially hydrogenated vegetable oil");
   await expect(page.locator("#ingredient-drilldown")).toContainText("Claim Boundary");
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-image img, #ingredient-drilldown .ingredient-drilldown-placeholder")).toBeVisible();
+  const drilldownImagePane = page.locator("#ingredient-drilldown .ingredient-drilldown-image");
   const drilldownImage = page.locator("#ingredient-drilldown .ingredient-drilldown-image img");
   if (await drilldownImage.count()) {
     await expect(drilldownImage).toHaveCSS("transform", "none");
+    await expect(drilldownImagePane).toHaveClass(/has-private-preview/);
+    const drilldownPaneMetrics = await drilldownImagePane.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(drilldownPaneMetrics.scrollWidth).toBeGreaterThan(drilldownPaneMetrics.clientWidth);
   }
   await page.locator(".ingredient-drilldown-close").click();
   await expect(page.locator("#ingredient-drilldown")).toBeHidden();

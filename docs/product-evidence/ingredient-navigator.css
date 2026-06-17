@@ -502,8 +502,10 @@ a:hover {
   object-fit: contain;
   display: block;
   background: #fffaf0;
+  filter: contrast(1) saturate(1);
   transform: none;
   transform-origin: center;
+  transition: filter 140ms ease;
 }
 
 .cwa-preview-frame.has-private-preview .cwa-preview-placeholder {
@@ -523,6 +525,40 @@ a:hover {
   border-radius: 7px;
   color: var(--gold);
   font-weight: 900;
+}
+
+.cwa-preview-frame.has-transcript-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  z-index: 1;
+  border: 2px solid rgba(212, 173, 87, 0);
+  border-radius: 7px;
+  background:
+    linear-gradient(90deg, rgba(212, 173, 87, 0.16), rgba(212, 173, 87, 0.04) 28%, transparent 44%, transparent 70%, rgba(101, 183, 177, 0.12)),
+    linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.12) 48%, transparent 58%);
+  box-shadow: inset 0 0 0 1px rgba(245, 240, 230, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.cwa-timeline-card:hover .cwa-preview-frame.has-transcript-overlay::before,
+.cwa-timeline-card:focus-within .cwa-preview-frame.has-transcript-overlay::before,
+.cwa-timeline-card.is-ingredient-preview .cwa-preview-frame.has-transcript-overlay::before,
+.cwa-timeline-card.is-ingredient-open .cwa-preview-frame.has-transcript-overlay::before {
+  border-color: rgba(212, 173, 87, 0.52);
+  box-shadow:
+    inset 0 0 0 1px rgba(245, 240, 230, 0.18),
+    0 0 0 1px rgba(212, 173, 87, 0.2);
+  opacity: 1;
+}
+
+.cwa-timeline-card:hover .cwa-preview-frame.has-transcript-overlay img,
+.cwa-timeline-card:focus-within .cwa-preview-frame.has-transcript-overlay img,
+.cwa-timeline-card.is-ingredient-preview .cwa-preview-frame.has-transcript-overlay img,
+.cwa-timeline-card.is-ingredient-open .cwa-preview-frame.has-transcript-overlay img {
+  filter: contrast(1.08) saturate(1.04);
 }
 
 .cwa-preview-lens {
@@ -555,15 +591,16 @@ a:hover {
 .cwa-ingredient-overlay {
   position: absolute;
   left: 10px;
-  right: 10px;
+  right: auto;
   bottom: 10px;
   z-index: 3;
   display: grid;
-  max-height: min(72%, 320px);
+  width: min(430px, calc(100% - 20px));
+  max-height: min(54%, 260px);
   gap: 8px;
   border: 1px solid rgba(245, 240, 230, 0.18);
   border-radius: 8px;
-  background: rgba(15, 18, 14, 0.9);
+  background: rgba(15, 18, 14, 0.78);
   backdrop-filter: blur(5px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.36);
   color: var(--ink);
@@ -614,7 +651,7 @@ a:hover {
   grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 6px 18px;
   width: 100%;
-  max-height: 230px;
+  max-height: 176px;
   margin: 0;
   overflow: auto;
   padding: 0;
@@ -985,6 +1022,13 @@ a:hover {
   overflow: hidden;
 }
 
+.ingredient-drilldown-image.has-private-preview {
+  place-items: start center;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
 .ingredient-drilldown-image img {
   display: block;
   width: 100%;
@@ -992,6 +1036,13 @@ a:hover {
   max-height: 68vh;
   object-fit: contain;
   transform: none;
+}
+
+.ingredient-drilldown-image.has-private-preview img {
+  width: max(100%, 1040px);
+  height: auto;
+  max-height: none;
+  object-fit: contain;
 }
 
 .ingredient-drilldown-placeholder {
@@ -1859,6 +1910,7 @@ a:hover {
     left: 8px;
     right: 8px;
     bottom: 8px;
+    width: auto;
     max-height: 68%;
   }
 
@@ -1897,6 +1949,11 @@ a:hover {
 
   .ingredient-drilldown-image img {
     max-height: 58vh;
+  }
+
+  .ingredient-drilldown-image.has-private-preview img {
+    width: max(100%, 760px);
+    max-height: none;
   }
 
   .timeline-axis {

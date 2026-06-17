@@ -198,7 +198,7 @@ function ingredientOverlay(row) {
   const overflowCount = Math.max(0, items.length - visibleItems.length);
   return `
     <div class="cwa-ingredient-overlay has-ingredient-list">
-      <span>Ingredients</span>
+      <span>Ingredients on label</span>
       ${visibleItems.length
         ? `<ul class="cwa-overlay-ingredient-list">${visibleItems.map((item) => `<li>${escapeHtml(truncateText(item, 142))}</li>`).join("")}</ul>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}
