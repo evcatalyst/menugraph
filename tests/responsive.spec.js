@@ -667,8 +667,19 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(drilldownProofOverlay).toBeVisible();
   expect(await drilldownProofOverlay.locator("li").count()).toBeGreaterThan(10);
   await expect(drilldownProofOverlay).toContainText("BHT added to maintain product freshness");
+  await expect(drilldownProofOverlay).toHaveCSS("background-color", "rgb(255, 250, 240)");
+  await expect(drilldownProofOverlay).toHaveCSS("bottom", "12px");
   const drilldownImagePane = page.locator("#ingredient-drilldown .ingredient-drilldown-image");
   const drilldownImage = page.locator("#ingredient-drilldown .ingredient-drilldown-image img");
+  const drilldownGuide = await drilldownImagePane.evaluate((element) => {
+    const style = getComputedStyle(element, "::before");
+    return {
+      backgroundImage: style.backgroundImage,
+      height: Number.parseFloat(style.height),
+    };
+  });
+  expect(drilldownGuide.backgroundImage).toContain("repeating-linear-gradient");
+  expect(drilldownGuide.height).toBeGreaterThan(100);
   if (await drilldownImage.count()) {
     await expect(drilldownImage).toHaveCSS("transform", "none");
     await expect(drilldownImagePane).toHaveClass(/has-private-preview/);
