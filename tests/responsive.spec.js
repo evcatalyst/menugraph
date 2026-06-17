@@ -745,7 +745,12 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Calcium Carbonate");
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_source_text_proof_panel");
   await expect(page.locator("#source-family-ingredient-summary")).toContainText("Frequent ingredients");
-  await expect(page.locator(".source-family-ingredient-bar").filter({ hasText: "sugar" }).first()).toBeVisible();
+  const sugarTrend = page.locator(".source-family-ingredient-bar").filter({ hasText: "sugar" }).first();
+  await expect(sugarTrend).toBeVisible();
+  await expect(sugarTrend).toHaveAttribute("aria-label", /58 proof rows, 58 products, 58 local visual previews/);
+  await expect(sugarTrend.locator(".source-family-ingredient-metric[aria-label='58 proof rows']")).toBeVisible();
+  await expect(sugarTrend.locator(".source-family-ingredient-metric[aria-label='58 products']")).toBeVisible();
+  await expect(sugarTrend.locator(".source-family-ingredient-metric[aria-label='58 local visual previews']")).toBeVisible();
   await page.locator(".source-family-ingredient-bar").filter({ hasText: "sugar" }).first().click();
   await expect(page.locator("#source-family-search")).toHaveValue(/sugar/i);
   await expect(page.locator("#source-family-filter-status")).toContainText("of 105 products");

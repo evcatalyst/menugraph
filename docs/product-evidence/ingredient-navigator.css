@@ -537,7 +537,7 @@ a:hover {
 
 .source-family-ingredient-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(62px, 0.44fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(62px, 0.36fr) auto;
   gap: 7px;
   align-items: center;
   min-height: 28px;
@@ -559,10 +559,56 @@ a:hover {
   white-space: nowrap;
 }
 
-.source-family-ingredient-bar strong {
-  color: var(--teal);
-  font-size: 11px;
+.source-family-ingredient-metrics {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.source-family-ingredient-metric {
+  display: inline-flex;
+  min-width: 31px;
+  height: 19px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--muted);
   line-height: 1;
+  padding: 0 4px;
+}
+
+.source-family-ingredient-metric svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.source-family-ingredient-metric b {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.source-family-ingredient-metric.is-good {
+  border-color: rgba(119, 196, 140, 0.5);
+  background: rgba(119, 196, 140, 0.11);
+  color: #9ee5af;
+}
+
+.source-family-ingredient-metric.is-local {
+  border-color: rgba(101, 183, 177, 0.52);
+  background: rgba(101, 183, 177, 0.11);
+  color: var(--teal);
 }
 
 .source-family-ingredient-bar meter {

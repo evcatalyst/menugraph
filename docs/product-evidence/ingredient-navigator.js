@@ -387,8 +387,15 @@ function ingredientTrendItems(rows, limit = 8) {
       const label = String(item || "").replace(/\s+/g, " ").trim();
       const key = ingredientTrendKey(label);
       if (!key) continue;
-      const existing = counts.get(key) || { label, count: 0 };
+      const existing = counts.get(key) || {
+        label,
+        count: 0,
+        local_visual_count: 0,
+        product_ids: new Set(),
+      };
       existing.count += 1;
+      if (row.local_preview_available) existing.local_visual_count += 1;
+      if (row.product_id) existing.product_ids.add(row.product_id);
       counts.set(key, existing);
     }
   }
@@ -887,6 +894,28 @@ function renderSourceFamilySummary() {
   `;
 }
 
+function sourceFamilyTrendMetric(iconName, value, singularLabel, pluralLabel = `${singularLabel}s`, tone = "neutral") {
+  const count = Number(value || 0);
+  const label = count === 1 ? singularLabel : pluralLabel;
+  return `
+    <span class="source-family-ingredient-metric is-${escapeHtml(tone)}" title="${escapeHtml(`${count} ${label}`)}" aria-label="${escapeHtml(`${count} ${label}`)}">
+      ${cwaInlineIcon(iconName)}
+      <b>${escapeHtml(count)}</b>
+    </span>
+  `;
+}
+
+function sourceFamilyTrendMetrics(item) {
+  const productCount = item.product_ids?.size || 0;
+  return `
+    <span class="source-family-ingredient-metrics">
+      ${sourceFamilyTrendMetric("ingredient", item.count, "proof row", "proof rows", "good")}
+      ${sourceFamilyTrendMetric("image", productCount, "product")}
+      ${sourceFamilyTrendMetric("crop", item.local_visual_count || 0, "local visual preview", "local visual previews", "local")}
+    </span>
+  `;
+}
+
 function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
   if (!els.sourceFamilyIngredientSummary) return;
   const rows = ingredientTrendRows(visibleProducts, query);
@@ -903,10 +932,10 @@ function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
     </div>
     <div class="source-family-ingredient-bars">
       ${items.map((item) => `
-        <button class="source-family-ingredient-bar" type="button" data-source-family-filter-value="${escapeHtml(item.label)}">
+        <button class="source-family-ingredient-bar" type="button" data-source-family-filter-value="${escapeHtml(item.label)}" aria-label="${escapeHtml(`${item.label}: ${item.count} proof ${item.count === 1 ? "row" : "rows"}, ${item.product_ids?.size || 0} ${item.product_ids?.size === 1 ? "product" : "products"}, ${item.local_visual_count || 0} local visual ${(item.local_visual_count || 0) === 1 ? "preview" : "previews"}`)}">
           <span>${escapeHtml(truncateText(item.label, 56))}</span>
           <meter min="0" max="${escapeHtml(maxCount)}" value="${escapeHtml(item.count)}"></meter>
-          <strong>${escapeHtml(item.count)}</strong>
+          ${sourceFamilyTrendMetrics(item)}
         </button>
       `).join("")}
     </div>
