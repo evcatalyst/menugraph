@@ -51,7 +51,7 @@ select {
   margin: -1px;
   border: 0;
   clip: rect(0 0 0 0);
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
   white-space: nowrap;
 }
@@ -1399,8 +1399,8 @@ a:hover {
   border: 2px solid rgba(212, 173, 87, 0);
   border-radius: 7px;
   background:
-    linear-gradient(90deg, rgba(212, 173, 87, 0.16), rgba(212, 173, 87, 0.04) 28%, transparent 44%, transparent 70%, rgba(101, 183, 177, 0.12)),
-    linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.12) 48%, transparent 58%);
+    linear-gradient(90deg, rgba(212, 173, 87, 0.15), rgba(212, 173, 87, 0.03) 24%, transparent 42%, transparent 72%, rgba(101, 183, 177, 0.12)),
+    linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.18) 46%, transparent 62%);
   box-shadow: inset 0 0 0 1px rgba(245, 240, 230, 0);
   opacity: 0;
   pointer-events: none;
@@ -1420,24 +1420,30 @@ a:hover {
 
 .cwa-preview-reader-guide {
   position: absolute;
-  inset: clamp(14px, 3.2vw, 28px);
+  left: clamp(20px, 6vw, 56px);
+  right: clamp(20px, 6vw, 56px);
+  top: clamp(34px, 17%, 98px);
   z-index: 2;
-  border: 1px solid rgba(101, 183, 177, 0.34);
+  height: min(47%, 265px);
+  border: 2px solid rgba(101, 183, 177, 0.34);
   border-radius: 7px;
   background:
-    linear-gradient(90deg, rgba(101, 183, 177, 0.16), transparent 16%, transparent 84%, rgba(212, 173, 87, 0.14)),
+    linear-gradient(90deg, rgba(101, 183, 177, 0.2), transparent 18%, transparent 82%, rgba(212, 173, 87, 0.18)),
     repeating-linear-gradient(
       180deg,
       transparent 0,
-      transparent 17px,
-      rgba(101, 183, 177, 0.18) 18px,
-      transparent 20px,
-      transparent 30px
+      transparent 19px,
+      rgba(212, 173, 87, 0.26) 20px,
+      rgba(212, 173, 87, 0.26) 23px,
+      transparent 24px,
+      transparent 34px
     );
-  box-shadow: inset 0 0 0 1px rgba(245, 240, 230, 0.1);
+  box-shadow:
+    inset 0 0 0 1px rgba(245, 240, 230, 0.15),
+    0 12px 28px rgba(0, 0, 0, 0.2);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 140ms ease, border-color 140ms ease;
+  transition: opacity 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
 
 .cwa-preview-frame.needs-transcript-overlay .cwa-preview-reader-guide {
@@ -1449,7 +1455,10 @@ a:hover {
 .cwa-timeline-card.is-ingredient-preview .cwa-preview-reader-guide,
 .cwa-timeline-card.is-ingredient-open .cwa-preview-reader-guide {
   border-color: rgba(212, 173, 87, 0.58);
-  opacity: 0.72;
+  box-shadow:
+    inset 0 0 0 1px rgba(245, 240, 230, 0.24),
+    0 16px 34px rgba(0, 0, 0, 0.28);
+  opacity: 0.84;
 }
 
 .cwa-timeline-card:hover .cwa-preview-frame.has-transcript-overlay img,
@@ -1488,26 +1497,51 @@ a:hover {
 
 .cwa-ingredient-overlay {
   position: absolute;
-  left: 10px;
-  right: auto;
-  top: 10px;
-  bottom: auto;
+  left: 12px;
+  right: 12px;
+  top: auto;
+  bottom: 12px;
   z-index: 3;
   display: grid;
-  width: min(360px, calc(100% - 20px));
-  max-height: min(34%, 170px);
+  max-height: min(42%, 236px);
   gap: 5px;
-  border: 1px solid rgba(245, 240, 230, 0.18);
+  border: 1px solid rgba(101, 183, 177, 0.48);
+  border-left: 4px solid rgba(101, 183, 177, 0.86);
   border-radius: 8px;
-  background: rgba(15, 18, 14, 0.68);
-  backdrop-filter: blur(5px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.36);
-  color: var(--ink);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.94), rgba(245, 240, 230, 0.88)),
+    #fffaf0;
+  backdrop-filter: blur(3px);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.38),
+    inset 0 0 0 1px rgba(15, 18, 14, 0.04);
+  color: #1e2119;
   opacity: 0;
   overflow: hidden;
   padding: clamp(8px, 0.9vw, 12px);
   pointer-events: none;
   transition: opacity 140ms ease;
+}
+
+.cwa-ingredient-overlay::before {
+  content: "";
+  position: absolute;
+  left: clamp(22px, 12%, 88px);
+  top: -16px;
+  width: clamp(74px, 24%, 180px);
+  height: 16px;
+  border-top: 2px solid rgba(101, 183, 177, 0.78);
+  border-left: 2px solid rgba(101, 183, 177, 0.78);
+  pointer-events: none;
+}
+
+.cwa-ingredient-overlay.is-missing-text {
+  border-color: rgba(212, 173, 87, 0.48);
+  border-left-color: rgba(212, 173, 87, 0.86);
+}
+
+.cwa-ingredient-overlay.is-missing-text::before {
+  border-color: rgba(212, 173, 87, 0.78);
 }
 
 .cwa-timeline-card:hover .cwa-ingredient-overlay,
@@ -1518,7 +1552,7 @@ a:hover {
 }
 
 .cwa-ingredient-overlay span {
-  color: var(--teal);
+  color: #295f5a;
   font-size: clamp(10px, 0.82vw, 12px);
   font-weight: 850;
   line-height: 1.1;
@@ -1529,7 +1563,7 @@ a:hover {
 .cwa-ingredient-overlay em {
   display: -webkit-box;
   margin: 0;
-  color: var(--ink);
+  color: #1e2119;
   font-size: clamp(12px, 0.92vw, 14px);
   line-height: 1.28;
   -webkit-line-clamp: 3;
@@ -1538,7 +1572,7 @@ a:hover {
 }
 
 .cwa-ingredient-overlay em {
-  color: var(--teal);
+  color: #356f67;
   font-size: 10px;
   font-style: normal;
   font-weight: 800;
@@ -1563,7 +1597,7 @@ a:hover {
   display: -webkit-box;
   min-width: 0;
   padding-left: 12px;
-  color: var(--ink);
+  color: #1e2119;
   font-size: clamp(12px, 0.96vw, 15px);
   font-weight: 820;
   line-height: 1.24;
@@ -1585,9 +1619,13 @@ a:hover {
 }
 
 .cwa-timeline-card.is-ingredient-open .cwa-preview-frame .cwa-ingredient-overlay {
-  width: min(640px, calc(100% - 20px));
-  max-height: min(74%, 460px);
-  background: rgba(15, 18, 14, 0.84);
+  left: 12px;
+  right: 12px;
+  width: auto;
+  max-height: min(76%, 470px);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.96), rgba(245, 240, 230, 0.91)),
+    #fffaf0;
   opacity: 1 !important;
 }
 
@@ -1659,8 +1697,8 @@ a:hover {
   }
 
   .cwa-timeline-track.is-single-proof-row .cwa-timeline-card.has-ingredient-proof .cwa-ingredient-overlay {
-    top: 12px;
-    bottom: auto;
+    top: auto;
+    bottom: 12px;
     max-height: min(54%, 340px);
   }
 
@@ -3144,8 +3182,8 @@ a:hover {
   .cwa-ingredient-overlay {
     left: 8px;
     right: 8px;
-    top: 8px;
-    bottom: auto;
+    top: auto;
+    bottom: 8px;
     width: auto;
     max-height: 42%;
   }

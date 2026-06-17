@@ -532,6 +532,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   expect(Number(firstProofHighlightOpacity)).toBeGreaterThan(0);
   const firstProofGuideOpacity = await firstProofPreview.locator(".cwa-preview-reader-guide").evaluate((element) => getComputedStyle(element).opacity);
   expect(Number(firstProofGuideOpacity)).toBeGreaterThan(0);
+  await expect(firstProofOverlay).toHaveClass(/has-ingredient-list/);
+  await expect(firstProofOverlay).toHaveCSS("bottom", "12px");
   await page.mouse.move(8, 8);
   await expect(firstProofCard).not.toHaveClass(/is-ingredient-preview/);
   await firstProofPreview.click();
@@ -591,6 +593,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(archiveProofCard).toHaveClass(/is-ingredient-preview/);
   await expect(archiveProofOverlay).toHaveCSS("opacity", "1");
   await expect(archiveProofOverlay).toContainText("Milk chocolate");
+  await expect(archiveProofOverlay).toHaveAttribute("aria-label", "Readable ingredient proof text");
   await page.mouse.move(8, 8);
   await expect(archiveProofCard).not.toHaveClass(/is-ingredient-preview/);
   await archiveProofPreview.click();
@@ -638,6 +641,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(2);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("partially hydrogenated vegetable oil");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy li").first()).toContainText("sugar");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader-meta")).not.toContainText("candidate text");
   const frootLoopsSourceLine = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-source-line");
   await expect(frootLoopsSourceLine).toContainText("BHT added to maintain product freshness");
   await expect.poll(async () => frootLoopsSourceLine.evaluate((element) => getComputedStyle(element).webkitLineClamp)).toBe("3");

@@ -204,7 +204,7 @@ function ingredientFilterButton(item) {
 function ingredientOverlay(row) {
   if (!row.ingredient_text) {
     return `
-      <div class="cwa-ingredient-overlay">
+      <div class="cwa-ingredient-overlay is-missing-text" aria-label="Readable ingredient proof status">
         <span>Readable panel needed</span>
         <p>This source image supports visual lineage, but no readable ingredient panel has been captured for this row.</p>
       </div>
@@ -219,7 +219,7 @@ function ingredientOverlay(row) {
       ? "Ingredient source text"
       : "Ingredients on label";
   return `
-    <div class="cwa-ingredient-overlay has-ingredient-list">
+    <div class="cwa-ingredient-overlay has-ingredient-list" aria-label="Readable ingredient proof text">
       <span>${escapeHtml(overlayTitle)}</span>
       ${items.length
         ? `<ul class="cwa-overlay-ingredient-list">${items.map((item) => `<li>${escapeHtml(truncateText(item, 140))}</li>`).join("")}</ul>`
@@ -247,7 +247,7 @@ function ingredientTextBlock(row, options = {}) {
         : "Label reader"
     : compact ? "Ingredients listed" : "Readable ingredient text";
   const readerMeta = compact && items.length
-    ? `<small class="cwa-label-reader-meta">${escapeHtml(`${items.length} ingredient ${items.length === 1 ? "entry" : "entries"} · candidate text`)}</small>`
+    ? `<small class="cwa-label-reader-meta">${escapeHtml(`${items.length} ingredient ${items.length === 1 ? "entry" : "entries"}`)}</small>`
     : "";
   const sourceLine = sourceText
     ? `<p class="cwa-ingredient-source-line">${escapeHtml(sourceText)}</p>`
