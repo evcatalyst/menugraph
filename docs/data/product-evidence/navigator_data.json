@@ -9990,6 +9990,37 @@
             "vintage_count": 1
           }
         ]
+      },
+      {
+        "id": "label-database-current-leads",
+        "label": "Label Database Current Leads",
+        "strategy": "label_database_source_text_leads",
+        "public_image_policy": "Public artifacts publish source links, candidate ingredient text, hashes, and status only. Localhost may render cached proof panels through /api/private/ingredient-crops/:visual_id when a private cache exists.",
+        "claim_policy": "Label database text remains candidate evidence until manually reviewed against package labeling.",
+        "evidence_row_count": 1,
+        "product_count": 1,
+        "top_domains": "www.directionsforme.org",
+        "gap_categories": "package_label_photo_review_needed",
+        "products": [
+          {
+            "product_id": "nilla_wafers",
+            "product_name": "Nilla Wafers",
+            "brand": "Nilla",
+            "category": "cookies",
+            "evidence_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "source_urls": [
+              "https://www.directionsforme.org/product/75544"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "verify_label_database_text_against_package_photo",
+            "vintage_count": 1
+          }
+        ]
       }
     ]
   },
@@ -10205,7 +10236,7 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T08:34:09.010Z",
+    "generated_at_utc": "2026-06-17T10:12:13.818Z",
     "default_family": "official-current-labels",
     "public_image_policy": "Public artifacts stay link/status-only. Localhost may render cached crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
     "claim_policy": "Wrapper lineage can support visual provenance only. OCR output remains candidate evidence until corrected and manually verified.",
@@ -19628,24 +19659,110 @@
             ]
           }
         ]
+      },
+      {
+        "id": "label-database-current-leads",
+        "label": "Label Database Current Leads",
+        "row_count": 1,
+        "product_count": 1,
+        "local_preview_available_count": 1,
+        "ingredient_signal_count": 1,
+        "products": [
+          {
+            "product_id": "nilla_wafers",
+            "product_name": "Nilla Wafers",
+            "brand": "Nilla",
+            "category": "cookies",
+            "source_family": "label-database-current-leads",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "rows": [
+              {
+                "product_id": "nilla_wafers",
+                "product_name": "Nilla Wafers",
+                "brand": "Nilla",
+                "category": "cookies",
+                "vintage_label": "current_2020s",
+                "vintage_start": "2020-01-01",
+                "vintage_end": "",
+                "evidence_id": "nilla_wafers__current_2020s__63__6",
+                "ocr_priority": "high",
+                "ocr_gap_category": "panel_capture_needed",
+                "source_domain": "www.directionsforme.org",
+                "source_url": "https://www.directionsforme.org/product/75544",
+                "source_title": "Nilla Wafers Family Size - Directions for Me",
+                "source_owner": "Horizons for the Blind / Directions for Me",
+                "rights_note": "",
+                "visual_id": "nilla_wafers__current_2020s__f79402cfec",
+                "preview_endpoint": "/api/private/ingredient-crops/nilla_wafers__current_2020s__f79402cfec",
+                "visual_status": "local_source_text_proof_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "label_database_source_text_proof_panel_ready",
+                "source_image_title": "Nilla Wafers Family Size",
+                "source_image_year": "current",
+                "source_detail_url": "https://www.directionsforme.org/product/75544",
+                "source_image_match_status": "label_database_source_text_record",
+                "proof_visual_basis": "label_database_source_text_proof_panel",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Unbleached Enriched Flour (Wheat Flour, Niacin, Reduced Iron, Thiamine Mononitrate [Vitamin B1], Riboflavin [Vitamin B2], Folic Acid), Sugar, Soybean and/or Canola Oil, Palm Oil, High Fructose Corn Syrup, Whey (from Milk), Eggs, Salt, Leavening (Baking Soda, Calcium Phosphate), Mono- and Diglycerides, Natural and Artificial Flavor, Soy Lecithin",
+                "ingredient_items": [
+                  "Unbleached Enriched Flour (Wheat Flour, Niacin, Reduced Iron, Thiamine Mononitrate [Vitamin B1], Riboflavin [Vitamin B2], Folic Acid)",
+                  "Sugar",
+                  "Soybean and/or Canola Oil",
+                  "Palm Oil",
+                  "High Fructose Corn Syrup",
+                  "Whey (from Milk)",
+                  "Eggs",
+                  "Salt",
+                  "Leavening (Baking Soda, Calcium Phosphate)",
+                  "Mono- and Diglycerides",
+                  "Natural and Artificial Flavor",
+                  "Soy Lecithin"
+                ],
+                "ingredient_text_source": "label_database_source_text",
+                "ingredient_text_status": "label_database_candidate_needs_package_review",
+                "candidate_excerpt": "Unbleached Enriched Flour (Wheat Flour, Niacin, Reduced Iron, Thiamine Mononitrate [Vitamin B1], Riboflavin [Vitamin B2], Folic Acid), Sugar, Soybean and/or Canola Oil, Palm Oil, High Fructose Corn Syrup, Whey (from Milk), Eggs, Salt, Leav...",
+                "candidate_status": "source_text_candidate_needs_package_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "manual_source_text_snapshot_ready",
+                "source_candidate_image_count": 0,
+                "product_size": "15 oz (425 g)",
+                "manufacturer": "Mondelez Global LLC, East Hanover, NJ 07936 United States",
+                "upc": "00044000077136",
+                "allergen_statement": "Contains: wheat, milk, egg, soy.",
+                "source_disclaimer_excerpt": "Horizons for the Blind makes no warranties regarding the accuracy of any information provided through this service.",
+                "source_text_hash": "83530247ab704edf",
+                "claim_boundary": "Label database text is candidate evidence only. Package image review is required before promoting a package-label ingredient claim or historical formulation comparison."
+              }
+            ]
+          }
+        ]
       }
     ]
   },
   "source_family_coverage": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T09:59:55.229Z",
+    "generated_at_utc": "2026-06-17T10:12:19.662Z",
     "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
     "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
     "totals": {
       "queue_products": 120,
-      "represented_products": 104,
-      "missing_products": 16,
+      "represented_products": 105,
+      "missing_products": 15,
       "queue_evidence_rows": 1701,
-      "high_priority_missing_rows": 110,
-      "current_missing_rows": 69
+      "high_priority_missing_rows": 102,
+      "current_missing_rows": 63
     },
     "missing_capture_classes": {
-      "candidate_panel_or_text_available": 9,
+      "candidate_panel_or_text_available": 8,
       "menu_component_source_needed": 7
     },
     "missing_products": [
@@ -19965,110 +20082,6 @@
             "ingredient_text_available": false,
             "next_action": "capture_private_panel_crop_and_run_ocr",
             "reviewer_note_excerpt": "Potentially useful for 1980 Cap'n Crunch back-panel review; verify exact Original variant and whether ingredients/net weight are readable.;Source-attributed Flickr page identifies uploader and package-back item title; label text readability must be reviewed a..."
-          }
-        ],
-        "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
-      },
-      {
-        "product_id": "nilla_wafers",
-        "product_name": "Nilla Wafers",
-        "brand": "Nilla",
-        "category": "cookies",
-        "coverage_status": "not_yet_represented_in_source_family",
-        "represented_source_families": [],
-        "capture_class": "candidate_panel_or_text_available",
-        "evidence_row_count": 12,
-        "high_priority_row_count": 8,
-        "current_row_count": 6,
-        "current_official_row_count": 0,
-        "ingredient_panel_visible_row_count": 8,
-        "ingredient_text_available_row_count": 2,
-        "top_source_domains": [
-          {
-            "domain": "www.walmart.com",
-            "count": 5
-          },
-          {
-            "domain": "www.directionsforme.org",
-            "count": 3
-          },
-          {
-            "domain": "www.flickr.com",
-            "count": 3
-          },
-          {
-            "domain": "unknown_source",
-            "count": 1
-          }
-        ],
-        "representative_rows": [
-          {
-            "evidence_id": "nilla_wafers__current_2020s__64__5",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "panel_capture_needed",
-            "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-            "evidence_kind": "retailer_page",
-            "source_domain": "www.walmart.com",
-            "source_url": "https://www.walmart.com/ip/17176262",
-            "source_title": "Nilla Wafers Mini Cookies, 11 oz - Walmart",
-            "source_owner": "www.walmart.com",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": false,
-            "next_action": "capture_private_panel_crop_and_run_ocr",
-            "reviewer_note_excerpt": "Mini package variant should remain SKU-specific.;Retailer source; useful for SKU/weight alignment, WARC and package verification required."
-          },
-          {
-            "evidence_id": "nilla_wafers__current_2020s__63__6",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "panel_capture_needed",
-            "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-            "evidence_kind": "label_database_record",
-            "source_domain": "www.directionsforme.org",
-            "source_url": "https://www.directionsforme.org/product/75544",
-            "source_title": "Nilla Wafers Family Size - Directions for Me",
-            "source_owner": "www.directionsforme.org",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": false,
-            "next_action": "capture_private_panel_crop_and_run_ocr",
-            "reviewer_note_excerpt": "Current Nilla candidate with enriched flour, oils, HFCS, flavor, soy, milk/egg facets.;Accessibility/product database source; useful label text candidate, but package image verification required."
-          },
-          {
-            "evidence_id": "nilla_wafers__current_2020s__524__1",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "panel_capture_needed",
-            "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-            "evidence_kind": "retailer_page",
-            "source_domain": "www.walmart.com",
-            "source_url": "https://www.walmart.com/ip/5032294033",
-            "source_title": "Nilla Wafers Cookies Family Size 15 oz Walmart page",
-            "source_owner": "Walmart",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": true,
-            "next_action": "extract_or_verify_source_ingredient_text",
-            "reviewer_note_excerpt": "Keep 15 oz family-size SKU separate for package-weight normalization; verify package-panel readability before promotion.;Retailer page with product gallery, package size, ingredient text, allergen text, and price context. Useful family-size SKU comparison aga..."
-          },
-          {
-            "evidence_id": "nilla_wafers__current_2020s__523__2",
-            "vintage_label": "current_2020s",
-            "ocr_priority": "high",
-            "ocr_gap_category": "panel_capture_needed",
-            "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
-            "evidence_kind": "retailer_page",
-            "source_domain": "www.walmart.com",
-            "source_url": "https://www.walmart.com/ip/11069151100",
-            "source_title": "Nilla Wafers Cookies 11 oz Walmart page",
-            "source_owner": "Walmart",
-            "source_surface": "current_web",
-            "ingredient_panel_visible": true,
-            "ingredient_text_available": true,
-            "next_action": "extract_or_verify_source_ingredient_text",
-            "reviewer_note_excerpt": "Verify package-gallery ingredient panel before ground-truth promotion; retailer page may contain duplicated or normalized product-data fields.;Retailer page with product image gallery, net weight, ingredient text, allergen text, and product detail context. Us..."
           }
         ],
         "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"

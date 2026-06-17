@@ -117,6 +117,7 @@ function proofVisualLabel(row) {
   if (basis === "official_ingredient_label_image") return "Ingredient label image with transcript";
   if (basis === "official_menu_or_api_text") return "Menu ingredient source proof";
   if (basis === "official_source_text_proof_panel") return "Source text proof panel";
+  if (basis === "label_database_source_text_proof_panel") return "Label database proof panel";
   if (basis === "archive_ingredient_label_crop") return "Archive ingredient label crop";
   return row?.ingredient_text ? "Ingredient source proof" : "Visual lineage only";
 }
@@ -127,7 +128,9 @@ function cwaStatusIcons(row) {
   if (row.ingredient_text) {
     const title = basis === "official_ingredient_label_image"
       ? "Ingredient text candidate paired with an official label image"
-      : "Ingredient text candidate extracted from the selected official source";
+      : basis === "label_database_source_text_proof_panel"
+        ? "Ingredient text candidate from a label database source; package label review still needed"
+        : "Ingredient text candidate extracted from the selected official source";
     icons.push(cwaStatusIcon("ingredient", title, "good"));
   }
   else if (row.crop_focus === "panel_context") icons.push(cwaStatusIcon("panel", "Package text crop, ingredient panel still needed", "warn"));
@@ -211,9 +214,12 @@ function ingredientOverlay(row) {
   const items = ingredientItemsForRow(row);
   const visibleItems = items.slice(0, 3);
   const overflowCount = Math.max(0, items.length - visibleItems.length);
+  const overlayTitle = proofVisualBasis(row) === "label_database_source_text_proof_panel"
+    ? "Ingredient source text"
+    : "Ingredients on label";
   return `
     <div class="cwa-ingredient-overlay has-ingredient-list">
-      <span>Ingredients on label</span>
+      <span>${escapeHtml(overlayTitle)}</span>
       ${visibleItems.length
         ? `<p>${visibleItems.map((item) => escapeHtml(truncateText(item, 78))).join(" · ")}</p>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}

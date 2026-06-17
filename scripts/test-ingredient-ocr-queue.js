@@ -12,6 +12,7 @@ const navigatorPath = path.join(root, "docs/data/product-evidence/navigator_data
 const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
 const sourceFamilySummaryPath = path.join(root, "docs/data/product-evidence/source_family_summary.json");
 const sourceFamilyCoveragePath = path.join(root, "docs/data/product-evidence/source_family_coverage.json");
+const labelDatabaseVisualIndexPath = path.join(root, "docs/data/product-evidence/label_database_ingredient_visual_index.json");
 const ocrBoardSummaryPath = path.join(root, "docs/data/product-evidence/ocr_board_summary.json");
 const productStoryIndexPath = path.join(root, "docs/data/product-evidence/product_story_index.json");
 const publicReviewQueuePath = path.join(root, "docs/data/product-evidence/review_queue_public.csv");
@@ -66,6 +67,7 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 const sourceFamilySummary = JSON.parse(fs.readFileSync(sourceFamilySummaryPath, "utf8"));
 const sourceFamilyCoverage = JSON.parse(fs.readFileSync(sourceFamilyCoveragePath, "utf8"));
+const labelDatabaseVisualIndex = JSON.parse(fs.readFileSync(labelDatabaseVisualIndexPath, "utf8"));
 const ocrBoardSummary = JSON.parse(fs.readFileSync(ocrBoardSummaryPath, "utf8"));
 const productStoryIndex = JSON.parse(fs.readFileSync(productStoryIndexPath, "utf8"));
 const queue = parseCsv(fs.readFileSync(queueCsvPath, "utf8"));
@@ -158,11 +160,12 @@ assert(!JSON.stringify(sourceFamilySummary).includes("/Volumes/azssd/scratch"), 
 assert.strictEqual(typeof buildCoverage, "function", "source-family coverage builder should export buildCoverage");
 assert.strictEqual(sourceFamilyCoverage.schema_version, 1, "source family coverage should be versioned");
 assert.strictEqual(sourceFamilyCoverage.totals.queue_products, 120, "source family coverage should audit the 120-product queue");
-assert.strictEqual(sourceFamilyCoverage.totals.represented_products, 104, "source family coverage should preserve represented product count");
-assert.strictEqual(sourceFamilyCoverage.totals.missing_products, 16, "source family coverage should expose the missing product queue");
-assert.strictEqual(navigator.source_family_coverage?.totals?.missing_products, 16, "navigator should embed the missing product queue");
+assert.strictEqual(sourceFamilyCoverage.totals.represented_products, 105, "source family coverage should include label-database enrichment");
+assert.strictEqual(sourceFamilyCoverage.totals.missing_products, 15, "source family coverage should expose the remaining missing product queue");
+assert.strictEqual(navigator.source_family_coverage?.totals?.missing_products, 15, "navigator should embed the remaining missing product queue");
 assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "starbucks_pumpkin_spice_latte"), "coverage queue should include Starbucks PSL");
 assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "pearl_milling_pancake_mix_original"), "coverage queue should include Pearl Milling");
+assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "nilla_wafers"), "Nilla Wafers should be represented by the label-database source-family lane");
 assert(sourceFamilyCoverage.missing_products.every((row) => row.coverage_status === "not_yet_represented_in_source_family"), "missing queue should not mix represented products");
 assert(sourceFamilyCoverage.missing_products.every((row) => row.representative_rows.length > 0), "missing queue should include source leads");
 assert(sourceFamilyCoverage.missing_products.every((row) => row.representative_rows.every((lead) => /^https?:/.test(lead.source_url))), "missing queue leads should stay source-link based");
@@ -170,6 +173,23 @@ assert(sourceFamilyCoverage.missing_capture_classes.candidate_panel_or_text_avai
 assert(sourceFamilyCoverage.missing_capture_classes.menu_component_source_needed >= 1, "coverage queue should classify menu-component candidates");
 assertPublicSafeJson(sourceFamilyCoveragePath);
 assertPublicSafeJson(navigatorPath);
+assertPublicSafeJson(labelDatabaseVisualIndexPath);
+
+assert.strictEqual(labelDatabaseVisualIndex.schema_version, 1, "label database visual index should be versioned");
+assert.strictEqual(labelDatabaseVisualIndex.source_family.id, "label-database-current-leads", "label database source-family id should be stable");
+assert.strictEqual(labelDatabaseVisualIndex.totals.products, 1, "label database lane should add one product in this slice");
+assert.strictEqual(labelDatabaseVisualIndex.totals.rows, 1, "label database lane should add one proof row in this slice");
+assert.strictEqual(labelDatabaseVisualIndex.totals.local_preview_available, 1, "label database lane should have a local private proof panel");
+const labelDatabaseRow = labelDatabaseVisualIndex.rows.find((row) => row.product_id === "nilla_wafers");
+assert(labelDatabaseRow, "label database lane should include Nilla Wafers");
+assert.strictEqual(labelDatabaseRow.proof_visual_basis, "label_database_source_text_proof_panel", "Nilla proof basis should remain claim-gated to source text");
+assert.strictEqual(labelDatabaseRow.ingredient_text_status, "label_database_candidate_needs_package_review", "Nilla label-database text should require package review");
+assert(labelDatabaseRow.ingredient_items.includes("High Fructose Corn Syrup"), "Nilla ingredient list should expose searchable ingredient items");
+assert(labelDatabaseRow.claim_boundary.includes("Package image review"), "Nilla claim boundary should require package image review");
+const labelDatabaseFamily = navigator.source_family_timeline?.families?.find((row) => row.id === "label-database-current-leads");
+assert(labelDatabaseFamily, "navigator should expose the label-database current leads lane");
+assert.strictEqual(labelDatabaseFamily.product_count, 1, "label-database lane should expose one product");
+assert(labelDatabaseFamily.products.some((row) => row.product_id === "nilla_wafers"), "navigator label-database lane should include Nilla Wafers");
 
 assert.strictEqual(productStoryIndex.schema_version, 1, "product story index should be versioned");
 assert.strictEqual(productStoryIndex.pilot_products.length, 10, "story index should keep the 10 pilot products");

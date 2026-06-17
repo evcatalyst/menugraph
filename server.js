@@ -21,10 +21,13 @@ const PRIVATE_FLICKR_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "fl
 const PRIVATE_FLICKR_MANIFEST_PATH = path.join(PRIVATE_FLICKR_ROOT, "latest-private-manifest.json");
 const PRIVATE_OFFICIAL_CURRENT_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "official-current-labels");
 const PRIVATE_OFFICIAL_CURRENT_MANIFEST_PATH = path.join(PRIVATE_OFFICIAL_CURRENT_ROOT, "latest-private-manifest.json");
+const PRIVATE_LABEL_DATABASE_ROOT = path.join(__dirname, ".cache", "ingredient-ocr", "label-database-current-leads");
+const PRIVATE_LABEL_DATABASE_MANIFEST_PATH = path.join(PRIVATE_LABEL_DATABASE_ROOT, "latest-private-manifest.json");
 const PRIVATE_INGREDIENT_MANIFESTS = [
   { manifestPath: PRIVATE_CWA_MANIFEST_PATH, rootDir: PRIVATE_CWA_ROOT },
   { manifestPath: PRIVATE_FLICKR_MANIFEST_PATH, rootDir: PRIVATE_FLICKR_ROOT },
   { manifestPath: PRIVATE_OFFICIAL_CURRENT_MANIFEST_PATH, rootDir: PRIVATE_OFFICIAL_CURRENT_ROOT },
+  { manifestPath: PRIVATE_LABEL_DATABASE_MANIFEST_PATH, rootDir: PRIVATE_LABEL_DATABASE_ROOT },
 ];
 const DATA_DIR = path.join(PUBLIC_DIR, "data");
 const DEFAULT_ASK_SECRET_HASH = "8f388ed94f5ff3d417b9b3f897bf9fc4d56a2d0dd6778905d8440a938558d30a";

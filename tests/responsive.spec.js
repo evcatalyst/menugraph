@@ -458,13 +458,13 @@ test("ingredient navigator renders CWA visual timeline without relying on public
 
   await expect(page.locator("#journey-status")).toContainText("Oreo");
   await expect(page.locator("#cwa-timeline-panel")).toBeVisible();
-  await expect(page.locator(".source-family-tab")).toHaveCount(3);
+  await expect(page.locator(".source-family-tab")).toHaveCount(4);
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
   await expect(page.locator("#source-family-gap-summary")).toBeHidden();
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Full-corpus capture queue");
-  await expect(page.locator("#source-family-coverage-summary")).toContainText("104/120 products represented");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("105/120 products represented");
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Starbucks Pumpkin Spice Latte");
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
@@ -637,6 +637,31 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   }));
   expect(sevenUpImageSize.width).toBeGreaterThan(sevenUpImageSize.height);
   await expect(sevenUpProofImage).toHaveCSS("transform", "none");
+
+  await page.locator(".source-family-tab").filter({ hasText: "Label Database Current Leads" }).click();
+  await expect(page.locator(".source-family-tab.is-selected")).toContainText("Label Database Current Leads");
+  await expect(page.locator("#source-family-timeline-title")).toContainText("Label Database Current Leads");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(1);
+  await expect(page.locator(".cwa-product-chip").first()).toContainText("Nilla Wafers");
+  await expect(page.locator("#source-family-filter-status")).toContainText("1 products");
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "label_database_source_text_proof_panel");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Unbleached Enriched Flour");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("High Fructose Corn Syrup");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Soy Lecithin");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Ingredient text candidate from a label database source']")).toBeVisible();
+  const labelDatabasePreview = page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame");
+  const labelDatabaseOverlay = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay");
+  await labelDatabasePreview.hover();
+  await expect(labelDatabaseOverlay).toContainText("Ingredient source text");
+  await expect(labelDatabaseOverlay).toContainText("Unbleached Enriched Flour");
+  await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
+  await expect(page.locator("#ingredient-drilldown")).toBeVisible();
+  await expect(page.locator("#ingredient-drilldown-title")).toContainText("Nilla Wafers");
+  await expect(page.locator("#ingredient-drilldown")).toContainText("Label database proof panel");
+  await expect(page.locator("#ingredient-drilldown")).toContainText("Package image review is required");
+  await expect(page.locator("#ingredient-drilldown")).toContainText("High Fructose Corn Syrup");
+  await page.keyboard.press("Escape");
 
   await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
