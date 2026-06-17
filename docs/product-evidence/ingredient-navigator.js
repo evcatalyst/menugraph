@@ -152,18 +152,18 @@ function ingredientOverlay(row) {
   if (!row.ingredient_text) {
     return `
       <div class="cwa-ingredient-overlay">
-        <span>Ingredient panel needed</span>
+        <span>Readable panel needed</span>
         <p>This source image supports visual lineage, but no readable ingredient panel has been captured for this row.</p>
       </div>
     `;
   }
 
   const items = splitIngredientText(row.ingredient_text);
-  const visibleItems = items.slice(0, 14);
+  const visibleItems = items.slice(0, 12);
   const overflowCount = Math.max(0, items.length - visibleItems.length);
   return `
-    <div class="cwa-ingredient-overlay">
-      <span>Ingredients on label</span>
+    <div class="cwa-ingredient-overlay has-ingredient-list">
+      <span>Label transcript</span>
       ${visibleItems.length
         ? `<ul class="cwa-overlay-ingredient-list">${visibleItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}
@@ -182,11 +182,13 @@ function ingredientTextBlock(row, options = {}) {
   const list = items.length
     ? `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
     : "";
+  const sourceLine = sourceText
+    ? `<p class="cwa-ingredient-source-line">${escapeHtml(sourceText)}</p>`
+    : "";
   return `
     <div class="cwa-ingredient-copy ${compact ? "is-compact" : ""}">
-      <span>${compact ? "Ingredient text" : "Readable ingredient text"}</span>
-      <p>${escapeHtml(sourceText)}</p>
-      ${list}
+      <span>${compact ? "Ingredients listed" : "Readable ingredient text"}</span>
+      ${compact ? `${list}${sourceLine}` : `${sourceLine}${list}`}
     </div>
   `;
 }
@@ -436,7 +438,9 @@ function renderCwaTimeline() {
     .join("");
 
   const localImages = isLocalPreviewHost();
-  els.cwaTimelineTrack.innerHTML = (productRow.rows || [])
+  const timelineRows = productRow.rows || [];
+  els.cwaTimelineTrack.classList.toggle("is-single-proof-row", timelineRows.length === 1);
+  els.cwaTimelineTrack.innerHTML = timelineRows
     .map((row, index) => {
       const canShowPreview = localImages && row.local_preview_available && row.preview_endpoint;
       const sourceLink = row.source_detail_url || row.source_url;
@@ -447,13 +451,15 @@ function renderCwaTimeline() {
           ? "Focused package text is visible; readable ingredient list still needed."
           : "Wrapper imagery can support visual provenance only; readable ingredient panel still needed.");
       const proofClass = ingredientText ? "has-ingredient-proof" : "needs-readable-panel";
+      const previewClass = ingredientText ? "has-transcript-overlay" : "needs-transcript-overlay";
       return `
         <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}">
-          <button class="cwa-preview-frame ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" aria-pressed="false" aria-label="${escapeHtml(`Toggle ingredient view for ${row.product_name} ${row.vintage_label}`)}">
+          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" aria-pressed="false" aria-label="${escapeHtml(`Toggle ingredient transcript for ${row.product_name} ${row.vintage_label}`)}">
             ${canShowPreview
               ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ingredient proof visual`)}" loading="lazy" data-private-preview="1" style="--crop-rotation:${escapeHtml(row.crop_rotation_degrees || 0)}deg" />`
               : ""}
             <div class="cwa-preview-placeholder"><span>${escapeHtml(String(row.vintage_label || "").slice(0, 4))}</span></div>
+            <span class="cwa-preview-lens" aria-hidden="true">${cwaInlineIcon(ingredientText ? "ingredient" : "inspect")}</span>
             ${ingredientOverlay(row)}
           </button>
           <div class="cwa-proof-row">

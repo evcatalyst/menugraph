@@ -426,7 +426,7 @@ a:hover {
 
 .cwa-timeline-track {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(430px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(520px, 100%), 1fr));
   gap: 12px;
   align-items: stretch;
   margin-top: 10px;
@@ -434,6 +434,10 @@ a:hover {
 
 .cwa-timeline-card {
   display: grid;
+  grid-template-areas:
+    "preview"
+    "proof"
+    "body";
   grid-template-rows: auto auto minmax(220px, 1fr);
   height: 100%;
   min-width: 0;
@@ -461,9 +465,10 @@ a:hover {
 
 .cwa-preview-frame {
   position: relative;
+  grid-area: preview;
   display: grid;
   width: 100%;
-  height: clamp(280px, 34vw, 520px);
+  height: clamp(320px, 36vw, 580px);
   place-items: center;
   border: 0;
   border-bottom: 1px solid var(--line);
@@ -475,6 +480,11 @@ a:hover {
   overflow: hidden;
   padding: 0;
   text-align: left;
+}
+
+.cwa-preview-frame:focus-visible {
+  outline: 2px solid rgba(101, 183, 177, 0.76);
+  outline-offset: -2px;
 }
 
 .cwa-preview-frame img {
@@ -506,16 +516,50 @@ a:hover {
   font-weight: 900;
 }
 
+.cwa-preview-lens {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: inline-grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 1px solid rgba(245, 240, 230, 0.28);
+  border-radius: 7px;
+  background: rgba(15, 18, 14, 0.72);
+  color: var(--teal);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
+}
+
+.cwa-preview-lens svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
 .cwa-ingredient-overlay {
   position: absolute;
-  inset: 0;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
   display: grid;
-  align-content: end;
-  gap: 9px;
-  padding: clamp(12px, 1.4vw, 20px);
-  background: linear-gradient(180deg, rgba(15, 18, 14, 0.04), rgba(15, 18, 14, 0.48) 30%, rgba(15, 18, 14, 0.96));
+  max-height: min(72%, 320px);
+  gap: 8px;
+  border: 1px solid rgba(245, 240, 230, 0.18);
+  border-radius: 8px;
+  background: rgba(15, 18, 14, 0.9);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.36);
   color: var(--ink);
   opacity: 0;
+  overflow: hidden;
+  padding: clamp(11px, 1.2vw, 16px);
   pointer-events: none;
   transition: opacity 140ms ease;
 }
@@ -559,7 +603,7 @@ a:hover {
   grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 6px 18px;
   width: 100%;
-  max-height: min(260px, 68%);
+  max-height: 230px;
   margin: 0;
   overflow: auto;
   padding: 0;
@@ -594,6 +638,7 @@ a:hover {
 }
 
 .cwa-card-body {
+  grid-area: body;
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr);
   align-content: stretch;
@@ -604,6 +649,7 @@ a:hover {
 }
 
 .cwa-proof-row {
+  grid-area: proof;
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -612,6 +658,40 @@ a:hover {
   border-bottom: 1px solid var(--line);
   background: rgba(15, 18, 14, 0.36);
   padding: 6px 8px;
+}
+
+@media (min-width: 1181px) {
+  .cwa-timeline-track.is-single-proof-row .cwa-timeline-card.has-ingredient-proof {
+    grid-template-columns: minmax(0, 1.18fr) minmax(340px, 0.82fr);
+    grid-template-rows: minmax(0, auto) auto;
+    grid-template-areas:
+      "preview body"
+      "proof body";
+  }
+
+  .cwa-timeline-track.is-single-proof-row .cwa-timeline-card.has-ingredient-proof .cwa-preview-frame {
+    height: clamp(420px, 40vw, 620px);
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .cwa-timeline-track.is-single-proof-row .cwa-timeline-card.has-ingredient-proof .cwa-proof-row {
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .cwa-timeline-track.is-single-proof-row .cwa-timeline-card.has-ingredient-proof .cwa-card-body {
+    max-height: calc(clamp(420px, 40vw, 620px) + 32px);
+    min-height: 0;
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+
+  .cwa-timeline-track.is-single-proof-row .cwa-timeline-card.has-ingredient-proof .cwa-ingredient-overlay {
+    top: 12px;
+    bottom: auto;
+    max-height: min(54%, 340px);
+  }
 }
 
 .cwa-card-body > span {
@@ -659,16 +739,17 @@ a:hover {
   text-transform: uppercase;
 }
 
-.cwa-ingredient-copy p {
+.cwa-ingredient-source-line {
+  margin: 0;
   color: var(--ink) !important;
 }
 
-.cwa-ingredient-copy.is-compact p {
+.cwa-ingredient-copy.is-compact .cwa-ingredient-source-line {
   display: -webkit-box;
   color: var(--muted) !important;
   font-size: 12px;
   line-height: 1.35;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -683,7 +764,7 @@ a:hover {
 
 .cwa-ingredient-copy.is-compact ul {
   grid-template-columns: minmax(0, 1fr);
-  max-height: 220px;
+  max-height: 250px;
   overflow: auto;
   padding-right: 6px;
   scrollbar-width: thin;
@@ -691,8 +772,8 @@ a:hover {
 
 .cwa-ingredient-copy li {
   color: var(--ink);
-  font-size: 11.5px;
-  line-height: 1.3;
+  font-size: 12px;
+  line-height: 1.32;
   overflow-wrap: anywhere;
 }
 
@@ -1741,6 +1822,22 @@ a:hover {
 
   .cwa-timeline-card {
     transform: none;
+  }
+
+  .cwa-preview-frame {
+    height: clamp(270px, 82vw, 420px);
+  }
+
+  .cwa-ingredient-overlay {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    max-height: 68%;
+  }
+
+  .cwa-overlay-ingredient-list {
+    grid-template-columns: 1fr;
+    max-height: 190px;
   }
 
   .cwa-ingredient-copy ul {

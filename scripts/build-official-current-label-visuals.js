@@ -255,6 +255,18 @@ const curatedRows = {
     source_detail_url: "https://www.pringles.com/en-us/products/pringles-the-original-product.html#ingredients",
     source_image_match_status: "official_current_product_page",
   },
+  "eggo_homestyle_waffles__current_2020s__626__4": {
+    ingredient_fragment_strategy: "kellanova_page",
+    source_detail_url: "https://www.leggomyeggo.com/en_US/eggo-homestyle-waffles-product.html#ingredients",
+    source_image_match_status: "official_current_product_page",
+  },
+  "lucky_charms__current_2020s__42__1": {
+    ingredient_fragment_strategy: "general_mills_marketing_page",
+    source_fetch_url: "https://www.luckycharms.com/products/lucky-charms-jumbo-rainbow",
+    source_url_override: "https://www.luckycharms.com/products/lucky-charms-jumbo-rainbow",
+    source_detail_url: "https://www.luckycharms.com/products/lucky-charms-jumbo-rainbow#ingredients",
+    source_image_match_status: "official_current_product_page",
+  },
   "chick_fil_a_chicken_sandwich__current_2020s__946__2": {
     ingredient_fragment_strategy: "official_json_ingredients",
     source_detail_url: "https://www.chick-fil-a.com/menu/entrees/chick-fil-a-chicken-sandwich/#ingredients",
@@ -1078,6 +1090,22 @@ function ingredientStatementFromGrapeNutsPage(html) {
     .replace(/[.;\s]+$/, "");
 }
 
+function ingredientStatementFromGeneralMillsMarketingPage(html) {
+  return statementBetween(visibleTextFromHtml(html), /\bIngredients\s+(Whole Grain\b|Enriched\b|Corn\b|Rice\b|Sugar\b|Wheat\b)/i, [
+    /\s+Does not contain declaration obligatory allergens/i,
+    /\s+Contains declaration obligatory allergens/i,
+    /\s+Allergens\s*\/\s*Disclaimers\b/i,
+    /\s+Nutrition Facts\b/i,
+    /\s+Benefits\s*\/\s*Consumer Statements\b/i,
+  ])
+    .replace(/\.\s+Contains 2% or less of:/i, ", Contains 2% or less of:")
+    .replace(/\.\s+Vitamin E\b/i, ", Vitamin E")
+    .replace(/\.\s+Vitamins and Minerals:/i, ", Vitamins and Minerals:")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[.;\s]+$/, "");
+}
+
 function statementsFromIngredientHeadings(text, endRegexes) {
   const source = String(text || "");
   const statements = [];
@@ -1156,6 +1184,9 @@ function ingredientStatementForStrategy(strategy, html, fragmentHtml) {
   }
   if (strategy === "grape_nuts_page") {
     return ingredientStatementFromGrapeNutsPage(html);
+  }
+  if (strategy === "general_mills_marketing_page") {
+    return ingredientStatementFromGeneralMillsMarketingPage(html);
   }
   if (strategy === "totinos_product_page") {
     return jsonStringValues(html, "ingredientDeclaration")[0]

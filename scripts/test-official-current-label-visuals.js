@@ -46,6 +46,7 @@ const expectedProducts = new Set([
   "miracle_whip_original",
   "cheerios_original",
   "honey_nut_cheerios",
+  "lucky_charms",
   "poptarts_frosted_strawberry",
   "poptarts_brown_sugar_cinnamon",
   "cheez_it_original",
@@ -57,6 +58,7 @@ const expectedProducts = new Set([
   "oscar_mayer_bologna",
   "kool_aid_cherry",
   "pringles_original",
+  "eggo_homestyle_waffles",
   "chick_fil_a_chicken_sandwich",
   "mms_milk_chocolate",
   "tootsie_roll",
@@ -124,6 +126,8 @@ const allowedOfficialHosts = new Set([
   "www.hiddenvalley.com",
   "www.jif.com",
   "www.kraftheinz.com",
+  "www.leggomyeggo.com",
+  "www.luckycharms.com",
   "www.mcdonalds.com",
   "www.mccormick.com",
   "www.milkywaybar.com",
@@ -167,11 +171,11 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 
 assert.strictEqual(visualIndex.schema_version, 1, "official-current visual index should be versioned");
 assert.strictEqual(visualIndex.source_family.id, "official-current-labels", "official-current source family id should be stable");
-assert.strictEqual(visualIndex.totals.products, 85, "official-current lane should cover 85 products");
-assert.strictEqual(visualIndex.totals.rows, 85, "official-current lane should cover 85 rows");
-assert.strictEqual(visualIndex.rows.length, 85, "official-current rows should match totals");
-assert.strictEqual(visualIndex.totals.local_preview_available, 85, "official-current lane should expose local proof previews");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 85, "official-current lane should expose 85 ingredient text candidates");
+assert.strictEqual(visualIndex.totals.products, 87, "official-current lane should cover 87 products");
+assert.strictEqual(visualIndex.totals.rows, 87, "official-current lane should cover 87 rows");
+assert.strictEqual(visualIndex.rows.length, 87, "official-current rows should match totals");
+assert.strictEqual(visualIndex.totals.local_preview_available, 87, "official-current lane should expose local proof previews");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 87, "official-current lane should expose 87 ingredient text candidates");
 assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 0, "official-current rows should have extracted source text");
 
 visualIndex.products.forEach((product) => {
@@ -217,6 +221,7 @@ const coolWhip = visualIndex.rows.find((row) => row.product_id === "cool_whip_or
 const miracleWhip = visualIndex.rows.find((row) => row.product_id === "miracle_whip_original");
 const cheerios = visualIndex.rows.find((row) => row.product_id === "cheerios_original");
 const honeyNutCheerios = visualIndex.rows.find((row) => row.product_id === "honey_nut_cheerios");
+const luckyCharms = visualIndex.rows.find((row) => row.product_id === "lucky_charms");
 const popTartsStrawberry = visualIndex.rows.find((row) => row.product_id === "poptarts_frosted_strawberry");
 const popTartsBrownSugar = visualIndex.rows.find((row) => row.product_id === "poptarts_brown_sugar_cinnamon");
 const cheezIt = visualIndex.rows.find((row) => row.product_id === "cheez_it_original");
@@ -228,6 +233,7 @@ const philadelphia = visualIndex.rows.find((row) => row.product_id === "philadel
 const oscarMayer = visualIndex.rows.find((row) => row.product_id === "oscar_mayer_bologna");
 const koolAid = visualIndex.rows.find((row) => row.product_id === "kool_aid_cherry");
 const pringles = visualIndex.rows.find((row) => row.product_id === "pringles_original");
+const eggo = visualIndex.rows.find((row) => row.product_id === "eggo_homestyle_waffles");
 const chickFilA = visualIndex.rows.find((row) => row.product_id === "chick_fil_a_chicken_sandwich");
 const mms = visualIndex.rows.find((row) => row.product_id === "mms_milk_chocolate");
 const tootsie = visualIndex.rows.find((row) => row.product_id === "tootsie_roll");
@@ -292,6 +298,10 @@ assert(coolWhip.ingredient_text.includes("HYDROGENATED VEGETABLE OIL"), "Cool Wh
 assert(miracleWhip.ingredient_text.includes("SOYBEAN OIL"), "Miracle Whip current label should expose source ingredient text");
 assert(cheerios.ingredient_text.includes("Whole Grain Oats"), "Cheerios current label should expose source ingredient text");
 assert(honeyNutCheerios.ingredient_text.includes("Natural Almond Flavor"), "Honey Nut Cheerios current label should expose source ingredient text");
+assert(luckyCharms.ingredient_text.includes("Whole Grain Oats"), "Lucky Charms current label should expose source ingredient text");
+assert(luckyCharms.ingredient_text.includes("Trisodium Phosphate"), "Lucky Charms current label should expose source ingredient text");
+assert(luckyCharms.ingredient_text.includes("Vitamin D3"), "Lucky Charms current label should expose vitamins/minerals text");
+assert.strictEqual(luckyCharms.source_url, "https://www.luckycharms.com/products/lucky-charms-jumbo-rainbow", "Lucky Charms should use the current canonical official product URL");
 assert(popTartsStrawberry.ingredient_text.includes("dried strawberries"), "Pop-Tarts Strawberry current label should expose source ingredient text");
 assert(popTartsBrownSugar.ingredient_text.includes("cinnamon"), "Pop-Tarts Brown Sugar Cinnamon current label should expose source ingredient text");
 assert(cheezIt.ingredient_text.includes("cheese made with skim milk"), "Cheez-It current label should expose source ingredient text");
@@ -303,6 +313,9 @@ assert(philadelphia.ingredient_text.includes("PASTEURIZED MILK AND CREAM"), "Phi
 assert(oscarMayer.ingredient_text.includes("MECHANICALLY SEPARATED CHICKEN"), "Oscar Mayer current label should expose source ingredient text");
 assert(koolAid.ingredient_text.includes("CITRIC ACID"), "Kool-Aid current label should expose source ingredient text");
 assert(pringles.ingredient_text.includes("DRIED POTATOES"), "Pringles current label should expose source ingredient text");
+assert(eggo.ingredient_text.includes("Enriched flour"), "Eggo Homestyle Waffles current label should expose source ingredient text");
+assert(eggo.ingredient_text.includes("soy lecithin"), "Eggo Homestyle Waffles current label should expose source ingredient text");
+assert(eggo.ingredient_text.includes("Calcium carbonate"), "Eggo Homestyle Waffles current label should expose vitamins/minerals text");
 assert(chickFilA.ingredient_text.includes("boneless, skinless chicken breast"), "Chick-fil-A current label should expose source ingredient text");
 assert(chickFilA.ingredient_text.includes("monosodium glutamate"), "Chick-fil-A current label should expose source ingredient text");
 assert(mms.ingredient_text.includes("Milk chocolate"), "M&M's current label should expose source ingredient text");
@@ -422,19 +435,19 @@ assert(mcnuggets.ingredient_text.includes("Enriched Flour"), "McNuggets current 
 
 const family = navigator.source_family_timeline?.families?.find((row) => row.id === "official-current-labels");
 assert(family, "navigator should expose the official-current source-family timeline");
-assert.strictEqual(family.product_count, 85, "navigator official-current timeline should cover 85 products");
-assert.strictEqual(family.row_count, 85, "navigator official-current timeline should cover 85 rows");
-assert.strictEqual(family.ingredient_signal_count, 85, "navigator official-current timeline should expose candidate count");
+assert.strictEqual(family.product_count, 87, "navigator official-current timeline should cover 87 products");
+assert.strictEqual(family.row_count, 87, "navigator official-current timeline should cover 87 rows");
+assert.strictEqual(family.ingredient_signal_count, 87, "navigator official-current timeline should expose candidate count");
 assert(family.products.every((product) => expectedProducts.has(product.product_id)), "navigator official-current timeline has unexpected products");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "official-current-labels");
 assert(summaryFamily, "navigator source-family summary should expose official-current labels");
-assert.strictEqual(summaryFamily.product_count, 85, "official-current summary should cover 85 products");
+assert.strictEqual(summaryFamily.product_count, 87, "official-current summary should cover 87 products");
 assert(summaryFamily.products.every((product) => product.ingredient_panel_visible_count === 1), "official-current summary should reflect current ingredient text candidates");
 
 if (fs.existsSync(privateManifestPath)) {
   const privateManifest = JSON.parse(fs.readFileSync(privateManifestPath, "utf8"));
-  assert.strictEqual(privateManifest.rows.length, 85, "official-current private manifest should have 85 rows");
+  assert.strictEqual(privateManifest.rows.length, 87, "official-current private manifest should have 87 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
   assert(hiddenValleyPrivate.ingredient_label_image_path && fs.existsSync(hiddenValleyPrivate.ingredient_label_image_path), "Hidden Valley private manifest should retain the local label-panel image");

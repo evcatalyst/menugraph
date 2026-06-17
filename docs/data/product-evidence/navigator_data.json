@@ -8165,9 +8165,9 @@
         "strategy": "official_current_ingredient_fragments",
         "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
         "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
-        "evidence_row_count": 85,
-        "product_count": 85,
-        "top_domains": "order.wendys.com; smartlabel.conagra.com; smartlabel.congra.net; smartlabel.hersheys.com; smartlabel.hormelfoods.com; smartlabel.kelloggs.com; smartlabel.mondelez.info; smartlabel.pepsico.info; smartlabel.unileverusa.com; smartlabel.wkkellogg.com; tootsie.com; wheaties.com; www.bettycrocker.com; www.butterfinger.com; www.campbells.com; www.campbellsfoodservice.com; www.cheerios.com; www.cheezit.com; www.chick-fil-a.com; www.coca-cola.com; www.generalmillsconvenience.com; www.goodnes.com; www.grapenuts.com; www.hamburgerhelper.com; www.heinz.com; www.hiddenvalley.com; www.jif.com; www.kraftheinz.com; www.mccormick.com; www.mcdonalds.com; www.milkywaybar.com; www.mms.com; www.nutella.com; www.oscarmayer.com; www.paneraathome.com; www.pepperidgefarm.com; www.pillsbury.com; www.poptarts.com; www.pringles.com; www.skittles.com; www.smuckers.com; www.starburst.com; www.totinos.com; www.twix.com; www.tysonfoodservice.com",
+        "evidence_row_count": 87,
+        "product_count": 87,
+        "top_domains": "order.wendys.com; smartlabel.conagra.com; smartlabel.congra.net; smartlabel.hersheys.com; smartlabel.hormelfoods.com; smartlabel.kelloggs.com; smartlabel.mondelez.info; smartlabel.pepsico.info; smartlabel.unileverusa.com; smartlabel.wkkellogg.com; tootsie.com; wheaties.com; www.bettycrocker.com; www.butterfinger.com; www.campbells.com; www.campbellsfoodservice.com; www.cheerios.com; www.cheezit.com; www.chick-fil-a.com; www.coca-cola.com; www.generalmillsconvenience.com; www.goodnes.com; www.grapenuts.com; www.hamburgerhelper.com; www.heinz.com; www.hiddenvalley.com; www.jif.com; www.kraftheinz.com; www.leggomyeggo.com; www.luckycharms.com; www.mccormick.com; www.mcdonalds.com; www.milkywaybar.com; www.mms.com; www.nutella.com; www.oscarmayer.com; www.paneraathome.com; www.pepperidgefarm.com; www.pillsbury.com; www.poptarts.com; www.pringles.com; www.skittles.com; www.smuckers.com; www.starburst.com; www.totinos.com; www.twix.com; www.tysonfoodservice.com",
         "gap_categories": "panel_capture_needed",
         "products": [
           {
@@ -8469,6 +8469,24 @@
             ],
             "source_urls": [
               "https://smartlabel.pepsico.info/028400017305-0007-en-US/index.html"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "review_current_official_label_against_package_panel",
+            "vintage_count": 1
+          },
+          {
+            "product_id": "eggo_homestyle_waffles",
+            "product_name": "Eggo Homestyle Waffles",
+            "brand": "Eggo",
+            "category": "frozen foods",
+            "evidence_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "source_urls": [
+              "https://www.leggomyeggo.com/en_US/eggo-homestyle-waffles-product.html"
             ],
             "ingredient_panel_visible_count": 1,
             "local_image_ready_count": 1,
@@ -8865,6 +8883,24 @@
             ],
             "source_urls": [
               "https://smartlabel.pepsico.info/030000063545-0021-en-US/index.html"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "review_current_official_label_against_package_panel",
+            "vintage_count": 1
+          },
+          {
+            "product_id": "lucky_charms",
+            "product_name": "Lucky Charms",
+            "brand": "Lucky Charms",
+            "category": "cereal",
+            "evidence_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "source_urls": [
+              "https://www.luckycharms.com/products/lucky-charms-jumbo-rainbow"
             ],
             "ingredient_panel_visible_count": 1,
             "local_image_ready_count": 1,
@@ -9916,7 +9952,7 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T04:16:12.188Z",
+    "generated_at_utc": "2026-06-17T04:45:25.863Z",
     "default_family": "official-current-labels",
     "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
     "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
@@ -11657,10 +11693,10 @@
       {
         "id": "official-current-labels",
         "label": "Official Current Labels",
-        "row_count": 85,
-        "product_count": 85,
-        "local_preview_available_count": 85,
-        "ingredient_signal_count": 85,
+        "row_count": 87,
+        "product_count": 87,
+        "local_preview_available_count": 87,
+        "ingredient_signal_count": 87,
         "products": [
           {
             "product_id": "ball_park_franks",
@@ -12589,6 +12625,61 @@
                 "ingredient_text_source": "official_current_label_fragment",
                 "ingredient_text_status": "official_current_label_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: Corn, Vegetable Oil, Corn Oil, And/Or Canola Oil, And/Or Soybean Oil, And/Or Sunflower Oil, Corn Maltodextrin, And Less Than 2% Of:, Cheddar Cheese, Milk, Cheese Cultures, Salt, Enzymes, Whey, Monosodium Glutamate, Buttermilk,...",
+                "candidate_status": "ingredient_text_candidate_needs_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "source_fragment_ready",
+                "source_candidate_image_count": 1,
+                "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
+              }
+            ]
+          },
+          {
+            "product_id": "eggo_homestyle_waffles",
+            "product_name": "Eggo Homestyle Waffles",
+            "brand": "Eggo",
+            "category": "frozen foods",
+            "source_family": "official-current-labels",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "rows": [
+              {
+                "product_id": "eggo_homestyle_waffles",
+                "product_name": "Eggo Homestyle Waffles",
+                "brand": "Eggo",
+                "category": "frozen foods",
+                "vintage_label": "current_2020s",
+                "vintage_start": "2020-01-01",
+                "vintage_end": "",
+                "evidence_id": "eggo_homestyle_waffles__current_2020s__626__4",
+                "ocr_priority": "high",
+                "ocr_gap_category": "panel_capture_needed",
+                "source_domain": "www.leggomyeggo.com",
+                "source_url": "https://www.leggomyeggo.com/en_US/eggo-homestyle-waffles-product.html",
+                "source_title": "Eggo® Homestyle Waffles",
+                "source_owner": "Eggo / Kellanova",
+                "rights_note": "",
+                "visual_id": "eggo_homestyle_waffles__current_2020s__fb492d7fd6",
+                "preview_endpoint": "/api/private/ingredient-crops/eggo_homestyle_waffles__current_2020s__fb492d7fd6",
+                "visual_status": "local_ingredient_crop_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "ingredient_source_fragment_ready",
+                "source_image_title": "Eggo® Homestyle Waffles",
+                "source_image_year": "2020",
+                "source_detail_url": "https://www.leggomyeggo.com/en_US/eggo-homestyle-waffles-product.html#ingredients",
+                "source_image_match_status": "official_current_product_page",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Ingredients: Enriched flour (wheat flour, niacin, reduced iron, vitamin B1 [thiamin mononitrate], vitamin B2 [riboflavin], folic acid), water, sugar, vegetable oil (soybean, palm, canola and/or cottonseed), contains 2% or less of leavening (baking soda, sodium aluminum phosphate, monocalcium phosphate), fructose, salt, spice, soy lecithin, whey, eggs. Vitamins and Minerals: Calcium carbonate, vitamin A palmitate, iron, vitamin B12, vitamin B6 (pyridoxine hydrochloride).",
+                "ingredient_text_source": "official_current_product_page_text",
+                "ingredient_text_status": "official_current_label_candidate_needs_review",
+                "candidate_excerpt": "Ingredients: Enriched flour (wheat flour, niacin, reduced iron, vitamin B1 [thiamin mononitrate], vitamin B2 [riboflavin], folic acid), water, sugar, vegetable oil (soybean, palm, canola and/or cottonseed), contains 2% or less of leavening...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "source_fragment_ready",
@@ -13799,6 +13890,61 @@
                 "ingredient_text_source": "official_current_label_fragment",
                 "ingredient_text_status": "official_current_label_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: Whole Grain Oat Flour, Corn Flour, Sugar, Whole Wheat Flour, Calcium Carbonate, Salt, Baking Soda, Tocopherols (To Preserve Freshness), Reduced Iron, Niacinamide*, Annatto (Color), Thiamine Mononitrate*, Pyridoxine Hydrochlori...",
+                "candidate_status": "ingredient_text_candidate_needs_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "source_fragment_ready",
+                "source_candidate_image_count": 1,
+                "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
+              }
+            ]
+          },
+          {
+            "product_id": "lucky_charms",
+            "product_name": "Lucky Charms",
+            "brand": "Lucky Charms",
+            "category": "cereal",
+            "source_family": "official-current-labels",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "rows": [
+              {
+                "product_id": "lucky_charms",
+                "product_name": "Lucky Charms",
+                "brand": "Lucky Charms",
+                "category": "cereal",
+                "vintage_label": "current_2020s",
+                "vintage_start": "2020-01-01",
+                "vintage_end": "",
+                "evidence_id": "lucky_charms__current_2020s__42__1",
+                "ocr_priority": "high",
+                "ocr_gap_category": "panel_capture_needed",
+                "source_domain": "www.luckycharms.com",
+                "source_url": "https://www.luckycharms.com/products/lucky-charms-jumbo-rainbow",
+                "source_title": "Lucky Charms™ Jumbo Rainbow",
+                "source_owner": "www.luckycharms.com",
+                "rights_note": "",
+                "visual_id": "lucky_charms__current_2020s__9928e4524a",
+                "preview_endpoint": "/api/private/ingredient-crops/lucky_charms__current_2020s__9928e4524a",
+                "visual_status": "local_ingredient_crop_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "ingredient_source_fragment_ready",
+                "source_image_title": "Lucky Charms™ Jumbo Rainbow",
+                "source_image_year": "2020",
+                "source_detail_url": "https://www.luckycharms.com/products/lucky-charms-jumbo-rainbow#ingredients",
+                "source_image_match_status": "official_current_product_page",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Ingredients: Whole Grain Oats, Sugar, Whole Grain Corn, Corn Starch, Corn Syrup, Dextrose, Contains 2% or less of: Salt, Modified Corn Starch, Gelatin, Trisodium Phosphate, Red 40, Yellow 5 & 6, Blue 1, Natural and Artificial Flavor, Vitamin E (mixed tocopherols) Added to Preserve Freshness, Vitamins and Minerals: Calcium Carbonate, Vitamin C (sodium ascorbate), Iron and Zinc (mineral nutrients), A B Vitamin (niacinamide), Vitamin B6 (pyridoxine hydrochloride), Vitamin B1 (thiamin mononitrate), Vitamin A (palmitate), Vitamin B2 (riboflavin), A B Vitamin (folic acid), Vitamin B12, Vitamin D3.",
+                "ingredient_text_source": "official_current_product_page_text",
+                "ingredient_text_status": "official_current_label_candidate_needs_review",
+                "candidate_excerpt": "Ingredients: Whole Grain Oats, Sugar, Whole Grain Corn, Corn Starch, Corn Syrup, Dextrose, Contains 2% or less of: Salt, Modified Corn Starch, Gelatin, Trisodium Phosphate, Red 40, Yellow 5 & 6, Blue 1, Natural and Artificial Flavor, Vitam...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "source_fragment_ready",
