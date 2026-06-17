@@ -471,6 +471,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   const defaultProofCard = await page.locator(".cwa-timeline-card").first().boundingBox();
   expect(defaultProofCard?.width || 0).toBeGreaterThan(900);
   await expect(page.locator(".cwa-timeline-card").first()).toHaveCSS("transform", "none");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame img")).toHaveCSS("transform", "none");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-preview-lens")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label^='Open source']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open local private crop']")).toBeVisible();
@@ -499,6 +500,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-card-links")).not.toContainText(/Local crop|Inspect|candywrapperarchive/i);
   await expect(page.locator(".cwa-timeline-card a").first()).toHaveAttribute("href", /candywrapperarchive\.com/);
   await expect(page.locator(".cwa-timeline-card").nth(1)).toHaveCSS("transform", "none");
+  await expect(page.locator(".cwa-timeline-card").nth(1).locator(".cwa-preview-frame img")).toHaveCSS("transform", "none");
 
   await page.locator(".cwa-timeline-card").nth(1).locator(".cwa-preview-frame").click();
   await expect(page.locator(".cwa-timeline-card").nth(1)).toHaveClass(/is-ingredient-open/);
@@ -540,6 +542,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#ingredient-drilldown")).toContainText("partially hydrogenated vegetable oil");
   await expect(page.locator("#ingredient-drilldown")).toContainText("Claim Boundary");
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-image img, #ingredient-drilldown .ingredient-drilldown-placeholder")).toBeVisible();
+  const drilldownImage = page.locator("#ingredient-drilldown .ingredient-drilldown-image img");
+  if (await drilldownImage.count()) {
+    await expect(drilldownImage).toHaveCSS("transform", "none");
+  }
   await page.locator(".ingredient-drilldown-close").click();
   await expect(page.locator("#ingredient-drilldown")).toBeHidden();
 

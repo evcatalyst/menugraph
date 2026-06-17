@@ -283,12 +283,6 @@ function statusDetail(row) {
   return parts.join(" · ");
 }
 
-function drilldownPreviewStyle(row) {
-  const rotation = Number(row.crop_rotation_degrees || 0);
-  const rotateScale = Math.abs(rotation) % 180 === 90 ? 0.72 : 1;
-  return `--crop-rotation:${escapeHtml(rotation)}deg;--drilldown-rotate-scale:${escapeHtml(rotateScale)}`;
-}
-
 function drilldownPlaceholder(row, label = "Local crop unavailable") {
   return `<div class="ingredient-drilldown-placeholder"><strong>${escapeHtml(String(row.vintage_label || "").slice(0, 4))}</strong><span>${escapeHtml(label)}</span></div>`;
 }
@@ -314,7 +308,7 @@ function renderIngredientDrilldown(row) {
     <div class="ingredient-drilldown-layout">
       <div class="ingredient-drilldown-image ${canShowPreview ? "has-private-preview" : ""}">
         ${canShowPreview
-          ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ingredient crop`)}" style="${drilldownPreviewStyle(row)}" />`
+          ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ingredient crop`)}" />`
           : drilldownPlaceholder(row)}
       </div>
       <div class="ingredient-drilldown-copy">
@@ -495,7 +489,7 @@ function renderCwaTimeline() {
         <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}" data-proof-basis="${escapeHtml(visualBasis)}">
           <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" aria-pressed="false" aria-label="${escapeHtml(`Toggle ingredient proof text for ${row.product_name} ${row.vintage_label}`)}">
             ${canShowPreview
-              ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ${proofVisualLabel(row).toLowerCase()}`)}" loading="lazy" data-private-preview="1" style="--crop-rotation:${escapeHtml(row.crop_rotation_degrees || 0)}deg" />`
+              ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ${proofVisualLabel(row).toLowerCase()}`)}" loading="lazy" data-private-preview="1" />`
               : ""}
             <div class="cwa-preview-placeholder"><span>${escapeHtml(String(row.vintage_label || "").slice(0, 4))}</span></div>
             <span class="cwa-preview-lens" aria-hidden="true">${cwaInlineIcon(ingredientText ? "ingredient" : "inspect")}</span>
