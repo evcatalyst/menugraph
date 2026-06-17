@@ -667,7 +667,13 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(focusedGapCard).toContainText("Kit Kat Bar");
   await expect(focusedGapCard.locator(".cwa-preview-frame")).toHaveAttribute("aria-pressed", "true");
   await expect(focusedGapCard.locator(".cwa-ingredient-overlay")).toHaveCSS("opacity", "1");
-  await expect(focusedGapCard.locator(".cwa-ingredient-overlay")).toContainText("Readable panel still needed");
+  await expect(focusedGapCard.locator(".cwa-ingredient-overlay")).toContainText("Partial ingredient strip");
+  await expect(focusedGapCard.locator(".cwa-ingredient-overlay")).toContainText("palm kernel oil");
+  await expect(focusedGapCard.locator(".cwa-ingredient-overlay")).toContainText("sodium bicarbonate");
+  await expect(focusedGapCard.locator(".cwa-ingredient-overlay")).toContainText("visible terms need full transcription");
+  await expect(focusedGapCard.locator(".cwa-label-reader.needs-readable-panel")).toContainText("11 visible terms");
+  await expect(focusedGapCard.locator(".cwa-visible-ingredient-list .ingredient-proof-list-item")).toHaveCount(11);
+  await expect(focusedGapCard.locator(".cwa-label-reader.needs-readable-panel")).toContainText("artificial and natural flavours");
   await page.locator(".cwa-product-chip").first().click();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();

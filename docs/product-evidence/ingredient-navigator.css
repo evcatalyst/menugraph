@@ -1725,6 +1725,10 @@ a:hover {
   border-left-color: rgba(101, 183, 177, 0.95);
 }
 
+.cwa-ingredient-overlay.has-visible-terms {
+  max-height: min(58%, 340px);
+}
+
 .cwa-ingredient-overlay::before {
   content: "";
   position: absolute;
@@ -2219,6 +2223,28 @@ a:hover {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.cwa-visible-ingredient-list,
+.cwa-overlay-ingredient-list.is-visible-terms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(132px, 100%), 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cwa-visible-ingredient-list .ingredient-proof-list-item,
+.cwa-overlay-ingredient-list.is-visible-terms .ingredient-proof-list-item {
+  border: 1px solid rgba(212, 173, 87, 0.24);
+  border-left: 2px solid rgba(212, 173, 87, 0.64);
+  border-radius: 4px;
+  background: rgba(212, 173, 87, 0.08);
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.18;
+  padding: 4px 5px;
 }
 
 .cwa-timeline-card.is-ingredient-open .cwa-ingredient-copy.is-compact .cwa-ingredient-source-line {

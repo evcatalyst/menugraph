@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-06-17T16:01:59.699Z",
+  "generated_at_utc": "2026-06-17T16:47:25.988Z",
   "public_image_policy": "Gap worklist exposes source URLs, local preview endpoint IDs, status, and collection criteria only. Private screenshots, crop files, OCR dumps, and absolute local paths stay out of this artifact.",
   "claim_policy": "Rows without ingredient text are collection targets only. They do not promote ingredient, formulation, or historical-change claims.",
   "totals": {

@@ -88,6 +88,8 @@ visualIndex.rows.forEach((row) => {
     assert.strictEqual(row.ingredient_text, "", `${row.evidence_id} partial row should not publish a full ingredient transcript`);
     assert(Array.isArray(row.ingredient_items) && row.ingredient_items.length === 0, `${row.evidence_id} partial row should not expose structured ingredient items`);
     assert.strictEqual(row.ingredient_item_count, 0, `${row.evidence_id} partial row ingredient item count should remain zero`);
+    assert(Array.isArray(row.visible_ingredient_items) && row.visible_ingredient_items.length >= 5, `${row.evidence_id} partial row should expose visible label terms separately`);
+    assert.strictEqual(row.visible_ingredient_item_count, row.visible_ingredient_items.length, `${row.evidence_id} visible term count should match term array`);
     assert.strictEqual(row.ingredient_text_status, "partial_ingredient_panel_needs_full_transcription", `${row.evidence_id} partial row should require full transcription`);
     assert.strictEqual(row.crop_focus, "ingredient_text", `${row.evidence_id} partial row should still use an ingredient-strip crop`);
     assert(row.candidate_excerpt.includes("Partial ingredient strip visible"), `${row.evidence_id} partial row should explain the visible ingredient strip`);
@@ -125,6 +127,9 @@ assert.strictEqual(kitKatEarliest.ingredient_signal_status, "partial_ingredient_
 assert.strictEqual(kitKatEarliest.proof_visual_basis, "archive_partial_ingredient_label_crop", "earliest Kit Kat should not be promoted as a full ingredient proof");
 assert.strictEqual(kitKatEarliest.preview_render_variant, "upscaled_crop", "earliest Kit Kat should render the focused upscaled strip crop locally");
 assert.strictEqual(Number(kitKatEarliest.crop_rotation_degrees), 270, "earliest Kit Kat ingredient strip should be rotated upright");
+assert(kitKatEarliest.visible_ingredient_items.includes("palm kernel oil"), "earliest Kit Kat visible terms should include palm kernel oil");
+assert(kitKatEarliest.visible_ingredient_items.includes("sodium bicarbonate"), "earliest Kit Kat visible terms should include sodium bicarbonate");
+assert.strictEqual(kitKatEarliest.ingredient_items.length, 0, "earliest Kit Kat visible terms must not become full structured ingredients");
 
 assert.deepStrictEqual(
   navigator.product_index.map((row) => row.id),

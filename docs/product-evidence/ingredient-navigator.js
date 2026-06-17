@@ -256,6 +256,15 @@ function ingredientItemsForRow(row) {
   return splitIngredientText(row?.ingredient_text || "");
 }
 
+function visibleIngredientItemsForRow(row) {
+  if (Array.isArray(row?.visible_ingredient_items) && row.visible_ingredient_items.length) {
+    return row.visible_ingredient_items
+      .map((item) => String(item || "").replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 function ingredientMatchesActiveFilter(item, query = sourceFamilyFilterQuery()) {
   return Boolean(query && ingredientTrendKey(item).includes(query));
 }
@@ -339,12 +348,16 @@ function ingredientOverlayMeta(row) {
 
 function ingredientOverlay(row) {
   if (!row.ingredient_text) {
+    const visibleItems = visibleIngredientItemsForRow(row);
     return `
-      <div class="cwa-ingredient-overlay is-missing-text" aria-label="Readable ingredient proof status">
+      <div class="cwa-ingredient-overlay is-missing-text ${visibleItems.length ? "has-visible-terms" : ""}" aria-label="Readable ingredient proof status">
         <span>${escapeHtml(missingProofTitle(row))}</span>
+        ${visibleItems.length
+          ? `<ul class="cwa-overlay-ingredient-list is-visible-terms">${visibleItems.map((item) => ingredientProofListItem(item, { truncate: 90 })).join("")}</ul>`
+          : ""}
         <p>${escapeHtml(missingProofMessage(row))}</p>
         ${ingredientOverlayMeta(row)}
-        <em>Readable panel still needed</em>
+        <em>${escapeHtml(visibleItems.length ? `${visibleItems.length} visible ${visibleItems.length === 1 ? "term needs" : "terms need"} full transcription` : "Readable panel still needed")}</em>
       </div>
     `;
   }
@@ -405,15 +418,19 @@ function ingredientTextBlock(row, options = {}) {
 
 function missingIngredientTextBlock(row, fallbackText, options = {}) {
   const idAttr = options.id ? ` id="${escapeHtml(options.id)}"` : "";
+  const visibleItems = visibleIngredientItemsForRow(row);
   const sourceStatus = row.crop_focus === "panel_context"
     ? "package text crop"
-    : "visual lineage";
+    : visibleItems.length ? "partial label crop" : "visual lineage";
   return `
-    <div${idAttr} class="cwa-ingredient-copy is-compact cwa-label-reader needs-readable-panel">
+    <div${idAttr} class="cwa-ingredient-copy is-compact cwa-label-reader needs-readable-panel ${visibleItems.length ? "has-visible-terms" : ""}">
       <div class="cwa-label-reader-title">
         <span>${escapeHtml(missingProofTitle(row))}</span>
-        <small class="cwa-label-reader-meta">Readable panel needed · ${escapeHtml(sourceStatus)}</small>
+        <small class="cwa-label-reader-meta">${escapeHtml(visibleItems.length ? `${visibleItems.length} visible terms` : "Readable panel needed")} · ${escapeHtml(sourceStatus)}</small>
       </div>
+      ${visibleItems.length
+        ? `<ul class="cwa-visible-ingredient-list">${visibleItems.map((item) => ingredientProofListItem(item, { truncate: 80 })).join("")}</ul>`
+        : ""}
       <p>${escapeHtml(fallbackText)}</p>
     </div>
   `;

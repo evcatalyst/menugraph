@@ -74,6 +74,19 @@ const curatedIngredientReviews = {
     ingredient_signal_lines: [
       "Partial ingredient strip visible: begins with INGREDIENTS:- MILK CHOCOLATE EMULSIFIER; visible lines include SUGAR, FLOUR, WATER, PALM KERNEL OIL, HAZEL NUTS, COCOA LIQUOR, BUTTER, SODIUM BICARBONATE, YEAST, and ARTIFICIAL AND NATURAL FLAVOURS. Full transcription still needs a sharper or complete panel.",
     ],
+    visible_ingredient_items: [
+      "Milk chocolate emulsifier",
+      "sugar",
+      "flour",
+      "water",
+      "palm kernel oil",
+      "hazel nuts",
+      "cocoa liquor",
+      "butter",
+      "sodium bicarbonate",
+      "yeast",
+      "artificial and natural flavours",
+    ],
   },
   "kit_kat_bar__2000s__173__1": {
     source: "manual_visual_read_candidate",
@@ -909,6 +922,8 @@ function publicRowFor(row, visual, sourceCapture) {
     ingredient_text: visual.ingredient_text || "",
     ingredient_items: ingredientItems,
     ingredient_item_count: ingredientItems.length,
+    visible_ingredient_items: visual.visible_ingredient_items || [],
+    visible_ingredient_item_count: (visual.visible_ingredient_items || []).length,
     ingredient_text_source: visual.ingredient_text_source || "",
     ingredient_text_status: ingredientTextStatus,
     candidate_excerpt: shortText(visual.ingredient_text || (visual.ingredient_signal_lines || []).slice(0, 2).join(" "), 220),
@@ -1075,6 +1090,7 @@ async function build() {
       ingredient_text: "",
       ingredient_text_source: "",
       ingredient_signal_lines: [],
+      visible_ingredient_items: [],
       panel_context_lines: [],
       errors: [],
     };
@@ -1105,6 +1121,7 @@ async function build() {
         visual.ingredient_signal_lines = visual.ingredient_text
           ? [visual.ingredient_text]
           : curatedReview.ingredient_signal_lines || visual.ingredient_signal_lines;
+        visual.visible_ingredient_items = curatedReview.visible_ingredient_items || [];
       }
       const focus = curatedReview
         ? { box: curatedReview.crop_box, focus: curatedReview.crop_focus || "ingredient_text" }

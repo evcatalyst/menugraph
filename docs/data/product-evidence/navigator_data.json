@@ -10470,7 +10470,7 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T16:01:31.650Z",
+    "generated_at_utc": "2026-06-17T16:46:34.476Z",
     "default_family": "official-current-labels",
     "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots or crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
     "claim_policy": "Ingredient text remains candidate evidence until manually reviewed against source labeling and package context.",
@@ -10542,6 +10542,8 @@
                   "whites of eggs and salt"
                 ],
                 "ingredient_item_count": 8,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "White sugar, sweet milk chocolate, corn syrup, peanuts, milk condensed with sugar, coconut oil, malted milk, whites of eggs and salt.",
@@ -10602,6 +10604,8 @@
                   "natural and artificial flavors"
                 ],
                 "ingredient_item_count": 12,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Milk chocolate, peanuts, corn syrup, sugar, milk, butter, salt, egg whites, soybean oil, chocolate, lecithin, natural and artificial flavors.",
@@ -10658,6 +10662,8 @@
                   "propyl gallate to maintain freshness"
                 ],
                 "ingredient_item_count": 8,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin and artificial flavor), peanut butter (peanuts, salt, hydrogenated vegetable oil), monoglycerides, sugar, corn syrup, egg whites,...",
@@ -10717,6 +10723,8 @@
                   "natural and artificial flavors"
                 ],
                 "ingredient_item_count": 11,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), peanuts, corn syrup, sugar, milk, butter, partially hydrogenated soybean oil, salt, egg whites, chocolate, n...",
@@ -10795,6 +10803,8 @@
                   "artificial flavor"
                 ],
                 "ingredient_item_count": 12,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate_nearest_image",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
@@ -10855,6 +10865,8 @@
                   "artificial flavor"
                 ],
                 "ingredient_item_count": 12,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate_nearest_image",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
@@ -10915,6 +10927,8 @@
                   "artificial flavor"
                 ],
                 "ingredient_item_count": 12,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate_nearest_image",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powder, baking soda, soy...",
@@ -10975,6 +10989,8 @@
                   "artificial flavor"
                 ],
                 "ingredient_item_count": 12,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: milk chocolate (sugar, cocoa butter, chocolate, skim milk, lactose, milkfat, soy lecithin, PGPR, artificial flavor), sugar, enriched wheat flour, palm oil, corn syrup, skim milk, dextrose, salt, cocoa powde...",
@@ -11039,6 +11055,20 @@
                 "ingredient_text": "",
                 "ingredient_items": [],
                 "ingredient_item_count": 0,
+                "visible_ingredient_items": [
+                  "Milk chocolate emulsifier",
+                  "sugar",
+                  "flour",
+                  "water",
+                  "palm kernel oil",
+                  "hazel nuts",
+                  "cocoa liquor",
+                  "butter",
+                  "sodium bicarbonate",
+                  "yeast",
+                  "artificial and natural flavours"
+                ],
+                "visible_ingredient_item_count": 11,
                 "ingredient_text_source": "manual_visual_partial_ingredient_panel",
                 "ingredient_text_status": "partial_ingredient_panel_needs_full_transcription",
                 "candidate_excerpt": "Partial ingredient strip visible: begins with INGREDIENTS:- MILK CHOCOLATE EMULSIFIER; visible lines include SUGAR, FLOUR, WATER, PALM KERNEL OIL, HAZEL NUTS, COCOA LIQUOR, BUTTER, SODIUM BICARBONATE, YEAST, and ARTIFIC...",
@@ -11109,6 +11139,8 @@
                   "natural and artificial flavour"
                 ],
                 "ingredient_item_count": 13,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: milk chocolate (contains condensed milk, cocoa butter, chocolate, sugar, soya lecithin, natural and artificial flavour), sugar, flour, hydrogenated vegetable oil, chocolate, yeast, sodium bicarbonate, calci...",
@@ -11172,6 +11204,8 @@
                   "Allergy information: manufactured in a facility that processes peanuts"
                 ],
                 "ingredient_item_count": 15,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: sugar, wheat flour, cocoa butter, nonfat milk, chocolate, refined palm kernel oil, lactose (milk), milk fat. Contains 2% or less of: soy lecithin, PGPR (emulsifier), yeast, artificial flavor, salt, and sodi...",
@@ -11244,6 +11278,8 @@
                   "natural and artificial flavors"
                 ],
                 "ingredient_item_count": 8,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, condensed milk, cocoa, salt, lecithin, natural and artificial flavors.",
@@ -11301,6 +11337,8 @@
                   "natural and artificial flavors"
                 ],
                 "ingredient_item_count": 9,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, cocoa, condensed skim milk, whey powder, salt, vegetable lecithin, natural and artificial flavors.",
@@ -11358,6 +11396,8 @@
                   "natural and artificial flavors"
                 ],
                 "ingredient_item_count": 9,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: sugar, corn syrup, vegetable oil, cocoa, condensed skim milk, whey powder, salt, vegetable lecithin, natural and artificial flavors.",
@@ -11431,6 +11471,8 @@
                   "breakfast cocoa and salt"
                 ],
                 "ingredient_item_count": 9,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "White sugar, sweet milk chocolate, corn syrup, milk, sugar, malted milk, coconut oil, whites of eggs, breakfast cocoa and salt.",
@@ -11489,6 +11531,8 @@
                   "lecithin"
                 ],
                 "ingredient_item_count": 10,
+                "visible_ingredient_items": [],
+                "visible_ingredient_item_count": 0,
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Milk chocolate, sugar, corn syrup, malted milk, sweetened condensed whole milk, vegetable oil, egg whites, cocoa, salt, lecithin.",
@@ -21736,7 +21780,7 @@
   },
   "source_family_coverage": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T16:01:59.699Z",
+    "generated_at_utc": "2026-06-17T16:47:25.988Z",
     "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
     "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
     "totals": {
@@ -22015,7 +22059,7 @@
   },
   "source_family_gap_worklist": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T16:01:59.699Z",
+    "generated_at_utc": "2026-06-17T16:47:25.988Z",
     "public_path": "data/product-evidence/source_family_gap_worklist.json",
     "totals": {
       "rows": 11,
