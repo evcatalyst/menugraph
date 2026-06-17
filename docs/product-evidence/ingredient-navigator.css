@@ -1849,6 +1849,7 @@ a:hover {
 }
 
 .ingredient-filter-link {
+  appearance: none;
   display: inline;
   width: auto;
   border: 0;
@@ -1860,14 +1861,20 @@ a:hover {
   padding: 0;
   text-align: left;
   text-decoration: none;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .ingredient-filter-link:hover,
 .ingredient-filter-link:focus-visible {
   color: var(--teal);
-  outline: 0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-line: underline;
+}
+
+.ingredient-filter-link:focus-visible {
+  border-radius: 2px;
+  outline: 1px solid rgba(101, 183, 177, 0.72);
+  outline-offset: 2px;
 }
 
 .cwa-icon-row {

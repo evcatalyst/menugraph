@@ -652,6 +652,26 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(frootLoopsOverlay).toContainText("BHT added to maintain product freshness");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader")).toContainText("artificial coloring");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Ingredients");
+  const ingredientFilter = page.locator(".cwa-timeline-card").first().locator(".ingredient-filter-link").filter({ hasText: "artificial coloring" }).first();
+  const ingredientFilterBeforeHover = await ingredientFilter.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      fontSize: style.fontSize,
+      lineHeight: style.lineHeight,
+    };
+  });
+  await ingredientFilter.hover();
+  const ingredientFilterAfterHover = await ingredientFilter.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      fontSize: style.fontSize,
+      lineHeight: style.lineHeight,
+      textDecorationLine: style.textDecorationLine,
+    };
+  });
+  expect(ingredientFilterAfterHover.fontSize).toBe(ingredientFilterBeforeHover.fontSize);
+  expect(ingredientFilterAfterHover.lineHeight).toBe(ingredientFilterBeforeHover.lineHeight);
+  expect(ingredientFilterAfterHover.textDecorationLine).toContain("underline");
   await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
   await expect(page.locator("#ingredient-drilldown")).toBeVisible();
   await expect(page.locator("#ingredient-drilldown-title")).toContainText("Kellogg's Froot Loops");
