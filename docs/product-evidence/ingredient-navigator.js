@@ -512,6 +512,23 @@ function syncCwaPreviewButton(button, isOpen) {
   button.setAttribute("aria-label", cwaPreviewButtonLabel(button, isOpen));
 }
 
+function closeCwaPreviewButton(button) {
+  const card = button?.closest(".cwa-timeline-card");
+  if (!card) return;
+  card.classList.remove("is-ingredient-open", "is-ingredient-preview");
+  if (button.dataset.cwaVisualId && state.sourceFamilyGapVisualId === button.dataset.cwaVisualId) {
+    state.sourceFamilyGapVisualId = "";
+    card.classList.remove("is-gap-focus");
+  }
+  syncCwaPreviewButton(button, false);
+}
+
+function closeCwaPreviewButtons(exceptButton = null) {
+  els.cwaTimelineTrack?.querySelectorAll("[data-cwa-toggle]").forEach((button) => {
+    if (button !== exceptButton) closeCwaPreviewButton(button);
+  });
+}
+
 function qualityLabel(value) {
   return Number.isFinite(Number(value)) ? formatPct(value) : "Pending";
 }
@@ -1695,12 +1712,14 @@ function renderCwaTimeline() {
     button.addEventListener("blur", () => setCwaPreviewState(button, false));
     button.addEventListener("click", () => {
       const card = button.closest(".cwa-timeline-card");
-      const isOpen = card?.classList.toggle("is-ingredient-open") || false;
-      if (button.dataset.cwaVisualId && !isOpen && state.sourceFamilyGapVisualId === button.dataset.cwaVisualId) {
-        state.sourceFamilyGapVisualId = "";
-        card.classList.remove("is-gap-focus");
+      const willOpen = !card?.classList.contains("is-ingredient-open");
+      if (willOpen) {
+        closeCwaPreviewButtons(button);
+        card?.classList.add("is-ingredient-open");
+        syncCwaPreviewButton(button, true);
+      } else {
+        closeCwaPreviewButton(button);
       }
-      syncCwaPreviewButton(button, isOpen);
     });
   });
 }
@@ -2261,6 +2280,10 @@ function attachEvents() {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !els.ingredientDrilldown?.hidden) {
       closeIngredientDrilldown();
+      return;
+    }
+    if (event.key === "Escape") {
+      closeCwaPreviewButtons();
     }
   });
 }

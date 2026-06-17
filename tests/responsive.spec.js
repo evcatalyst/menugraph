@@ -624,6 +624,13 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(firstProofPreview).toHaveAttribute("aria-pressed", "true");
   await expect(firstProofPreview).toHaveAttribute("aria-label", /Hide ingredient proof text/);
   await expect(firstProofOverlay).toHaveCSS("opacity", "1");
+  await page.mouse.move(8, 8);
+  await expect(firstProofCard).toHaveClass(/is-ingredient-open/);
+  await expect(firstProofOverlay).toHaveCSS("opacity", "1");
+  await page.keyboard.press("Escape");
+  await expect(firstProofCard).not.toHaveClass(/is-ingredient-open/);
+  await expect(firstProofPreview).toHaveAttribute("aria-pressed", "false");
+  await expect(firstProofPreview).toHaveAttribute("aria-label", /Show ingredient proof text/);
   await defaultTranscript.locator("summary").click();
   await expect(defaultTranscript).toHaveAttribute("open", "");
   await expect(defaultTranscript.locator("p")).toContainText("hydrolyzed beef stock");
@@ -686,6 +693,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").nth(1).locator(".cwa-preview-frame img")).toHaveCSS("transform", "none");
 
   const archiveProofCard = page.locator(".cwa-timeline-card").nth(1);
+  const archiveFirstProofCard = page.locator(".cwa-timeline-card").first();
+  const archiveFirstProofPreview = archiveFirstProofCard.locator(".cwa-preview-frame");
   const archiveProofPreview = archiveProofCard.locator(".cwa-preview-frame");
   const archiveProofOverlay = archiveProofCard.locator(".cwa-ingredient-overlay");
   await archiveProofPreview.hover();
@@ -698,7 +707,12 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(archiveProofOverlay.locator(".cwa-overlay-proof-meta")).toContainText("Archive ingredient label crop");
   await page.mouse.move(8, 8);
   await expect(archiveProofCard).not.toHaveClass(/is-ingredient-preview/);
+  await archiveFirstProofPreview.click();
+  await expect(archiveFirstProofCard).toHaveClass(/is-ingredient-open/);
+  await expect(archiveFirstProofPreview).toHaveAttribute("aria-pressed", "true");
   await archiveProofPreview.click();
+  await expect(archiveFirstProofCard).not.toHaveClass(/is-ingredient-open/);
+  await expect(archiveFirstProofPreview).toHaveAttribute("aria-pressed", "false");
   await expect(archiveProofCard).toHaveClass(/is-ingredient-open/);
   await expect(archiveProofPreview).toHaveAttribute("aria-pressed", "true");
   await expect(archiveProofPreview).toHaveAttribute("aria-label", /Hide ingredient proof text/);

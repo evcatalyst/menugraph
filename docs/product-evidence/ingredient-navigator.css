@@ -1528,7 +1528,8 @@ a:hover {
 
 .cwa-timeline-card:hover,
 .cwa-timeline-card:focus-within,
-.cwa-timeline-card.is-ingredient-preview {
+.cwa-timeline-card.is-ingredient-preview,
+.cwa-timeline-card.is-ingredient-open {
   border-color: var(--gold);
   box-shadow: 0 0 0 1px rgba(212, 173, 87, 0.24);
 }
@@ -1921,6 +1922,11 @@ a:hover {
   border-color: rgba(101, 183, 177, 0.72);
   background: rgba(101, 183, 177, 0.18);
   color: var(--ink);
+}
+
+.cwa-preview-frame[aria-pressed="true"] {
+  border-bottom-color: rgba(101, 183, 177, 0.7);
+  box-shadow: inset 0 -3px 0 rgba(101, 183, 177, 0.52);
 }
 
 .cwa-card-body {
