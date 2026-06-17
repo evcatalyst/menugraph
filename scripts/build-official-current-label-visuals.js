@@ -113,6 +113,15 @@ const curatedRows = {
     source_detail_url: "https://smartlabel.hersheys.com/034000002467-0011-en-US/index.html#ingredients",
     source_image_match_status: "official_current_label_page",
   },
+  "reeses_peanut_butter_cups__current_2020s__35__1": {
+    ingredient_fragment_strategy: "smartlabel_fragment",
+    source_fetch_url: "https://smartlabel.hersheys.com/034000004409-0011-en-US/index.html",
+    source_url_override: "https://smartlabel.hersheys.com/034000004409-0011-en-US/index.html",
+    source_detail_url: "https://smartlabel.hersheys.com/034000004409-0011-en-US/index.html#ingredients",
+    source_title_override: "Reese's Peanut Butter Cups official SmartLabel page",
+    source_owner_override: "The Hershey Company",
+    source_image_match_status: "official_current_label_page",
+  },
   "hellmanns_mayonnaise_real__current_2020s__850__6": {
     ingredient_fragment_strategy: "smartlabel_fragment",
     source_detail_url: "https://smartlabel.unileverusa.com/048001213388-0001-en-US/index.html#ingredients",
@@ -247,6 +256,15 @@ const curatedRows = {
   "kool_aid_cherry__current_2020s__106__4": {
     ingredient_fragment_strategy: "kraft_heinz_json",
     source_detail_url: "https://www.kraftheinz.com/kool-aid/products/00043000953532-sugar-sweetened-cherry-artificially-flavored-powdered-soft-drink-mix#ingredients",
+    source_image_match_status: "official_current_product_page",
+  },
+  "jello_strawberry_gelatin__current_2020s__560__2": {
+    ingredient_fragment_strategy: "kraft_heinz_json",
+    source_fetch_url: "https://www.kraftheinz.com/jell-o/products/00043000200018-strawberry-gelatin-dessert-mix",
+    source_url_override: "https://www.kraftheinz.com/jell-o/products/00043000200018-strawberry-gelatin-dessert-mix",
+    source_detail_url: "https://www.kraftheinz.com/jell-o/products/00043000200018-strawberry-gelatin-dessert-mix#ingredients",
+    source_title_override: "Jell-O Strawberry Gelatin Dessert Mix official product page",
+    source_owner_override: "The Kraft Heinz Company",
     source_image_match_status: "official_current_product_page",
   },
   "pringles_original__current_2020s__996__7": {
@@ -491,6 +509,28 @@ const curatedRows = {
     source_image_url: "https://app.wendys.com/unified/assets/menu/cropped/29_large_US_en.png",
     source_image_match_status: "official_current_product_page",
   },
+  "taco_bell_crunchy_taco__current_2020s__620__3": {
+    ingredient_fragment_strategy: "taco_bell_nutritionix_components",
+    component_ingredient_names: ["Taco Shell", "Seasoned Beef", "Iceberg Lettuce", "Cheddar Cheese"],
+    source_fetch_url: "https://www.nutritionix.com/taco-bell/ingredient-search/premium",
+    source_url_override: "https://www.tacobell.com/food/menu-items/crunchy-taco",
+    source_detail_url: "https://www.tacobell.com/food/menu-items/crunchy-taco#ingredients",
+    source_title_override: "Taco Bell Crunchy Taco official menu page",
+    source_owner_override: "Taco Bell",
+    source_image_url: "https://www.tacobell.com/images/22100_crunchy_taco_1400x800.jpg",
+    source_image_match_status: "official_current_menu_ingredient_statement_table",
+  },
+  "taco_bell_bean_burrito__current_2020s__568__3": {
+    ingredient_fragment_strategy: "taco_bell_nutritionix_components",
+    component_ingredient_names: ["Flour Tortilla", "Seasoned Refried Beans", "Red Sauce", "Onions", "Cheddar Cheese"],
+    source_fetch_url: "https://www.nutritionix.com/taco-bell/ingredient-search/premium",
+    source_url_override: "https://www.tacobell.com/food/burritos/bean-burrito",
+    source_detail_url: "https://www.tacobell.com/food/burritos/bean-burrito#ingredients",
+    source_title_override: "Taco Bell Bean Burrito official menu page",
+    source_owner_override: "Taco Bell",
+    source_image_url: "https://www.tacobell.com/images/22200_bean_burrito_1400x800.jpg",
+    source_image_match_status: "official_current_menu_ingredient_statement_table",
+  },
   "mcdonalds_big_mac__current_2020s__499__1": {
     ingredient_fragment_strategy: "mcdonalds_item_details",
     source_fetch_url: "https://www.mcdonalds.com/dnaapp/itemDetails?country=US&language=en&item=200463",
@@ -682,6 +722,8 @@ function decodeEntities(value) {
     .replace(/&#39;/g, "'")
     .replace(/&apos;/g, "'")
     .replace(/&nbsp;/g, " ")
+    .replace(/&reg;/g, "®")
+    .replace(/&trade;/g, "™")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">");
 }
@@ -971,6 +1013,38 @@ function ingredientItemsFromWendysOrderPage(html) {
   return items;
 }
 
+function ingredientStatementsFromTacoBellNutritionix(html) {
+  const statements = new Map();
+  const regex = /<div class="modifierName">([\s\S]*?)<\/div>[\s\S]*?<span class="ingredientStatement">([\s\S]*?)<\/span>/g;
+  let match;
+  while ((match = regex.exec(String(html || "")))) {
+    const name = stripTags(match[1]).replace(/\s+/g, " ").trim();
+    const statement = stripTags(match[2])
+      .replace(/\s+/g, " ")
+      .replace(/\s*\[certified (?:vegan|vegetarian)\]/gi, "")
+      .trim()
+      .replace(/[.;\s]+$/, "");
+    if (name && statement) statements.set(name.toLowerCase(), { name, statement });
+  }
+  return statements;
+}
+
+function ingredientItemsFromTacoBellNutritionixComponents(html, componentNames = []) {
+  const statements = ingredientStatementsFromTacoBellNutritionix(html);
+  const items = [];
+  const seen = new Set();
+  for (const componentName of componentNames) {
+    const record = statements.get(String(componentName || "").toLowerCase());
+    if (!record) continue;
+    const item = `${record.name}: ${record.statement}`;
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    items.push(item);
+  }
+  return items;
+}
+
 function ingredientTextFromItems(items) {
   return `Ingredients: ${items.join(", ")}.`;
 }
@@ -1218,12 +1292,15 @@ function ingredientStatementForStrategy(strategy, html, fragmentHtml) {
   return fragmentHtml ? "" : "";
 }
 
-function ingredientItemsForStrategy(strategy, mainHtml, fragmentHtml) {
+function ingredientItemsForStrategy(strategy, mainHtml, fragmentHtml, review = {}) {
   if (strategy === "hormel_page") return ingredientItemsFromHormelPage(mainHtml);
   if (strategy === "wkkellogg_smartlabel") return ingredientItemsFromWkKelloggSmartLabel(mainHtml);
   if (strategy === "kelloggs_ingredients_list") return ingredientItemsFromKelloggsIngredientsList(mainHtml);
   if (strategy === "mcdonalds_item_details") return ingredientItemsFromMcdonaldsItemDetails(mainHtml);
   if (strategy === "wendys_order_page") return ingredientItemsFromWendysOrderPage(mainHtml);
+  if (strategy === "taco_bell_nutritionix_components") {
+    return ingredientItemsFromTacoBellNutritionixComponents(mainHtml, review.component_ingredient_names || []);
+  }
   if (strategy === "smartlabel_fragment") return ingredientItemsFromFragment(fragmentHtml);
   return ingredientItemsFromStatement(ingredientStatementForStrategy(strategy, mainHtml, fragmentHtml));
 }
@@ -1247,6 +1324,7 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "kelloggs_ingredients_list") return "official_current_label_page";
   if (strategy === "mcdonalds_item_details") return "official_current_product_api_json";
   if (strategy === "wendys_order_page") return "official_current_menu_page_json";
+  if (strategy === "taco_bell_nutritionix_components") return "official_current_menu_ingredient_statement_table";
   if (strategy === "manual_source_image_transcription") return "official_current_ingredient_label_image_manual_transcription";
   if (strategy === "kraft_heinz_json" || strategy === "official_json_ingredients" || strategy === "totinos_product_page") return "official_current_product_page_json";
   return "official_current_product_page_text";
@@ -1532,7 +1610,7 @@ function updateNavigatorTimeline(visualIndex) {
   writeJson(navigatorPath, data);
 }
 
-function publicRowFor(row, review, visual, ingredientText, sourceTitle) {
+function publicRowFor(row, review, visual, ingredientText, sourceTitle, ingredientItems = []) {
   const localPreviewAvailable = Boolean(visual.upscaled_preview_path || visual.preview_path);
   const hasIngredientText = Boolean(ingredientText);
   const publicSourceUrl = review.source_url_override || row.source_url;
@@ -1567,6 +1645,7 @@ function publicRowFor(row, review, visual, ingredientText, sourceTitle) {
     crop_focus: "ingredient_text",
     crop_rotation_degrees: 0,
     ingredient_text: ingredientText,
+    ingredient_items: ingredientItems,
     ingredient_text_source: visual.ingredient_text_source || "official_current_label_fragment",
     ingredient_text_status: hasIngredientText ? "official_current_label_candidate_needs_review" : "readable_ingredient_text_needed",
     candidate_excerpt: shortText(ingredientText, 240),
@@ -1629,7 +1708,7 @@ async function build() {
       : { file_path: "", status: "no_ingredient_label_image" };
     const items = review.ingredient_statement_override
       ? ingredientItemsFromStatement(review.ingredient_statement_override)
-      : ingredientItemsForStrategy(strategy, mainCapture.text, fragmentCapture.text);
+      : ingredientItemsForStrategy(strategy, mainCapture.text, fragmentCapture.text, review);
     const ingredientText = items.length ? ingredientTextFromItems(items) : "";
     const proofPath = path.join(proofHtmlDir, `${visualId}.html`);
     writeTextIfChanged(proofPath, proofHtml(
@@ -1712,7 +1791,7 @@ async function build() {
       product_image_url: productImageUrl || ingredientLabelImageUrl,
       ingredient_label_image_url: ingredientLabelImageUrl,
       ingredient_text_source: visual.ingredient_text_source,
-    }, ingredientText, sourceTitle));
+    }, ingredientText, sourceTitle, items));
   }
 
   const privateManifest = {

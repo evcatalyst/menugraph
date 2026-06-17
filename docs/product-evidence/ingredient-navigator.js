@@ -148,6 +148,15 @@ function splitIngredientText(value) {
     .filter(Boolean);
 }
 
+function ingredientItemsForRow(row) {
+  if (Array.isArray(row?.ingredient_items) && row.ingredient_items.length) {
+    return row.ingredient_items
+      .map((item) => String(item || "").replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+  }
+  return splitIngredientText(row?.ingredient_text || "");
+}
+
 function ingredientOverlay(row) {
   if (!row.ingredient_text) {
     return `
@@ -158,14 +167,14 @@ function ingredientOverlay(row) {
     `;
   }
 
-  const items = splitIngredientText(row.ingredient_text);
+  const items = ingredientItemsForRow(row);
   const visibleItems = items.slice(0, 12);
   const overflowCount = Math.max(0, items.length - visibleItems.length);
   return `
     <div class="cwa-ingredient-overlay has-ingredient-list">
       <span>Label transcript</span>
       ${visibleItems.length
-        ? `<ul class="cwa-overlay-ingredient-list">${visibleItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+        ? `<ul class="cwa-overlay-ingredient-list">${visibleItems.map((item) => `<li>${escapeHtml(truncateText(item, 142))}</li>`).join("")}</ul>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}
       ${overflowCount ? `<em>+${escapeHtml(overflowCount)} more in text below</em>` : ""}
     </div>
@@ -175,7 +184,7 @@ function ingredientOverlay(row) {
 function ingredientTextBlock(row, options = {}) {
   if (!row.ingredient_text) return "";
   const compact = Boolean(options.compact);
-  const items = splitIngredientText(row.ingredient_text);
+  const items = ingredientItemsForRow(row);
   const sourceText = compact
     ? truncateText(row.candidate_excerpt || row.ingredient_text, 230)
     : row.ingredient_text;

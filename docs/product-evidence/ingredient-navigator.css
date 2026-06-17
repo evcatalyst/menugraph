@@ -613,12 +613,16 @@ a:hover {
 
 .cwa-overlay-ingredient-list li {
   position: relative;
+  display: -webkit-box;
   min-width: 0;
   padding-left: 12px;
   color: var(--ink);
   font-size: clamp(12px, 0.96vw, 15px);
   font-weight: 820;
   line-height: 1.24;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   overflow-wrap: anywhere;
 }
 
