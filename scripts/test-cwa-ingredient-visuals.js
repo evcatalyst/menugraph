@@ -73,8 +73,10 @@ visualIndex.rows.forEach((row) => {
   assert(/^https:\/\/www\.candywrapperarchive\.com\//.test(row.source_url), `${row.evidence_id} source should remain a CWA link`);
   assert(row.claim_boundary.includes("claim"), `${row.evidence_id} missing claim boundary`);
   assert(["ingredient_signal_found", "readable_panel_still_needed"].includes(row.ingredient_signal_status), `${row.evidence_id} has unknown ingredient signal state`);
+  assert(["archive_ingredient_label_crop", "source_visual_lineage_only"].includes(row.proof_visual_basis), `${row.evidence_id} has unknown proof visual basis`);
   assert(Number.isFinite(Number(row.crop_rotation_degrees || 0)), `${row.evidence_id} crop rotation should be numeric`);
   if (row.ingredient_signal_status === "ingredient_signal_found") {
+    assert.strictEqual(row.proof_visual_basis, "archive_ingredient_label_crop", `${row.evidence_id} ingredient row should publish archive proof basis`);
     assert(row.ingredient_text, `${row.evidence_id} ingredient candidate should include public-safe ingredient text`);
     assert(Array.isArray(row.ingredient_items), `${row.evidence_id} should expose structured ingredient items`);
     assert(row.ingredient_items.length >= 3, `${row.evidence_id} should expose multiple structured ingredient items`);
@@ -82,6 +84,7 @@ visualIndex.rows.forEach((row) => {
     assert(row.ingredient_text_status.includes("candidate"), `${row.evidence_id} ingredient text should remain candidate-gated`);
     assert.strictEqual(row.crop_focus, "ingredient_text", `${row.evidence_id} ingredient row should use ingredient crop focus`);
   } else {
+    assert.strictEqual(row.proof_visual_basis, "source_visual_lineage_only", `${row.evidence_id} gap row should publish lineage-only proof basis`);
     assert(Array.isArray(row.ingredient_items) && row.ingredient_items.length === 0, `${row.evidence_id} without ingredient text should not expose ingredient items`);
     assert.strictEqual(row.ingredient_item_count, 0, `${row.evidence_id} ingredient item count should remain zero`);
   }

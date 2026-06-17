@@ -827,6 +827,7 @@ function publicRowFor(row, visual, sourceCapture) {
     source_image_year: visual.source_image_year || "",
     source_detail_url: visual.source_detail_url || "",
     source_image_match_status: visual.source_image_match_status || "",
+    proof_visual_basis: hasIngredientSignal ? "archive_ingredient_label_crop" : "source_visual_lineage_only",
     crop_focus: visual.crop_focus || "",
     crop_rotation_degrees: visual.crop_rotation_degrees || 0,
     ingredient_text: visual.ingredient_text || "",

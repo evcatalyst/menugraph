@@ -542,6 +542,7 @@ function publicRowFor(row, review, visual) {
     source_image_year: review.source_image_year || "",
     source_detail_url: review.source_detail_url || row.source_url,
     source_image_match_status: review.source_image_match_status || "source_record_date_matched",
+    proof_visual_basis: hasIngredientText ? "archive_ingredient_label_crop" : "source_visual_lineage_only",
     crop_focus: cropFocus,
     crop_rotation_degrees: review.crop_rotation_degrees || 0,
     ingredient_text: review.ingredient_text || "",

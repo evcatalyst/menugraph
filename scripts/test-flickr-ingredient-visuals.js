@@ -80,7 +80,9 @@ visualIndex.rows.forEach((row) => {
   assert(/^https:\/\/www\.flickr\.com\//.test(row.source_url), `${row.evidence_id} source should remain a Flickr link`);
   assert(row.claim_boundary.includes("claim"), `${row.evidence_id} missing claim boundary`);
   assert(["ingredient_signal_found", "readable_panel_still_needed"].includes(row.ingredient_signal_status), `${row.evidence_id} has unknown ingredient signal status`);
+  assert(["archive_ingredient_label_crop", "source_visual_lineage_only"].includes(row.proof_visual_basis), `${row.evidence_id} has unknown proof visual basis`);
   if (row.ingredient_signal_status === "ingredient_signal_found") {
+    assert.strictEqual(row.proof_visual_basis, "archive_ingredient_label_crop", `${row.evidence_id} ingredient row should publish archive proof basis`);
     assert(row.ingredient_text, `${row.evidence_id} ingredient candidate should include public-safe text`);
     assert(Array.isArray(row.ingredient_items), `${row.evidence_id} should expose structured ingredient items`);
     assert(row.ingredient_items.length >= 1, `${row.evidence_id} should expose at least one structured ingredient item`);
@@ -89,6 +91,7 @@ visualIndex.rows.forEach((row) => {
     assert.strictEqual(row.crop_focus, "ingredient_text", `${row.evidence_id} should use ingredient crop focus`);
   } else {
     assert.strictEqual(row.product_id, "trix_cereal", `${row.evidence_id} should be a known pending Flickr transcription row`);
+    assert.strictEqual(row.proof_visual_basis, "source_visual_lineage_only", `${row.evidence_id} gap row should publish lineage-only proof basis`);
     assert(Array.isArray(row.ingredient_items) && row.ingredient_items.length === 0, `${row.evidence_id} without ingredient text should not expose ingredient items`);
     assert.strictEqual(row.ingredient_item_count, 0, `${row.evidence_id} ingredient item count should remain zero`);
     assert.strictEqual(row.crop_focus, "visual_lineage", `${row.evidence_id} should be visual lineage only`);
