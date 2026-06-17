@@ -457,6 +457,34 @@ function sourceFamilyProductMetrics(productRow) {
   `;
 }
 
+function sourceFamilyTabMetric(iconName, value, singularLabel, pluralLabel = `${singularLabel}s`, tone = "neutral") {
+  const count = Number(value || 0);
+  const label = count === 1 ? singularLabel : pluralLabel;
+  return `
+    <span class="source-family-tab-metric is-${escapeHtml(tone)}" title="${escapeHtml(`${count} ${label}`)}" aria-label="${escapeHtml(`${count} ${label}`)}">
+      ${cwaInlineIcon(iconName)}
+      <b>${escapeHtml(count)}</b>
+    </span>
+  `;
+}
+
+function sourceFamilyTabMetrics(family) {
+  const products = family.products || [];
+  const rows = products.flatMap((productRow) => productRow.rows || []);
+  const productCount = family.product_count || products.length;
+  const proofCount = family.ingredient_signal_count || rows.filter((row) => row.ingredient_text).length;
+  const localVisualCount = rows.filter((row) => row.local_preview_available).length;
+  const readableGapCount = rows.filter((row) => !row.ingredient_text).length;
+  return `
+    <span class="source-family-tab-metrics">
+      ${sourceFamilyTabMetric("image", productCount, "product")}
+      ${sourceFamilyTabMetric("ingredient", proofCount, "ingredient proof row", "ingredient proof rows", "good")}
+      ${sourceFamilyTabMetric("crop", localVisualCount, "local visual preview", "local visual previews", "local")}
+      ${readableGapCount ? sourceFamilyTabMetric("partial", readableGapCount, "readable panel still needed", "readable panels still needed", "warn") : ""}
+    </span>
+  `;
+}
+
 function sourceFamilyGapRows(products, query = sourceFamilyFilterQuery()) {
   return products.flatMap((productRow) => (
     sourceFamilyRowsForProduct(productRow, query)
@@ -965,7 +993,7 @@ function renderCwaTimeline() {
       ? families.map((row) => `
         <button class="source-family-tab ${row.id === family.id ? "is-selected" : ""}" type="button" data-source-family-id="${escapeHtml(row.id)}">
           <strong>${escapeHtml(row.label)}</strong>
-          <span>${escapeHtml(`${row.product_count || row.products?.length || 0} products · ${row.ingredient_signal_count || 0} proof`)}</span>
+          ${sourceFamilyTabMetrics(row)}
         </button>
       `).join("")
       : "";

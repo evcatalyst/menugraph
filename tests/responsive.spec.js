@@ -460,6 +460,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#cwa-timeline-panel")).toBeVisible();
   await expect(page.locator(".source-family-tab")).toHaveCount(4);
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
+  await expect(page.locator(".source-family-tab.is-selected")).not.toContainText(/products · \d+ proof/);
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='105 products']")).toBeVisible();
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='105 ingredient proof rows']")).toBeVisible();
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='105 local visual previews']")).toBeVisible();
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
   await expect(page.locator("#source-family-summary")).toContainText("152");
   await expect(page.locator("#source-family-summary")).toContainText("local visuals");
@@ -529,6 +533,11 @@ test("ingredient navigator renders CWA visual timeline without relying on public
 
   await page.locator(".source-family-tab").filter({ hasText: "Candy Wrapper Archive" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Candy Wrapper Archive");
+  await expect(page.locator(".source-family-tab.is-selected")).not.toContainText(/products · \d+ proof/);
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='5 products']")).toBeVisible();
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='14 ingredient proof rows']")).toBeVisible();
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='16 local visual previews']")).toBeVisible();
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='2 readable panels still needed']")).toBeVisible();
   await expect(page.locator("#source-family-summary")).toContainText("16/16 local visuals");
   await expect(page.locator("#source-family-summary")).toContainText("14 structured ingredient rows");
   await expect(page.locator("#source-family-summary")).toContainText("2 readable-panel gaps");
