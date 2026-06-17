@@ -485,6 +485,34 @@ function sourceFamilyTabMetrics(family) {
   `;
 }
 
+function sourceFamilyHeaderMetric(iconName, value, singularLabel, pluralLabel = `${singularLabel}s`, tone = "neutral") {
+  const count = Number(value || 0);
+  const label = count === 1 ? singularLabel : pluralLabel;
+  return `
+    <span class="source-family-header-metric is-${escapeHtml(tone)}" title="${escapeHtml(`${count} ${label}`)}" aria-label="${escapeHtml(`${count} ${label}`)}">
+      ${cwaInlineIcon(iconName)}
+      <b>${escapeHtml(count)}</b>
+    </span>
+  `;
+}
+
+function sourceFamilyHeaderMetrics(family) {
+  const products = family.products || [];
+  const rows = products.flatMap((productRow) => productRow.rows || []);
+  const productCount = family.product_count || products.length;
+  const proofCount = family.ingredient_signal_count || rows.filter((row) => row.ingredient_text).length;
+  const localVisualCount = rows.filter((row) => row.local_preview_available).length;
+  const readableGapCount = rows.filter((row) => !row.ingredient_text).length;
+  return `
+    <span class="source-family-header-metrics" aria-label="${escapeHtml(`${productCount} products, ${proofCount} ingredient proof rows, ${localVisualCount} local visual previews, ${readableGapCount} readable panels still needed`)}">
+      ${sourceFamilyHeaderMetric("image", productCount, "product")}
+      ${sourceFamilyHeaderMetric("ingredient", proofCount, "ingredient proof row", "ingredient proof rows", "good")}
+      ${sourceFamilyHeaderMetric("crop", localVisualCount, "local visual preview", "local visual previews", "local")}
+      ${readableGapCount ? sourceFamilyHeaderMetric("partial", readableGapCount, "readable panel still needed", "readable panels still needed", "warn") : ""}
+    </span>
+  `;
+}
+
 function sourceFamilyGapRows(products, query = sourceFamilyFilterQuery()) {
   return products.flatMap((productRow) => (
     sourceFamilyRowsForProduct(productRow, query)
@@ -986,7 +1014,7 @@ function renderCwaTimeline() {
     els.sourceFamilyTimelineTitle.textContent = `${family.label} Proof Board`;
   }
   if (els.sourceFamilyTimelineNote) {
-    els.sourceFamilyTimelineNote.textContent = `${family.product_count || family.products.length} products · ${family.ingredient_signal_count || 0} source-backed proof cards`;
+    els.sourceFamilyTimelineNote.innerHTML = sourceFamilyHeaderMetrics(family);
   }
   if (els.sourceFamilyTabs) {
     els.sourceFamilyTabs.innerHTML = families.length > 1

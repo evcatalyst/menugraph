@@ -465,6 +465,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='105 ingredient proof rows']")).toBeVisible();
   await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='105 local visual previews']")).toBeVisible();
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
+  await expect(page.locator("#source-family-timeline-note")).not.toContainText(/products · \d+ source-backed proof cards/);
+  await expect(page.locator("#source-family-timeline-note .source-family-header-metric[aria-label='105 products']")).toBeVisible();
+  await expect(page.locator("#source-family-timeline-note .source-family-header-metric[aria-label='105 ingredient proof rows']")).toBeVisible();
+  await expect(page.locator("#source-family-timeline-note .source-family-header-metric[aria-label='105 local visual previews']")).toBeVisible();
   await expect(page.locator("#source-family-summary")).toContainText("152");
   await expect(page.locator("#source-family-summary")).toContainText("local visuals");
   await expect(page.locator("#source-family-summary")).toContainText("148");
@@ -538,6 +542,11 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='14 ingredient proof rows']")).toBeVisible();
   await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='16 local visual previews']")).toBeVisible();
   await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='2 readable panels still needed']")).toBeVisible();
+  await expect(page.locator("#source-family-timeline-note")).not.toContainText(/products · \d+ source-backed proof cards/);
+  await expect(page.locator("#source-family-timeline-note .source-family-header-metric[aria-label='5 products']")).toBeVisible();
+  await expect(page.locator("#source-family-timeline-note .source-family-header-metric[aria-label='14 ingredient proof rows']")).toBeVisible();
+  await expect(page.locator("#source-family-timeline-note .source-family-header-metric[aria-label='16 local visual previews']")).toBeVisible();
+  await expect(page.locator("#source-family-timeline-note .source-family-header-metric[aria-label='2 readable panels still needed']")).toBeVisible();
   await expect(page.locator("#source-family-summary")).toContainText("16/16 local visuals");
   await expect(page.locator("#source-family-summary")).toContainText("14 structured ingredient rows");
   await expect(page.locator("#source-family-summary")).toContainText("2 readable-panel gaps");
