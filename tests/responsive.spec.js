@@ -683,6 +683,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Monosodium Glutamate");
   await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Rice Krispies" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_ingredient_label_image");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("malt flavor");
   await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Corn Flakes" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);

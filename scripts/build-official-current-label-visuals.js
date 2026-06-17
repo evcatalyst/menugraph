@@ -301,15 +301,25 @@ const curatedRows = {
     source_detail_url: "https://tootsie.com/products/tootsie-rolls/#ingredients",
     source_image_match_status: "official_current_product_page",
   },
-  "rice_krispies__current_2020s__55__3": {
-    ingredient_fragment_strategy: "wkkellogg_smartlabel",
-    source_detail_url: "https://smartlabel.wkkellogg.com/Product/Index?gtin=00038000005657#ingredients",
-    source_image_match_status: "official_current_label_page",
+  "rice_krispies__current_2020s__54__1": {
+    ingredient_fragment_strategy: "wkkellogg_yext_product",
+    source_fetch_url: "https://cdn.yextapis.com/v2/accounts/me/content/products?api_key=ebb4ac611dd26217320c751b4b519276&v=20250103&c_SEOName=kelloggs-rice-krispies-cereal-product&c_locale=en_US",
+    source_url_override: "https://www.wkkellogg.com/products/kelloggs-rice-krispies-cereal-product",
+    source_detail_url: "https://www.wkkellogg.com/products/kelloggs-rice-krispies-cereal-product#ingredients",
+    source_title_override: "Kellogg's Rice Krispies official WK Kellogg product page",
+    source_owner_override: "WK Kellogg Co",
+    yext_smartlabel_gtin: "00038000200038",
+    source_image_match_status: "official_current_ingredient_label_image",
   },
-  "raisin_bran_kelloggs__current_2020s__111__3": {
-    ingredient_fragment_strategy: "wkkellogg_smartlabel",
-    source_detail_url: "https://smartlabel.wkkellogg.com/Product/Index?gtin=00038000270840#ingredients",
-    source_image_match_status: "official_current_label_page",
+  "raisin_bran_kelloggs__current_2020s__952__6": {
+    ingredient_fragment_strategy: "wkkellogg_yext_product",
+    source_fetch_url: "https://cdn.yextapis.com/v2/accounts/me/content/products?api_key=ebb4ac611dd26217320c751b4b519276&v=20250103&c_SEOName=kellogg-s-raisin-bran-cereal-product&c_locale=en_US",
+    source_url_override: "https://www.wkkellogg.com/products/kellogg-s-raisin-bran-cereal-product",
+    source_detail_url: "https://www.wkkellogg.com/products/kellogg-s-raisin-bran-cereal-product#ingredients",
+    source_title_override: "Kellogg's Raisin Bran official WK Kellogg product page",
+    source_owner_override: "WK Kellogg Co",
+    yext_smartlabel_gtin: "00038000779008",
+    source_image_match_status: "official_current_ingredient_label_image",
   },
   "corn_flakes__current_2020s__255__1": {
     ingredient_fragment_strategy: "wkkellogg_yext_product",
@@ -1120,6 +1130,7 @@ function ingredientStatementFromWkKelloggYextSmartLabel(jsonText) {
   return stripTags(record?.c_nL_Ingredients_Portal || "")
     .replace(/^ingredients?:\s*/i, "")
     .replace(/\.\s+Vitamins and Minerals\s*:/i, ", Vitamins and Minerals:")
+    .replace(/\.\s+Contains 2% or less of\b/i, ", Contains 2% or less of")
     .replace(/\.\s+BHT\b/i, ", BHT")
     .replace(/\s+/g, " ")
     .trim()

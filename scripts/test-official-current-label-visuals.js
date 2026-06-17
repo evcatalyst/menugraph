@@ -371,8 +371,12 @@ assert(tootsie.ingredient_text.includes("Corn Syrup"), "Tootsie Roll current lab
 assert(tootsie.ingredient_text.includes("Soy Lecithin"), "Tootsie Roll current label should expose source ingredient text");
 assert(riceKrispies.ingredient_text.includes("Rice"), "Rice Krispies current label should expose source ingredient text");
 assert(riceKrispies.ingredient_text.includes("malt flavor"), "Rice Krispies current label should expose source ingredient text");
+assert.strictEqual(riceKrispies.ingredient_text_source, "official_current_label_api_json", "Rice Krispies should identify the WK SmartLabel API as the ingredient source");
+assert.strictEqual(riceKrispies.proof_visual_basis, "official_ingredient_label_image", "Rice Krispies proof basis should identify the official ingredient-label image");
 assert(raisinBran.ingredient_text.includes("Whole grain wheat"), "Raisin Bran current label should expose source ingredient text");
 assert(raisinBran.ingredient_text.includes("brown sugar syrup"), "Raisin Bran current label should expose source ingredient text");
+assert.strictEqual(raisinBran.ingredient_text_source, "official_current_label_api_json", "Raisin Bran should identify the WK SmartLabel API as the ingredient source");
+assert.strictEqual(raisinBran.proof_visual_basis, "official_ingredient_label_image", "Raisin Bran proof basis should identify the official ingredient-label image");
 assert(cornFlakes.ingredient_text.includes("Milled corn"), "Corn Flakes current label should expose source ingredient text");
 assert(cornFlakes.ingredient_text.includes("ferric phosphate"), "Corn Flakes current label should expose vitamin/mineral text");
 assert.strictEqual(cornFlakes.ingredient_text_source, "official_current_label_api_json", "Corn Flakes should identify the WK SmartLabel API as the ingredient source");
@@ -585,6 +589,8 @@ if (fs.existsSync(privateManifestPath)) {
   assert.strictEqual(privateManifest.rows.length, 99, "official-current private manifest should have 99 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
+  const riceKrispiesPrivate = privateManifest.rows.find((row) => row.product_id === "rice_krispies");
+  const raisinBranPrivate = privateManifest.rows.find((row) => row.product_id === "raisin_bran_kelloggs");
   const cornFlakesPrivate = privateManifest.rows.find((row) => row.product_id === "corn_flakes");
   const frootLoopsPrivate = privateManifest.rows.find((row) => row.product_id === "froot_loops");
   const frostedFlakesPrivate = privateManifest.rows.find((row) => row.product_id === "frosted_flakes");
@@ -593,6 +599,8 @@ if (fs.existsSync(privateManifestPath)) {
   const littleDebbiePrivate = privateManifest.rows.find((row) => row.product_id === "little_debbie_oatmeal_creme_pies");
   assert(hiddenValleyPrivate.ingredient_label_image_path && fs.existsSync(hiddenValleyPrivate.ingredient_label_image_path), "Hidden Valley private manifest should retain the local label-panel image");
   assert(butterfingerPrivate.ingredient_label_image_path && fs.existsSync(butterfingerPrivate.ingredient_label_image_path), "Butterfinger private manifest should retain the local label-panel image");
+  assert(riceKrispiesPrivate.ingredient_label_image_path && fs.existsSync(riceKrispiesPrivate.ingredient_label_image_path), "Rice Krispies private manifest should retain the local label-panel image");
+  assert(raisinBranPrivate.ingredient_label_image_path && fs.existsSync(raisinBranPrivate.ingredient_label_image_path), "Raisin Bran private manifest should retain the local label-panel image");
   assert(cornFlakesPrivate.ingredient_label_image_path && fs.existsSync(cornFlakesPrivate.ingredient_label_image_path), "Corn Flakes private manifest should retain the local label-panel image");
   assert(frootLoopsPrivate.ingredient_label_image_path && fs.existsSync(frootLoopsPrivate.ingredient_label_image_path), "Froot Loops private manifest should retain the local label-panel image");
   assert(frostedFlakesPrivate.ingredient_label_image_path && fs.existsSync(frostedFlakesPrivate.ingredient_label_image_path), "Frosted Flakes private manifest should retain the local label-panel image");
