@@ -552,6 +552,10 @@ function ingredientTrendItems(rows, limit = 8, options = {}) {
     .slice(0, limit);
 }
 
+function trendProofLabel(proof) {
+  return [proof?.product_name, proof?.vintage_label, proof?.proof_label].filter(Boolean).join(" · ");
+}
+
 function sourceFamilyProductPreviewRow(productRow, query = sourceFamilyFilterQuery()) {
   const rows = sourceFamilyRowsForProduct(productRow, query);
   return rows.find((row) => row.local_preview_available && row.ingredient_text)
@@ -921,11 +925,21 @@ function ingredientDrilldownTrendBlock(row) {
               <strong>${escapeHtml(truncateText(item.label, 48))}</strong>
               ${localImages && item.proofs?.length ? `
                 <span class="ingredient-drilldown-trend-thumbs" aria-label="${escapeHtml(`Proof examples for ${item.label}`)}">
-                  ${item.proofs.map((proof) => `
-                    <span class="ingredient-drilldown-trend-thumb" title="${escapeHtml(`${proof.product_name} · ${proof.vintage_label} · ${proof.proof_label}`)}">
+                  ${item.proofs.map((proof) => {
+                    const proofLabel = trendProofLabel(proof);
+                    return `
+                    <span
+                      class="ingredient-drilldown-trend-thumb"
+                      role="img"
+                      aria-label="${escapeHtml(proofLabel)}"
+                      title="${escapeHtml(proofLabel)}"
+                      data-proof-basis="${escapeHtml(proof.proof_label || "")}"
+                      data-proof-product="${escapeHtml(proof.product_name || "")}"
+                      data-proof-vintage="${escapeHtml(proof.vintage_label || "")}"
+                    >
                       <img src="${escapeHtml(proof.preview_endpoint)}" alt="" loading="lazy" data-private-drilldown-trend-preview="1" />
                     </span>
-                  `).join("")}
+                  `; }).join("")}
                 </span>
               ` : ""}
             </span>
@@ -1189,7 +1203,7 @@ function sourceFamilyTrendProofStrip(item, localImages) {
     <span class="source-family-ingredient-proof-strip" aria-label="${escapeHtml(`Proof examples: ${exampleNames.join(", ")}`)}">
       <span class="source-family-ingredient-proof-thumbs">
         ${item.proofs.map((proof) => {
-          const proofLabel = [proof.product_name, proof.vintage_label, proof.proof_label].filter(Boolean).join(" · ");
+          const proofLabel = trendProofLabel(proof);
           return `
           <span
             class="source-family-ingredient-proof-thumb"

@@ -741,7 +741,13 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   const artificialColoringTrend = page.locator("#ingredient-drilldown .ingredient-drilldown-trends button").filter({ hasText: "artificial coloring" });
   await expect(artificialColoringTrend).toBeVisible();
   await expect(artificialColoringTrend.locator(".ingredient-drilldown-trend-thumbs")).toBeVisible();
+  await expect(artificialColoringTrend.locator(".ingredient-drilldown-trend-thumbs")).not.toHaveAttribute("aria-hidden", "true");
   expect(await artificialColoringTrend.locator(".ingredient-drilldown-trend-thumb img").count()).toBeGreaterThanOrEqual(2);
+  await expect(artificialColoringTrend.locator(".ingredient-drilldown-trend-thumb").first()).toHaveAttribute("role", "img");
+  await expect(artificialColoringTrend.locator(".ingredient-drilldown-trend-thumb").first()).toHaveAttribute("aria-label", /Kellogg|Froot|ingredient|proof/i);
+  await expect(artificialColoringTrend.locator(".ingredient-drilldown-trend-thumb").first()).toHaveAttribute("data-proof-product", /Kellogg|Froot/i);
+  await expect(artificialColoringTrend.locator(".ingredient-drilldown-trend-thumb").first()).toHaveAttribute("data-proof-vintage", /[A-Za-z0-9]/);
+  await expect(artificialColoringTrend.locator(".ingredient-drilldown-trend-thumb").first()).toHaveAttribute("data-proof-basis", /ingredient|proof|crop/i);
   await expect(artificialColoringTrend.locator(".ingredient-drilldown-trend-thumb img").first()).toHaveAttribute("src", /\/api\/private\/ingredient-crops\//);
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-image img, #ingredient-drilldown .ingredient-drilldown-placeholder")).toBeVisible();
   const drilldownProofOverlay = page.locator("#ingredient-drilldown .ingredient-drilldown-proof-overlay");
