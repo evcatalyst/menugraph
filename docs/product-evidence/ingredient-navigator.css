@@ -1375,7 +1375,15 @@ a:hover {
 }
 
 .cwa-timeline-card.is-ingredient-open .cwa-preview-frame .cwa-ingredient-overlay {
+  width: min(640px, calc(100% - 20px));
+  max-height: min(74%, 460px);
+  background: rgba(15, 18, 14, 0.84);
   opacity: 1 !important;
+}
+
+.cwa-timeline-card.is-ingredient-open .cwa-overlay-ingredient-list {
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  max-height: min(58vh, 390px);
 }
 
 .cwa-preview-frame[aria-pressed="true"] .cwa-preview-lens {
@@ -1444,6 +1452,10 @@ a:hover {
     top: 12px;
     bottom: auto;
     max-height: min(54%, 340px);
+  }
+
+  .cwa-timeline-track.is-single-proof-row .cwa-timeline-card.has-ingredient-proof.is-ingredient-open .cwa-ingredient-overlay {
+    max-height: min(78%, 520px);
   }
 }
 

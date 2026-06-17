@@ -213,8 +213,6 @@ function ingredientOverlay(row) {
 
   const items = ingredientItemsForRow(row);
   const basis = proofVisualBasis(row);
-  const visibleItems = items.slice(0, basis === "label_database_source_text_proof_panel" ? 10 : 8);
-  const overflowCount = Math.max(0, items.length - visibleItems.length);
   const overlayTitle = basis === "official_menu_or_api_text"
     ? "Menu source text"
     : basis === "label_database_source_text_proof_panel"
@@ -223,10 +221,10 @@ function ingredientOverlay(row) {
   return `
     <div class="cwa-ingredient-overlay has-ingredient-list">
       <span>${escapeHtml(overlayTitle)}</span>
-      ${visibleItems.length
-        ? `<ul class="cwa-overlay-ingredient-list">${visibleItems.map((item) => `<li>${escapeHtml(truncateText(item, 96))}</li>`).join("")}</ul>`
+      ${items.length
+        ? `<ul class="cwa-overlay-ingredient-list">${items.map((item) => `<li>${escapeHtml(truncateText(item, 140))}</li>`).join("")}</ul>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}
-      <em>${escapeHtml(overflowCount ? `${items.length} ingredient entries` : "Ingredient text")}</em>
+      <em>${escapeHtml(items.length ? `${items.length} ingredient ${items.length === 1 ? "entry" : "entries"}` : "Ingredient text")}</em>
     </div>
   `;
 }

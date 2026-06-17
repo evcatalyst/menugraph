@@ -598,6 +598,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect.poll(async () => frootLoopsSourceLine.evaluate((element) => getComputedStyle(element).webkitLineClamp)).toBe("3");
   await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
   await expect.poll(async () => frootLoopsSourceLine.evaluate((element) => getComputedStyle(element).webkitLineClamp)).toBe("none");
+  const frootLoopsOverlay = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay");
+  expect(await frootLoopsOverlay.locator("li").count()).toBeGreaterThan(10);
+  await expect(frootLoopsOverlay).toContainText("BHT added to maintain product freshness");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader")).toContainText("artificial coloring");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Ingredients");
   await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
