@@ -539,8 +539,13 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".source-family-tab").filter({ hasText: "Flickr Package Archive" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Flickr Package Archive");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Flickr Package Archive");
-  await expect(page.locator(".cwa-product-chip")).toHaveCount(12);
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(13);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText(/ingredients|beverage syrup|label formula|carbonated water/i);
+  await page.locator(".cwa-product-chip").filter({ hasText: "Cocoa Puffs" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("whole grain corn");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("BHT added to preserve freshness");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Ingredient text candidate']")).toBeVisible();
   await page.locator(".cwa-product-chip").filter({ hasText: "Cheerios Original" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("whole grain oats");

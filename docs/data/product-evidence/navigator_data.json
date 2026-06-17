@@ -7927,8 +7927,8 @@
         "strategy": "readable_label_crops_first",
         "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
         "claim_policy": "Manual visual transcription remains candidate evidence until corrected and manually verified.",
-        "evidence_row_count": 20,
-        "product_count": 12,
+        "evidence_row_count": 21,
+        "product_count": 13,
         "top_domains": "www.flickr.com",
         "gap_categories": "panel_capture_needed",
         "products": [
@@ -8096,6 +8096,24 @@
             ],
             "source_urls": [
               "https://www.flickr.com/photos/25692985%40N07/3523833856"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "review_manual_visual_read_candidate_ingredient_text",
+            "vintage_count": 1
+          },
+          {
+            "product_id": "cocoa_puffs",
+            "product_name": "Cocoa Puffs",
+            "brand": "Cocoa Puffs",
+            "category": "cereal",
+            "evidence_count": 1,
+            "vintages": [
+              "2000s"
+            ],
+            "source_urls": [
+              "https://www.flickr.com/photos/jasonliebigstuff/4053543678/"
             ],
             "ingredient_panel_visible_count": 1,
             "local_image_ready_count": 1,
@@ -10168,10 +10186,10 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T06:53:11.853Z",
+    "generated_at_utc": "2026-06-17T07:25:53.274Z",
     "default_family": "official-current-labels",
-    "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
-    "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
+    "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached crops through /api/private/ingredient-crops/:visual_id when a private cache exists.",
+    "claim_policy": "Manual visual transcription remains candidate evidence until corrected and manually verified.",
     "families": [
       {
         "id": "candy-wrapper-archive",
@@ -10911,10 +10929,10 @@
       {
         "id": "flickr-package-archive",
         "label": "Flickr Package Archive",
-        "row_count": 20,
-        "product_count": 12,
-        "local_preview_available_count": 20,
-        "ingredient_signal_count": 18,
+        "row_count": 21,
+        "product_count": 13,
+        "local_preview_available_count": 21,
+        "ingredient_signal_count": 19,
         "products": [
           {
             "product_id": "7up_original",
@@ -11731,6 +11749,61 @@
                 "ingredient_text_source": "manual_visual_read_candidate",
                 "ingredient_text_status": "manual_visual_read_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: whole grain oats, corn starch, sugar, salt, trisodium phosphate, calcium carbonate, wheat starch, vitamin E (mixed tocopherols) added to preserve freshness.",
+                "candidate_status": "ingredient_text_candidate_needs_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "cached",
+                "source_candidate_image_count": 1,
+                "claim_boundary": "Manual visual transcription is a candidate only; do not publish an ingredient-change claim until corrected and manually verified."
+              }
+            ]
+          },
+          {
+            "product_id": "cocoa_puffs",
+            "product_name": "Cocoa Puffs",
+            "brand": "Cocoa Puffs",
+            "category": "cereal",
+            "source_family": "flickr-package-archive",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "2000s"
+            ],
+            "rows": [
+              {
+                "product_id": "cocoa_puffs",
+                "product_name": "Cocoa Puffs",
+                "brand": "Cocoa Puffs",
+                "category": "cereal",
+                "vintage_label": "2000s",
+                "vintage_start": "2000-01-01",
+                "vintage_end": "2009-12-31",
+                "evidence_id": "cocoa_puffs__2000s__423__2",
+                "ocr_priority": "medium",
+                "ocr_gap_category": "readable_panel_photo_needed",
+                "source_domain": "www.flickr.com",
+                "source_url": "https://www.flickr.com/photos/jasonliebigstuff/4053543678/",
+                "source_title": "General Mills Cocoa Puffs Box, 2009 Safeway Retro Cereal Boxes - Flickr",
+                "source_owner": "Flickr",
+                "rights_note": "",
+                "visual_id": "cocoa_puffs__2000s__7a76999332",
+                "preview_endpoint": "/api/private/ingredient-crops/cocoa_puffs__2000s__7a76999332",
+                "visual_status": "local_ingredient_crop_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "manual_visual_review",
+                "crop_status": "ingredient_crop_ready",
+                "source_image_title": "General Mills Cocoa Puffs Box, 2009 Safeway Retro Cereal Boxes",
+                "source_image_year": 2009,
+                "source_detail_url": "https://www.flickr.com/photos/jasonliebigstuff/4053543678/",
+                "source_image_match_status": "source_record_date_matched",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Ingredients: whole grain corn, sugar, corn syrup, modified corn starch, cocoa processed with alkali, canola and/or rice bran oil, color added, salt, fructose, tricalcium phosphate, corn starch, natural and artificial flavor, trisodium phosphate, wheat flour, BHT added to preserve freshness. Vitamins and minerals: calcium carbonate, zinc and iron (mineral nutrients), vitamin C (sodium ascorbate), a B vitamin (niacinamide), vitamin B6 (pyridoxine hydrochloride), vitamin B2 (riboflavin), vitamin B1 (thiamin mononitrate), vitamin A (palmitate), a B vitamin (folic acid), vitamin B12, vitamin D. Contains wheat ingredients.",
+                "ingredient_text_source": "manual_visual_read_candidate",
+                "ingredient_text_status": "manual_visual_read_candidate_needs_review",
+                "candidate_excerpt": "Ingredients: whole grain corn, sugar, corn syrup, modified corn starch, cocoa processed with alkali, canola and/or rice bran oil, color added, salt, fructose, tricalcium phosphate, corn starch, natural and artificial fl...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "cached",

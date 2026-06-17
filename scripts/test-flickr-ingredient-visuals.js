@@ -24,6 +24,7 @@ const expectedPilotProducts = [
 const expectedFlickrProducts = new Set([
   "cheerios_original",
   "trix_cereal",
+  "cocoa_puffs",
   "coca_cola_classic",
   "froot_loops",
   "tang_orange",
@@ -56,10 +57,10 @@ const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 
 assert.strictEqual(visualIndex.schema_version, 1, "Flickr visual index should be versioned");
 assert.strictEqual(visualIndex.source_family.id, "flickr-package-archive", "Flickr source family id should be stable");
-assert.strictEqual(visualIndex.totals.products, 12, "Flickr visual index should cover 12 products");
-assert.strictEqual(visualIndex.totals.rows, 20, "Flickr visual index should cover 20 evidence rows");
-assert.strictEqual(visualIndex.rows.length, 20, "Flickr public rows should match totals");
-assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 18, "Flickr rows should expose 18 readable candidate texts");
+assert.strictEqual(visualIndex.totals.products, 13, "Flickr visual index should cover 13 products");
+assert.strictEqual(visualIndex.totals.rows, 21, "Flickr visual index should cover 21 evidence rows");
+assert.strictEqual(visualIndex.rows.length, 21, "Flickr public rows should match totals");
+assert.strictEqual(visualIndex.totals.ingredient_signal_candidates, 19, "Flickr rows should expose 19 readable candidate texts");
 assert.strictEqual(visualIndex.totals.readable_panel_still_needed, 2, "Curated Flickr lane should preserve known non-ingredient visual gaps");
 
 visualIndex.products.forEach((product) => {
@@ -97,6 +98,14 @@ assert.strictEqual(cheeriosRow.crop_focus, "ingredient_text", "Cheerios crop sho
 assert(cheeriosRow.ingredient_text.includes("whole grain oats"), "Cheerios candidate should include visible ingredient text");
 assert(cheeriosRow.ingredient_text.includes("trisodium phosphate"), "Cheerios candidate should include the visible phosphate ingredient");
 
+const cocoaPuffsRow = visualIndex.rows.find((row) => row.evidence_id === "cocoa_puffs__2000s__423__2");
+assert(cocoaPuffsRow, "Flickr index should include the 2009 Cocoa Puffs row");
+assert.strictEqual(cocoaPuffsRow.ingredient_signal_status, "ingredient_signal_found", "Cocoa Puffs panel should expose a review-gated ingredient candidate");
+assert.strictEqual(cocoaPuffsRow.crop_focus, "ingredient_text", "Cocoa Puffs crop should focus the ingredient block");
+assert(cocoaPuffsRow.ingredient_text.includes("whole grain corn"), "Cocoa Puffs candidate should include visible ingredient text");
+assert(cocoaPuffsRow.ingredient_text.includes("BHT added to preserve freshness"), "Cocoa Puffs candidate should include the preservative line");
+assert(cocoaPuffsRow.ingredient_text.includes("Contains wheat ingredients"), "Cocoa Puffs candidate should include the allergen line");
+
 assert.deepStrictEqual(
   navigator.product_index.map((row) => row.id),
   expectedPilotProducts,
@@ -108,16 +117,17 @@ const cwaTimeline = families.find((row) => row.id === "candy-wrapper-archive");
 const flickrTimeline = families.find((row) => row.id === "flickr-package-archive");
 assert(cwaTimeline, "navigator should preserve the CWA timeline");
 assert(flickrTimeline, "navigator should expose the Flickr source-family timeline");
-assert.strictEqual(flickrTimeline.product_count, 12, "navigator Flickr timeline should cover 12 products");
-assert.strictEqual(flickrTimeline.row_count, 20, "navigator Flickr timeline should cover 20 rows");
-assert.strictEqual(flickrTimeline.products.length, 12, "navigator Flickr timeline should include 12 product groups");
-assert.strictEqual(flickrTimeline.ingredient_signal_count, 18, "navigator Flickr timeline should expose candidate count");
+assert.strictEqual(flickrTimeline.product_count, 13, "navigator Flickr timeline should cover 13 products");
+assert.strictEqual(flickrTimeline.row_count, 21, "navigator Flickr timeline should cover 21 rows");
+assert.strictEqual(flickrTimeline.products.length, 13, "navigator Flickr timeline should include 13 product groups");
+assert.strictEqual(flickrTimeline.ingredient_signal_count, 19, "navigator Flickr timeline should expose candidate count");
 
 const summaryFamily = navigator.source_family_summary?.families?.find((row) => row.id === "flickr-package-archive");
 assert(summaryFamily, "navigator source-family summary should expose Flickr");
-assert.strictEqual(summaryFamily.product_count, 12, "Flickr source-family summary should cover 12 products");
+assert.strictEqual(summaryFamily.product_count, 13, "Flickr source-family summary should cover 13 products");
 assert(summaryFamily.products.some((product) => product.product_id === "cheerios_original" && product.ingredient_panel_visible_count === 1 && product.readable_panel_photo_needed_count === 0), "Flickr summary should promote the review-gated Cheerios ingredient candidate");
 assert(summaryFamily.products.some((product) => product.product_id === "trix_cereal" && product.readable_panel_photo_needed_count === 2), "Flickr summary should preserve the Trix transcription gaps");
+assert(summaryFamily.products.some((product) => product.product_id === "cocoa_puffs" && product.ingredient_panel_visible_count === 1 && product.readable_panel_photo_needed_count === 0), "Flickr summary should promote the review-gated Cocoa Puffs ingredient candidate");
 
 assert.strictEqual(resolvePrivateIngredientCropPath("../bad"), null, "path traversal visual id should be rejected");
 assert.strictEqual(resolvePrivateIngredientCropPath("bad/slash"), null, "slash visual id should be rejected");
