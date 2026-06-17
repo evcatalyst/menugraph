@@ -385,6 +385,35 @@ function ingredientTrendItems(rows, limit = 8) {
     .slice(0, limit);
 }
 
+function sourceFamilyProductPreviewRow(productRow, query = sourceFamilyFilterQuery()) {
+  const rows = sourceFamilyRowsForProduct(productRow, query);
+  return rows.find((row) => row.local_preview_available && row.ingredient_text)
+    || rows.find((row) => row.local_preview_available)
+    || rows.find((row) => row.ingredient_text)
+    || rows[0]
+    || (productRow.rows || [])[0]
+    || null;
+}
+
+function sourceFamilyProductPreview(productRow, query, localImages) {
+  const row = sourceFamilyProductPreviewRow(productRow, query);
+  const hasIngredientProof = Boolean(row?.ingredient_text);
+  const canShowPreview = Boolean(localImages && row?.local_preview_available && row?.preview_endpoint);
+  const thumbClass = [
+    "cwa-product-thumb",
+    hasIngredientProof ? "has-proof" : "needs-readable-panel",
+    canShowPreview ? "has-private-preview" : "",
+  ].filter(Boolean).join(" ");
+  return `
+    <span class="${escapeHtml(thumbClass)}" aria-hidden="true">
+      ${canShowPreview
+        ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="" loading="lazy" data-private-product-preview="1" />`
+        : cwaInlineIcon(hasIngredientProof ? "ingredient" : "image")}
+      <span class="cwa-product-thumb-icon">${cwaInlineIcon(hasIngredientProof ? "ingredient" : "panel")}</span>
+    </span>
+  `;
+}
+
 function selectedCwaProduct() {
   const family = cwaTimeline();
   const products = filteredSourceFamilyProducts(family);
@@ -673,16 +702,25 @@ function renderCwaTimeline() {
   if (els.sourceFamilyPosition) {
     els.sourceFamilyPosition.textContent = `${selectedProductIndex + 1} / ${visibleProducts.length}`;
   }
+  const localImages = isLocalPreviewHost();
   els.cwaProductStrip.innerHTML = visibleProducts
     .map((row) => `
       <button class="cwa-product-chip ${row.product_id === state.cwaProductId ? "is-selected" : ""}" type="button" data-cwa-product-id="${escapeHtml(row.product_id)}">
-        <strong>${escapeHtml(row.product_name)}</strong>
-        <span>${escapeHtml(`${row.evidence_count} rows · ${row.ingredient_signal_count || 0} proof · ${row.local_preview_available_count} local`)}</span>
+        ${sourceFamilyProductPreview(row, query, localImages)}
+        <span class="cwa-product-chip-copy">
+          <strong>${escapeHtml(row.product_name)}</strong>
+          <span>${escapeHtml(`${row.evidence_count} rows · ${row.ingredient_signal_count || 0} proof · ${row.local_preview_available_count} local`)}</span>
+        </span>
       </button>
     `)
     .join("");
+  els.cwaProductStrip.querySelectorAll("[data-private-product-preview]").forEach((image) => {
+    image.addEventListener("error", () => {
+      image.closest(".cwa-product-thumb")?.classList.add("is-missing-private-preview");
+      image.remove();
+    }, { once: true });
+  });
 
-  const localImages = isLocalPreviewHost();
   const timelineRows = sourceFamilyRowsForProduct(productRow, query);
   els.cwaTimelineTrack.classList.toggle("is-single-proof-row", timelineRows.length === 1);
   els.cwaTimelineTrack.innerHTML = timelineRows

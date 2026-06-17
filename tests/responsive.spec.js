@@ -462,6 +462,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_source_text_proof_panel");
@@ -509,6 +511,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".source-family-tab").filter({ hasText: "Candy Wrapper Archive" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Candy Wrapper Archive");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(5);
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText(/readable ingredient panel still needed/i);
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader.needs-readable-panel")).toContainText(/Readable panel needed/i);
@@ -602,6 +606,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-filter-status")).toContainText("1 of 14 products");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(1);
   await expect(page.locator(".cwa-product-chip").first()).toContainText("Kellogg's Froot Loops");
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("artificial coloring");
   await page.locator("#source-family-filter-clear").click();
   await expect(page.locator(".cwa-product-chip")).toHaveCount(14);

@@ -614,14 +614,18 @@ a:hover {
 }
 
 .cwa-product-chip {
-  flex: 0 0 156px;
-  min-height: 58px;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  flex: 0 0 210px;
+  min-height: 70px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-soft);
   color: var(--ink);
   cursor: pointer;
-  padding: 8px;
+  padding: 7px;
   text-align: left;
 }
 
@@ -630,8 +634,81 @@ a:hover {
   box-shadow: inset 0 0 0 1px rgba(212, 173, 87, 0.34);
 }
 
+.cwa-product-thumb {
+  position: relative;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background:
+    linear-gradient(135deg, rgba(101, 183, 177, 0.13), rgba(212, 173, 87, 0.12)),
+    rgba(15, 18, 14, 0.8);
+  color: var(--muted);
+  overflow: hidden;
+}
+
+.cwa-product-thumb.has-proof {
+  border-color: rgba(101, 183, 177, 0.44);
+}
+
+.cwa-product-thumb.needs-readable-panel {
+  border-color: rgba(212, 173, 87, 0.48);
+}
+
+.cwa-product-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fffaf0;
+}
+
+.cwa-product-thumb.is-missing-private-preview {
+  color: var(--gold);
+}
+
+.cwa-product-thumb svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.cwa-product-thumb-icon {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 1px solid rgba(245, 240, 230, 0.28);
+  border-radius: 4px;
+  background: rgba(15, 18, 14, 0.74);
+  color: var(--teal);
+}
+
+.cwa-product-thumb.needs-readable-panel .cwa-product-thumb-icon {
+  color: var(--gold);
+}
+
+.cwa-product-thumb-icon svg {
+  width: 11px;
+  height: 11px;
+}
+
+.cwa-product-chip-copy {
+  min-width: 0;
+}
+
 .cwa-product-chip strong,
-.cwa-product-chip span {
+.cwa-product-chip-copy > span {
   display: block;
   overflow-wrap: anywhere;
 }
@@ -641,7 +718,7 @@ a:hover {
   line-height: 1.1;
 }
 
-.cwa-product-chip span {
+.cwa-product-chip-copy > span {
   margin-top: 5px;
   color: var(--muted);
   font-size: 11px;
