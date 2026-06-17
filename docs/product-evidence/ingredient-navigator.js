@@ -231,6 +231,24 @@ function ingredientTextBlock(row, options = {}) {
   `;
 }
 
+function cwaPreviewButtonLabel(button, isOpen = false) {
+  const productName = button?.dataset?.cwaProductName || "this product";
+  const vintageLabel = button?.dataset?.cwaVintageLabel || "";
+  const subject = `${productName} ${vintageLabel}`.trim();
+  return `${isOpen ? "Hide" : "Show"} ingredient proof text for ${subject}`;
+}
+
+function setCwaPreviewState(button, isPreviewing) {
+  const card = button?.closest(".cwa-timeline-card");
+  if (!card) return;
+  card.classList.toggle("is-ingredient-preview", Boolean(isPreviewing));
+}
+
+function syncCwaPreviewButton(button, isOpen) {
+  button.setAttribute("aria-pressed", String(isOpen));
+  button.setAttribute("aria-label", cwaPreviewButtonLabel(button, isOpen));
+}
+
 function qualityLabel(value) {
   return Number.isFinite(Number(value)) ? formatPct(value) : "Pending";
 }
@@ -487,7 +505,7 @@ function renderCwaTimeline() {
       const visualBasis = proofVisualBasis(row);
       return `
         <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}" data-proof-basis="${escapeHtml(visualBasis)}">
-          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" aria-pressed="false" aria-label="${escapeHtml(`Toggle ingredient proof text for ${row.product_name} ${row.vintage_label}`)}">
+          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" data-cwa-product-name="${escapeHtml(row.product_name)}" data-cwa-vintage-label="${escapeHtml(row.vintage_label)}" aria-pressed="false" aria-label="${escapeHtml(`Show ingredient proof text for ${row.product_name} ${row.vintage_label}`)}">
             ${canShowPreview
               ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ${proofVisualLabel(row).toLowerCase()}`)}" loading="lazy" data-private-preview="1" />`
               : ""}
@@ -520,10 +538,15 @@ function renderCwaTimeline() {
     }, { once: true });
   });
   els.cwaTimelineTrack.querySelectorAll("[data-cwa-toggle]").forEach((button) => {
+    syncCwaPreviewButton(button, false);
+    button.addEventListener("pointerenter", () => setCwaPreviewState(button, true));
+    button.addEventListener("pointerleave", () => setCwaPreviewState(button, false));
+    button.addEventListener("focus", () => setCwaPreviewState(button, true));
+    button.addEventListener("blur", () => setCwaPreviewState(button, false));
     button.addEventListener("click", () => {
       const card = button.closest(".cwa-timeline-card");
       const isOpen = card?.classList.toggle("is-ingredient-open") || false;
-      button.setAttribute("aria-pressed", String(isOpen));
+      syncCwaPreviewButton(button, isOpen);
     });
   });
 }

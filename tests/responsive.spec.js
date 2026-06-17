@@ -478,12 +478,23 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open ingredient drill-in']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card .status-badge")).toHaveCount(0);
   expect(await page.locator(".cwa-status-icon").count()).toBeGreaterThan(0);
-  await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
-  await expect(page.locator(".cwa-timeline-card").first()).toHaveClass(/is-ingredient-open/);
-  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame")).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toHaveCSS("opacity", "1");
-  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Ingredients");
-  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Beef");
+  const firstProofCard = page.locator(".cwa-timeline-card").first();
+  const firstProofPreview = firstProofCard.locator(".cwa-preview-frame");
+  const firstProofOverlay = firstProofCard.locator(".cwa-ingredient-overlay");
+  await expect(firstProofPreview).toHaveAttribute("aria-label", /Show ingredient proof text/);
+  await expect(firstProofOverlay).toHaveCSS("opacity", "0");
+  await firstProofPreview.hover();
+  await expect(firstProofCard).toHaveClass(/is-ingredient-preview/);
+  await expect(firstProofOverlay).toHaveCSS("opacity", "1");
+  await expect(firstProofOverlay).toContainText("Ingredients");
+  await expect(firstProofOverlay).toContainText("Beef");
+  await page.mouse.move(8, 8);
+  await expect(firstProofCard).not.toHaveClass(/is-ingredient-preview/);
+  await firstProofPreview.click();
+  await expect(firstProofCard).toHaveClass(/is-ingredient-open/);
+  await expect(firstProofPreview).toHaveAttribute("aria-pressed", "true");
+  await expect(firstProofPreview).toHaveAttribute("aria-label", /Hide ingredient proof text/);
+  await expect(firstProofOverlay).toHaveCSS("opacity", "1");
 
   await page.locator(".source-family-tab").filter({ hasText: "Candy Wrapper Archive" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Candy Wrapper Archive");
@@ -502,10 +513,21 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").nth(1)).toHaveCSS("transform", "none");
   await expect(page.locator(".cwa-timeline-card").nth(1).locator(".cwa-preview-frame img")).toHaveCSS("transform", "none");
 
-  await page.locator(".cwa-timeline-card").nth(1).locator(".cwa-preview-frame").click();
-  await expect(page.locator(".cwa-timeline-card").nth(1)).toHaveClass(/is-ingredient-open/);
-  await expect(page.locator(".cwa-timeline-card").nth(1).locator(".cwa-ingredient-overlay")).toContainText("Milk chocolate");
-  expect(await page.locator(".cwa-timeline-card").nth(1).locator(".cwa-overlay-ingredient-list li").count()).toBeGreaterThan(3);
+  const archiveProofCard = page.locator(".cwa-timeline-card").nth(1);
+  const archiveProofPreview = archiveProofCard.locator(".cwa-preview-frame");
+  const archiveProofOverlay = archiveProofCard.locator(".cwa-ingredient-overlay");
+  await archiveProofPreview.hover();
+  await expect(archiveProofCard).toHaveClass(/is-ingredient-preview/);
+  await expect(archiveProofOverlay).toHaveCSS("opacity", "1");
+  await expect(archiveProofOverlay).toContainText("Milk chocolate");
+  await page.mouse.move(8, 8);
+  await expect(archiveProofCard).not.toHaveClass(/is-ingredient-preview/);
+  await archiveProofPreview.click();
+  await expect(archiveProofCard).toHaveClass(/is-ingredient-open/);
+  await expect(archiveProofPreview).toHaveAttribute("aria-pressed", "true");
+  await expect(archiveProofPreview).toHaveAttribute("aria-label", /Hide ingredient proof text/);
+  await expect(archiveProofOverlay).toContainText("Milk chocolate");
+  expect(await archiveProofCard.locator(".cwa-overlay-ingredient-list li").count()).toBeGreaterThan(3);
 
   await page.locator(".cwa-product-chip").filter({ hasText: "Tootsie Roll" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(3);

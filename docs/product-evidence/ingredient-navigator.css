@@ -466,7 +466,8 @@ a:hover {
 }
 
 .cwa-timeline-card:hover,
-.cwa-timeline-card:focus-within {
+.cwa-timeline-card:focus-within,
+.cwa-timeline-card.is-ingredient-preview {
   border-color: var(--gold);
   box-shadow: 0 0 0 1px rgba(212, 173, 87, 0.24);
 }
@@ -575,6 +576,7 @@ a:hover {
 
 .cwa-timeline-card:hover .cwa-ingredient-overlay,
 .cwa-timeline-card:focus-within .cwa-ingredient-overlay,
+.cwa-timeline-card.is-ingredient-preview .cwa-ingredient-overlay,
 .cwa-timeline-card.is-ingredient-open .cwa-ingredient-overlay {
   opacity: 1;
 }
@@ -648,6 +650,12 @@ a:hover {
 
 .cwa-timeline-card.is-ingredient-open .cwa-preview-frame .cwa-ingredient-overlay {
   opacity: 1 !important;
+}
+
+.cwa-preview-frame[aria-pressed="true"] .cwa-preview-lens {
+  border-color: rgba(101, 183, 177, 0.72);
+  background: rgba(101, 183, 177, 0.18);
+  color: var(--ink);
 }
 
 .cwa-card-body {
