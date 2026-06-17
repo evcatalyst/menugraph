@@ -1069,22 +1069,73 @@ a:hover {
   min-width: 0;
 }
 
-.cwa-product-chip strong,
-.cwa-product-chip-copy > span {
+.cwa-product-chip > .cwa-product-chip-copy > strong,
+.cwa-product-chip-copy > .cwa-product-chip-metrics {
   display: block;
   overflow-wrap: anywhere;
 }
 
-.cwa-product-chip strong {
+.cwa-product-chip > .cwa-product-chip-copy > strong {
   font-size: 13px;
   line-height: 1.1;
 }
 
-.cwa-product-chip-copy > span {
+.cwa-product-chip-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
   margin-top: 5px;
+}
+
+.cwa-product-chip-metric {
+  display: inline-flex;
+  min-width: 31px;
+  height: 19px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.035);
   color: var(--muted);
-  font-size: 11px;
-  line-height: 1.16;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.cwa-product-chip-metric svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.cwa-product-chip-metric b {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.cwa-product-chip-metric.is-good {
+  border-color: rgba(119, 196, 140, 0.5);
+  background: rgba(119, 196, 140, 0.11);
+  color: #9ee5af;
+}
+
+.cwa-product-chip-metric.is-local {
+  border-color: rgba(101, 183, 177, 0.52);
+  background: rgba(101, 183, 177, 0.11);
+  color: var(--teal);
+}
+
+.cwa-product-chip-metric.is-warn {
+  border-color: rgba(212, 173, 87, 0.58);
+  background: rgba(212, 173, 87, 0.12);
+  color: var(--gold);
 }
 
 .cwa-timeline-track {

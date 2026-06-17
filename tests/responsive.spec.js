@@ -478,6 +478,11 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Item-level ingredient source needed");
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first()).not.toContainText(/rows · \d+ proof · \d+ local/);
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-chip-metrics")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-chip-metric[aria-label='1 visual row']")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-chip-metric[aria-label='1 ingredient proof row']")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-chip-metric[aria-label='1 local visual preview']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
   await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_source_text_proof_panel");
@@ -534,6 +539,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-gap-summary .source-family-gap-card").first().locator(".source-family-gap-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first()).not.toContainText(/rows · \d+ proof · \d+ local/);
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-chip-metric[aria-label='4 visual rows']")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-chip-metric[aria-label='1 readable panel still needed']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText(/readable ingredient panel still needed/i);
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader.needs-readable-panel")).toContainText(/Readable panel needed/i);

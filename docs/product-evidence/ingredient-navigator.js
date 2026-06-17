@@ -426,6 +426,30 @@ function sourceFamilyProductPreview(productRow, query, localImages) {
   `;
 }
 
+function cwaProductMetric(iconName, value, singularLabel, pluralLabel = `${singularLabel}s`, tone = "neutral") {
+  const count = Number(value || 0);
+  const label = count === 1 ? singularLabel : pluralLabel;
+  return `
+    <span class="cwa-product-chip-metric is-${escapeHtml(tone)}" title="${escapeHtml(`${count} ${label}`)}" aria-label="${escapeHtml(`${count} ${label}`)}">
+      ${cwaInlineIcon(iconName)}
+      <b>${escapeHtml(count)}</b>
+    </span>
+  `;
+}
+
+function sourceFamilyProductMetrics(productRow) {
+  const rows = productRow.rows || [];
+  const readableGapCount = rows.filter((row) => !row.ingredient_text).length;
+  return `
+    <span class="cwa-product-chip-metrics">
+      ${cwaProductMetric("panel", productRow.evidence_count || rows.length, "visual row")}
+      ${cwaProductMetric("ingredient", productRow.ingredient_signal_count || 0, "ingredient proof row", "ingredient proof rows", "good")}
+      ${cwaProductMetric("crop", productRow.local_preview_available_count || 0, "local visual preview", "local visual previews", "local")}
+      ${readableGapCount ? cwaProductMetric("partial", readableGapCount, "readable panel still needed", "readable panels still needed", "warn") : ""}
+    </span>
+  `;
+}
+
 function sourceFamilyGapRows(products, query = sourceFamilyFilterQuery()) {
   return products.flatMap((productRow) => (
     sourceFamilyRowsForProduct(productRow, query)
@@ -962,7 +986,7 @@ function renderCwaTimeline() {
         ${sourceFamilyProductPreview(row, query, localImages)}
         <span class="cwa-product-chip-copy">
           <strong>${escapeHtml(row.product_name)}</strong>
-          <span>${escapeHtml(`${row.evidence_count} rows · ${row.ingredient_signal_count || 0} proof · ${row.local_preview_available_count} local`)}</span>
+          ${sourceFamilyProductMetrics(row)}
         </span>
       </button>
     `)
