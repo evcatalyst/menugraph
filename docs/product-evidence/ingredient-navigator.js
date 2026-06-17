@@ -1069,10 +1069,14 @@ function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
   }
   const maxCount = Math.max(...items.map((item) => item.count), 1);
   const localImages = isLocalPreviewHost();
+  const title = query ? "Filtered ingredients" : "Frequent ingredients";
+  const subtitle = query
+    ? `${query} · ${rows.length} proof ${rows.length === 1 ? "row" : "rows"}`
+    : `${rows.length} proof ${rows.length === 1 ? "row" : "rows"}`;
   els.sourceFamilyIngredientSummary.innerHTML = `
     <div class="source-family-ingredient-summary-title">
-      <span>Frequent ingredients</span>
-      <small>${escapeHtml(`${rows.length} proof ${rows.length === 1 ? "row" : "rows"}`)}</small>
+      <span>${escapeHtml(title)}</span>
+      <small>${escapeHtml(subtitle)}</small>
     </div>
     <div class="source-family-ingredient-bars">
       ${items.map((item) => `

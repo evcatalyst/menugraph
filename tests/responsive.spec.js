@@ -853,6 +853,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".source-family-ingredient-bar").filter({ hasText: "sugar" }).first().click();
   await expect(page.locator("#source-family-search")).toHaveValue(/sugar/i);
   await expect(page.locator("#source-family-filter-status")).toContainText("of 105 products");
+  await expect(page.locator("#source-family-ingredient-summary .source-family-ingredient-summary-title")).toContainText("Filtered ingredients");
+  await expect(page.locator("#source-family-ingredient-summary .source-family-ingredient-summary-title small")).toContainText(/sugar/i);
   await expect(page.locator(".cwa-product-chip")).not.toHaveCount(105);
   await page.locator("#source-family-filter-clear").click();
   await page.locator("#source-family-search").fill("sodium alginate");
