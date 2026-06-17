@@ -1493,6 +1493,15 @@ a:hover {
   border-style: dashed;
 }
 
+.cwa-timeline-card.is-gap-focus {
+  border-color: rgba(212, 173, 87, 0.72);
+  box-shadow: 0 0 0 1px rgba(212, 173, 87, 0.3);
+}
+
+.cwa-timeline-card.is-gap-focus .cwa-preview-frame {
+  box-shadow: inset 0 0 0 2px rgba(212, 173, 87, 0.32);
+}
+
 .cwa-timeline-card:hover,
 .cwa-timeline-card:focus-within,
 .cwa-timeline-card.is-ingredient-preview {

@@ -650,6 +650,15 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-gap-summary")).not.toContainText("Snickers Bar");
   await expect(page.locator("#source-family-gap-summary .source-family-gap-card")).toHaveCount(1);
   await expect(page.locator("#source-family-gap-summary .source-family-gap-card").first().locator(".source-family-gap-thumb img")).toBeVisible();
+  await page.locator("#source-family-gap-summary .source-family-gap-actions button[aria-label='Show Kit Kat Bar proof rows']").click();
+  await expect(page.locator(".cwa-product-chip.is-selected")).toContainText("Kit Kat Bar");
+  const focusedGapCard = page.locator(".cwa-timeline-card.is-gap-focus");
+  await expect(focusedGapCard).toHaveCount(1);
+  await expect(focusedGapCard).toContainText("Kit Kat Bar");
+  await expect(focusedGapCard.locator(".cwa-preview-frame")).toHaveAttribute("aria-pressed", "true");
+  await expect(focusedGapCard.locator(".cwa-ingredient-overlay")).toHaveCSS("opacity", "1");
+  await expect(focusedGapCard.locator(".cwa-ingredient-overlay")).toContainText("Readable panel still needed");
+  await page.locator(".cwa-product-chip").first().click();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first()).not.toContainText(/rows · \d+ proof · \d+ local/);

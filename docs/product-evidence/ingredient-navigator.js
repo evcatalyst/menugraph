@@ -50,6 +50,7 @@ const state = {
   facetId: "",
   sourceFamilyId: "",
   cwaProductId: "",
+  sourceFamilyGapVisualId: "",
   sourceFamilyQuery: "",
   search: "",
   compare: false,
@@ -934,7 +935,7 @@ function renderSourceFamilyGapSummary(family, visibleProducts, query, localImage
               ${collectionSourceRequirements(row, { compact: true })}
             </div>
             <div class="source-family-gap-actions">
-              <button type="button" data-cwa-gap-product-id="${escapeHtml(row.product_group_id)}" aria-label="${escapeHtml(`Show ${row.product_name} proof rows`)}">${cwaInlineIcon("date")}</button>
+              <button type="button" data-cwa-gap-product-id="${escapeHtml(row.product_group_id)}" data-cwa-gap-visual-id="${escapeHtml(row.visual_id || "")}" aria-label="${escapeHtml(`Show ${row.product_name} proof rows`)}">${cwaInlineIcon("date")}</button>
               ${sourceLink ? `<a href="${escapeHtml(sourceLink)}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(`Open source for ${row.product_name}`)}">${cwaInlineIcon("source")}</a>` : ""}
               ${row.visual_id ? cwaActionButton("inspect", `Open ${row.product_name} collection drill-in`, row.visual_id) : ""}
             </div>
@@ -1066,6 +1067,7 @@ function moveSourceFamilyProduct(delta) {
   const currentIndex = selectedSourceFamilyProductIndex(products);
   const nextIndex = Math.min(products.length - 1, Math.max(0, currentIndex + delta));
   state.cwaProductId = products[nextIndex].product_id;
+  state.sourceFamilyGapVisualId = "";
   renderCwaTimeline();
 }
 
@@ -1074,6 +1076,7 @@ function applySourceFamilyFilter(value, options = {}) {
   if (!query) return;
   state.sourceFamilyQuery = query;
   state.cwaProductId = "";
+  state.sourceFamilyGapVisualId = "";
   if (els.sourceFamilySearch) els.sourceFamilySearch.value = query;
   renderCwaTimeline();
   if (options.closeDrilldown) closeIngredientDrilldown();
@@ -1616,9 +1619,13 @@ function renderCwaTimeline() {
   });
 
   const timelineRows = sourceFamilyRowsForProduct(productRow, query);
+  if (state.sourceFamilyGapVisualId && !timelineRows.some((row) => row.visual_id === state.sourceFamilyGapVisualId)) {
+    state.sourceFamilyGapVisualId = "";
+  }
   els.cwaTimelineTrack.classList.toggle("is-single-proof-row", timelineRows.length === 1);
   els.cwaTimelineTrack.innerHTML = timelineRows
     .map((row, index) => {
+      const isFocusedGap = Boolean(state.sourceFamilyGapVisualId && row.visual_id === state.sourceFamilyGapVisualId);
       const canShowPreview = localImages && row.local_preview_available && row.preview_endpoint;
       const sourceLink = row.source_detail_url || row.source_url;
       const sourceTitle = row.source_image_title || (row.source_image_year ? `${row.source_image_year} source image` : "Source image pending");
@@ -1632,8 +1639,8 @@ function renderCwaTimeline() {
       const visualBasis = proofVisualBasis(row);
       const readerId = `cwa-label-reader-${row.visual_id || index}`;
       return `
-        <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}" data-proof-basis="${escapeHtml(visualBasis)}">
-          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" data-cwa-has-ingredient="${ingredientText ? "1" : "0"}" data-cwa-product-name="${escapeHtml(row.product_name)}" data-cwa-vintage-label="${escapeHtml(row.vintage_label)}" aria-pressed="false" aria-describedby="${escapeHtml(readerId)}" aria-label="${escapeHtml(ingredientText ? `Show ingredient proof text for ${row.product_name} ${row.vintage_label}` : `Inspect visual source gap for ${row.product_name} ${row.vintage_label}`)}">
+        <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass} ${isFocusedGap ? "is-gap-focus is-ingredient-open" : ""}" data-proof-basis="${escapeHtml(visualBasis)}">
+          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" data-cwa-visual-id="${escapeHtml(row.visual_id || "")}" data-cwa-has-ingredient="${ingredientText ? "1" : "0"}" data-cwa-product-name="${escapeHtml(row.product_name)}" data-cwa-vintage-label="${escapeHtml(row.vintage_label)}" aria-pressed="${isFocusedGap ? "true" : "false"}" aria-describedby="${escapeHtml(readerId)}" aria-label="${escapeHtml(ingredientText ? `Show ingredient proof text for ${row.product_name} ${row.vintage_label}` : `Inspect visual source gap for ${row.product_name} ${row.vintage_label}`)}">
             ${canShowPreview
               ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ${proofVisualLabel(row).toLowerCase()}`)}" loading="lazy" data-private-preview="1" />`
               : ""}
@@ -1671,7 +1678,7 @@ function renderCwaTimeline() {
     }, { once: true });
   });
   els.cwaTimelineTrack.querySelectorAll("[data-cwa-toggle]").forEach((button) => {
-    syncCwaPreviewButton(button, false);
+    syncCwaPreviewButton(button, Boolean(button.closest(".cwa-timeline-card")?.classList.contains("is-ingredient-open")));
     button.addEventListener("pointerenter", () => setCwaPreviewState(button, true));
     button.addEventListener("pointerleave", () => setCwaPreviewState(button, false));
     button.addEventListener("focus", () => setCwaPreviewState(button, true));
@@ -1679,6 +1686,10 @@ function renderCwaTimeline() {
     button.addEventListener("click", () => {
       const card = button.closest(".cwa-timeline-card");
       const isOpen = card?.classList.toggle("is-ingredient-open") || false;
+      if (button.dataset.cwaVisualId && !isOpen && state.sourceFamilyGapVisualId === button.dataset.cwaVisualId) {
+        state.sourceFamilyGapVisualId = "";
+        card.classList.remove("is-gap-focus");
+      }
       syncCwaPreviewButton(button, isOpen);
     });
   });
@@ -2129,6 +2140,7 @@ function attachEvents() {
     const button = event.target.closest("[data-cwa-product-id]");
     if (!button) return;
     state.cwaProductId = button.dataset.cwaProductId;
+    state.sourceFamilyGapVisualId = "";
     renderCwaTimeline();
   });
   els.sourceFamilySearch?.addEventListener("input", () => {
@@ -2138,6 +2150,7 @@ function attachEvents() {
   els.sourceFamilyFilterClear?.addEventListener("click", () => {
     state.sourceFamilyQuery = "";
     state.cwaProductId = "";
+    state.sourceFamilyGapVisualId = "";
     if (els.sourceFamilySearch) els.sourceFamilySearch.value = "";
     renderCwaTimeline();
     els.sourceFamilySearch?.focus();
@@ -2158,6 +2171,7 @@ function attachEvents() {
     const gapProductButton = event.target.closest("[data-cwa-gap-product-id]");
     if (gapProductButton) {
       state.cwaProductId = gapProductButton.dataset.cwaGapProductId;
+      state.sourceFamilyGapVisualId = gapProductButton.dataset.cwaGapVisualId || "";
       renderCwaTimeline();
       els.cwaTimelineTrack?.scrollIntoView({ block: "start", behavior: "smooth" });
       return;
@@ -2194,6 +2208,7 @@ function attachEvents() {
     if (!button) return;
     state.sourceFamilyId = button.dataset.sourceFamilyId;
     state.cwaProductId = "";
+    state.sourceFamilyGapVisualId = "";
     renderSourceFamilySummary();
     renderCwaTimeline();
   });
