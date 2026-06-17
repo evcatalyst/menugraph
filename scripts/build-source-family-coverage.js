@@ -163,6 +163,17 @@ function collectionBlockersForProduct(product) {
       detail: "Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet.",
       next_step: "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text.",
       claim_boundary: "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
+      source_research_status: "official_owned_source_required",
+      acceptable_source_types: [
+        "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+        "Starbucks-owned allergen or ingredient document with PSL rows",
+        "Cacheable Starbucks PDF/page whose text can be extracted and reviewed",
+      ],
+      rejected_source_types: [
+        "brand-history pages without ingredient rows",
+        "secondary nutrition articles or recipes",
+        "availability press releases without ingredient text",
+      ],
     }];
   }
   if (product.product_id === "kfc_original_recipe_chicken") {
@@ -172,6 +183,17 @@ function collectionBlockersForProduct(product) {
       detail: "Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement.",
       next_step: "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row.",
       claim_boundary: "Use current KFC pages as source-routing and process context only, not formulation evidence.",
+      source_research_status: "item_level_official_source_required",
+      acceptable_source_types: [
+        "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+        "KFC-owned product API or menu data with item-level ingredients",
+        "Original KFC PDF/page whose text can be extracted and reviewed",
+      ],
+      rejected_source_types: [
+        "global process pages about chicken quality",
+        "secret-recipe articles or recreation recipes",
+        "general takeout bag or meal photos without ingredient text",
+      ],
     }];
   }
   return [];
@@ -230,6 +252,9 @@ function collectionTargetRow(product, lead, index) {
     candidate_excerpt: shortText(candidateExcerpt, 360),
     claim_boundary: product.promotion_boundary,
     collection_target_status: blocker.status || product.capture_class,
+    collection_source_status: blocker.source_research_status || product.capture_class,
+    collection_acceptable_source_types: blocker.acceptable_source_types || [],
+    collection_rejected_source_types: blocker.rejected_source_types || [],
     collection_lead_action: lead.next_action,
     collection_reviewer_note_excerpt: lead.reviewer_note_excerpt,
     collection_next_step: blocker.next_step || lead.next_action || product.next_collection_goal,

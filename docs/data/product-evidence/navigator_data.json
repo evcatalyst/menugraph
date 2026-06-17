@@ -21019,7 +21019,18 @@
                 "label": "Official Starbucks source cache blocked",
                 "detail": "Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet.",
                 "next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text.",
-                "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone."
+                "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
+                "source_research_status": "official_owned_source_required",
+                "acceptable_source_types": [
+                  "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+                  "Starbucks-owned allergen or ingredient document with PSL rows",
+                  "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+                ],
+                "rejected_source_types": [
+                  "brand-history pages without ingredient rows",
+                  "secondary nutrition articles or recipes",
+                  "availability press releases without ingredient text"
+                ]
               }
             ],
             "claim_policy": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
@@ -21061,6 +21072,17 @@
                 "candidate_excerpt": "Official Starbucks source cache blocked Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet. Extract document version/date, market, PSL rows, ingredients/allergens, and mark as UK-market evidence.;International official document. Keep sep...",
                 "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
                 "collection_target_status": "official_source_cache_blocked",
+                "collection_source_status": "official_owned_source_required",
+                "collection_acceptable_source_types": [
+                  "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+                  "Starbucks-owned allergen or ingredient document with PSL rows",
+                  "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+                ],
+                "collection_rejected_source_types": [
+                  "brand-history pages without ingredient rows",
+                  "secondary nutrition articles or recipes",
+                  "availability press releases without ingredient text"
+                ],
                 "collection_lead_action": "capture_private_panel_crop_and_run_ocr",
                 "collection_reviewer_note_excerpt": "Extract document version/date, market, PSL rows, ingredients/allergens, and mark as UK-market evidence.;International official document. Keep separate from US Starbucks PSL formulation and use mainly as variant/date/document evidence.",
                 "collection_next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text."
@@ -21102,6 +21124,17 @@
                 "candidate_excerpt": "Official Starbucks source cache blocked Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet. Capture timeline milestone text and dates, especially 2003 launch and 2015 recipe change; mark ingredient details as incomplete unless full state...",
                 "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
                 "collection_target_status": "official_source_cache_blocked",
+                "collection_source_status": "official_owned_source_required",
+                "collection_acceptable_source_types": [
+                  "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+                  "Starbucks-owned allergen or ingredient document with PSL rows",
+                  "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+                ],
+                "collection_rejected_source_types": [
+                  "brand-history pages without ingredient rows",
+                  "secondary nutrition articles or recipes",
+                  "availability press releases without ingredient text"
+                ],
                 "collection_lead_action": "find_package_label_or_smartlabel_panel",
                 "collection_reviewer_note_excerpt": "Capture timeline milestone text and dates, especially 2003 launch and 2015 recipe change; mark ingredient details as incomplete unless full statement appears.;Official brand timeline. Use for dated change events and source trail, not ingredient occurrence par...",
                 "collection_next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text."
@@ -21143,6 +21176,17 @@
                 "candidate_excerpt": "Official Starbucks source cache blocked Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet. Use for availability timeline and product-family context only. Ingredient analysis requires menu/nutrition evidence for a specific hot/iced size...",
                 "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
                 "collection_target_status": "official_source_cache_blocked",
+                "collection_source_status": "official_owned_source_required",
+                "collection_acceptable_source_types": [
+                  "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+                  "Starbucks-owned allergen or ingredient document with PSL rows",
+                  "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+                ],
+                "collection_rejected_source_types": [
+                  "brand-history pages without ingredient rows",
+                  "secondary nutrition articles or recipes",
+                  "availability press releases without ingredient text"
+                ],
                 "collection_lead_action": "find_package_label_or_smartlabel_panel",
                 "collection_reviewer_note_excerpt": "Use for availability timeline and product-family context only. Ingredient analysis requires menu/nutrition evidence for a specific hot/iced size and milk configuration.;Official seasonal availability/change-event evidence for PSL. It is not a full ingredient...",
                 "collection_next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text."
@@ -21184,6 +21228,17 @@
                 "candidate_excerpt": "Official Starbucks source cache blocked Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet. Record launch claim and high-level formulation notes as claims, not ingredient occurrences. Pair with current nutrition/allergen sources later.;O...",
                 "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
                 "collection_target_status": "official_source_cache_blocked",
+                "collection_source_status": "official_owned_source_required",
+                "collection_acceptable_source_types": [
+                  "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+                  "Starbucks-owned allergen or ingredient document with PSL rows",
+                  "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+                ],
+                "collection_rejected_source_types": [
+                  "brand-history pages without ingredient rows",
+                  "secondary nutrition articles or recipes",
+                  "availability press releases without ingredient text"
+                ],
                 "collection_lead_action": "find_package_label_or_smartlabel_panel",
                 "collection_reviewer_note_excerpt": "Record launch claim and high-level formulation notes as claims, not ingredient occurrences. Pair with current nutrition/allergen sources later.;Official product-history evidence, not a verified ingredient statement. Use for launch/story context and source tra...",
                 "collection_next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text."
@@ -21229,7 +21284,18 @@
                 "label": "Item-level ingredient source needed",
                 "detail": "Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement.",
                 "next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row.",
-                "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence."
+                "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence.",
+                "source_research_status": "item_level_official_source_required",
+                "acceptable_source_types": [
+                  "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+                  "KFC-owned product API or menu data with item-level ingredients",
+                  "Original KFC PDF/page whose text can be extracted and reviewed"
+                ],
+                "rejected_source_types": [
+                  "global process pages about chicken quality",
+                  "secret-recipe articles or recreation recipes",
+                  "general takeout bag or meal photos without ingredient text"
+                ]
               }
             ],
             "claim_policy": "Use current KFC pages as source-routing and process context only, not formulation evidence.",
@@ -21271,6 +21337,17 @@
                 "candidate_excerpt": "Item-level ingredient source needed Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement. Pair with US market nutrition/allergen/ingredient documents before comparing Original Recipe formulation.;Official KFC source page, but not a US...",
                 "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence.",
                 "collection_target_status": "item_level_ingredient_source_needed",
+                "collection_source_status": "item_level_official_source_required",
+                "collection_acceptable_source_types": [
+                  "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+                  "KFC-owned product API or menu data with item-level ingredients",
+                  "Original KFC PDF/page whose text can be extracted and reviewed"
+                ],
+                "collection_rejected_source_types": [
+                  "global process pages about chicken quality",
+                  "secret-recipe articles or recreation recipes",
+                  "general takeout bag or meal photos without ingredient text"
+                ],
                 "collection_lead_action": "find_package_label_or_smartlabel_panel",
                 "collection_reviewer_note_excerpt": "Pair with US market nutrition/allergen/ingredient documents before comparing Original Recipe formulation.;Official KFC source page, but not a US item ingredient record. Use as source-routing and global disclosure evidence only until market-specific PDF/page i...",
                 "collection_next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row."
@@ -21312,6 +21389,17 @@
                 "candidate_excerpt": "Item-level ingredient source needed Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement. Do not promote ingredient details from this story. Pair with market-specific ingredient/nutrition documents for formulation records.;Official KF...",
                 "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence.",
                 "collection_target_status": "item_level_ingredient_source_needed",
+                "collection_source_status": "item_level_official_source_required",
+                "collection_acceptable_source_types": [
+                  "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+                  "KFC-owned product API or menu data with item-level ingredients",
+                  "Original KFC PDF/page whose text can be extracted and reviewed"
+                ],
+                "collection_rejected_source_types": [
+                  "global process pages about chicken quality",
+                  "secret-recipe articles or recreation recipes",
+                  "general takeout bag or meal photos without ingredient text"
+                ],
                 "collection_lead_action": "find_package_label_or_smartlabel_panel",
                 "collection_reviewer_note_excerpt": "Do not promote ingredient details from this story. Pair with market-specific ingredient/nutrition documents for formulation records.;Official KFC formulation-governance/history context. It is useful for product-history notes but not for SKU-level ingredient g...",
                 "collection_next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row."
@@ -21353,6 +21441,17 @@
                 "candidate_excerpt": "Item-level ingredient source needed Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement. Review whether exact item context is Original Recipe or general takeout bag. Do not promote ingredient claims from this record.;Source-attributa...",
                 "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence.",
                 "collection_target_status": "item_level_ingredient_source_needed",
+                "collection_source_status": "item_level_official_source_required",
+                "collection_acceptable_source_types": [
+                  "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+                  "KFC-owned product API or menu data with item-level ingredients",
+                  "Original KFC PDF/page whose text can be extracted and reviewed"
+                ],
+                "collection_rejected_source_types": [
+                  "global process pages about chicken quality",
+                  "secret-recipe articles or recreation recipes",
+                  "general takeout bag or meal photos without ingredient text"
+                ],
                 "collection_lead_action": "find_back_or_side_panel_photo",
                 "collection_reviewer_note_excerpt": "Review whether exact item context is Original Recipe or general takeout bag. Do not promote ingredient claims from this record.;Source-attributable KFC package/bag history lead. Useful for brand/package chronology, not Original Recipe formulation by itself.",
                 "collection_next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row."
@@ -21394,6 +21493,17 @@
                 "candidate_excerpt": "Item-level ingredient source needed Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement. Open album, capture exact photo URLs for box/bag/menu images, record taken/upload dates, and keep meal photos separate from ingredient evidence....",
                 "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence.",
                 "collection_target_status": "item_level_ingredient_source_needed",
+                "collection_source_status": "item_level_official_source_required",
+                "collection_acceptable_source_types": [
+                  "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+                  "KFC-owned product API or menu data with item-level ingredients",
+                  "Original KFC PDF/page whose text can be extracted and reviewed"
+                ],
+                "collection_rejected_source_types": [
+                  "global process pages about chicken quality",
+                  "secret-recipe articles or recreation recipes",
+                  "general takeout bag or meal photos without ingredient text"
+                ],
                 "collection_lead_action": "find_package_label_or_smartlabel_panel",
                 "collection_reviewer_note_excerpt": "Open album, capture exact photo URLs for box/bag/menu images, record taken/upload dates, and keep meal photos separate from ingredient evidence.;Source-attributable Flickr album with uploader/date metadata. Inspect individual images for boxes, bags, receipts,...",
                 "collection_next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row."
@@ -21406,7 +21516,7 @@
   },
   "source_family_coverage": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-17T14:06:43.763Z",
+    "generated_at_utc": "2026-06-17T14:49:52.208Z",
     "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
     "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
     "totals": {
@@ -21536,7 +21646,18 @@
             "label": "Official Starbucks source cache blocked",
             "detail": "Starbucks-owned PSL PDF and page leads currently resolve to challenge, not-found, or non-PDF HTML during local collection, so no cacheable ingredient source is attached yet.",
             "next_step": "Capture a Starbucks-owned menu, allergen, ingredient document, or product API through a browser session before promoting PSL ingredient text.",
-            "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone."
+            "claim_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone.",
+            "source_research_status": "official_owned_source_required",
+            "acceptable_source_types": [
+              "Starbucks-owned menu or product API with Pumpkin Spice Latte ingredients",
+              "Starbucks-owned allergen or ingredient document with PSL rows",
+              "Cacheable Starbucks PDF/page whose text can be extracted and reviewed"
+            ],
+            "rejected_source_types": [
+              "brand-history pages without ingredient rows",
+              "secondary nutrition articles or recipes",
+              "availability press releases without ingredient text"
+            ]
           }
         ],
         "promotion_boundary": "Do not promote PSL ingredient composition from secondary articles or brand-history text alone."
@@ -21654,7 +21775,18 @@
             "label": "Item-level ingredient source needed",
             "detail": "Cacheable KFC-owned pages found so far describe chicken quality, Original Recipe process, and 11 herbs and spices, but do not expose a current US item-level ingredient statement.",
             "next_step": "Resolve KFC US nutrition/allergen data or an original KFC ingredient PDF for Original Recipe Chicken before promoting an ingredient proof row.",
-            "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence."
+            "claim_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence.",
+            "source_research_status": "item_level_official_source_required",
+            "acceptable_source_types": [
+              "KFC-owned US nutrition/allergen/ingredient document with Original Recipe Chicken rows",
+              "KFC-owned product API or menu data with item-level ingredients",
+              "Original KFC PDF/page whose text can be extracted and reviewed"
+            ],
+            "rejected_source_types": [
+              "global process pages about chicken quality",
+              "secret-recipe articles or recreation recipes",
+              "general takeout bag or meal photos without ingredient text"
+            ]
           }
         ],
         "promotion_boundary": "Use current KFC pages as source-routing and process context only, not formulation evidence."

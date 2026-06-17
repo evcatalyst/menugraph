@@ -173,6 +173,10 @@ assert(starbucksMissing.collection_blockers.some((blocker) => blocker.status ===
 assert(starbucksMissing.promotion_boundary.includes("Do not promote PSL"), "Starbucks PSL should publish a promotion boundary");
 assert(kfcOriginalMissing.collection_blockers.some((blocker) => blocker.status === "item_level_ingredient_source_needed"), "KFC Original should explain the item-level source blocker");
 assert(kfcOriginalMissing.collection_blockers[0].detail.includes("11 herbs and spices"), "KFC Original blocker should preserve the source-routing context");
+assert(starbucksMissing.collection_blockers[0].acceptable_source_types.some((value) => value.includes("Starbucks-owned")), "Starbucks PSL should define acceptable official proof source types");
+assert(starbucksMissing.collection_blockers[0].rejected_source_types.some((value) => value.includes("secondary")), "Starbucks PSL should reject secondary ingredient summaries");
+assert(kfcOriginalMissing.collection_blockers[0].acceptable_source_types.some((value) => value.includes("KFC-owned")), "KFC Original should define acceptable official proof source types");
+assert(kfcOriginalMissing.collection_blockers[0].rejected_source_types.some((value) => value.includes("secret-recipe")), "KFC Original should reject recipe recreation sources");
 assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "pearl_milling_pancake_mix_original"), "Pearl Milling should be represented by the official-current source-family lane");
 assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "nilla_wafers"), "Nilla Wafers should be represented by the label-database source-family lane");
 assert(!sourceFamilyCoverage.missing_products.some((row) => row.product_id === "twinkies"), "Twinkies should be represented by the label-database source-family lane");
@@ -201,6 +205,7 @@ assert(collectionTargetFamily.products.every((product) => product.rows.every((ro
 assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.ocr_gap_category && row.evidence_kind)), "collection-target rows should carry source lead type and gap category metadata");
 assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => typeof row.ingredient_panel_visible === "boolean" && typeof row.ingredient_text_available === "boolean")), "collection-target rows should preserve panel/text availability flags");
 assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.collection_lead_action && row.collection_next_step)), "collection-target rows should publish next collection actions");
+assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.collection_source_status && row.collection_acceptable_source_types?.length && row.collection_rejected_source_types?.length)), "collection-target rows should publish accepted and rejected proof-source requirements");
 assert(collectionTargetFamily.claim_policy.includes("do not promote ingredient"), "collection-target lane should publish a claim boundary");
 assertPublicSafeJson(sourceFamilyCoveragePath);
 assertPublicSafeJson(navigatorPath);

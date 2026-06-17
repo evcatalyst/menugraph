@@ -842,6 +842,18 @@ a:hover {
   padding-top: 8px;
 }
 
+.source-family-gap-card.is-document-pipeline {
+  border-top-color: rgba(131, 167, 216, 0.42);
+}
+
+.source-family-gap-card.is-panel-capture {
+  border-top-color: rgba(101, 183, 177, 0.42);
+}
+
+.source-family-gap-card.is-panel-photo {
+  border-top-color: rgba(212, 173, 87, 0.42);
+}
+
 .source-family-gap-thumb {
   position: relative;
   display: grid;
@@ -900,7 +912,12 @@ a:hover {
   min-width: 0;
 }
 
-.source-family-gap-card div > span {
+.source-family-gap-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.source-family-gap-copy > span {
   display: block;
   color: var(--clay);
   font-size: 10px;
@@ -910,23 +927,46 @@ a:hover {
   text-transform: uppercase;
 }
 
-.source-family-gap-card strong {
+.source-family-gap-copy strong {
   display: block;
-  margin-top: 3px;
   font-size: 13px;
   line-height: 1.14;
   overflow-wrap: anywhere;
 }
 
-.source-family-gap-card small {
+.source-family-gap-copy small {
   display: -webkit-box;
-  margin-top: 3px;
   color: var(--muted);
   font-size: 11px;
   line-height: 1.2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.source-family-gap-copy em {
+  width: fit-content;
+  border: 1px solid rgba(212, 173, 87, 0.28);
+  border-radius: 4px;
+  color: var(--gold);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 820;
+  line-height: 1.1;
+  padding: 2px 5px;
+  text-transform: uppercase;
+}
+
+.source-family-gap-copy p {
+  display: -webkit-box;
+  margin: 0;
+  color: rgba(248, 242, 229, 0.72);
+  font-size: 11px;
+  line-height: 1.24;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .source-family-gap-actions {
@@ -1610,7 +1650,7 @@ a:hover {
   bottom: 12px;
   z-index: 3;
   display: grid;
-  max-height: min(42%, 236px);
+  max-height: min(48%, 292px);
   gap: 5px;
   border: 1px solid rgba(101, 183, 177, 0.48);
   border-left: 4px solid rgba(101, 183, 177, 0.86);
@@ -1676,6 +1716,33 @@ a:hover {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.cwa-overlay-proof-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  min-width: 0;
+  color: #42524a;
+  font-size: 10px;
+  font-weight: 820;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.cwa-overlay-proof-meta span {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  overflow-wrap: anywhere;
+  text-transform: inherit;
+}
+
+.cwa-overlay-proof-meta span:not(:last-child)::after {
+  content: "/";
+  margin-left: 8px;
+  color: rgba(66, 82, 74, 0.54);
 }
 
 .cwa-ingredient-overlay em {
@@ -1921,6 +1988,49 @@ a:hover {
   min-width: 0;
   color: rgba(248, 242, 229, 0.82);
   font-weight: 760;
+  overflow-wrap: anywhere;
+}
+
+.collection-source-requirements {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.collection-source-requirements > span {
+  color: var(--teal);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.collection-source-requirements dl {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  min-width: 0;
+}
+
+.collection-source-requirements div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.collection-source-requirements dt {
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 820;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.collection-source-requirements dd {
+  margin: 0;
+  color: rgba(248, 242, 229, 0.72);
+  font-size: 11px;
+  line-height: 1.24;
   overflow-wrap: anywhere;
 }
 
@@ -2579,6 +2689,14 @@ a:hover {
   font-size: 10px;
   font-weight: 850;
   line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.ingredient-drilldown-trends > small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 760;
+  line-height: 1.2;
   text-transform: uppercase;
 }
 

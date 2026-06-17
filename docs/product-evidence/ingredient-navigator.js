@@ -146,6 +146,7 @@ const cwaIconSvgs = {
 };
 
 const collectionTargetFamilyId = "collection-targets";
+const allProofProductsFamilyId = "all-proof-products";
 
 function cwaInlineIcon(name) {
   return cwaIconSvgs[name] || cwaIconSvgs.image;
@@ -318,12 +319,27 @@ function missingProofMessage(row) {
       : "This source image supports visual provenance, but no readable ingredient panel has been captured for this row.");
 }
 
+function ingredientOverlayMeta(row) {
+  const details = [
+    row?.vintage_label,
+    row?.source_domain || row?.source_family_label || labelFor(row?.source_family),
+    proofVisualLabel(row),
+  ].filter(Boolean);
+  if (!details.length) return "";
+  return `
+    <div class="cwa-overlay-proof-meta" aria-label="Ingredient proof context">
+      ${details.map((detail) => `<span>${escapeHtml(detail)}</span>`).join("")}
+    </div>
+  `;
+}
+
 function ingredientOverlay(row) {
   if (!row.ingredient_text) {
     return `
       <div class="cwa-ingredient-overlay is-missing-text" aria-label="Readable ingredient proof status">
         <span>${escapeHtml(missingProofTitle(row))}</span>
         <p>${escapeHtml(missingProofMessage(row))}</p>
+        ${ingredientOverlayMeta(row)}
         <em>Readable panel still needed</em>
       </div>
     `;
@@ -342,6 +358,7 @@ function ingredientOverlay(row) {
       ${items.length
         ? `<ul class="cwa-overlay-ingredient-list">${items.map((item) => ingredientProofListItem(item, { truncate: 140 })).join("")}</ul>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}
+      ${ingredientOverlayMeta(row)}
       <em>${escapeHtml(items.length ? `${items.length} ingredient ${items.length === 1 ? "entry" : "entries"}` : "Ingredient text")}</em>
     </div>
   `;
@@ -419,6 +436,34 @@ function collectionLeadFacts(row) {
   `;
 }
 
+function collectionSourceRequirements(row, options = {}) {
+  const accepted = row?.collection_acceptable_source_types || [];
+  const rejected = row?.collection_rejected_source_types || [];
+  if (!accepted.length && !rejected.length) return "";
+  const compact = Boolean(options.compact);
+  const acceptedRows = accepted.slice(0, compact ? 2 : 4);
+  const rejectedRows = rejected.slice(0, compact ? 2 : 4);
+  return `
+    <div class="collection-source-requirements">
+      ${row.collection_source_status ? `<span>${escapeHtml(labelFor(row.collection_source_status))}</span>` : ""}
+      <dl>
+        ${acceptedRows.length ? `
+          <div>
+            <dt>Accepted proof</dt>
+            <dd>${acceptedRows.map((item) => escapeHtml(item)).join("; ")}</dd>
+          </div>
+        ` : ""}
+        ${rejectedRows.length ? `
+          <div>
+            <dt>Do not use</dt>
+            <dd>${rejectedRows.map((item) => escapeHtml(item)).join("; ")}</dd>
+          </div>
+        ` : ""}
+      </dl>
+    </div>
+  `;
+}
+
 function collectionLeadDetail(row) {
   if (proofVisualBasis(row) !== "collection_target_source_lead") return "";
   const action = row.collection_next_step
@@ -431,6 +476,7 @@ function collectionLeadDetail(row) {
       <span>Collection next action</span>
       <p>${escapeHtml(action)}</p>
       ${note ? `<small>${escapeHtml(note)}</small>` : ""}
+      ${collectionSourceRequirements(row)}
       ${collectionLeadFacts(row)}
     </div>
   `;
@@ -473,8 +519,77 @@ function isLocalPreviewHost() {
   return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 }
 
+function rawSourceFamilyTimelineFamilies() {
+  return state.data?.source_family_timeline?.families || [];
+}
+
+function allProofProductsFamily() {
+  const families = rawSourceFamilyTimelineFamilies();
+  if (!families.length) return null;
+  const productsById = new Map();
+  let rowCount = 0;
+  let proofCount = 0;
+  for (const family of families) {
+    for (const productRow of family.products || []) {
+      const productId = productRow.product_id;
+      if (!productId) continue;
+      const existing = productsById.get(productId) || {
+        ...productRow,
+        source_family: allProofProductsFamilyId,
+        source_family_label: "All Proof Products",
+        rows: [],
+      };
+      for (const row of productRow.rows || []) {
+        const annotatedRow = {
+          ...row,
+          product_id: row.product_id || productId,
+          product_name: row.product_name || productRow.product_name,
+          brand: row.brand || productRow.brand,
+          category: row.category || productRow.category,
+          source_family: row.source_family || family.id,
+          source_family_id: family.id,
+          source_family_label: row.source_family_label || family.label,
+          source_family_product_count: family.product_count || family.products?.length || 0,
+        };
+        existing.rows.push(annotatedRow);
+        rowCount += 1;
+        if (annotatedRow.ingredient_text) proofCount += 1;
+      }
+      existing.vintages = [...new Set([
+        ...(existing.vintages || []),
+        ...(productRow.vintages || []),
+        ...existing.rows.map((row) => row.vintage_label).filter(Boolean),
+      ])];
+      existing.evidence_count = existing.rows.length;
+      existing.ingredient_signal_count = existing.rows.filter((row) => row.ingredient_text).length;
+      existing.local_preview_available_count = existing.rows.filter((row) => row.local_preview_available).length;
+      productsById.set(productId, existing);
+    }
+  }
+  const products = [...productsById.values()]
+    .sort((a, b) => (b.ingredient_signal_count || 0) - (a.ingredient_signal_count || 0)
+      || (b.local_preview_available_count || 0) - (a.local_preview_available_count || 0)
+      || String(a.product_name || "").localeCompare(String(b.product_name || "")));
+  return {
+    id: allProofProductsFamilyId,
+    label: "All Proof Products",
+    source_domain: "combined source families",
+    claim_policy: state.data?.source_family_timeline?.claim_policy || "Ingredient text remains candidate evidence until manual review.",
+    product_count: products.length,
+    evidence_row_count: rowCount,
+    ingredient_signal_count: proofCount,
+    products,
+  };
+}
+
+function sourceFamilyTimelineFamilies() {
+  const families = rawSourceFamilyTimelineFamilies();
+  const allFamily = allProofProductsFamily();
+  return allFamily ? [allFamily, ...families] : families;
+}
+
 function sourceFamilyTimeline() {
-  const families = state.data.source_family_timeline?.families || [];
+  const families = sourceFamilyTimelineFamilies();
   return families.find((row) => row.id === state.sourceFamilyId) || families[0];
 }
 
@@ -491,6 +606,11 @@ function sourceFamilyRowSearchText(row) {
     row.product_name,
     row.brand,
     row.category,
+    row.source_family_label,
+    row.source_family,
+    row.collection_source_status,
+    ...(row.collection_acceptable_source_types || []),
+    ...(row.collection_rejected_source_types || []),
     row.vintage_label,
     row.source_title,
     row.source_image_title,
@@ -544,12 +664,14 @@ function ingredientTrendKey(value) {
 function ingredientTrendItems(rows, limit = 8, options = {}) {
   const proofLimit = Number(options.proofLimit || 4);
   const dedupeProofsByProduct = options.dedupeProofsByProduct !== false;
+  const allowedKeys = options.allowedKeys || null;
   const counts = new Map();
   for (const row of rows) {
     for (const item of ingredientItemsForRow(row)) {
       const label = String(item || "").replace(/\s+/g, " ").trim();
       const key = ingredientTrendKey(label);
       if (!key) continue;
+      if (allowedKeys && !allowedKeys.has(key)) continue;
       const existing = counts.get(key) || {
         label,
         count: 0,
@@ -587,6 +709,21 @@ function ingredientTrendItems(rows, limit = 8, options = {}) {
 
 function trendProofLabel(proof) {
   return [proof?.product_name, proof?.vintage_label, proof?.proof_label].filter(Boolean).join(" · ");
+}
+
+function allProofRows() {
+  return rawSourceFamilyTimelineFamilies()
+    .flatMap((family) => (family.products || []).flatMap((productRow) => (
+      (productRow.rows || []).map((row) => ({
+        ...row,
+        product_id: row.product_id || productRow.product_id,
+        product_name: row.product_name || productRow.product_name,
+        brand: row.brand || productRow.brand,
+        category: row.category || productRow.category,
+        source_family_id: row.source_family_id || family.id,
+        source_family_label: row.source_family_label || family.label,
+      }))
+    )));
 }
 
 function sourceFamilyProductPreviewRow(productRow, query = sourceFamilyFilterQuery()) {
@@ -699,11 +836,16 @@ function sourceFamilyHeaderMetrics(family) {
   `;
 }
 
-function sourceFamilyGapRows(products, query = sourceFamilyFilterQuery()) {
+function sourceFamilyGapRows(products, query = sourceFamilyFilterQuery(), family = null) {
   return products.flatMap((productRow) => (
     sourceFamilyRowsForProduct(productRow, query)
       .filter((row) => !row.ingredient_text)
-      .map((row) => ({ ...row, product_group_id: productRow.product_id }))
+      .map((row) => ({
+        ...row,
+        product_group_id: productRow.product_id,
+        source_family_id: row.source_family_id || productRow.source_family || family?.id || "",
+        source_family_label: row.source_family_label || family?.label || labelFor(row.source_family || productRow.source_family || ""),
+      }))
   ));
 }
 
@@ -719,28 +861,56 @@ function sourceFamilyGapThumb(row, localImages) {
   `;
 }
 
+function sourceFamilyGapAction(row) {
+  if (row.collection_next_step) return row.collection_next_step;
+  if (row.collection_lead_action) return row.collection_lead_action;
+  if (row.ocr_recommended_action) return labelFor(row.ocr_recommended_action);
+  if (row.ocr_gap_category === "document_text_pipeline_needed") return "Extract the source document or API text before promoting ingredient claims.";
+  if (row.ocr_gap_category === "panel_capture_needed") return "Capture a readable ingredient panel from the same source family.";
+  if (row.ocr_gap_category === "readable_panel_photo_needed") return "Find a back or side panel photo with readable ingredient text.";
+  return "Keep as visual provenance until a readable ingredient source is captured.";
+}
+
+function sourceFamilyGapKind(row) {
+  return row.ocr_gap_category || row.ingredient_signal_status || "readable_panel_needed";
+}
+
+function sourceFamilyGapClass(row) {
+  const kind = sourceFamilyGapKind(row);
+  if (kind === "document_text_pipeline_needed") return "is-document-pipeline";
+  if (kind === "panel_capture_needed") return "is-panel-capture";
+  if (kind === "readable_panel_photo_needed") return "is-panel-photo";
+  return "is-source-gap";
+}
+
 function renderSourceFamilyGapSummary(family, visibleProducts, query, localImages) {
   if (!els.sourceFamilyGapSummary) return;
-  const gaps = sourceFamilyGapRows(visibleProducts, query);
+  const gaps = sourceFamilyGapRows(visibleProducts, query, family);
   if (!gaps.length) {
     els.sourceFamilyGapSummary.innerHTML = "";
     return;
   }
+  const visibleLimit = family?.id === allProofProductsFamilyId ? 12 : 6;
+  const visibleGaps = gaps.slice(0, visibleLimit);
+  const overflowCount = Math.max(0, gaps.length - visibleGaps.length);
   els.sourceFamilyGapSummary.innerHTML = `
     <div class="source-family-gap-summary-title">
       <span>Readable panel queue</span>
-      <small>${escapeHtml(`${gaps.length} ${gaps.length === 1 ? "row" : "rows"}`)}</small>
+      <small>${escapeHtml(`${gaps.length} ${gaps.length === 1 ? "row" : "rows"}${overflowCount ? ` · showing ${visibleGaps.length}` : ""}`)}</small>
     </div>
     <div class="source-family-gap-list">
-      ${gaps.slice(0, 6).map((row) => {
+      ${visibleGaps.map((row) => {
         const sourceLink = row.source_detail_url || row.source_url;
         return `
-          <article class="source-family-gap-card">
+          <article class="source-family-gap-card ${escapeHtml(sourceFamilyGapClass(row))}">
             ${sourceFamilyGapThumb(row, localImages)}
-            <div>
-              <span>${escapeHtml(row.vintage_label)}</span>
+            <div class="source-family-gap-copy">
+              <span>${escapeHtml([row.source_family_label, row.vintage_label].filter(Boolean).join(" · "))}</span>
               <strong>${escapeHtml(row.product_name)}</strong>
               <small>${escapeHtml(row.source_image_title || row.source_title || row.source_domain || "Source image")}</small>
+              <em>${escapeHtml(labelFor(sourceFamilyGapKind(row)))}</em>
+              <p>${escapeHtml(truncateText(sourceFamilyGapAction(row), 190))}</p>
+              ${collectionSourceRequirements(row, { compact: true })}
             </div>
             <div class="source-family-gap-actions">
               <button type="button" data-cwa-gap-product-id="${escapeHtml(row.product_group_id)}" aria-label="${escapeHtml(`Show ${row.product_name} proof rows`)}">${cwaInlineIcon("date")}</button>
@@ -774,6 +944,9 @@ function missingCoverageSearchText(productRow) {
       blocker.detail,
       blocker.next_step,
       blocker.claim_boundary,
+      blocker.source_research_status,
+      ...(blocker.acceptable_source_types || []),
+      ...(blocker.rejected_source_types || []),
     ]),
     ...(productRow.top_source_domains || []).map((row) => row.domain),
     ...(productRow.representative_rows || []).flatMap((row) => [
@@ -943,14 +1116,39 @@ function ingredientDrilldownFacts(row, canShowPreview) {
 }
 
 function ingredientDrilldownTrendBlock(row) {
-  const context = sourceFamilyContextForRow(row);
-  const rows = context?.productRow?.rows || [];
   const localImages = isLocalPreviewHost();
-  const items = ingredientTrendItems(rows, 8, { dedupeProofsByProduct: false, proofLimit: 3 });
+  const selectedItems = ingredientItemsForRow(row);
+  const selectedKeys = new Set(selectedItems.map((item) => ingredientTrendKey(item)).filter(Boolean));
+  if (!selectedKeys.size) return "";
+  const selectedOrder = new Map(selectedItems.map((item, index) => [ingredientTrendKey(item), index]));
+  const rows = allProofRows().filter((proofRow) => (
+    ingredientItemsForRow(proofRow).some((item) => selectedKeys.has(ingredientTrendKey(item)))
+  ));
+  const rawItems = ingredientTrendItems(rows, 24, {
+    allowedKeys: selectedKeys,
+    dedupeProofsByProduct: false,
+    proofLimit: 4,
+  }).filter((item) => item.count > 1 || (item.product_ids?.size || 0) > 1);
+  const sharedItems = rawItems.filter((item) => (item.product_ids?.size || 0) > 1);
+  const repeatedLocalItems = rawItems
+    .filter((item) => item.count > 1 && (item.product_ids?.size || 0) <= 1 && item.label.length > 10)
+    .sort((a, b) => (selectedOrder.get(ingredientTrendKey(a.label)) ?? 9999) - (selectedOrder.get(ingredientTrendKey(b.label)) ?? 9999));
+  const seenKeys = new Set();
+  const items = [...sharedItems.slice(0, 5), ...repeatedLocalItems.slice(0, 3)]
+    .filter((item) => {
+      const key = ingredientTrendKey(item.label);
+      if (seenKeys.has(key)) return false;
+      seenKeys.add(key);
+      return true;
+    })
+    .slice(0, 8);
   if (!items.length) return "";
+  const proofCount = rows.length;
+  const productCount = new Set(rows.map((proofRow) => proofRow.product_id).filter(Boolean)).size;
   return `
-    <div class="ingredient-drilldown-trends">
-      <span>Product ingredient signals</span>
+    <div class="ingredient-drilldown-trends" aria-label="${escapeHtml(`Shared ingredient proof signals across ${productCount} products and ${proofCount} proof rows`)}">
+      <span>Shared visual ingredient signals</span>
+      <small>${escapeHtml(`${productCount} ${productCount === 1 ? "product" : "products"} · ${proofCount} proof ${proofCount === 1 ? "row" : "rows"}`)}</small>
       <div>
         ${items.map((item) => `
           <button type="button" data-source-family-filter-value="${escapeHtml(item.label)}">
@@ -1148,7 +1346,8 @@ function sourceFamilyFocusMetrics(metrics, options = {}) {
 function renderSourceFamilySummary() {
   if (!els.sourceFamilySummary) return;
   const families = state.data.source_family_summary?.families || [];
-  const timelineFamilies = state.data.source_family_timeline?.families || [];
+  const timelineFamilies = sourceFamilyTimelineFamilies();
+  const rawTimelineFamilies = rawSourceFamilyTimelineFamilies();
   if (!families.length) {
     els.sourceFamilySummary.innerHTML = `
       <article class="source-family-empty">
@@ -1163,8 +1362,8 @@ function renderSourceFamilySummary() {
     || families[0];
   const selectedTimelineFamily = timelineFamilies.find((family) => family.id === selectedSummary.id) || timelineFamilies[0] || {};
   const selectedTimelineRows = (selectedTimelineFamily.products || []).flatMap((productRow) => productRow.rows || []);
-  const allTimelineRows = timelineFamilies.flatMap((family) => (family.products || []).flatMap((productRow) => productRow.rows || []));
-  const totalProducts = new Set(timelineFamilies.flatMap((family) => (family.products || []).map((productRow) => productRow.product_id))).size
+  const allTimelineRows = rawTimelineFamilies.flatMap((family) => (family.products || []).flatMap((productRow) => productRow.rows || []));
+  const totalProducts = new Set(rawTimelineFamilies.flatMap((family) => (family.products || []).map((productRow) => productRow.product_id))).size
     || families.reduce((sum, family) => sum + Number(family.product_count || 0), 0);
   const totalRows = families.reduce((sum, family) => sum + Number(family.evidence_row_count || family.row_count || 0), 0);
   const selectedProducts = Number(selectedSummary.product_count || selectedSummary.products?.length || 0);
@@ -1305,7 +1504,7 @@ function renderSourceFamilyIngredientSummary(family, visibleProducts, query) {
 
 function renderCwaTimeline() {
   if (!els.cwaTimelinePanel || !els.cwaProductStrip || !els.cwaTimelineTrack) return;
-  const families = state.data.source_family_timeline?.families || [];
+  const families = sourceFamilyTimelineFamilies();
   const family = cwaTimeline();
   if (!family?.products?.length) {
     els.cwaTimelinePanel.hidden = true;
@@ -2021,7 +2220,7 @@ async function init() {
     if (!response.ok) throw new Error(`Navigator data returned ${response.status}`);
     state.data = await response.json();
     state.productId = state.data.default_product;
-    state.sourceFamilyId = state.data.source_family_timeline?.default_family || state.data.source_family_timeline?.families?.[0]?.id || "";
+    state.sourceFamilyId = allProofProductsFamilyId;
     const family = sourceFamilyTimeline();
     state.cwaProductId = family?.products?.[0]?.product_id || "";
     state.maxYear = Number(els.timeRange.value || 2026);
