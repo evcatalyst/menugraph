@@ -197,6 +197,10 @@ assert(collectionTargetFamily.products.some((row) => row.product_id === "starbuc
 assert(collectionTargetFamily.products.some((row) => row.product_id === "kfc_original_recipe_chicken"), "collection-target lane should include KFC Original Recipe Chicken");
 assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.proof_visual_basis === "collection_target_source_lead")), "collection-target rows should be source leads");
 assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => !row.ingredient_text && !row.local_preview_available)), "collection-target rows should remain non-claim, no-local-preview rows");
+assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.ocr_priority === "high")), "collection-target rows should preserve high-priority queue metadata");
+assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.ocr_gap_category && row.evidence_kind)), "collection-target rows should carry source lead type and gap category metadata");
+assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => typeof row.ingredient_panel_visible === "boolean" && typeof row.ingredient_text_available === "boolean")), "collection-target rows should preserve panel/text availability flags");
+assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.collection_lead_action && row.collection_next_step)), "collection-target rows should publish next collection actions");
 assert(collectionTargetFamily.claim_policy.includes("do not promote ingredient"), "collection-target lane should publish a claim boundary");
 assertPublicSafeJson(sourceFamilyCoveragePath);
 assertPublicSafeJson(navigatorPath);

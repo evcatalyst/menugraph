@@ -860,17 +860,25 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Official Starbucks source cache blocked");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-preview-placeholder")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Collection source lead']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("High priority");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Menu Or Nutrition Document");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Panel visible");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Document Text Pipeline Needed");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open local private crop']")).toHaveCount(0);
   await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
   await expect(page.locator("#ingredient-drilldown")).toBeVisible();
   await expect(page.locator("#ingredient-drilldown-title")).toContainText("Starbucks Pumpkin Spice Latte");
   await expect(page.locator("#ingredient-drilldown")).toContainText("Collection source lead");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-collection-lead")).toContainText("Collection next action");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-collection-lead")).toContainText("Capture a Starbucks-owned menu");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-collection-lead .collection-lead-facts")).toContainText("High priority");
   await expect(page.locator("#ingredient-drilldown")).toContainText("Do not promote PSL ingredient composition");
   await page.keyboard.press("Escape");
   await page.locator(".cwa-product-chip").filter({ hasText: "KFC Original Recipe Chicken" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("KFC Chicken and Nutrition official page");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Item-level ingredient source needed");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".collection-lead-facts")).toContainText("Panel not visible");
 
   await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");

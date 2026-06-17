@@ -366,6 +366,44 @@ function missingIngredientTextBlock(row, fallbackText, options = {}) {
   `;
 }
 
+function collectionLeadFacts(row) {
+  if (proofVisualBasis(row) !== "collection_target_source_lead") return "";
+  const facts = [
+    row.ocr_priority ? { icon: "inspect", label: `${labelFor(row.ocr_priority)} priority` } : null,
+    row.evidence_kind ? { icon: "source", label: labelFor(row.evidence_kind) } : null,
+    { icon: "panel", label: row.ingredient_panel_visible ? "Panel visible" : "Panel not visible" },
+    row.ocr_gap_category ? { icon: "partial", label: labelFor(row.ocr_gap_category) } : null,
+  ].filter((fact) => fact?.label);
+  if (!facts.length) return "";
+  return `
+    <div class="collection-lead-facts" aria-label="Collection lead facts">
+      ${facts.map((fact) => `
+        <span title="${escapeHtml(fact.label)}">
+          ${cwaInlineIcon(fact.icon)}
+          <b>${escapeHtml(fact.label)}</b>
+        </span>
+      `).join("")}
+    </div>
+  `;
+}
+
+function collectionLeadDetail(row) {
+  if (proofVisualBasis(row) !== "collection_target_source_lead") return "";
+  const action = row.collection_next_step
+    || row.collection_lead_action
+    || row.ocr_recommended_action
+    || "Capture a source-attributable readable ingredient panel before promoting claims.";
+  const note = row.collection_reviewer_note_excerpt || row.candidate_excerpt || "";
+  return `
+    <div class="ingredient-drilldown-collection-lead">
+      <span>Collection next action</span>
+      <p>${escapeHtml(action)}</p>
+      ${note ? `<small>${escapeHtml(note)}</small>` : ""}
+      ${collectionLeadFacts(row)}
+    </div>
+  `;
+}
+
 function cwaPreviewButtonLabel(button, isOpen = false) {
   const productName = button?.dataset?.cwaProductName || "this product";
   const vintageLabel = button?.dataset?.cwaVintageLabel || "";
@@ -948,6 +986,7 @@ function renderIngredientDrilldown(row) {
         <span>${escapeHtml(previewTitle)}</span>
         ${ingredientDrilldownFacts(row, canShowPreview)}
         ${ingredientCopy || `<p>${escapeHtml(fallbackText)}</p>`}
+        ${collectionLeadDetail(row)}
         ${ingredientDrilldownTrendBlock(row)}
         <dl class="ingredient-drilldown-meta">
           <div>
@@ -1343,6 +1382,7 @@ function renderCwaTimeline() {
             <span>${escapeHtml(row.vintage_label)}</span>
             <strong>${escapeHtml(row.product_name)}</strong>
             <small class="cwa-source-title">${escapeHtml(sourceTitle)}</small>
+            ${collectionLeadFacts(row)}
             ${ingredientText
               ? ingredientTextBlock(row, { compact: true, id: readerId })
               : missingIngredientTextBlock(row, evidenceText, { id: readerId })}

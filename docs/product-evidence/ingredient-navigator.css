@@ -1847,6 +1847,42 @@ a:hover {
   overflow-wrap: anywhere;
 }
 
+.collection-lead-facts {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.collection-lead-facts span {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 6px;
+  align-items: start;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.18;
+}
+
+.collection-lead-facts svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  color: var(--gold);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.collection-lead-facts b {
+  min-width: 0;
+  color: rgba(248, 242, 229, 0.82);
+  font-weight: 760;
+  overflow-wrap: anywhere;
+}
+
 .cwa-card-body p {
   margin: 0;
   color: var(--muted);
@@ -2457,6 +2493,37 @@ a:hover {
 .ingredient-drilldown-copy .cwa-ingredient-copy li {
   font-size: 13px;
   line-height: 1.32;
+}
+
+.ingredient-drilldown-collection-lead {
+  display: grid;
+  gap: 7px;
+  border: 1px solid rgba(212, 173, 87, 0.26);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px;
+  background: rgba(15, 18, 14, 0.28);
+  padding: 9px;
+}
+
+.ingredient-drilldown-collection-lead > span {
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.ingredient-drilldown-collection-lead p,
+.ingredient-drilldown-collection-lead small {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.ingredient-drilldown-collection-lead small {
+  color: var(--muted);
 }
 
 .ingredient-drilldown-trends {
