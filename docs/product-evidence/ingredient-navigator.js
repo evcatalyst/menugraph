@@ -800,6 +800,7 @@ function renderProductPicker() {
 function renderSourceFamilySummary() {
   if (!els.sourceFamilySummary) return;
   const families = state.data.source_family_summary?.families || [];
+  const timelineFamilies = state.data.source_family_timeline?.families || [];
   const board = state.data.ocr_board_summary || {};
   if (!families.length) {
     els.sourceFamilySummary.innerHTML = `
@@ -811,22 +812,31 @@ function renderSourceFamilySummary() {
     return;
   }
   const selectedSummary = families.find((family) => family.id === state.sourceFamilyId) || families[0];
+  const selectedTimelineFamily = timelineFamilies.find((family) => family.id === selectedSummary.id) || timelineFamilies[0] || {};
+  const selectedTimelineRows = (selectedTimelineFamily.products || []).flatMap((productRow) => productRow.rows || []);
+  const allTimelineRows = timelineFamilies.flatMap((family) => (family.products || []).flatMap((productRow) => productRow.rows || []));
   const totalProducts = families.reduce((sum, family) => sum + Number(family.product_count || 0), 0);
   const totalRows = families.reduce((sum, family) => sum + Number(family.evidence_row_count || family.row_count || 0), 0);
   const selectedProducts = Number(selectedSummary.product_count || selectedSummary.products?.length || 0);
   const selectedRows = Number(selectedSummary.evidence_row_count || selectedSummary.row_count || 0);
   const selectedProofs = Number(selectedSummary.ingredient_signal_count || 0)
     || (selectedSummary.products || []).reduce((sum, row) => sum + Number(row.ingredient_signal_count || row.ingredient_panel_visible_count || 0), 0);
+  const allLocalVisuals = allTimelineRows.filter((row) => row.local_preview_available).length;
+  const allStructuredRows = allTimelineRows.filter((row) => ingredientItemsForRow(row).length).length;
+  const selectedLocalVisuals = selectedTimelineRows.filter((row) => row.local_preview_available).length;
+  const selectedStructuredRows = selectedTimelineRows.filter((row) => ingredientItemsForRow(row).length).length;
+  const selectedReadableGaps = selectedTimelineRows.filter((row) => !row.ingredient_text).length;
   els.sourceFamilySummary.innerHTML = `
     <div class="source-family-metrics">
-      <span><strong>${escapeHtml(totalProducts)}</strong>products</span>
-      <span><strong>${escapeHtml(totalRows)}</strong>evidence rows</span>
-      <span><strong>${escapeHtml(selectedProofs)}</strong>selected proofs</span>
-      <span><strong>${escapeHtml(board.scratch_soft_quota || "200GB")}</strong>private quota</span>
+      <span>${cwaInlineIcon("image")}<strong>${escapeHtml(totalProducts)}</strong>products</span>
+      <span>${cwaInlineIcon("panel")}<strong>${escapeHtml(totalRows)}</strong>proof rows</span>
+      <span>${cwaInlineIcon("crop")}<strong>${escapeHtml(allLocalVisuals)}</strong>local visuals</span>
+      <span>${cwaInlineIcon("ingredient")}<strong>${escapeHtml(allStructuredRows)}</strong>ingredient lists</span>
     </div>
     <div class="source-family-focus">
       <span>${escapeHtml(selectedSummary.label || "Selected source lane")}</span>
-      <strong>${escapeHtml(`${selectedProducts} products · ${selectedRows} evidence rows · ${selectedProofs} proof text candidates`)}</strong>
+      <strong>${escapeHtml(`${selectedProducts} products · ${selectedRows} proof rows · ${selectedProofs} proof text candidates`)}</strong>
+      <small>${escapeHtml(`${selectedLocalVisuals}/${selectedTimelineRows.length || selectedRows} local visuals · ${selectedStructuredRows} structured ingredient rows · ${selectedReadableGaps} readable-panel gaps · ${board.scratch_soft_quota || "200GB"} private quota`)}</small>
       <em>${escapeHtml(selectedSummary.claim_policy || state.data.source_family_timeline?.claim_policy || "Ingredient text remains candidate evidence until manual review.")}</em>
     </div>
   `;

@@ -461,6 +461,13 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab")).toHaveCount(4);
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
+  await expect(page.locator("#source-family-summary")).toContainText("152");
+  await expect(page.locator("#source-family-summary")).toContainText("local visuals");
+  await expect(page.locator("#source-family-summary")).toContainText("148");
+  await expect(page.locator("#source-family-summary")).toContainText("ingredient lists");
+  await expect(page.locator("#source-family-summary")).toContainText("105/105 local visuals");
+  await expect(page.locator("#source-family-summary")).toContainText("105 structured ingredient rows");
+  await expect(page.locator("#source-family-summary")).toContainText("0 readable-panel gaps");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(105);
   await expect(page.locator("#source-family-gap-summary")).toBeHidden();
   await expect(page.locator("#source-family-coverage-summary")).toContainText("Full-corpus capture queue");
@@ -517,6 +524,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
 
   await page.locator(".source-family-tab").filter({ hasText: "Candy Wrapper Archive" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Candy Wrapper Archive");
+  await expect(page.locator("#source-family-summary")).toContainText("16/16 local visuals");
+  await expect(page.locator("#source-family-summary")).toContainText("14 structured ingredient rows");
+  await expect(page.locator("#source-family-summary")).toContainText("2 readable-panel gaps");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(5);
   await expect(page.locator("#source-family-gap-summary")).toContainText("Readable panel queue");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Snickers Bar");
