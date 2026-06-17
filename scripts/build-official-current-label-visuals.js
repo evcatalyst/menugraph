@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { spawnSync } = require("child_process");
 
 const root = path.join(__dirname, "..");
 const fullQueueCsvPath = path.join(root, "docs/data/product-evidence/exports/full_corpus_ingredient_ocr_queue.csv");
@@ -578,6 +579,15 @@ const curatedRows = {
     source_image_url: "https://cache.dominos.com/olo/6_168_0/assets/build/images/promo/dominos_social_logo.jpg",
     source_image_match_status: "official_current_menu_ingredient_statement_table",
   },
+  "dunkin_glazed_donut__current_2020s__697__3": {
+    ingredient_fragment_strategy: "dunkin_pdf_glazed_donut",
+    source_fetch_url: "https://www.dunkindonuts.com/content/dam/dd/pdf/allergy_ingredient_guide.pdf",
+    source_url_override: "https://www.dunkindonuts.com/content/dam/dd/pdf/allergy_ingredient_guide.pdf",
+    source_detail_url: "https://www.dunkindonuts.com/content/dam/dd/pdf/allergy_ingredient_guide.pdf#page=82",
+    source_title_override: "Dunkin' Allergen and Ingredient Guide official PDF",
+    source_owner_override: "Dunkin'",
+    source_image_match_status: "official_current_menu_ingredient_pdf",
+  },
 };
 
 function argValue(name, fallback = "") {
@@ -737,6 +747,48 @@ async function fetchBinaryToCache(url, targetPath, noFetch) {
   ensureDir(path.dirname(finalPath));
   fs.writeFileSync(finalPath, Buffer.from(await response.arrayBuffer()));
   return { file_path: finalPath, status: "downloaded" };
+}
+
+function extractPdfTextToCache(pdfPath, textPath) {
+  if (fs.existsSync(textPath)) return { text_path: textPath, status: "cached", text: fs.readFileSync(textPath, "utf8") };
+  const python = process.env.MENUGRAPH_PDF_PYTHON || process.env.PYTHON || "python3";
+  const script = [
+    "import pathlib, sys",
+    "import pdfplumber",
+    "pdf_path = pathlib.Path(sys.argv[1])",
+    "text_path = pathlib.Path(sys.argv[2])",
+    "parts = []",
+    "with pdfplumber.open(str(pdf_path)) as pdf:",
+    "    for page in pdf.pages:",
+    "        parts.append(page.extract_text(x_tolerance=1, y_tolerance=3) or '')",
+    "text_path.parent.mkdir(parents=True, exist_ok=True)",
+    "text_path.write_text('\\n'.join(parts), encoding='utf-8')",
+  ].join("\n");
+  const result = spawnSync(python, ["-c", script, pdfPath, textPath], {
+    encoding: "utf8",
+    maxBuffer: 1024 * 1024,
+  });
+  if (result.status !== 0) {
+    return {
+      text_path: "",
+      status: `pdf_text_extraction_failed_${result.status ?? "signal"}`,
+      text: "",
+      error: shortText(result.stderr || result.stdout || "pdf text extraction failed", 500),
+    };
+  }
+  return { text_path: textPath, status: "pdf_text_extracted", text: fs.readFileSync(textPath, "utf8") };
+}
+
+async function fetchPdfTextToCache(url, pdfPath, textPath, noFetch) {
+  if (!fs.existsSync(pdfPath) && !noFetch) {
+    const response = await fetchWithTimeout(url, { headers: { Accept: "application/pdf,*/*" } });
+    if (!response.ok) return { file_path: "", text_path: "", status: `download_failed_${response.status}`, text: "" };
+    ensureDir(path.dirname(pdfPath));
+    fs.writeFileSync(pdfPath, Buffer.from(await response.arrayBuffer()));
+  }
+  if (!fs.existsSync(pdfPath)) return { file_path: "", text_path: "", status: "missing_local_cache", text: "" };
+  const extracted = extractPdfTextToCache(pdfPath, textPath);
+  return { file_path: pdfPath, ...extracted };
 }
 
 function decodeEntities(value) {
@@ -1109,6 +1161,14 @@ function ingredientItemsFromPizzaHutPepperoniPage(html) {
   return statement ? [`Pepperoni topping: ${statement}`] : [];
 }
 
+function ingredientItemsFromDunkinGlazedDonutPdf(text) {
+  const statement = statementBetween(String(text || "").replace(/\s+/g, " "), /\bPRODUCT NAME\s+Glazed Donut\s+CATEGORY\s+Donuts\s+FLAVOR\s+Glazed Donut\s+INGREDIENTS\s+/i, [
+    /\s+ALLERGENS\b/i,
+    /\s+PRODUCT NAME\b/i,
+  ]);
+  return ingredientItemsFromStatement(statement);
+}
+
 function ingredientTextFromItems(items) {
   return `Ingredients: ${items.join(", ")}.`;
 }
@@ -1369,6 +1429,7 @@ function ingredientItemsForStrategy(strategy, mainHtml, fragmentHtml, review = {
     return ingredientItemsFromDominosIngredientsXml(mainHtml, review.component_ingredient_names || []);
   }
   if (strategy === "pizza_hut_pepperoni_page") return ingredientItemsFromPizzaHutPepperoniPage(mainHtml);
+  if (strategy === "dunkin_pdf_glazed_donut") return ingredientItemsFromDunkinGlazedDonutPdf(mainHtml);
   if (strategy === "smartlabel_fragment") return ingredientItemsFromFragment(fragmentHtml);
   return ingredientItemsFromStatement(ingredientStatementForStrategy(strategy, mainHtml, fragmentHtml));
 }
@@ -1390,11 +1451,16 @@ function proofVisualBasisFor(review, visual, hasIngredientText) {
     return "official_ingredient_label_image";
   }
   if (review.source_image_match_status === "official_current_menu_ingredient_statement_table"
+    || review.source_image_match_status === "official_current_menu_ingredient_pdf"
     || review.source_image_match_status === "official_current_product_api") {
     return "official_menu_or_api_text";
   }
   if (hasIngredientText) return "official_source_text_proof_panel";
   return "source_visual_lineage_only";
+}
+
+function isPdfIngredientStrategy(strategy) {
+  return /^dunkin_pdf_/.test(strategy);
 }
 
 function ingredientTextSourceForStrategy(strategy) {
@@ -1407,6 +1473,7 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "taco_bell_nutritionix_components") return "official_current_menu_ingredient_statement_table";
   if (strategy === "dominos_ingredients_xml_components") return "official_current_menu_ingredient_statement_xml";
   if (strategy === "pizza_hut_pepperoni_page") return "official_current_menu_page_text";
+  if (strategy === "dunkin_pdf_glazed_donut") return "official_current_menu_ingredient_pdf";
   if (strategy === "manual_source_image_transcription") return "official_current_ingredient_label_image_manual_transcription";
   if (strategy === "kraft_heinz_json" || strategy === "official_json_ingredients" || strategy === "totinos_product_page") return "official_current_product_page_json";
   return "official_current_product_page_text";
@@ -1746,11 +1813,12 @@ async function build() {
   const runId = sanitizeId(argValue("run-id", "official_current")) || "official_current";
   const runDir = path.resolve(argValue("result-dir", path.join(cacheRoot, runId)));
   const htmlDir = path.join(runDir, "source-html");
+  const pdfDir = path.join(runDir, "source-pdfs");
   const imageDir = path.join(runDir, "images");
   const proofHtmlDir = path.join(runDir, "proof-html");
   const cropDir = path.join(runDir, "crops");
   const upscaledCropDir = path.join(cropDir, "upscaled");
-  [runDir, htmlDir, imageDir, proofHtmlDir, cropDir, upscaledCropDir].forEach(ensureDir);
+  [runDir, htmlDir, pdfDir, imageDir, proofHtmlDir, cropDir, upscaledCropDir].forEach(ensureDir);
 
   const rows = readQueueRows();
   const missingRows = Object.keys(curatedRows).filter((evidenceId) => !rows.some((row) => row.evidence_id === evidenceId));
@@ -1767,9 +1835,16 @@ async function build() {
     const visualId = visualIdFor(row);
     const publicSourceUrl = review.source_url_override || row.source_url;
     const sourceFetchUrl = review.source_fetch_url || row.source_url;
-    const mainHtmlPath = path.join(htmlDir, `${visualId}-${sha(sourceFetchUrl, 8)}-main.html`);
-    const mainCapture = await fetchTextToCache(sourceFetchUrl, mainHtmlPath, noFetch);
     const strategy = review.ingredient_fragment_strategy || "smartlabel_fragment";
+    const mainHtmlPath = path.join(htmlDir, `${visualId}-${sha(sourceFetchUrl, 8)}-main.html`);
+    const mainCapture = isPdfIngredientStrategy(strategy)
+      ? await fetchPdfTextToCache(
+        sourceFetchUrl,
+        path.join(pdfDir, `${visualId}-${sha(sourceFetchUrl, 8)}.pdf`),
+        path.join(htmlDir, `${visualId}-${sha(sourceFetchUrl, 8)}-pdf.txt`),
+        noFetch,
+      )
+      : await fetchTextToCache(sourceFetchUrl, mainHtmlPath, noFetch);
     const productId = strategy === "smartlabel_fragment" ? productIdFromMainHtml(mainCapture.text) : "";
     const fragmentUrl = strategy === "smartlabel_fragment"
       ? productId ? smartLabelFragmentUrl(sourceFetchUrl, productId) : ""
