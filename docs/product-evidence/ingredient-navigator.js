@@ -200,10 +200,41 @@ function ingredientItemsForRow(row) {
   return splitIngredientText(row?.ingredient_text || "");
 }
 
+function ingredientMatchesActiveFilter(item, query = sourceFamilyFilterQuery()) {
+  return Boolean(query && ingredientTrendKey(item).includes(query));
+}
+
+function ingredientProofExcerpt(value, limit) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!limit || text.length <= limit) return text;
+
+  const query = sourceFamilyFilterQuery();
+  const matchIndex = query ? text.toLowerCase().indexOf(query) : -1;
+  if (matchIndex < 0) return truncateText(text, limit);
+
+  const padding = Math.max(12, Math.floor((limit - query.length) / 2));
+  let start = Math.max(0, matchIndex - padding);
+  let end = Math.min(text.length, start + limit);
+  start = Math.max(0, end - limit);
+
+  let excerpt = text.slice(start, end).trim();
+  if (start > 0) excerpt = `...${excerpt.replace(/^[,;:\s]+/, "")}`;
+  if (end < text.length) excerpt = `${excerpt.replace(/[,;:\s]+$/, "")}...`;
+  return excerpt;
+}
+
+function ingredientProofListItem(item, options = {}) {
+  const value = String(item || "").replace(/\s+/g, " ").trim();
+  const isFilterMatch = ingredientMatchesActiveFilter(value);
+  const className = `ingredient-proof-list-item${isFilterMatch ? " is-filter-match" : ""}`;
+  const matchAttr = isFilterMatch ? ` data-filter-match="true"` : "";
+  const text = options.truncate ? ingredientProofExcerpt(value, options.truncate) : value;
+  return `<li class="${escapeHtml(className)}"${matchAttr}>${escapeHtml(text)}</li>`;
+}
+
 function ingredientFilterButton(item) {
   const value = String(item || "").replace(/\s+/g, " ").trim();
-  const query = sourceFamilyFilterQuery();
-  const isFilterMatch = Boolean(query && ingredientTrendKey(value).includes(query));
+  const isFilterMatch = ingredientMatchesActiveFilter(value);
   const className = `ingredient-filter-link${isFilterMatch ? " is-filter-match" : ""}`;
   const title = isFilterMatch ? `Active proof filter: ${value}` : `Find proof cards with ${value}`;
   const currentAttr = isFilterMatch ? ` aria-current="true"` : "";
@@ -231,7 +262,7 @@ function ingredientOverlay(row) {
     <div class="cwa-ingredient-overlay has-ingredient-list" aria-label="Readable ingredient proof text">
       <span>${escapeHtml(overlayTitle)}</span>
       ${items.length
-        ? `<ul class="cwa-overlay-ingredient-list">${items.map((item) => `<li>${escapeHtml(truncateText(item, 140))}</li>`).join("")}</ul>`
+        ? `<ul class="cwa-overlay-ingredient-list">${items.map((item) => ingredientProofListItem(item, { truncate: 140 })).join("")}</ul>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}
       <em>${escapeHtml(items.length ? `${items.length} ingredient ${items.length === 1 ? "entry" : "entries"}` : "Ingredient text")}</em>
     </div>
@@ -814,7 +845,7 @@ function ingredientDrilldownProofOverlay(row) {
     <div class="ingredient-drilldown-proof-overlay" aria-label="Readable ingredient proof text">
       <span>${escapeHtml(proofVisualLabel(row))}</span>
       <ul>
-        ${items.map((item) => `<li>${escapeHtml(truncateText(item, 140))}</li>`).join("")}
+        ${items.map((item) => ingredientProofListItem(item, { truncate: 140 })).join("")}
       </ul>
     </div>
   `;

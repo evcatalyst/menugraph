@@ -1672,6 +1672,17 @@ a:hover {
   background: var(--teal);
 }
 
+.cwa-overlay-ingredient-list li.is-filter-match,
+.ingredient-drilldown-proof-overlay li.is-filter-match {
+  color: #5d3f0f;
+  box-shadow: inset 0 -0.52em rgba(212, 173, 87, 0.24);
+}
+
+.cwa-overlay-ingredient-list li.is-filter-match::before,
+.ingredient-drilldown-proof-overlay li.is-filter-match::before {
+  background: var(--gold);
+}
+
 .cwa-timeline-card.is-ingredient-open .cwa-preview-frame .cwa-ingredient-overlay {
   left: 12px;
   right: 12px;
