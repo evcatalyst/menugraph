@@ -501,6 +501,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-gap-summary")).toContainText("Readable Panel Photo Needed");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Panel Capture Needed");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Document Text Pipeline Needed");
+  await expect(page.locator("#source-family-gap-summary .source-family-gap-kind")).toHaveCount(11);
+  await expect(page.locator("#source-family-gap-summary .source-family-gap-copy em")).toHaveCount(0);
   await expect(page.locator("#source-family-gap-summary")).toContainText("Find a back or side panel photo");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Capture a Starbucks-owned menu");
   await expect(page.locator("#source-family-gap-summary")).toContainText("Resolve KFC US nutrition/allergen data");

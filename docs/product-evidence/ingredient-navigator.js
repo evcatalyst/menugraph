@@ -883,6 +883,14 @@ function sourceFamilyGapClass(row) {
   return "is-source-gap";
 }
 
+function sourceFamilyGapIcon(row) {
+  const kind = sourceFamilyGapKind(row);
+  if (kind === "document_text_pipeline_needed") return "source";
+  if (kind === "panel_capture_needed") return "panel";
+  if (kind === "readable_panel_photo_needed") return "image";
+  return "partial";
+}
+
 function renderSourceFamilyGapSummary(family, visibleProducts, query, localImages) {
   if (!els.sourceFamilyGapSummary) return;
   const gaps = sourceFamilyGapRows(visibleProducts, query, family);
@@ -908,7 +916,10 @@ function renderSourceFamilyGapSummary(family, visibleProducts, query, localImage
               <span>${escapeHtml([row.source_family_label, row.vintage_label].filter(Boolean).join(" · "))}</span>
               <strong>${escapeHtml(row.product_name)}</strong>
               <small>${escapeHtml(row.source_image_title || row.source_title || row.source_domain || "Source image")}</small>
-              <em>${escapeHtml(labelFor(sourceFamilyGapKind(row)))}</em>
+              <span class="source-family-gap-kind">
+                ${cwaInlineIcon(sourceFamilyGapIcon(row))}
+                <b>${escapeHtml(labelFor(sourceFamilyGapKind(row)))}</b>
+              </span>
               <p>${escapeHtml(truncateText(sourceFamilyGapAction(row), 190))}</p>
               ${collectionSourceRequirements(row, { compact: true })}
             </div>

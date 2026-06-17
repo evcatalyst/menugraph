@@ -944,17 +944,34 @@ a:hover {
   overflow: hidden;
 }
 
-.source-family-gap-copy em {
+.source-family-gap-kind {
+  display: inline-grid;
+  grid-template-columns: 14px minmax(0, 1fr);
   width: fit-content;
-  border: 1px solid rgba(212, 173, 87, 0.28);
-  border-radius: 4px;
+  gap: 5px;
+  align-items: center;
   color: var(--gold);
   font-size: 10px;
-  font-style: normal;
   font-weight: 820;
   line-height: 1.1;
-  padding: 2px 5px;
   text-transform: uppercase;
+}
+
+.source-family-gap-kind svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.source-family-gap-kind b {
+  min-width: 0;
+  font: inherit;
+  overflow-wrap: anywhere;
 }
 
 .source-family-gap-copy p {
