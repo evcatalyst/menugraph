@@ -505,6 +505,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader-meta")).toContainText(/ingredient entr/);
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy.is-compact ul li").first()).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-source-line")).toBeVisible();
+  const defaultTranscript = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-transcript");
+  await expect(defaultTranscript.locator("summary")).toContainText("Full ingredient transcript");
+  await expect(defaultTranscript).not.toHaveAttribute("open", "");
   const defaultProofCard = await page.locator(".cwa-timeline-card").first().boundingBox();
   expect(defaultProofCard?.width || 0).toBeGreaterThan(900);
   await expect(page.locator(".cwa-timeline-card").first()).toHaveCSS("transform", "none");
@@ -541,6 +544,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(firstProofPreview).toHaveAttribute("aria-pressed", "true");
   await expect(firstProofPreview).toHaveAttribute("aria-label", /Hide ingredient proof text/);
   await expect(firstProofOverlay).toHaveCSS("opacity", "1");
+  await defaultTranscript.locator("summary").click();
+  await expect(defaultTranscript).toHaveAttribute("open", "");
+  await expect(defaultTranscript.locator("p")).toContainText("hydrolyzed beef stock");
 
   await page.locator(".source-family-tab").filter({ hasText: "Candy Wrapper Archive" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Candy Wrapper Archive");
@@ -661,9 +667,14 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader-meta")).not.toContainText("candidate text");
   const frootLoopsSourceLine = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-source-line");
   await expect(frootLoopsSourceLine).toContainText("BHT added to maintain product freshness");
+  const frootLoopsTranscript = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-transcript");
+  await expect(frootLoopsTranscript.locator("summary")).toContainText("Full ingredient transcript");
   await expect.poll(async () => frootLoopsSourceLine.evaluate((element) => getComputedStyle(element).webkitLineClamp)).toBe("3");
   await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
   await expect.poll(async () => frootLoopsSourceLine.evaluate((element) => getComputedStyle(element).webkitLineClamp)).toBe("none");
+  await frootLoopsTranscript.locator("summary").click();
+  await expect(frootLoopsTranscript).toHaveAttribute("open", "");
+  await expect(frootLoopsTranscript.locator("p")).toContainText("BHT added to maintain product freshness");
   const frootLoopsOverlay = page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay");
   expect(await frootLoopsOverlay.locator("li").count()).toBeGreaterThan(10);
   await expect(frootLoopsOverlay).toContainText("BHT added to maintain product freshness");
@@ -701,6 +712,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(drilldownIngredientCopy.locator("ul")).toBeVisible();
   await expect(drilldownIngredientCopy.locator("ul")).toContainText("sugar");
   await expect(drilldownIngredientCopy.locator("ul + .cwa-ingredient-source-line")).toContainText("BHT added to maintain product freshness");
+  await expect(drilldownIngredientCopy.locator(".cwa-ingredient-transcript summary")).toContainText("Full ingredient transcript");
+  await drilldownIngredientCopy.locator(".cwa-ingredient-transcript summary").click();
+  await expect(drilldownIngredientCopy.locator(".cwa-ingredient-transcript")).toHaveAttribute("open", "");
+  await expect(drilldownIngredientCopy.locator(".cwa-ingredient-transcript p")).toContainText("BHT added to maintain product freshness");
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-trends")).toContainText("Product ingredient signals");
   const artificialColoringTrend = page.locator("#ingredient-drilldown .ingredient-drilldown-trends button").filter({ hasText: "artificial coloring" });
   await expect(artificialColoringTrend).toBeVisible();

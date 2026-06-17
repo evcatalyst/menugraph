@@ -241,6 +241,17 @@ function ingredientFilterButton(item) {
   return `<button class="${escapeHtml(className)}" type="button" data-source-family-filter-value="${escapeHtml(value)}" title="${escapeHtml(title)}"${currentAttr}>${escapeHtml(value)}</button>`;
 }
 
+function ingredientTranscriptDetails(sourceText) {
+  const text = String(sourceText || "").replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  return `
+    <details class="cwa-ingredient-transcript">
+      <summary>Full ingredient transcript</summary>
+      <p>${escapeHtml(text)}</p>
+    </details>
+  `;
+}
+
 function missingProofTitle(row) {
   const basis = proofVisualBasis(row);
   if (basis === "collection_target_source_lead") return "Source lead only";
@@ -307,13 +318,14 @@ function ingredientTextBlock(row, options = {}) {
   const sourceLine = sourceText
     ? `<p class="cwa-ingredient-source-line">${escapeHtml(sourceText)}</p>`
     : "";
+  const transcript = sourceText && items.length ? ingredientTranscriptDetails(sourceText) : "";
   return `
     <div${idAttr} class="cwa-ingredient-copy ${compact ? "is-compact cwa-label-reader has-ingredients" : ""}">
       <div class="cwa-label-reader-title">
         <span>${escapeHtml(label)}</span>
         ${readerMeta}
       </div>
-      ${list}${sourceLine}
+      ${list}${sourceLine}${transcript}
     </div>
   `;
 }

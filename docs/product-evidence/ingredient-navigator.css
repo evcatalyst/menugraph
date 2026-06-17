@@ -1889,6 +1889,68 @@ a:hover {
   max-height: min(42vh, 420px);
 }
 
+.cwa-ingredient-transcript {
+  border-top: 1px solid rgba(245, 240, 230, 0.1);
+  margin-top: 1px;
+  min-width: 0;
+  padding-top: 6px;
+}
+
+.cwa-ingredient-transcript summary {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  width: fit-content;
+  border-radius: 3px;
+  color: var(--teal);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.15;
+  list-style: none;
+  text-transform: uppercase;
+}
+
+.cwa-ingredient-transcript summary::-webkit-details-marker {
+  display: none;
+}
+
+.cwa-ingredient-transcript summary::before {
+  content: "+";
+  display: inline-grid;
+  width: 13px;
+  height: 13px;
+  place-items: center;
+  border: 1px solid rgba(101, 183, 177, 0.42);
+  border-radius: 3px;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.cwa-ingredient-transcript[open] summary::before {
+  content: "-";
+}
+
+.cwa-ingredient-transcript summary:focus-visible {
+  outline: 1px solid rgba(101, 183, 177, 0.72);
+  outline-offset: 2px;
+}
+
+.cwa-ingredient-transcript p {
+  max-height: min(34vh, 280px);
+  margin-top: 7px;
+  overflow: auto;
+  color: var(--ink) !important;
+  font-size: 12px;
+  line-height: 1.4;
+  scrollbar-width: thin;
+}
+
+.cwa-ingredient-copy.is-compact .cwa-ingredient-transcript p {
+  max-height: min(28vh, 220px);
+}
+
 .cwa-ingredient-copy ul {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
