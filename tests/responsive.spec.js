@@ -639,6 +639,12 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".cwa-product-chip").filter({ hasText: "Trix Cereal" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(2);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText(/promotion\/top-flap panel only|readable ingredient panel still needed/i);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader-title")).toContainText("Visual proof only");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-label-reader-meta")).toContainText("Readable panel needed");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame")).toHaveAttribute("aria-label", /Inspect visual source gap/);
+  await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").hover();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Visual proof only");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText(/promotion\/top-flap panel only/i);
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Visual lineage only']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label='Local private upscaled crop available']")).toBeVisible();
   await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Froot Loops" }).click();

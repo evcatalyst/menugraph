@@ -241,12 +241,27 @@ function ingredientFilterButton(item) {
   return `<button class="${escapeHtml(className)}" type="button" data-source-family-filter-value="${escapeHtml(value)}" title="${escapeHtml(title)}"${currentAttr}>${escapeHtml(value)}</button>`;
 }
 
+function missingProofTitle(row) {
+  const basis = proofVisualBasis(row);
+  if (basis === "collection_target_source_lead") return "Source lead only";
+  if (row?.crop_focus === "panel_context") return "Panel context only";
+  return "Visual proof only";
+}
+
+function missingProofMessage(row) {
+  return row?.candidate_excerpt
+    || (row?.crop_focus === "panel_context"
+      ? "Focused package text is visible; a readable ingredient list still needs capture and review."
+      : "This source image supports visual provenance, but no readable ingredient panel has been captured for this row.");
+}
+
 function ingredientOverlay(row) {
   if (!row.ingredient_text) {
     return `
       <div class="cwa-ingredient-overlay is-missing-text" aria-label="Readable ingredient proof status">
-        <span>Readable panel needed</span>
-        <p>This source image supports visual lineage, but no readable ingredient panel has been captured for this row.</p>
+        <span>${escapeHtml(missingProofTitle(row))}</span>
+        <p>${escapeHtml(missingProofMessage(row))}</p>
+        <em>Readable panel still needed</em>
       </div>
     `;
   }
@@ -311,8 +326,8 @@ function missingIngredientTextBlock(row, fallbackText, options = {}) {
   return `
     <div${idAttr} class="cwa-ingredient-copy is-compact cwa-label-reader needs-readable-panel">
       <div class="cwa-label-reader-title">
-        <span>Readable panel needed</span>
-        <small class="cwa-label-reader-meta">${escapeHtml(sourceStatus)}</small>
+        <span>${escapeHtml(missingProofTitle(row))}</span>
+        <small class="cwa-label-reader-meta">Readable panel needed · ${escapeHtml(sourceStatus)}</small>
       </div>
       <p>${escapeHtml(fallbackText)}</p>
     </div>
@@ -323,6 +338,9 @@ function cwaPreviewButtonLabel(button, isOpen = false) {
   const productName = button?.dataset?.cwaProductName || "this product";
   const vintageLabel = button?.dataset?.cwaVintageLabel || "";
   const subject = `${productName} ${vintageLabel}`.trim();
+  if (button?.dataset?.cwaHasIngredient !== "1") {
+    return `${isOpen ? "Close" : "Inspect"} visual source gap for ${subject}`;
+  }
   return `${isOpen ? "Hide" : "Show"} ingredient proof text for ${subject}`;
 }
 
@@ -1238,7 +1256,7 @@ function renderCwaTimeline() {
       const readerId = `cwa-label-reader-${row.visual_id || index}`;
       return `
         <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}" data-proof-basis="${escapeHtml(visualBasis)}">
-          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" data-cwa-product-name="${escapeHtml(row.product_name)}" data-cwa-vintage-label="${escapeHtml(row.vintage_label)}" aria-pressed="false" aria-describedby="${escapeHtml(readerId)}" aria-label="${escapeHtml(`Show ingredient proof text for ${row.product_name} ${row.vintage_label}`)}">
+          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" data-cwa-has-ingredient="${ingredientText ? "1" : "0"}" data-cwa-product-name="${escapeHtml(row.product_name)}" data-cwa-vintage-label="${escapeHtml(row.vintage_label)}" aria-pressed="false" aria-describedby="${escapeHtml(readerId)}" aria-label="${escapeHtml(ingredientText ? `Show ingredient proof text for ${row.product_name} ${row.vintage_label}` : `Inspect visual source gap for ${row.product_name} ${row.vintage_label}`)}">
             ${canShowPreview
               ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ${proofVisualLabel(row).toLowerCase()}`)}" loading="lazy" data-private-preview="1" />`
               : ""}
