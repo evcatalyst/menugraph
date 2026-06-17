@@ -855,6 +855,8 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-filter-status")).toContainText("of 105 products");
   await expect(page.locator("#source-family-ingredient-summary .source-family-ingredient-summary-title")).toContainText("Filtered ingredients");
   await expect(page.locator("#source-family-ingredient-summary .source-family-ingredient-summary-title small")).toContainText(/sugar/i);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".ingredient-filter-link.is-filter-match").first()).toContainText(/sugar/i);
+  await expect(page.locator(".cwa-timeline-card").first().locator(".ingredient-filter-link.is-filter-match").first()).toHaveAttribute("aria-current", "true");
   await expect(page.locator(".cwa-product-chip")).not.toHaveCount(105);
   await page.locator("#source-family-filter-clear").click();
   await page.locator("#source-family-search").fill("sodium alginate");
@@ -863,6 +865,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-product-chip").first()).toContainText("Velveeta Shells & Cheese");
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("SODIUM ALGINATE");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".ingredient-filter-link.is-filter-match")).toContainText("SODIUM ALGINATE");
   await expect(page.locator("#source-family-position")).toContainText("1 / 1");
   await expect(page.locator("#source-family-prev")).toBeDisabled();
   await expect(page.locator("#source-family-next")).toBeDisabled();

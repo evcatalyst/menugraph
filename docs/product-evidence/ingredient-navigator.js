@@ -202,7 +202,12 @@ function ingredientItemsForRow(row) {
 
 function ingredientFilterButton(item) {
   const value = String(item || "").replace(/\s+/g, " ").trim();
-  return `<button class="ingredient-filter-link" type="button" data-source-family-filter-value="${escapeHtml(value)}" title="${escapeHtml(`Find proof cards with ${value}`)}">${escapeHtml(value)}</button>`;
+  const query = sourceFamilyFilterQuery();
+  const isFilterMatch = Boolean(query && ingredientTrendKey(value).includes(query));
+  const className = `ingredient-filter-link${isFilterMatch ? " is-filter-match" : ""}`;
+  const title = isFilterMatch ? `Active proof filter: ${value}` : `Find proof cards with ${value}`;
+  const currentAttr = isFilterMatch ? ` aria-current="true"` : "";
+  return `<button class="${escapeHtml(className)}" type="button" data-source-family-filter-value="${escapeHtml(value)}" title="${escapeHtml(title)}"${currentAttr}>${escapeHtml(value)}</button>`;
 }
 
 function ingredientOverlay(row) {
