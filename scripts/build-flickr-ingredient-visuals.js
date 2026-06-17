@@ -235,7 +235,7 @@ const curatedRows = {
     source_detail_url: "https://www.flickr.com/photos/jasonliebigstuff/548698222",
     source_image_match_status: "source_record_date_matched",
     crop_box: { x: 0.0, y: 0.08, width: 0.12, height: 0.89 },
-    crop_rotation_degrees: 90,
+    crop_rotation_degrees: 270,
     crop_focus: "ingredient_text",
     ingredient_text: "Seven-Up contains carbonated water, sugar, citric acid, sodium citrate, flavor derived from lemon and lime oils.",
   },
@@ -247,7 +247,7 @@ const curatedRows = {
     source_detail_url: "https://www.flickr.com/photos/jasonliebigstuff/548698222",
     source_image_match_status: "vintage_matched",
     crop_box: { x: 0.0, y: 0.08, width: 0.12, height: 0.89 },
-    crop_rotation_degrees: 90,
+    crop_rotation_degrees: 270,
     crop_focus: "ingredient_text",
     ingredient_text: "Seven-Up contains carbonated water, sugar, citric acid, sodium citrate, flavor derived from lemon and lime oils.",
   },
@@ -445,7 +445,7 @@ async function localImageForReview(review, imageDir, noFetch) {
   return { file_path: downloadPath, status: "downloaded" };
 }
 
-function runCrop(imagePath, cropPath, box, moduleCachePath, padding = 0.05, minOutputWidth = 1800) {
+function runCrop(imagePath, cropPath, box, moduleCachePath, padding = 0.05, minOutputWidth = 1800, rotationDegrees = 0) {
   const swiftTempPath = path.join(moduleCachePath, "tmp");
   ensureDir(swiftTempPath);
   const run = spawnSync("swift", [
@@ -460,6 +460,7 @@ function runCrop(imagePath, cropPath, box, moduleCachePath, padding = 0.05, minO
     String(box.height),
     String(padding),
     String(minOutputWidth),
+    String(rotationDegrees || 0),
   ], {
     cwd: root,
     encoding: "utf8",
@@ -715,7 +716,15 @@ async function build() {
 
     if (localImage.file_path) {
       const cropPath = path.join(cropDir, `${visualId}.png`);
-      const crop = runCrop(localImage.file_path, cropPath, review.crop_box, moduleCachePath, review.crop_padding ?? 0.06, review.min_output_width || 1800);
+      const crop = runCrop(
+        localImage.file_path,
+        cropPath,
+        review.crop_box,
+        moduleCachePath,
+        review.crop_padding ?? 0.06,
+        review.min_output_width || 1800,
+        review.crop_rotation_degrees || 0,
+      );
       visual.crop_status = crop.status === "crop_ready"
         ? review.crop_focus === "panel_context" ? "panel_context_crop_ready" : "ingredient_crop_ready"
         : crop.status;
@@ -730,6 +739,7 @@ async function build() {
           moduleCachePath,
           review.crop_padding ?? 0.06,
           review.upscaled_min_output_width || upscaledMinOutputWidth(review.crop_focus),
+          review.crop_rotation_degrees || 0,
         );
         visual.upscaled_crop_status = upscaled.status === "crop_ready" ? "upscaled_crop_ready" : upscaled.status;
         if (upscaled.status === "crop_ready" && fs.existsSync(upscaledPath)) {

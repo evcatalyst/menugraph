@@ -481,7 +481,7 @@ function wholeImageBox() {
   return { x: 0, y: 0, width: 1, height: 1 };
 }
 
-function runCrop(imagePath, cropPath, box, moduleCachePath, padding = 0.05, minOutputWidth = 1000) {
+function runCrop(imagePath, cropPath, box, moduleCachePath, padding = 0.05, minOutputWidth = 1000, rotationDegrees = 0) {
   const swiftTempPath = path.join(moduleCachePath, "tmp");
   ensureDir(swiftTempPath);
   const run = spawnSync("swift", [
@@ -496,6 +496,7 @@ function runCrop(imagePath, cropPath, box, moduleCachePath, padding = 0.05, minO
     String(box.height),
     String(padding),
     String(minOutputWidth),
+    String(rotationDegrees || 0),
   ], {
     cwd: root,
     encoding: "utf8",
@@ -1011,6 +1012,7 @@ async function build() {
         moduleCachePath,
         cropPadding,
         cropMinOutputWidth,
+        visual.crop_rotation_degrees || 0,
       );
       visual.crop_status = focus.focus === "ingredient_text"
         ? "ingredient_crop_ready"
@@ -1028,6 +1030,7 @@ async function build() {
           moduleCachePath,
           cropPadding,
           upscaledMinOutputWidth(focus.focus),
+          visual.crop_rotation_degrees || 0,
         );
         visual.upscaled_crop_status = upscaled.status === "crop_ready" ? "upscaled_crop_ready" : upscaled.status;
         if (upscaled.status === "crop_ready" && fs.existsSync(upscaledPath)) {

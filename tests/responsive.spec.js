@@ -581,6 +581,18 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".ingredient-drilldown-close").click();
   await expect(page.locator("#ingredient-drilldown")).toBeHidden();
 
+  await page.locator(".cwa-product-chip").filter({ hasText: "7UP Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(2);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("carbonated water");
+  const sevenUpProofImage = page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame img");
+  await expect(sevenUpProofImage).toBeVisible();
+  const sevenUpImageSize = await sevenUpProofImage.evaluate((image) => ({
+    width: image.naturalWidth,
+    height: image.naturalHeight,
+  }));
+  expect(sevenUpImageSize.width).toBeGreaterThan(sevenUpImageSize.height);
+  await expect(sevenUpProofImage).toHaveCSS("transform", "none");
+
   await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);

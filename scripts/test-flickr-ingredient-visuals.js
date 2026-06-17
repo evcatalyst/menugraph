@@ -141,12 +141,25 @@ assert(summaryFamily.products.some((product) => product.product_id === "trix_cer
 assert(summaryFamily.products.some((product) => product.product_id === "cocoa_puffs" && product.ingredient_panel_visible_count === 1 && product.readable_panel_photo_needed_count === 0), "Flickr summary should promote the review-gated Cocoa Puffs ingredient candidate");
 assert(summaryFamily.products.some((product) => product.product_id === "doritos_nacho_cheese" && product.ingredient_panel_visible_count === 2 && product.readable_panel_photo_needed_count === 0), "Flickr summary should promote the review-gated Doritos ingredient candidates");
 
+const rightAngleProofRows = visualIndex.rows.filter((row) => [90, 270].includes(Number(row.crop_rotation_degrees || 0)));
+assert(rightAngleProofRows.length >= 6, "Flickr index should carry right-angle crop orientation for sideways label panels");
+rightAngleProofRows.forEach((row) => {
+  assert.strictEqual(row.preview_render_variant, "upscaled_crop", `${row.evidence_id} should render the upscaled rotated proof crop`);
+});
+
 assert.strictEqual(resolvePrivateIngredientCropPath("../bad"), null, "path traversal visual id should be rejected");
 assert.strictEqual(resolvePrivateIngredientCropPath("bad/slash"), null, "slash visual id should be rejected");
 assert.strictEqual(resolvePrivateIngredientCropPath("unknown_visual_id_000000"), null, "unknown visual id should not resolve");
 
 if (fs.existsSync(privateManifestPath)) {
   const privateManifest = JSON.parse(fs.readFileSync(privateManifestPath, "utf8"));
+  const rotatedProofIds = new Set(rightAngleProofRows.map((row) => row.evidence_id));
+  const rotatedPrivateProofs = (privateManifest.rows || []).filter((row) => rotatedProofIds.has(row.evidence_id));
+  assert.strictEqual(rotatedPrivateProofs.length, rightAngleProofRows.length, "private manifest should cover every right-angle public proof row");
+  rotatedPrivateProofs.forEach((row) => {
+    assert.strictEqual(row.upscaled_crop_status, "upscaled_crop_ready", `${row.evidence_id} should have an upscaled rotated crop`);
+    assert(Number(row.upscaled_output_pixels?.width || 0) > Number(row.upscaled_output_pixels?.height || 0), `${row.evidence_id} rotated crop should be upright and wider than tall`);
+  });
   const preview = (privateManifest.rows || []).find((row) => row.upscaled_preview_path || row.preview_path);
   if (preview) {
     const resolved = resolvePrivateIngredientCropPath(preview.visual_id);
