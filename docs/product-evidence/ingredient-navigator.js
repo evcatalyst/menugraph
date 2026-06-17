@@ -9,6 +9,9 @@ const els = {
   sourceFamilyTimelineTitle: document.querySelector("#source-family-timeline-title"),
   sourceFamilyTimelineNote: document.querySelector("#source-family-timeline-note"),
   sourceFamilyTabs: document.querySelector("#source-family-tabs"),
+  sourceFamilySearch: document.querySelector("#source-family-search"),
+  sourceFamilyFilterClear: document.querySelector("#source-family-filter-clear"),
+  sourceFamilyFilterStatus: document.querySelector("#source-family-filter-status"),
   cwaProductStrip: document.querySelector("#cwa-product-strip"),
   cwaTimelineTrack: document.querySelector("#cwa-timeline-track"),
   status: document.querySelector("#journey-status"),
@@ -41,6 +44,7 @@ const state = {
   facetId: "",
   sourceFamilyId: "",
   cwaProductId: "",
+  sourceFamilyQuery: "",
   search: "",
   compare: false,
   maxYear: 2026,
@@ -274,10 +278,54 @@ function cwaTimeline() {
   return sourceFamilyTimeline();
 }
 
+function sourceFamilyFilterQuery() {
+  return String(state.sourceFamilyQuery || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function sourceFamilyRowSearchText(row) {
+  return [
+    row.product_name,
+    row.brand,
+    row.category,
+    row.vintage_label,
+    row.source_title,
+    row.source_image_title,
+    row.source_domain,
+    row.ingredient_text,
+    row.candidate_excerpt,
+    ...ingredientItemsForRow(row),
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function sourceFamilyProductSearchText(productRow) {
+  return [
+    productRow.product_name,
+    productRow.brand,
+    productRow.category,
+    ...(productRow.vintages || []),
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function sourceFamilyRowMatches(row, query) {
+  return !query || sourceFamilyRowSearchText(row).includes(query);
+}
+
+function sourceFamilyProductMatches(productRow, query) {
+  return !query
+    || sourceFamilyProductSearchText(productRow).includes(query)
+    || (productRow.rows || []).some((row) => sourceFamilyRowMatches(row, query));
+}
+
+function filteredSourceFamilyProducts(family) {
+  const query = sourceFamilyFilterQuery();
+  return (family?.products || []).filter((productRow) => sourceFamilyProductMatches(productRow, query));
+}
+
 function selectedCwaProduct() {
   const family = cwaTimeline();
-  if (!family?.products?.length) return null;
-  return family.products.find((row) => row.product_id === state.cwaProductId) || family.products[0];
+  const products = filteredSourceFamilyProducts(family);
+  if (!products.length) return null;
+  return products.find((row) => row.product_id === state.cwaProductId) || products[0];
 }
 
 function sourceFamilyRowByVisualId(visualId) {
@@ -474,11 +522,38 @@ function renderCwaTimeline() {
       `).join("")
       : "";
   }
-  if (!state.cwaProductId || !family.products.some((row) => row.product_id === state.cwaProductId)) {
-    state.cwaProductId = family.products[0].product_id;
+  const query = sourceFamilyFilterQuery();
+  const visibleProducts = filteredSourceFamilyProducts(family);
+  const allProducts = family.products || [];
+  if (els.sourceFamilySearch && els.sourceFamilySearch.value !== state.sourceFamilyQuery) {
+    els.sourceFamilySearch.value = state.sourceFamilyQuery;
+  }
+  if (els.sourceFamilyFilterClear) {
+    els.sourceFamilyFilterClear.disabled = !query;
+  }
+  if (els.sourceFamilyFilterStatus) {
+    const visibleRows = visibleProducts.reduce((sum, productRow) => {
+      const productMatch = sourceFamilyProductSearchText(productRow).includes(query);
+      return sum + (query && !productMatch
+        ? (productRow.rows || []).filter((row) => sourceFamilyRowMatches(row, query)).length
+        : (productRow.rows || []).length);
+    }, 0);
+    els.sourceFamilyFilterStatus.textContent = query
+      ? `${visibleProducts.length} of ${allProducts.length} products · ${visibleRows} matching proof rows`
+      : `${allProducts.length} products · ${family.row_count || allProducts.reduce((sum, row) => sum + Number(row.evidence_count || 0), 0)} proof rows`;
+  }
+  if (!visibleProducts.length) {
+    state.cwaProductId = "";
+    els.cwaProductStrip.innerHTML = "";
+    els.cwaTimelineTrack.classList.remove("is-single-proof-row");
+    els.cwaTimelineTrack.innerHTML = `<article class="cwa-timeline-empty">No matching proof rows.</article>`;
+    return;
+  }
+  if (!state.cwaProductId || !visibleProducts.some((row) => row.product_id === state.cwaProductId)) {
+    state.cwaProductId = visibleProducts[0].product_id;
   }
   const productRow = selectedCwaProduct();
-  els.cwaProductStrip.innerHTML = family.products
+  els.cwaProductStrip.innerHTML = visibleProducts
     .map((row) => `
       <button class="cwa-product-chip ${row.product_id === state.cwaProductId ? "is-selected" : ""}" type="button" data-cwa-product-id="${escapeHtml(row.product_id)}">
         <strong>${escapeHtml(row.product_name)}</strong>
@@ -488,7 +563,10 @@ function renderCwaTimeline() {
     .join("");
 
   const localImages = isLocalPreviewHost();
-  const timelineRows = productRow.rows || [];
+  const productMatch = sourceFamilyProductSearchText(productRow).includes(query);
+  const timelineRows = query && !productMatch
+    ? (productRow.rows || []).filter((row) => sourceFamilyRowMatches(row, query))
+    : productRow.rows || [];
   els.cwaTimelineTrack.classList.toggle("is-single-proof-row", timelineRows.length === 1);
   els.cwaTimelineTrack.innerHTML = timelineRows
     .map((row, index) => {
@@ -997,6 +1075,16 @@ function attachEvents() {
     if (!button) return;
     state.cwaProductId = button.dataset.cwaProductId;
     renderCwaTimeline();
+  });
+  els.sourceFamilySearch?.addEventListener("input", () => {
+    state.sourceFamilyQuery = els.sourceFamilySearch.value;
+    renderCwaTimeline();
+  });
+  els.sourceFamilyFilterClear?.addEventListener("click", () => {
+    state.sourceFamilyQuery = "";
+    if (els.sourceFamilySearch) els.sourceFamilySearch.value = "";
+    renderCwaTimeline();
+    els.sourceFamilySearch?.focus();
   });
   els.cwaTimelineTrack?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-cwa-inspect]");

@@ -605,6 +605,16 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
+  await expect(page.locator("#source-family-filter-status")).toContainText("99 products");
+  await page.locator("#source-family-search").fill("sodium alginate");
+  await expect(page.locator("#source-family-filter-status")).toContainText("1 of 99 products");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(1);
+  await expect(page.locator(".cwa-product-chip").first()).toContainText("Velveeta Shells & Cheese");
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("SODIUM ALGINATE");
+  await page.locator("#source-family-filter-clear").click();
+  await expect(page.locator("#source-family-search")).toHaveValue("");
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
   await page.locator(".cwa-product-chip").filter({ hasText: "Oreo Original Chocolate Sandwich Cookies" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("HIGH FRUCTOSE CORN SYRUP");
