@@ -280,6 +280,11 @@ const curatedRows = {
     source_detail_url: "https://smartlabel.wkkellogg.com/Product/Index?gtin=00038000270840#ingredients",
     source_image_match_status: "official_current_label_page",
   },
+  "rice_krispies_treats_original__current_2020s__112__2": {
+    ingredient_fragment_strategy: "kelloggs_ingredients_list",
+    source_detail_url: "https://smartlabel.kelloggs.com/Product/Index/038000126710#ingredients",
+    source_image_match_status: "official_current_label_page",
+  },
   "betty_crocker_super_moist_yellow_cake_mix__current_2020s__100__1": {
     ingredient_fragment_strategy: "general_mills_product_page",
     source_detail_url: "https://www.bettycrocker.com/products/betty-crocker-baking-and-cake-mixes/yellow#ingredients",
@@ -786,6 +791,13 @@ function ingredientItemsFromFragment(fragmentHtml) {
   return items;
 }
 
+function isNonIngredientSmartLabelItem(item) {
+  const text = String(item || "").trim();
+  return /^[A-Za-z ]+ Contains$/i.test(text)
+    || /^(Bioengineered Food Disclosure|Kosher Status|Claims|Certifications|Health & Safety|Product Instructions|Recipes|Feeding Happiness|USDA MyPlate|Dietary Guidelines for Americans|Sustainability)$/i.test(text)
+    || /^(WK Kellogg Co|About Kellogg's|About Kellanova)$/i.test(text);
+}
+
 function ingredientItemsFromWkKelloggSmartLabel(html) {
   return ingredientItemsFromFragment(html)
     .map((item) => item
@@ -793,6 +805,20 @@ function ingredientItemsFromWkKelloggSmartLabel(html) {
       .replace(/\s+:/g, ":")
       .replace(/\s+/g, " ")
       .trim())
+    .filter((item) => item && !isNonIngredientSmartLabelItem(item))
+    .filter(Boolean);
+}
+
+function ingredientItemsFromKelloggsIngredientsList(html) {
+  const ingredientListMatch = String(html || "").match(/<ul\b[^>]*id=["']ingredients-list["'][^>]*>([\s\S]*?)<\/ul>/i);
+  const sourceHtml = ingredientListMatch ? ingredientListMatch[1] : html;
+  return ingredientItemsFromFragment(sourceHtml)
+    .map((item) => item
+      .replace(/^ingredients?:\s*/i, "")
+      .replace(/\s+:/g, ":")
+      .replace(/\s+/g, " ")
+      .trim())
+    .filter((item) => item && !isNonIngredientSmartLabelItem(item))
     .filter(Boolean);
 }
 
@@ -1164,6 +1190,7 @@ function ingredientStatementForStrategy(strategy, html, fragmentHtml) {
 function ingredientItemsForStrategy(strategy, mainHtml, fragmentHtml) {
   if (strategy === "hormel_page") return ingredientItemsFromHormelPage(mainHtml);
   if (strategy === "wkkellogg_smartlabel") return ingredientItemsFromWkKelloggSmartLabel(mainHtml);
+  if (strategy === "kelloggs_ingredients_list") return ingredientItemsFromKelloggsIngredientsList(mainHtml);
   if (strategy === "mcdonalds_item_details") return ingredientItemsFromMcdonaldsItemDetails(mainHtml);
   if (strategy === "wendys_order_page") return ingredientItemsFromWendysOrderPage(mainHtml);
   if (strategy === "smartlabel_fragment") return ingredientItemsFromFragment(fragmentHtml);
@@ -1186,6 +1213,7 @@ function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "hormel_page") return "official_current_label_page";
   if (strategy === "smartlabel_fragment") return "official_current_label_fragment";
   if (strategy === "wkkellogg_smartlabel") return "official_current_label_page";
+  if (strategy === "kelloggs_ingredients_list") return "official_current_label_page";
   if (strategy === "mcdonalds_item_details") return "official_current_product_api_json";
   if (strategy === "wendys_order_page") return "official_current_menu_page_json";
   if (strategy === "manual_source_image_transcription") return "official_current_ingredient_label_image_manual_transcription";

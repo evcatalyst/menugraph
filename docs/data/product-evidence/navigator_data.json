@@ -8165,9 +8165,9 @@
         "strategy": "official_current_ingredient_fragments",
         "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
         "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
-        "evidence_row_count": 84,
-        "product_count": 84,
-        "top_domains": "order.wendys.com; smartlabel.conagra.com; smartlabel.congra.net; smartlabel.hersheys.com; smartlabel.hormelfoods.com; smartlabel.mondelez.info; smartlabel.pepsico.info; smartlabel.unileverusa.com; smartlabel.wkkellogg.com; tootsie.com; wheaties.com; www.bettycrocker.com; www.butterfinger.com; www.campbells.com; www.campbellsfoodservice.com; www.cheerios.com; www.cheezit.com; www.chick-fil-a.com; www.coca-cola.com; www.generalmillsconvenience.com; www.goodnes.com; www.grapenuts.com; www.hamburgerhelper.com; www.heinz.com; www.hiddenvalley.com; www.jif.com; www.kraftheinz.com; www.mccormick.com; www.mcdonalds.com; www.milkywaybar.com; www.mms.com; www.nutella.com; www.oscarmayer.com; www.paneraathome.com; www.pepperidgefarm.com; www.pillsbury.com; www.poptarts.com; www.pringles.com; www.skittles.com; www.smuckers.com; www.starburst.com; www.totinos.com; www.twix.com; www.tysonfoodservice.com",
+        "evidence_row_count": 85,
+        "product_count": 85,
+        "top_domains": "order.wendys.com; smartlabel.conagra.com; smartlabel.congra.net; smartlabel.hersheys.com; smartlabel.hormelfoods.com; smartlabel.kelloggs.com; smartlabel.mondelez.info; smartlabel.pepsico.info; smartlabel.unileverusa.com; smartlabel.wkkellogg.com; tootsie.com; wheaties.com; www.bettycrocker.com; www.butterfinger.com; www.campbells.com; www.campbellsfoodservice.com; www.cheerios.com; www.cheezit.com; www.chick-fil-a.com; www.coca-cola.com; www.generalmillsconvenience.com; www.goodnes.com; www.grapenuts.com; www.hamburgerhelper.com; www.heinz.com; www.hiddenvalley.com; www.jif.com; www.kraftheinz.com; www.mccormick.com; www.mcdonalds.com; www.milkywaybar.com; www.mms.com; www.nutella.com; www.oscarmayer.com; www.paneraathome.com; www.pepperidgefarm.com; www.pillsbury.com; www.poptarts.com; www.pringles.com; www.skittles.com; www.smuckers.com; www.starburst.com; www.totinos.com; www.twix.com; www.tysonfoodservice.com",
         "gap_categories": "panel_capture_needed",
         "products": [
           {
@@ -9269,6 +9269,24 @@
             "vintage_count": 1
           },
           {
+            "product_id": "rice_krispies_treats_original",
+            "product_name": "Rice Krispies Treats Original",
+            "brand": "Rice Krispies Treats",
+            "category": "snack bars",
+            "evidence_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "source_urls": [
+              "https://smartlabel.kelloggs.com/Product/Index/038000126710"
+            ],
+            "ingredient_panel_visible_count": 1,
+            "local_image_ready_count": 1,
+            "readable_panel_photo_needed_count": 0,
+            "next_action": "review_current_official_label_against_package_panel",
+            "vintage_count": 1
+          },
+          {
             "product_id": "ritz_original_crackers",
             "product_name": "Ritz Original Crackers",
             "brand": "Ritz",
@@ -9898,7 +9916,7 @@
   },
   "source_family_timeline": {
     "schema_version": 1,
-    "generated_at_utc": "2026-06-16T11:45:36.459Z",
+    "generated_at_utc": "2026-06-17T04:16:12.188Z",
     "default_family": "official-current-labels",
     "public_image_policy": "Public artifacts stay link/status/text-only. Localhost may render cached proof screenshots through /api/private/ingredient-crops/:visual_id when a private cache exists.",
     "claim_policy": "Official current ingredient text remains candidate current-label evidence until manually reviewed against package labeling.",
@@ -11639,10 +11657,10 @@
       {
         "id": "official-current-labels",
         "label": "Official Current Labels",
-        "row_count": 84,
-        "product_count": 84,
-        "local_preview_available_count": 84,
-        "ingredient_signal_count": 84,
+        "row_count": 85,
+        "product_count": 85,
+        "local_preview_available_count": 85,
+        "ingredient_signal_count": 85,
         "products": [
           {
             "product_id": "ball_park_franks",
@@ -13337,10 +13355,10 @@
                 "source_image_match_status": "official_current_label_page",
                 "crop_focus": "ingredient_text",
                 "crop_rotation_degrees": 0,
-                "ingredient_text": "Ingredients: Whole grain wheat, raisins, wheat bran, sugar, brown sugar syrup, Contains 2% or less of malt flavor, salt, iron, Wheat Contains, Bioengineered Food Disclosure, Kosher Status, WK Kellogg Co, Recipes, Feeding Happiness, USDA MyPlate, Dietary Guidelines for Americans, Sustainability.",
+                "ingredient_text": "Ingredients: Whole grain wheat, raisins, wheat bran, sugar, brown sugar syrup, Contains 2% or less of malt flavor, salt, iron.",
                 "ingredient_text_source": "official_current_label_page",
                 "ingredient_text_status": "official_current_label_candidate_needs_review",
-                "candidate_excerpt": "Ingredients: Whole grain wheat, raisins, wheat bran, sugar, brown sugar syrup, Contains 2% or less of malt flavor, salt, iron, Wheat Contains, Bioengineered Food Disclosure, Kosher Status, WK Kellogg Co, Recipes, Feeding Happiness, USDA My...",
+                "candidate_excerpt": "Ingredients: Whole grain wheat, raisins, wheat bran, sugar, brown sugar syrup, Contains 2% or less of malt flavor, salt, iron.",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "source_fragment_ready",
@@ -13392,7 +13410,7 @@
                 "source_image_match_status": "official_current_label_page",
                 "crop_focus": "ingredient_text",
                 "crop_rotation_degrees": 0,
-                "ingredient_text": "Ingredients: Rice, sugar, contains 2% or less of salt, malt flavor, Vitamins and Minerals: Iron (ferric phosphate), niacinamide, vitamin B 6 (pyridoxine hydrochloride), vitamin B 2 (riboflavin), vitamin B 1 (thiamin hydrochloride), folic acid, vitamin D 3, vitamin B 12, Bioengineered Food Disclosure, Kosher Status, WK Kellogg Co, Recipes, Feeding Happiness, USDA MyPlate, Dietary Guidelines for Americans, Sustainability.",
+                "ingredient_text": "Ingredients: Rice, sugar, contains 2% or less of salt, malt flavor, Vitamins and Minerals: Iron (ferric phosphate), niacinamide, vitamin B 6 (pyridoxine hydrochloride), vitamin B 2 (riboflavin), vitamin B 1 (thiamin hydrochloride), folic acid, vitamin D 3, vitamin B 12.",
                 "ingredient_text_source": "official_current_label_page",
                 "ingredient_text_status": "official_current_label_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: Rice, sugar, contains 2% or less of salt, malt flavor, Vitamins and Minerals: Iron (ferric phosphate), niacinamide, vitamin B 6 (pyridoxine hydrochloride), vitamin B 2 (riboflavin), vitamin B 1 (thiamin hydrochloride), folic a...",
@@ -14991,6 +15009,61 @@
                 "ingredient_text_source": "official_current_label_fragment",
                 "ingredient_text_status": "official_current_label_candidate_needs_review",
                 "candidate_excerpt": "Ingredients: Whole Grain Rolled Oats.",
+                "candidate_status": "ingredient_text_candidate_needs_review",
+                "ingredient_signal_status": "ingredient_signal_found",
+                "source_capture_status": "source_fragment_ready",
+                "source_candidate_image_count": 1,
+                "claim_boundary": "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review."
+              }
+            ]
+          },
+          {
+            "product_id": "rice_krispies_treats_original",
+            "product_name": "Rice Krispies Treats Original",
+            "brand": "Rice Krispies Treats",
+            "category": "snack bars",
+            "source_family": "official-current-labels",
+            "evidence_count": 1,
+            "local_preview_available_count": 1,
+            "ingredient_signal_count": 1,
+            "vintages": [
+              "current_2020s"
+            ],
+            "rows": [
+              {
+                "product_id": "rice_krispies_treats_original",
+                "product_name": "Rice Krispies Treats Original",
+                "brand": "Rice Krispies Treats",
+                "category": "snack bars",
+                "vintage_label": "current_2020s",
+                "vintage_start": "2020-01-01",
+                "vintage_end": "",
+                "evidence_id": "rice_krispies_treats_original__current_2020s__112__2",
+                "ocr_priority": "high",
+                "ocr_gap_category": "panel_capture_needed",
+                "source_domain": "smartlabel.kelloggs.com",
+                "source_url": "https://smartlabel.kelloggs.com/Product/Index/038000126710",
+                "source_title": "Kellogg's® Rice Krispies Treats® Original Bars",
+                "source_owner": "smartlabel.kelloggs.com",
+                "rights_note": "",
+                "visual_id": "rice_krispies_treats_original__current_2020s__2d044a1575",
+                "preview_endpoint": "/api/private/ingredient-crops/rice_krispies_treats_original__current_2020s__2d044a1575",
+                "visual_status": "local_ingredient_crop_ready",
+                "local_preview_available": true,
+                "local_upscaled_preview_available": true,
+                "preview_render_variant": "upscaled_crop",
+                "ocr_status": "source_html_text_extracted",
+                "crop_status": "ingredient_source_fragment_ready",
+                "source_image_title": "Kellogg's® Rice Krispies Treats® Original Bars",
+                "source_image_year": "2020",
+                "source_detail_url": "https://smartlabel.kelloggs.com/Product/Index/038000126710#ingredients",
+                "source_image_match_status": "official_current_label_page",
+                "crop_focus": "ingredient_text",
+                "crop_rotation_degrees": 0,
+                "ingredient_text": "Ingredients: Toasted rice cereal (rice, sugar, salt, malt flavor), corn syrup, fructose, vegetable oil (soybean and palm oil with TBHQ for freshness), sugar, corn syrup solids, Contains 2% or less of vegetable glycerin, dextrose, gelatin, natural and artificial flavors (contains milk), salt, DATEM, acetylated monoglycerides, soy lecithin, BHT for freshness.",
+                "ingredient_text_source": "official_current_label_page",
+                "ingredient_text_status": "official_current_label_candidate_needs_review",
+                "candidate_excerpt": "Ingredients: Toasted rice cereal (rice, sugar, salt, malt flavor), corn syrup, fructose, vegetable oil (soybean and palm oil with TBHQ for freshness), sugar, corn syrup solids, Contains 2% or less of vegetable glycerin, dextrose, gelatin,...",
                 "candidate_status": "ingredient_text_candidate_needs_review",
                 "ingredient_signal_status": "ingredient_signal_found",
                 "source_capture_status": "source_fragment_ready",

@@ -461,7 +461,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".source-family-tab")).toHaveCount(3);
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
-  await expect(page.locator(".cwa-product-chip")).toHaveCount(84);
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(85);
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy.is-compact")).toBeVisible();
@@ -536,7 +536,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
 
   await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
-  await expect(page.locator(".cwa-product-chip")).toHaveCount(84);
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(85);
   await page.locator(".cwa-product-chip").filter({ hasText: "Oreo Original Chocolate Sandwich Cookies" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("HIGH FRUCTOSE CORN SYRUP");
@@ -621,6 +621,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Rice Krispies" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("malt flavor");
+  await page.locator(".cwa-product-chip").filter({ hasText: "Rice Krispies Treats Original" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Toasted rice cereal");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("TBHQ for freshness");
   await page.locator(".cwa-product-chip").filter({ hasText: "Bisquick Original Pancake and Baking Mix" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Monoglycerides");
