@@ -647,6 +647,13 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText(/promotion\/top-flap panel only/i);
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Visual lineage only']")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label='Local private upscaled crop available']")).toBeVisible();
+  await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
+  await expect(page.locator("#ingredient-drilldown")).toBeVisible();
+  await expect(page.locator("#ingredient-drilldown-title")).toContainText("Trix Cereal");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-proof-overlay")).toHaveAttribute("aria-label", "Visual source gap status");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-proof-overlay")).toContainText("Visual proof only");
+  await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-proof-overlay")).toContainText(/promotion\/top-flap panel only/i);
+  await page.keyboard.press("Escape");
   await page.locator(".cwa-product-chip").filter({ hasText: "Kellogg's Froot Loops" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(2);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("partially hydrogenated vegetable oil");

@@ -853,9 +853,9 @@ function ingredientDrilldownProofOverlay(row) {
   const items = ingredientItemsForRow(row);
   if (!items.length) {
     return `
-      <div class="ingredient-drilldown-proof-overlay is-missing-text" aria-label="Readable ingredient proof text">
-        <span>Readable panel needed</span>
-        <p>${escapeHtml(row.candidate_excerpt || "No readable ingredient panel has been captured for this visual proof row.")}</p>
+      <div class="ingredient-drilldown-proof-overlay is-missing-text" aria-label="Visual source gap status">
+        <span>${escapeHtml(missingProofTitle(row))}</span>
+        <p>${escapeHtml(missingProofMessage(row))}</p>
       </div>
     `;
   }
