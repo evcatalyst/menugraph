@@ -91,9 +91,35 @@ function cwaStatusIcon(name, title, tone = "neutral") {
   return `<span class="cwa-status-icon is-${escapeHtml(tone)}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">${cwaInlineIcon(name)}</span>`;
 }
 
+function proofVisualBasis(row) {
+  if (row?.proof_visual_basis) return row.proof_visual_basis;
+  if (row?.source_image_match_status === "official_current_ingredient_label_image") return "official_ingredient_label_image";
+  if (row?.ingredient_text_source === "manual_visual_read_candidate"
+    || /^(source_record_date_matched|vintage_matched|earliest_available_source_image)$/.test(row?.source_image_match_status || "")) {
+    return row?.ingredient_text ? "archive_ingredient_label_crop" : "source_visual_lineage_only";
+  }
+  if (row?.ingredient_text) return "official_source_text_proof_panel";
+  return "source_visual_lineage_only";
+}
+
+function proofVisualLabel(row) {
+  const basis = proofVisualBasis(row);
+  if (basis === "official_ingredient_label_image") return "Ingredient label image with transcript";
+  if (basis === "official_menu_or_api_text") return "Menu ingredient source proof";
+  if (basis === "official_source_text_proof_panel") return "Source text proof panel";
+  if (basis === "archive_ingredient_label_crop") return "Archive ingredient label crop";
+  return row?.ingredient_text ? "Ingredient source proof" : "Visual lineage only";
+}
+
 function cwaStatusIcons(row) {
   const icons = [];
-  if (row.ingredient_text) icons.push(cwaStatusIcon("ingredient", "Ingredient text candidate visible on selected label crop", "good"));
+  const basis = proofVisualBasis(row);
+  if (row.ingredient_text) {
+    const title = basis === "official_ingredient_label_image"
+      ? "Ingredient text candidate paired with an official label image"
+      : "Ingredient text candidate extracted from the selected official source";
+    icons.push(cwaStatusIcon("ingredient", title, "good"));
+  }
   else if (row.crop_focus === "panel_context") icons.push(cwaStatusIcon("panel", "Package text crop, ingredient panel still needed", "warn"));
   else icons.push(cwaStatusIcon("image", "Visual lineage only; readable ingredient panel still needed", "muted"));
 
@@ -172,7 +198,7 @@ function ingredientOverlay(row) {
   const overflowCount = Math.max(0, items.length - visibleItems.length);
   return `
     <div class="cwa-ingredient-overlay has-ingredient-list">
-      <span>Label transcript</span>
+      <span>Ingredients</span>
       ${visibleItems.length
         ? `<ul class="cwa-overlay-ingredient-list">${visibleItems.map((item) => `<li>${escapeHtml(truncateText(item, 142))}</li>`).join("")}</ul>`
         : `<p>${escapeHtml(row.ingredient_text)}</p>`}
@@ -191,12 +217,15 @@ function ingredientTextBlock(row, options = {}) {
   const list = items.length
     ? `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
     : "";
+  const label = compact && items.length
+    ? `${items.length} ingredient ${items.length === 1 ? "entry" : "entries"}`
+    : compact ? "Ingredients listed" : "Readable ingredient text";
   const sourceLine = sourceText
     ? `<p class="cwa-ingredient-source-line">${escapeHtml(sourceText)}</p>`
     : "";
   return `
     <div class="cwa-ingredient-copy ${compact ? "is-compact" : ""}">
-      <span>${compact ? "Ingredients listed" : "Readable ingredient text"}</span>
+      <span>${escapeHtml(label)}</span>
       ${compact ? `${list}${sourceLine}` : `${sourceLine}${list}`}
     </div>
   `;
@@ -274,8 +303,8 @@ function renderIngredientDrilldown(row) {
       ? "Focused package text is visible; readable ingredient list still needed."
       : "Wrapper imagery can support visual provenance only; readable ingredient panel still needed.");
   const previewTitle = row.local_upscaled_preview_available
-    ? row.ingredient_text ? "Upscaled ingredient label crop" : "Upscaled visual lineage crop"
-    : row.ingredient_text ? "Ingredient label crop" : "Visual lineage crop";
+    ? `Upscaled ${proofVisualLabel(row).toLowerCase()}`
+    : proofVisualLabel(row);
   return `
     <div class="ingredient-drilldown-header">
       <p class="eyebrow">${escapeHtml(row.source_family_label || row.source_family || "Source family")}</p>
@@ -418,10 +447,10 @@ function renderCwaTimeline() {
     state.sourceFamilyId = family.id;
   }
   if (els.sourceFamilyTimelineTitle) {
-    els.sourceFamilyTimelineTitle.textContent = `${family.label} Timeline`;
+    els.sourceFamilyTimelineTitle.textContent = `${family.label} Proof Board`;
   }
   if (els.sourceFamilyTimelineNote) {
-    els.sourceFamilyTimelineNote.textContent = `${family.product_count || family.products.length} products · ${family.ingredient_signal_count || 0} proof text candidates`;
+    els.sourceFamilyTimelineNote.textContent = `${family.product_count || family.products.length} products · ${family.ingredient_signal_count || 0} source-backed proof cards`;
   }
   if (els.sourceFamilyTabs) {
     els.sourceFamilyTabs.innerHTML = families.length > 1
@@ -461,11 +490,12 @@ function renderCwaTimeline() {
           : "Wrapper imagery can support visual provenance only; readable ingredient panel still needed.");
       const proofClass = ingredientText ? "has-ingredient-proof" : "needs-readable-panel";
       const previewClass = ingredientText ? "has-transcript-overlay" : "needs-transcript-overlay";
+      const visualBasis = proofVisualBasis(row);
       return `
-        <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}">
-          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" aria-pressed="false" aria-label="${escapeHtml(`Toggle ingredient transcript for ${row.product_name} ${row.vintage_label}`)}">
+        <article class="cwa-timeline-card status-${escapeHtml(row.ingredient_signal_status)} ${proofClass}" data-proof-basis="${escapeHtml(visualBasis)}">
+          <button class="cwa-preview-frame ${previewClass} ${canShowPreview ? "has-private-preview" : ""}" type="button" data-cwa-toggle="1" aria-pressed="false" aria-label="${escapeHtml(`Toggle ingredient proof text for ${row.product_name} ${row.vintage_label}`)}">
             ${canShowPreview
-              ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ingredient proof visual`)}" loading="lazy" data-private-preview="1" style="--crop-rotation:${escapeHtml(row.crop_rotation_degrees || 0)}deg" />`
+              ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ${proofVisualLabel(row).toLowerCase()}`)}" loading="lazy" data-private-preview="1" style="--crop-rotation:${escapeHtml(row.crop_rotation_degrees || 0)}deg" />`
               : ""}
             <div class="cwa-preview-placeholder"><span>${escapeHtml(String(row.vintage_label || "").slice(0, 4))}</span></div>
             <span class="cwa-preview-lens" aria-hidden="true">${cwaInlineIcon(ingredientText ? "ingredient" : "inspect")}</span>

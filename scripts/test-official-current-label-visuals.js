@@ -153,6 +153,12 @@ const allowedOfficialHosts = new Set([
   "wheaties.com",
 ]);
 
+const allowedProofBases = new Set([
+  "official_source_text_proof_panel",
+  "official_ingredient_label_image",
+  "official_menu_or_api_text",
+]);
+
 function assertPublicSafe(filePath) {
   const text = fs.readFileSync(filePath, "utf8");
   assert(!text.includes(".cache"), `${filePath} exposes .cache path`);
@@ -199,6 +205,7 @@ visualIndex.rows.forEach((row) => {
   assert(allowedOfficialHosts.has(new URL(row.source_url).hostname), `${row.evidence_id} source should remain an approved official URL`);
   assert.strictEqual(row.preview_render_variant, "upscaled_crop", `${row.evidence_id} should render the private proof crop`);
   assert.strictEqual(row.local_upscaled_preview_available, true, `${row.evidence_id} should expose upscaled availability only as a boolean`);
+  assert(allowedProofBases.has(row.proof_visual_basis), `${row.evidence_id} should expose a public-safe proof visual basis`);
 });
 
 const oreo = visualIndex.rows.find((row) => row.product_id === "oreo_original_chocolate_sandwich_cookies");
@@ -381,6 +388,7 @@ assert(ballPark.ingredient_text.includes("sodium nitrite"), "Ball Park current l
 assert(frenchs.ingredient_text.includes("Distilled Vinegar"), "French's current label should expose source ingredient text");
 assert(frenchs.ingredient_text.includes("#1 Grade Mustard Seed"), "French's current label should expose source ingredient text");
 assert(frenchs.source_image_match_status === "official_current_ingredient_label_image", "French's proof card should use the official ingredient-label image");
+assert.strictEqual(frenchs.proof_visual_basis, "official_ingredient_label_image", "French's proof basis should identify an actual ingredient-label image");
 assert(goldfish.ingredient_text.includes("Cheddar Cheese"), "Goldfish current label should expose source ingredient text");
 assert(goldfish.ingredient_text.includes("Autolyzed Yeast Extract"), "Goldfish current label should expose source ingredient text");
 assert.strictEqual(goldfish.source_url, "https://www.pepperidgefarm.com/product/goldfish-cheddar/", "Goldfish should use the current canonical official product URL");
@@ -419,6 +427,7 @@ assert.strictEqual(hiddenValley.source_url, "https://www.hiddenvalley.com/produc
 assert.strictEqual(hiddenValley.source_title, "Hidden Valley Original Ranch official product page", "Hidden Valley should expose the official product page title");
 assert.strictEqual(hiddenValley.source_owner, "Hidden Valley / The Clorox Company", "Hidden Valley should expose the official source owner");
 assert.strictEqual(hiddenValley.source_image_match_status, "official_current_ingredient_label_image", "Hidden Valley proof should include the official ingredient-label image");
+assert.strictEqual(hiddenValley.proof_visual_basis, "official_ingredient_label_image", "Hidden Valley proof basis should identify an actual ingredient-label image");
 assert.strictEqual(hiddenValley.source_candidate_image_count, 2, "Hidden Valley should count product and label source visuals without exposing paths");
 assert(butterfinger.ingredient_text.includes("Corn syrup"), "Butterfinger current label should expose source ingredient text");
 assert(butterfinger.ingredient_text.includes("peanut flour"), "Butterfinger current label should expose source ingredient text");
@@ -427,6 +436,7 @@ assert.strictEqual(butterfinger.source_url, "https://www.butterfinger.com/produc
 assert.strictEqual(butterfinger.source_title, "Butterfinger official product page", "Butterfinger should expose the official product page title");
 assert.strictEqual(butterfinger.source_owner, "Butterfinger / Ferrero", "Butterfinger should expose the official source owner");
 assert.strictEqual(butterfinger.source_image_match_status, "official_current_ingredient_label_image", "Butterfinger proof should include the official ingredient-label image");
+assert.strictEqual(butterfinger.proof_visual_basis, "official_ingredient_label_image", "Butterfinger proof basis should identify an actual ingredient-label image");
 assert.strictEqual(butterfinger.source_candidate_image_count, 2, "Butterfinger should count product and label source visuals without exposing paths");
 assert(wendysDavesSingle.ingredient_text.includes("Potato Bun"), "Wendy's Dave's Single current evidence should expose bun component text");
 assert(wendysDavesSingle.ingredient_text.includes("Ground Beef"), "Wendy's Dave's Single current evidence should expose beef component text");
@@ -449,6 +459,7 @@ assert.strictEqual(tacoBellCrunchyTaco.source_url, "https://www.tacobell.com/foo
 assert.strictEqual(tacoBellCrunchyTaco.source_title, "Taco Bell Crunchy Taco official menu page", "Taco Bell Crunchy Taco should expose the official menu title");
 assert.strictEqual(tacoBellCrunchyTaco.source_owner, "Taco Bell", "Taco Bell Crunchy Taco should expose the official source owner");
 assert.strictEqual(tacoBellCrunchyTaco.ingredient_text_source, "official_current_menu_ingredient_statement_table", "Taco Bell Crunchy Taco should identify the Nutritionix ingredient-statement table source");
+assert.strictEqual(tacoBellCrunchyTaco.proof_visual_basis, "official_menu_or_api_text", "Taco Bell Crunchy Taco proof basis should identify menu/API source text");
 assert(Array.isArray(tacoBellCrunchyTaco.ingredient_items) && tacoBellCrunchyTaco.ingredient_items.length === 4, "Taco Bell Crunchy Taco should expose four structured component ingredient items");
 assert(tacoBellBeanBurrito.ingredient_text.includes("Flour Tortilla: Bleached enriched wheat flour"), "Taco Bell Bean Burrito current evidence should expose tortilla component text");
 assert(tacoBellBeanBurrito.ingredient_text.includes("Seasoned Refried Beans: Pinto beans"), "Taco Bell Bean Burrito current evidence should expose bean component text");
@@ -458,6 +469,7 @@ assert.strictEqual(tacoBellBeanBurrito.source_url, "https://www.tacobell.com/foo
 assert.strictEqual(tacoBellBeanBurrito.source_title, "Taco Bell Bean Burrito official menu page", "Taco Bell Bean Burrito should expose the official menu title");
 assert.strictEqual(tacoBellBeanBurrito.source_owner, "Taco Bell", "Taco Bell Bean Burrito should expose the official source owner");
 assert.strictEqual(tacoBellBeanBurrito.ingredient_text_source, "official_current_menu_ingredient_statement_table", "Taco Bell Bean Burrito should identify the Nutritionix ingredient-statement table source");
+assert.strictEqual(tacoBellBeanBurrito.proof_visual_basis, "official_menu_or_api_text", "Taco Bell Bean Burrito proof basis should identify menu/API source text");
 assert(Array.isArray(tacoBellBeanBurrito.ingredient_items) && tacoBellBeanBurrito.ingredient_items.length === 5, "Taco Bell Bean Burrito should expose five structured component ingredient items");
 assert(bigMac.ingredient_text.includes("Big Mac Bun"), "Big Mac current ingredient evidence should expose component text");
 assert(bigMac.ingredient_text.includes("100% Pure Usda Inspected Beef"), "Big Mac current ingredient evidence should expose beef-patty text");

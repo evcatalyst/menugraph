@@ -1317,6 +1317,18 @@ function publicClaimBoundary() {
   return "Official current-label text is candidate current evidence only; do not infer a historical ingredient-change claim without dated package-label review.";
 }
 
+function proofVisualBasisFor(review, visual, hasIngredientText) {
+  if (visual.ingredient_label_image_url || review.source_image_match_status === "official_current_ingredient_label_image") {
+    return "official_ingredient_label_image";
+  }
+  if (review.source_image_match_status === "official_current_menu_ingredient_statement_table"
+    || review.source_image_match_status === "official_current_product_api") {
+    return "official_menu_or_api_text";
+  }
+  if (hasIngredientText) return "official_source_text_proof_panel";
+  return "source_visual_lineage_only";
+}
+
 function ingredientTextSourceForStrategy(strategy) {
   if (strategy === "hormel_page") return "official_current_label_page";
   if (strategy === "smartlabel_fragment") return "official_current_label_fragment";
@@ -1642,6 +1654,7 @@ function publicRowFor(row, review, visual, ingredientText, sourceTitle, ingredie
     source_image_year: row.vintage_start ? String(row.vintage_start).slice(0, 4) : "current",
     source_detail_url: review.source_detail_url || row.source_url,
     source_image_match_status: review.source_image_match_status || "official_current_label_page",
+    proof_visual_basis: proofVisualBasisFor(review, visual, hasIngredientText),
     crop_focus: "ingredient_text",
     crop_rotation_degrees: 0,
     ingredient_text: ingredientText,

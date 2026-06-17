@@ -464,6 +464,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-product-chip")).toHaveCount(91);
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("hydrolyzed beef stock");
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_source_text_proof_panel");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy.is-compact")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy.is-compact ul li").first()).toBeVisible();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-source-line")).toBeVisible();
@@ -480,7 +481,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toHaveClass(/is-ingredient-open/);
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame")).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toHaveCSS("opacity", "1");
-  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Label transcript");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Ingredients");
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Beef");
 
   await page.locator(".source-family-tab").filter({ hasText: "Candy Wrapper Archive" }).click();
@@ -489,6 +490,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
   await expect(page.locator(".cwa-timeline-card").first()).toContainText(/readable ingredient panel still needed/i);
   await expect(page.locator(".cwa-timeline-card").nth(1)).toContainText("Milk chocolate, peanuts");
+  await expect(page.locator(".cwa-timeline-card").nth(1)).toHaveAttribute("data-proof-basis", "archive_ingredient_label_crop");
   await expect(page.locator(".cwa-timeline-card .status-badge")).toHaveCount(0);
   expect(await page.locator(".cwa-status-icon").count()).toBeGreaterThan(0);
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label^='Open source']")).toBeVisible();
@@ -531,7 +533,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-copy li").first()).toContainText("sugar");
   await page.locator(".cwa-timeline-card").first().locator(".cwa-preview-frame").click();
   await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("artificial coloring");
-  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Label transcript");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-ingredient-overlay")).toContainText("Ingredients");
   await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
   await expect(page.locator("#ingredient-drilldown")).toBeVisible();
   await expect(page.locator("#ingredient-drilldown-title")).toContainText("Kellogg's Froot Loops");
@@ -582,6 +584,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Chili Beans");
   await page.locator(".cwa-product-chip").filter({ hasText: "Taco Bell Crunchy Taco" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_menu_or_api_text");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Taco Shell");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Seasoned Beef");
   await page.locator(".cwa-product-chip").filter({ hasText: "Taco Bell Bean Burrito" }).click();
@@ -600,6 +603,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Trisodium Phosphate");
   await page.locator(".cwa-product-chip").filter({ hasText: "Hidden Valley Original Ranch" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "official_ingredient_label_image");
   await expect(page.locator(".cwa-timeline-card").first()).toContainText("Monosodium Glutamate");
   await page.locator(".cwa-product-chip").filter({ hasText: "Butterfinger Bar" }).click();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);
