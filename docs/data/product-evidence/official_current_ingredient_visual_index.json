@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-06-17T06:02:04.379Z",
+  "generated_at_utc": "2026-06-17T06:08:53.667Z",
   "source_family": {
     "id": "official-current-labels",
     "label": "Official Current Labels",
@@ -184,7 +184,7 @@
       "source_url": "https://plk-use1-prod.sites.rbictg.com/nutrition/PLK_US_Ingredient_Information.pdf",
       "status": "source_fragment_ready",
       "candidate_image_count": 1,
-      "downloaded_image_count": 2,
+      "downloaded_image_count": 3,
       "error": ""
     },
     {
@@ -485,7 +485,7 @@
       "source_url": "https://www.dunkindonuts.com/content/dam/dd/pdf/allergy_ingredient_guide.pdf",
       "status": "source_fragment_ready",
       "candidate_image_count": 1,
-      "downloaded_image_count": 2,
+      "downloaded_image_count": 3,
       "error": ""
     },
     {

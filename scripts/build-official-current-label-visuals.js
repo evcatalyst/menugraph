@@ -810,6 +810,46 @@ async function fetchPdfTextToCache(url, pdfPath, textPath, noFetch) {
   return { file_path: pdfPath, ...extracted };
 }
 
+function pdfPageNumberFromUrl(url) {
+  const match = String(url || "").match(/(?:#|[?&])page=(\d+)/i);
+  const page = match ? Number(match[1]) : 1;
+  return Number.isFinite(page) && page > 0 ? page : 1;
+}
+
+function renderPdfPageToImage(pdfPath, outputPath, pageNumber, noRender) {
+  if (fs.existsSync(outputPath)) return { file_path: outputPath, status: "cached" };
+  if (noRender) return { file_path: "", status: "render_skipped" };
+  if (!pdfPath || !fs.existsSync(pdfPath)) return { file_path: "", status: "missing_local_cache" };
+  const pdftoppm = process.env.MENUGRAPH_PDFTOPPM || "pdftoppm";
+  ensureDir(path.dirname(outputPath));
+  const outputPrefix = outputPath.replace(/\.png$/i, "");
+  const result = spawnSync(pdftoppm, [
+    "-png",
+    "-singlefile",
+    "-f",
+    String(pageNumber),
+    "-l",
+    String(pageNumber),
+    "-r",
+    "150",
+    pdfPath,
+    outputPrefix,
+  ], {
+    encoding: "utf8",
+    maxBuffer: 1024 * 1024,
+  });
+  if (result.status !== 0) {
+    return {
+      file_path: "",
+      status: `pdf_page_render_failed_${result.status ?? "signal"}`,
+      error: shortText(result.stderr || result.stdout || "pdf page render failed", 500),
+    };
+  }
+  return fs.existsSync(outputPath)
+    ? { file_path: outputPath, status: "pdf_page_preview_ready" }
+    : { file_path: "", status: "pdf_page_render_missing_output" };
+}
+
 function decodeEntities(value) {
   return String(value || "")
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
@@ -1909,6 +1949,15 @@ async function build() {
     const productImage = productImageUrl
       ? await fetchBinaryToCache(productImageUrl, path.join(imageDir, `${sha(productImageUrl, 16)}.jpg`), noFetch)
       : { file_path: "", status: "no_product_image" };
+    const pdfPageNumber = pdfPageNumberFromUrl(review.source_detail_url || publicSourceUrl);
+    const sourceDocumentPreview = isPdfIngredientStrategy(strategy) && !productImage.file_path
+      ? renderPdfPageToImage(
+        mainCapture.file_path,
+        path.join(imageDir, `${visualId}-source-page-${pdfPageNumber}.png`),
+        pdfPageNumber,
+        noRender,
+      )
+      : { file_path: "", status: productImage.file_path ? "product_image_available" : "not_pdf_source" };
     const ingredientLabelImageUrl = review.source_label_image_url || "";
     const ingredientLabelImage = ingredientLabelImageUrl
       ? await fetchBinaryToCache(ingredientLabelImageUrl, path.join(imageDir, `${sha(ingredientLabelImageUrl, 16)}.jpg`), noFetch)
@@ -1923,7 +1972,7 @@ async function build() {
       sourceTitle,
       new URL(publicSourceUrl).hostname,
       items,
-      productImage.file_path,
+      productImage.file_path || sourceDocumentPreview.file_path,
       ingredientLabelImage.file_path,
     ));
 
@@ -1944,6 +1993,8 @@ async function build() {
       ingredient_fragment_path: fragmentCapture.file_path,
       product_image_url: productImageUrl,
       product_image_path: productImage.file_path,
+      source_document_preview_path: sourceDocumentPreview.file_path,
+      source_document_preview_status: sourceDocumentPreview.status,
       ingredient_label_image_url: ingredientLabelImageUrl,
       ingredient_label_image_path: ingredientLabelImage.file_path,
       source_image_title: sourceTitle,
@@ -1968,6 +2019,7 @@ async function build() {
         mainCapture.status.startsWith("download_failed") ? mainCapture.status : "",
         fragmentCapture.status.startsWith("download_failed") ? fragmentCapture.status : "",
         productImage.status.startsWith("download_failed") ? productImage.status : "",
+        sourceDocumentPreview.status.startsWith("pdf_page_render_failed") ? sourceDocumentPreview.status : "",
         ingredientLabelImage.status.startsWith("download_failed") ? ingredientLabelImage.status : "",
         !ingredientText ? "ingredient_fragment_empty" : "",
       ].filter(Boolean),
@@ -1982,6 +2034,7 @@ async function build() {
           mainCapture.file_path ? { url: sourceFetchUrl, file_path: mainCapture.file_path, title: sourceTitle } : null,
           fragmentCapture.file_path ? { url: fragmentUrl, file_path: fragmentCapture.file_path, title: `${sourceTitle} ingredients` } : null,
           productImage.file_path ? { url: productImageUrl, file_path: productImage.file_path, title: `${sourceTitle} product image` } : null,
+          sourceDocumentPreview.file_path ? { url: review.source_detail_url || publicSourceUrl, file_path: sourceDocumentPreview.file_path, title: `${sourceTitle} source page ${pdfPageNumber}` } : null,
           ingredientLabelImage.file_path ? { url: ingredientLabelImageUrl, file_path: ingredientLabelImage.file_path, title: `${sourceTitle} ingredient label image` } : null,
         ].filter(Boolean),
         public_error: mainCapture.file_path && fragmentCapture.file_path ? "" : mainCapture.status || fragmentCapture.status,

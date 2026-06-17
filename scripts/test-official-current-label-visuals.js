@@ -176,6 +176,7 @@ function assertPublicSafe(filePath) {
   assert(!text.includes("ingredient_fragment_path"), `${filePath} exposes ingredient_fragment_path`);
   assert(!text.includes("product_image_path"), `${filePath} exposes product_image_path`);
   assert(!text.includes("source_image_path"), `${filePath} exposes source_image_path`);
+  assert(!text.includes("source_document_preview_path"), `${filePath} exposes source_document_preview_path`);
   assert(!text.includes("preview_path"), `${filePath} exposes preview_path`);
   assert(!text.includes("ocr_path"), `${filePath} exposes ocr_path`);
   assert(!/data:image\//.test(text), `${filePath} exposes image data URI`);
@@ -549,8 +550,12 @@ if (fs.existsSync(privateManifestPath)) {
   assert.strictEqual(privateManifest.rows.length, 95, "official-current private manifest should have 95 rows");
   const hiddenValleyPrivate = privateManifest.rows.find((row) => row.product_id === "hidden_valley_ranch_original");
   const butterfingerPrivate = privateManifest.rows.find((row) => row.product_id === "butterfinger_bar");
+  const dunkinPrivate = privateManifest.rows.find((row) => row.product_id === "dunkin_glazed_donut");
+  const popeyesPrivate = privateManifest.rows.find((row) => row.product_id === "popeyes_chicken_sandwich");
   assert(hiddenValleyPrivate.ingredient_label_image_path && fs.existsSync(hiddenValleyPrivate.ingredient_label_image_path), "Hidden Valley private manifest should retain the local label-panel image");
   assert(butterfingerPrivate.ingredient_label_image_path && fs.existsSync(butterfingerPrivate.ingredient_label_image_path), "Butterfinger private manifest should retain the local label-panel image");
+  assert(dunkinPrivate.source_document_preview_path && fs.existsSync(dunkinPrivate.source_document_preview_path), "Dunkin private manifest should retain the local PDF source-page preview");
+  assert(popeyesPrivate.source_document_preview_path && fs.existsSync(popeyesPrivate.source_document_preview_path), "Popeyes private manifest should retain the local PDF source-page preview");
   for (const row of privateManifest.rows) {
     const resolved = resolvePrivateIngredientCropPath(row.visual_id);
     assert(resolved, `${row.visual_id} should resolve through the shared private crop endpoint`);
