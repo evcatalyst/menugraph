@@ -6,6 +6,7 @@ const queuePath = path.join(root, "docs/data/product-evidence/exports/full_corpu
 const navigatorPath = path.join(root, "docs/data/product-evidence/navigator_data.json");
 const coveragePath = path.join(root, "docs/data/product-evidence/source_family_coverage.json");
 const generatedAt = new Date().toISOString();
+const collectionTargetFamilyId = "collection-targets";
 
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -92,8 +93,13 @@ function groupedQueueProducts(rows) {
   return products;
 }
 
+function proofFamilies(navigator) {
+  return (navigator.source_family_timeline?.families || [])
+    .filter((family) => family.id !== collectionTargetFamilyId);
+}
+
 function coveredProductsFromNavigator(navigator) {
-  return new Set((navigator.source_family_timeline?.families || [])
+  return new Set(proofFamilies(navigator)
     .flatMap((family) => (family.products || []).map((product) => product.product_id)));
 }
 
@@ -176,6 +182,99 @@ function promotionBoundaryForProduct(product) {
   return blocker?.claim_boundary || "Missing-product rows are collection targets only; no ingredient, formulation, or historical-change claim is promoted.";
 }
 
+function collectionTargetVisualId(evidenceId) {
+  return `${String(evidenceId || "source_lead").replace(/[^a-z0-9_]+/gi, "_")}__collection_target`;
+}
+
+function collectionTargetRow(product, lead, index) {
+  const blocker = (product.collection_blockers || [])[0] || {};
+  const candidateExcerpt = [
+    blocker.label || "Collection target",
+    blocker.detail || product.next_collection_goal,
+    lead.reviewer_note_excerpt,
+  ].filter(Boolean).join(" ");
+  return {
+    visual_id: collectionTargetVisualId(lead.evidence_id || `${product.product_id}_${index}`),
+    product_id: product.product_id,
+    product_group_id: product.product_id,
+    product_name: product.product_name,
+    vintage_label: lead.vintage_label || "source_lead",
+    evidence_id: lead.evidence_id,
+    source_family: collectionTargetFamilyId,
+    source_family_label: "Collection Targets",
+    source_domain: lead.source_domain,
+    source_url: lead.source_url,
+    source_detail_url: lead.source_url,
+    source_image_title: lead.source_title || "Collection source lead",
+    source_title: lead.source_title || "Collection source lead",
+    source_owner: lead.source_owner,
+    source_surface: lead.source_surface,
+    source_image_match_status: "collection_target_source_lead",
+    proof_visual_basis: "collection_target_source_lead",
+    crop_status: "collection_target_source_lead",
+    crop_focus: lead.ingredient_panel_visible ? "panel_context" : "source_lead",
+    ocr_status: lead.ocr_gap_category,
+    ocr_recommended_action: lead.ocr_recommended_action,
+    local_preview_available: false,
+    local_upscaled_preview_available: false,
+    preview_endpoint: "",
+    preview_render_variant: "source_lead_placeholder",
+    ingredient_text: "",
+    ingredient_items: [],
+    ingredient_signal_status: "readable_panel_needed",
+    candidate_excerpt: shortText(candidateExcerpt, 360),
+    claim_boundary: product.promotion_boundary,
+    collection_target_status: blocker.status || product.capture_class,
+    collection_next_step: blocker.next_step || lead.next_action || product.next_collection_goal,
+  };
+}
+
+function collectionTargetProduct(product) {
+  const rows = (product.representative_rows || []).map((lead, index) => collectionTargetRow(product, lead, index));
+  return {
+    product_id: product.product_id,
+    product_group_id: product.product_id,
+    product_name: product.product_name,
+    source_family: collectionTargetFamilyId,
+    evidence_count: rows.length,
+    source_queue_evidence_count: product.evidence_row_count,
+    high_priority_row_count: product.high_priority_row_count,
+    local_preview_available_count: 0,
+    ingredient_signal_count: 0,
+    readable_panel_needed_count: rows.length,
+    source_domains: product.top_source_domains || [],
+    collection_blockers: product.collection_blockers,
+    claim_policy: product.promotion_boundary,
+    rows,
+  };
+}
+
+function buildCollectionTargetFamily(missing) {
+  const products = missing.map(collectionTargetProduct);
+  const rows = products.flatMap((product) => product.rows || []);
+  return {
+    id: collectionTargetFamilyId,
+    label: "Collection Targets",
+    source_family: collectionTargetFamilyId,
+    product_count: products.length,
+    row_count: rows.length,
+    local_preview_available_count: 0,
+    ingredient_signal_count: 0,
+    readable_panel_needed_count: rows.length,
+    claim_policy: "Collection target rows expose source leads only. They do not promote ingredient, formulation, or historical-change claims until readable source text is captured and reviewed.",
+    products,
+  };
+}
+
+function upsertCollectionTargetFamily(navigator, missing) {
+  const existingTimeline = navigator.source_family_timeline || {};
+  const families = (existingTimeline.families || []).filter((family) => family.id !== collectionTargetFamilyId);
+  navigator.source_family_timeline = {
+    ...existingTimeline,
+    families: missing.length ? [...families, buildCollectionTargetFamily(missing)] : families,
+  };
+}
+
 function publicProduct(product, coveredSourceFamilies = []) {
   const rows = product.rows || [];
   const highPriorityRows = rows.filter((row) => row.ocr_priority === "high").length;
@@ -221,7 +320,7 @@ function buildCoverage() {
   const grouped = groupedQueueProducts(queueRows);
   const sourceFamilyProducts = new Map();
 
-  for (const family of navigator.source_family_timeline?.families || []) {
+  for (const family of proofFamilies(navigator)) {
     for (const product of family.products || []) {
       const families = sourceFamilyProducts.get(product.product_id) || [];
       families.push({ id: family.id, label: family.label });
@@ -245,6 +344,8 @@ function buildCoverage() {
     totals: {
       queue_products: products.length,
       represented_products: products.length - missing.length,
+      collection_target_products: missing.length,
+      timeline_products: products.length,
       missing_products: missing.length,
       queue_evidence_rows: queueRows.length,
       high_priority_missing_rows: missing.reduce((sum, product) => sum + product.high_priority_row_count, 0),
@@ -257,6 +358,7 @@ function buildCoverage() {
     missing_products: missing,
   };
 
+  upsertCollectionTargetFamily(navigator, missing);
   navigator.source_family_coverage = coverage;
   writeJson(coveragePath, coverage);
   writeJson(navigatorPath, navigator);

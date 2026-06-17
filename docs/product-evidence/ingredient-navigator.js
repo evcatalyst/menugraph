@@ -93,6 +93,8 @@ const cwaIconSvgs = {
   inspect: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12.5 12.5 16 16M7 9h4M9 7v4" /></svg>',
 };
 
+const collectionTargetFamilyId = "collection-targets";
+
 function cwaInlineIcon(name) {
   return cwaIconSvgs[name] || cwaIconSvgs.image;
 }
@@ -119,6 +121,7 @@ function proofVisualLabel(row) {
   if (basis === "official_source_text_proof_panel") return "Source text proof panel";
   if (basis === "label_database_source_text_proof_panel") return "Label database proof panel";
   if (basis === "archive_ingredient_label_crop") return "Archive ingredient label crop";
+  if (basis === "collection_target_source_lead") return "Collection source lead";
   return row?.ingredient_text ? "Ingredient source proof" : "Visual lineage only";
 }
 
@@ -133,6 +136,7 @@ function cwaStatusIcons(row) {
         : "Ingredient text candidate extracted from the selected official source";
     icons.push(cwaStatusIcon("ingredient", title, "good"));
   }
+  else if (basis === "collection_target_source_lead") icons.push(cwaStatusIcon("source", "Collection source lead; readable ingredient source still needed", "warn"));
   else if (row.crop_focus === "panel_context") icons.push(cwaStatusIcon("panel", "Package text crop, ingredient panel still needed", "warn"));
   else icons.push(cwaStatusIcon("image", "Visual lineage only; readable ingredient panel still needed", "muted"));
 
@@ -447,9 +451,10 @@ function cwaProductMetric(iconName, value, singularLabel, pluralLabel = `${singu
 function sourceFamilyProductMetrics(productRow) {
   const rows = productRow.rows || [];
   const readableGapCount = rows.filter((row) => !row.ingredient_text).length;
+  const rowLabel = productRow.source_family === collectionTargetFamilyId ? "source lead" : "visual row";
   return `
     <span class="cwa-product-chip-metrics">
-      ${cwaProductMetric("panel", productRow.evidence_count || rows.length, "visual row")}
+      ${cwaProductMetric("panel", productRow.evidence_count || rows.length, rowLabel)}
       ${cwaProductMetric("ingredient", productRow.ingredient_signal_count || 0, "ingredient proof row", "ingredient proof rows", "good")}
       ${cwaProductMetric("crop", productRow.local_preview_available_count || 0, "local visual preview", "local visual previews", "local")}
       ${readableGapCount ? cwaProductMetric("partial", readableGapCount, "readable panel still needed", "readable panels still needed", "warn") : ""}
@@ -916,11 +921,12 @@ function sourceFamilyFocusMetric(iconName, value, singularLabel, pluralLabel = `
   `;
 }
 
-function sourceFamilyFocusMetrics(metrics) {
+function sourceFamilyFocusMetrics(metrics, options = {}) {
+  const rowLabel = options.rowLabel || "proof row";
   return `
     <div class="source-family-focus-metrics">
       ${sourceFamilyFocusMetric("image", metrics.selectedProducts, "product")}
-      ${sourceFamilyFocusMetric("panel", metrics.selectedRows, "proof row")}
+      ${sourceFamilyFocusMetric("panel", metrics.selectedRows, rowLabel)}
       ${sourceFamilyFocusMetric("ingredient", metrics.selectedProofs, "proof text candidate", "proof text candidates", "good")}
       ${sourceFamilyFocusMetric("crop", metrics.selectedLocalVisuals, "local visual", "local visuals", "local")}
       ${sourceFamilyFocusMetric("ingredient", metrics.selectedStructuredRows, "structured ingredient row", "structured ingredient rows", "good")}
@@ -942,11 +948,14 @@ function renderSourceFamilySummary() {
     `;
     return;
   }
-  const selectedSummary = families.find((family) => family.id === state.sourceFamilyId) || families[0];
+  const selectedSummary = families.find((family) => family.id === state.sourceFamilyId)
+    || timelineFamilies.find((family) => family.id === state.sourceFamilyId)
+    || families[0];
   const selectedTimelineFamily = timelineFamilies.find((family) => family.id === selectedSummary.id) || timelineFamilies[0] || {};
   const selectedTimelineRows = (selectedTimelineFamily.products || []).flatMap((productRow) => productRow.rows || []);
   const allTimelineRows = timelineFamilies.flatMap((family) => (family.products || []).flatMap((productRow) => productRow.rows || []));
-  const totalProducts = families.reduce((sum, family) => sum + Number(family.product_count || 0), 0);
+  const totalProducts = new Set(timelineFamilies.flatMap((family) => (family.products || []).map((productRow) => productRow.product_id))).size
+    || families.reduce((sum, family) => sum + Number(family.product_count || 0), 0);
   const totalRows = families.reduce((sum, family) => sum + Number(family.evidence_row_count || family.row_count || 0), 0);
   const selectedProducts = Number(selectedSummary.product_count || selectedSummary.products?.length || 0);
   const selectedRows = Number(selectedSummary.evidence_row_count || selectedSummary.row_count || 0);
@@ -957,6 +966,7 @@ function renderSourceFamilySummary() {
   const selectedLocalVisuals = selectedTimelineRows.filter((row) => row.local_preview_available).length;
   const selectedStructuredRows = selectedTimelineRows.filter((row) => ingredientItemsForRow(row).length).length;
   const selectedReadableGaps = selectedTimelineRows.filter((row) => !row.ingredient_text).length;
+  const selectedRowLabel = selectedSummary.id === collectionTargetFamilyId ? "source lead" : "proof row";
   els.sourceFamilySummary.innerHTML = `
     <div class="source-family-metrics">
       <span>${cwaInlineIcon("image")}<strong>${escapeHtml(totalProducts)}</strong>products</span>
@@ -973,7 +983,7 @@ function renderSourceFamilySummary() {
         selectedLocalVisuals,
         selectedStructuredRows,
         selectedReadableGaps,
-      })}
+      }, { rowLabel: selectedRowLabel })}
       <em>${escapeHtml(selectedSummary.claim_policy || state.data.source_family_timeline?.claim_policy || "Ingredient text remains candidate evidence until manual review.")}</em>
     </div>
   `;
@@ -1040,7 +1050,7 @@ function renderCwaTimeline() {
     state.sourceFamilyId = family.id;
   }
   if (els.sourceFamilyTimelineTitle) {
-    els.sourceFamilyTimelineTitle.textContent = `${family.label} Proof Board`;
+    els.sourceFamilyTimelineTitle.textContent = `${family.label} ${family.id === collectionTargetFamilyId ? "Board" : "Proof Board"}`;
   }
   if (els.sourceFamilyTimelineNote) {
     els.sourceFamilyTimelineNote.innerHTML = sourceFamilyHeaderMetrics(family);
@@ -1066,9 +1076,11 @@ function renderCwaTimeline() {
   }
   if (els.sourceFamilyFilterStatus) {
     const visibleRows = ingredientTrendRows(visibleProducts, query).length;
+    const rowLabel = family.id === collectionTargetFamilyId ? "source leads" : "proof rows";
+    const totalRows = family.row_count || allProducts.reduce((sum, row) => sum + Number(row.evidence_count || 0), 0);
     els.sourceFamilyFilterStatus.textContent = query
       ? `${visibleProducts.length} of ${allProducts.length} products · ${visibleRows} matching proof rows`
-      : `${allProducts.length} products · ${family.row_count || allProducts.reduce((sum, row) => sum + Number(row.evidence_count || 0), 0)} proof rows`;
+      : `${allProducts.length} products · ${totalRows} ${rowLabel}`;
   }
   const localImages = isLocalPreviewHost();
   renderSourceFamilyIngredientSummary(family, visibleProducts, query);

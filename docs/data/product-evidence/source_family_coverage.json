@@ -1,11 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-06-17T11:27:51.711Z",
+  "generated_at_utc": "2026-06-17T12:19:21.349Z",
   "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
   "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
   "totals": {
     "queue_products": 120,
     "represented_products": 118,
+    "collection_target_products": 2,
+    "timeline_products": 120,
     "missing_products": 2,
     "queue_evidence_rows": 1701,
     "high_priority_missing_rows": 22,

@@ -458,7 +458,7 @@ test("ingredient navigator renders CWA visual timeline without relying on public
 
   await expect(page.locator("#journey-status")).toContainText("Oreo");
   await expect(page.locator("#cwa-timeline-panel")).toBeVisible();
-  await expect(page.locator(".source-family-tab")).toHaveCount(4);
+  await expect(page.locator(".source-family-tab")).toHaveCount(5);
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");
   await expect(page.locator(".source-family-tab.is-selected")).not.toContainText(/products · \d+ proof/);
   await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='105 products']")).toBeVisible();
@@ -765,6 +765,38 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#ingredient-drilldown")).toContainText("Package image review is required");
   await expect(page.locator("#ingredient-drilldown")).toContainText("High Fructose Corn Syrup");
   await page.keyboard.press("Escape");
+
+  await page.locator(".source-family-tab").filter({ hasText: "Collection Targets" }).click();
+  await expect(page.locator(".source-family-tab.is-selected")).toContainText("Collection Targets");
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='2 products']")).toBeVisible();
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='0 ingredient proof rows']")).toBeVisible();
+  await expect(page.locator(".source-family-tab.is-selected .source-family-tab-metric[aria-label='8 readable panels still needed']")).toBeVisible();
+  await expect(page.locator("#source-family-timeline-title")).toContainText("Collection Targets Board");
+  await expect(page.locator("#source-family-filter-status")).toContainText("2 products · 8 source leads");
+  await expect(sourceFamilySummary.locator(".source-family-focus-metric[aria-label='2 products']")).toBeVisible();
+  await expect(sourceFamilySummary.locator(".source-family-focus-metric[aria-label='8 source leads']")).toBeVisible();
+  await expect(sourceFamilySummary.locator(".source-family-focus-metric[aria-label='0 proof text candidates']")).toBeVisible();
+  await expect(sourceFamilySummary.locator(".source-family-focus-metric[aria-label='8 readable panel gaps']")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip")).toHaveCount(2);
+  await expect(page.locator(".cwa-product-chip").first()).toContainText("Starbucks Pumpkin Spice Latte");
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-chip-metric[aria-label='4 source leads']")).toBeVisible();
+  await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-chip-metric[aria-label='0 ingredient proof rows']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
+  await expect(page.locator(".cwa-timeline-card").first()).toHaveAttribute("data-proof-basis", "collection_target_source_lead");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Official Starbucks source cache blocked");
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-preview-placeholder")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-status-icon[aria-label^='Collection source lead']")).toBeVisible();
+  await expect(page.locator(".cwa-timeline-card").first().locator(".cwa-action-icon[aria-label='Open local private crop']")).toHaveCount(0);
+  await page.locator(".cwa-timeline-card").first().locator("[data-cwa-inspect]").click();
+  await expect(page.locator("#ingredient-drilldown")).toBeVisible();
+  await expect(page.locator("#ingredient-drilldown-title")).toContainText("Starbucks Pumpkin Spice Latte");
+  await expect(page.locator("#ingredient-drilldown")).toContainText("Collection source lead");
+  await expect(page.locator("#ingredient-drilldown")).toContainText("Do not promote PSL ingredient composition");
+  await page.keyboard.press("Escape");
+  await page.locator(".cwa-product-chip").filter({ hasText: "KFC Original Recipe Chicken" }).click();
+  await expect(page.locator(".cwa-timeline-card")).toHaveCount(4);
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("KFC Chicken and Nutrition official page");
+  await expect(page.locator(".cwa-timeline-card").first()).toContainText("Item-level ingredient source needed");
 
   await page.locator(".source-family-tab").filter({ hasText: "Official Current Labels" }).click();
   await expect(page.locator(".source-family-tab.is-selected")).toContainText("Official Current Labels");

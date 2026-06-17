@@ -161,6 +161,8 @@ assert.strictEqual(typeof buildCoverage, "function", "source-family coverage bui
 assert.strictEqual(sourceFamilyCoverage.schema_version, 1, "source family coverage should be versioned");
 assert.strictEqual(sourceFamilyCoverage.totals.queue_products, 120, "source family coverage should audit the 120-product queue");
 assert.strictEqual(sourceFamilyCoverage.totals.represented_products, 118, "source family coverage should include source-family enrichment");
+assert.strictEqual(sourceFamilyCoverage.totals.collection_target_products, 2, "source family coverage should expose missing products as collection targets");
+assert.strictEqual(sourceFamilyCoverage.totals.timeline_products, 120, "source-family timeline should show the full 120-product queue scope");
 assert.strictEqual(sourceFamilyCoverage.totals.missing_products, 2, "source family coverage should expose the remaining missing product queue");
 assert.strictEqual(navigator.source_family_coverage?.totals?.missing_products, 2, "navigator should embed the remaining missing product queue");
 assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "starbucks_pumpkin_spice_latte"), "coverage queue should keep Starbucks PSL until a locally cacheable official source is attached");
@@ -185,6 +187,17 @@ assert(sourceFamilyCoverage.missing_products.every((row) => row.representative_r
 assert(sourceFamilyCoverage.missing_products.every((row) => row.representative_rows.every((lead) => /^https?:/.test(lead.source_url))), "missing queue leads should stay source-link based");
 assert(!Object.hasOwn(sourceFamilyCoverage.missing_capture_classes, "candidate_panel_or_text_available"), "coverage queue should have promoted panel/text candidates into source-family proof rows");
 assert(sourceFamilyCoverage.missing_capture_classes.menu_component_source_needed >= 1, "coverage queue should classify menu-component candidates");
+const collectionTargetFamily = navigator.source_family_timeline?.families?.find((row) => row.id === "collection-targets");
+assert(collectionTargetFamily, "navigator should expose collection targets for the missing proof products");
+assert.strictEqual(collectionTargetFamily.product_count, 2, "collection-target lane should expose two products");
+assert.strictEqual(collectionTargetFamily.row_count, 8, "collection-target lane should expose representative source leads");
+assert.strictEqual(collectionTargetFamily.ingredient_signal_count, 0, "collection-target lane should not promote ingredient proof rows");
+assert.strictEqual(collectionTargetFamily.local_preview_available_count, 0, "collection-target lane should not claim local proof imagery");
+assert(collectionTargetFamily.products.some((row) => row.product_id === "starbucks_pumpkin_spice_latte"), "collection-target lane should include Starbucks PSL");
+assert(collectionTargetFamily.products.some((row) => row.product_id === "kfc_original_recipe_chicken"), "collection-target lane should include KFC Original Recipe Chicken");
+assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => row.proof_visual_basis === "collection_target_source_lead")), "collection-target rows should be source leads");
+assert(collectionTargetFamily.products.every((product) => product.rows.every((row) => !row.ingredient_text && !row.local_preview_available)), "collection-target rows should remain non-claim, no-local-preview rows");
+assert(collectionTargetFamily.claim_policy.includes("do not promote ingredient"), "collection-target lane should publish a claim boundary");
 assertPublicSafeJson(sourceFamilyCoveragePath);
 assertPublicSafeJson(navigatorPath);
 assertPublicSafeJson(labelDatabaseVisualIndexPath);
