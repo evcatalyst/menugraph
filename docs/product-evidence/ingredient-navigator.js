@@ -236,9 +236,7 @@ function ingredientTextBlock(row, options = {}) {
   const compact = Boolean(options.compact);
   const idAttr = options.id ? ` id="${escapeHtml(options.id)}"` : "";
   const items = ingredientItemsForRow(row);
-  const sourceText = compact
-    ? truncateText(row.candidate_excerpt || row.ingredient_text, 230)
-    : row.ingredient_text;
+  const sourceText = row.ingredient_text || row.candidate_excerpt || "";
   const list = items.length
     ? `<ul>${items.map((item) => `<li>${ingredientFilterButton(item)}</li>`).join("")}</ul>`
     : "";

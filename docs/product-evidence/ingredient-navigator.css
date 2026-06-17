@@ -1552,6 +1552,18 @@ a:hover {
   overflow: hidden;
 }
 
+.cwa-timeline-card.is-ingredient-open .cwa-ingredient-copy.is-compact .cwa-ingredient-source-line {
+  display: block;
+  max-height: min(34vh, 280px);
+  overflow: auto;
+  scrollbar-width: thin;
+  -webkit-line-clamp: unset;
+}
+
+.cwa-timeline-card.is-ingredient-open .cwa-ingredient-copy.is-compact ul {
+  max-height: min(42vh, 420px);
+}
+
 .cwa-ingredient-copy ul {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
