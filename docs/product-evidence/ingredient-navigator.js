@@ -689,6 +689,26 @@ function ingredientDrilldownTrendBlock(row) {
   `;
 }
 
+function ingredientDrilldownProofOverlay(row) {
+  const items = ingredientItemsForRow(row);
+  if (!items.length) {
+    return `
+      <div class="ingredient-drilldown-proof-overlay is-missing-text" aria-label="Readable ingredient proof text">
+        <span>Readable panel needed</span>
+        <p>${escapeHtml(row.candidate_excerpt || "No readable ingredient panel has been captured for this visual proof row.")}</p>
+      </div>
+    `;
+  }
+  return `
+    <div class="ingredient-drilldown-proof-overlay" aria-label="Readable ingredient proof text">
+      <span>${escapeHtml(proofVisualLabel(row))}</span>
+      <ul>
+        ${items.map((item) => `<li>${escapeHtml(truncateText(item, 140))}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+}
+
 function renderIngredientDrilldown(row) {
   const canShowPreview = isLocalPreviewHost() && row.local_preview_available && row.preview_endpoint;
   const sourceLink = row.source_detail_url || row.source_url;
@@ -712,6 +732,7 @@ function renderIngredientDrilldown(row) {
         ${canShowPreview
           ? `<img src="${escapeHtml(row.preview_endpoint)}" alt="${escapeHtml(`${row.product_name} ${row.vintage_label} ingredient crop`)}" />`
           : drilldownPlaceholder(row)}
+        ${ingredientDrilldownProofOverlay(row)}
       </div>
       <div class="ingredient-drilldown-copy">
         <span>${escapeHtml(previewTitle)}</span>

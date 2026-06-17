@@ -624,6 +624,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-trends")).toContainText("Product ingredient signals");
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-trends button").filter({ hasText: "artificial coloring" })).toBeVisible();
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-image img, #ingredient-drilldown .ingredient-drilldown-placeholder")).toBeVisible();
+  const drilldownProofOverlay = page.locator("#ingredient-drilldown .ingredient-drilldown-proof-overlay");
+  await expect(drilldownProofOverlay).toBeVisible();
+  expect(await drilldownProofOverlay.locator("li").count()).toBeGreaterThan(10);
+  await expect(drilldownProofOverlay).toContainText("BHT added to maintain product freshness");
   const drilldownImagePane = page.locator("#ingredient-drilldown .ingredient-drilldown-image");
   const drilldownImage = page.locator("#ingredient-drilldown .ingredient-drilldown-image img");
   if (await drilldownImage.count()) {
