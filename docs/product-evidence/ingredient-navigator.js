@@ -17,6 +17,7 @@ const els = {
   sourceFamilyPosition: document.querySelector("#source-family-position"),
   sourceFamilyIngredientSummary: document.querySelector("#source-family-ingredient-summary"),
   sourceFamilyGapSummary: document.querySelector("#source-family-gap-summary"),
+  sourceFamilyCoverageSummary: document.querySelector("#source-family-coverage-summary"),
   cwaProductStrip: document.querySelector("#cwa-product-strip"),
   cwaTimelineTrack: document.querySelector("#cwa-timeline-track"),
   status: document.querySelector("#journey-status"),
@@ -476,6 +477,79 @@ function renderSourceFamilyGapSummary(family, visibleProducts, query, localImage
   });
 }
 
+function missingCoverageSearchText(productRow) {
+  return [
+    productRow.product_name,
+    productRow.brand,
+    productRow.category,
+    productRow.capture_class,
+    productRow.next_collection_goal,
+    ...(productRow.top_source_domains || []).map((row) => row.domain),
+    ...(productRow.representative_rows || []).flatMap((row) => [
+      row.vintage_label,
+      row.source_domain,
+      row.source_title,
+      row.ocr_gap_category,
+      row.next_action,
+    ]),
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function sourceFamilyCoverageRows(query = sourceFamilyFilterQuery()) {
+  const coverage = state.data?.source_family_coverage;
+  const rows = coverage?.missing_products || [];
+  if (!query) return rows;
+  return rows.filter((row) => missingCoverageSearchText(row).includes(query));
+}
+
+function renderSourceFamilyCoverageSummary(query = sourceFamilyFilterQuery()) {
+  if (!els.sourceFamilyCoverageSummary) return;
+  const coverage = state.data?.source_family_coverage;
+  if (!coverage?.missing_products?.length) {
+    els.sourceFamilyCoverageSummary.innerHTML = "";
+    return;
+  }
+  const rows = sourceFamilyCoverageRows(query);
+  const totals = coverage.totals || {};
+  const visibleRows = rows.slice(0, 6);
+  if (!visibleRows.length) {
+    els.sourceFamilyCoverageSummary.innerHTML = `
+      <div class="source-family-coverage-title">
+        <span>Full-corpus capture queue</span>
+        <small>${escapeHtml(`0 of ${totals.missing_products || coverage.missing_products.length} missing products match`)}</small>
+      </div>
+    `;
+    return;
+  }
+  els.sourceFamilyCoverageSummary.innerHTML = `
+    <div class="source-family-coverage-title">
+      <span>Full-corpus capture queue</span>
+      <small>${escapeHtml(query
+        ? `${rows.length} of ${totals.missing_products || coverage.missing_products.length} missing products match`
+        : `${totals.represented_products || 0}/${totals.queue_products || 0} products represented · ${totals.missing_products || coverage.missing_products.length} missing`)}</small>
+    </div>
+    <div class="source-family-coverage-list">
+      ${visibleRows.map((productRow) => {
+        const lead = (productRow.representative_rows || [])[0] || {};
+        const sourceLink = lead.source_url || "";
+        const topDomain = productRow.top_source_domains?.[0]?.domain || lead.source_domain || "source needed";
+        return `
+          <article class="source-family-coverage-card">
+            <span>${escapeHtml(labelFor(productRow.capture_class || "capture_queue"))}</span>
+            <strong>${escapeHtml(productRow.product_name)}</strong>
+            <small>${escapeHtml(`${productRow.high_priority_row_count || 0} high-priority rows · ${productRow.current_row_count || 0} current rows · ${topDomain}`)}</small>
+            <p>${escapeHtml(labelFor(productRow.next_collection_goal || lead.next_action || "source_attributable_panel_capture_needed"))}</p>
+            <div class="source-family-coverage-actions">
+              ${sourceLink ? `<a href="${escapeHtml(sourceLink)}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(`Open lead source for ${productRow.product_name}`)}">${cwaInlineIcon("source")}</a>` : ""}
+              <button type="button" data-source-family-filter-value="${escapeHtml(productRow.product_name)}" aria-label="${escapeHtml(`Search proof board for ${productRow.product_name}`)}">${cwaInlineIcon("inspect")}</button>
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
 function selectedCwaProduct() {
   const family = cwaTimeline();
   const products = filteredSourceFamilyProducts(family);
@@ -803,6 +877,7 @@ function renderCwaTimeline() {
   const localImages = isLocalPreviewHost();
   renderSourceFamilyIngredientSummary(family, visibleProducts, query);
   renderSourceFamilyGapSummary(family, visibleProducts, query, localImages);
+  renderSourceFamilyCoverageSummary(query);
   if (!visibleProducts.length) {
     state.cwaProductId = "";
     els.cwaProductStrip.innerHTML = "";

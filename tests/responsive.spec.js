@@ -463,6 +463,9 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#source-family-timeline-title")).toContainText("Official Current Labels");
   await expect(page.locator(".cwa-product-chip")).toHaveCount(99);
   await expect(page.locator("#source-family-gap-summary")).toBeHidden();
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("Full-corpus capture queue");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("104/120 products represented");
+  await expect(page.locator("#source-family-coverage-summary")).toContainText("Starbucks Pumpkin Spice Latte");
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb.has-proof")).toBeVisible();
   await expect(page.locator(".cwa-product-chip").first().locator(".cwa-product-thumb img")).toBeVisible();
   await expect(page.locator(".cwa-timeline-card")).toHaveCount(1);

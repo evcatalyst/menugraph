@@ -1,0 +1,1716 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-06-17T09:59:55.229Z",
+  "public_image_policy": "Coverage queue exposes source links, status counts, and next actions only. Private screenshots, crops, OCR dumps, and local paths stay in the private local cache.",
+  "claim_policy": "Missing-product rows are capture targets only. They do not promote ingredient, formulation, or historical-change claims.",
+  "totals": {
+    "queue_products": 120,
+    "represented_products": 104,
+    "missing_products": 16,
+    "queue_evidence_rows": 1701,
+    "high_priority_missing_rows": 110,
+    "current_missing_rows": 69
+  },
+  "missing_capture_classes": {
+    "candidate_panel_or_text_available": 9,
+    "menu_component_source_needed": 7
+  },
+  "missing_products": [
+    {
+      "product_id": "starbucks_pumpkin_spice_latte",
+      "product_name": "Starbucks Pumpkin Spice Latte",
+      "brand": "Starbucks",
+      "category": "fast food",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "menu_component_source_needed",
+      "evidence_row_count": 17,
+      "high_priority_row_count": 14,
+      "current_row_count": 7,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 1,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "about.starbucks.com",
+          "count": 4
+        },
+        {
+          "domain": "stories.starbucks.com",
+          "count": 3
+        },
+        {
+          "domain": "unknown_source",
+          "count": 3
+        },
+        {
+          "domain": "www.tastingtable.com",
+          "count": 2
+        },
+        {
+          "domain": "wtop.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "starbucks_pumpkin_spice_latte__current_2020s__966__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.starbucks.co.uk",
+          "source_url": "https://www.starbucks.co.uk/sites/starbucks-uk-pwa/files/2025-09/AUT25_UK_AllergenBook_CORE_BEVERAGE_v1509.pdf",
+          "source_title": "Starbucks UK Autumn 2025 beverage allergen guide with Pumpkin Spice Latte rows",
+          "source_owner": "Starbucks UK",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Extract document version/date, market, PSL rows, ingredients/allergens, and mark as UK-market evidence.;International official document. Keep separate from US Starbucks PSL formulation and use mainly as variant/date/document evidence."
+        },
+        {
+          "evidence_id": "starbucks_pumpkin_spice_latte__current_2020s__768__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "stories.starbucks.com",
+          "source_url": "https://stories.starbucks.com/uploads/2023/08/PA082-Fall-Promo-PSL-20-Timeline-US-EN.pdf",
+          "source_title": "Starbucks PSL 20th season timeline PDF",
+          "source_owner": "Starbucks Stories",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Capture timeline milestone text and dates, especially 2003 launch and 2015 recipe change; mark ingredient details as incomplete unless full statement appears.;Official brand timeline. Use for dated change events and source trail, not ingredient occurrence par..."
+        },
+        {
+          "evidence_id": "starbucks_pumpkin_spice_latte__current_2020s__617__3",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "about.starbucks.com",
+          "source_url": "https://about.starbucks.com/press/2025/starbucks-pumpkin-spice-latte-psl-returns-august-26/",
+          "source_title": "Starbucks Pumpkin Spice Latte returns August 26, 2025 - official press release",
+          "source_owner": "Starbucks",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Use for availability timeline and product-family context only. Ingredient analysis requires menu/nutrition evidence for a specific hot/iced size and milk configuration.;Official seasonal availability/change-event evidence for PSL. It is not a full ingredient..."
+        },
+        {
+          "evidence_id": "starbucks_pumpkin_spice_latte__current_2020s__575__4",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "about.starbucks.com",
+          "source_url": "https://about.starbucks.com/history/pumpkin-spice-latte/",
+          "source_title": "Starbucks history page for Pumpkin Spice Latte",
+          "source_owner": "Starbucks",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Record launch claim and high-level formulation notes as claims, not ingredient occurrences. Pair with current nutrition/allergen sources later.;Official product-history evidence, not a verified ingredient statement. Use for launch/story context and source tra..."
+        }
+      ],
+      "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
+    },
+    {
+      "product_id": "chipotle_chicken_burrito",
+      "product_name": "Chipotle Chicken Burrito",
+      "brand": "Chipotle",
+      "category": "fast food",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "menu_component_source_needed",
+      "evidence_row_count": 13,
+      "high_priority_row_count": 10,
+      "current_row_count": 6,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 0,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.chipotle.com",
+          "count": 5
+        },
+        {
+          "domain": "www.flickr.com",
+          "count": 4
+        },
+        {
+          "domain": "unknown_source",
+          "count": 3
+        },
+        {
+          "domain": "www.chipotleme.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "chipotle_chicken_burrito__current_2020s__611__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.chipotle.com",
+          "source_url": "https://www.chipotle.com/nutrition-calculator",
+          "source_title": "Chipotle official nutrition calculator",
+          "source_owner": "Chipotle Mexican Grill",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Record every selected component before linking to a formulation version. The calculator is not a single fixed product label.;Official current calculation source for Chipotle build-level nutrition. Use only with stored configuration state or screenshot/export..."
+        },
+        {
+          "evidence_id": "chipotle_chicken_burrito__current_2020s__669__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.chipotle.com",
+          "source_url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/nutrition.pdf",
+          "source_title": "Chipotle Nutrition PDF component rows",
+          "source_owner": "Chipotle Mexican Grill",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Store market and selected components. Do not collapse all possible Chipotle burrito configurations into one formulation.;Official component-level nutrition source. Useful for configured-burrito serving/weight alignment, not a fixed product label."
+        },
+        {
+          "evidence_id": "chipotle_chicken_burrito__current_2020s__612__3",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.chipotle.com",
+          "source_url": "https://www.chipotle.com/allergens",
+          "source_title": "Chipotle official allergens and special diet page",
+          "source_owner": "Chipotle Mexican Grill",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Capture allergen table or component rows and explicitly define the burrito build variant.;Official current source. Must pair with ingredient/component statements for tortilla, chicken, rice, beans, salsa, cheese, sour cream, etc. before formulation use."
+        },
+        {
+          "evidence_id": "chipotle_chicken_burrito__current_2020s__573__4",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.chipotle.com",
+          "source_url": "https://www.chipotle.com/content/dam/chipotle/menu/nutrition/US-Nutrition-Facts-Paper-Menu-3-2025.pdf",
+          "source_title": "Chipotle US Nutrition Facts Paper Menu, March 2025",
+          "source_owner": "Chipotle Mexican Grill",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Capture PDF date/version, burrito format rows, selected chicken component row, and link to allergens/component pages.;Official current nutrition PDF. Use for serving/calorie overlay, not full ingredient parsing unless the PDF contains ingredient statements."
+        }
+      ],
+      "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
+    },
+    {
+      "product_id": "capn_crunch_original",
+      "product_name": "Cap'n Crunch Original",
+      "brand": "Cap'n Crunch",
+      "category": "cereal",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 19,
+      "high_priority_row_count": 9,
+      "current_row_count": 3,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 9,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.flickr.com",
+          "count": 10
+        },
+        {
+          "domain": "underunderstood.com",
+          "count": 3
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "www.reddit.com",
+          "count": 2
+        },
+        {
+          "domain": "www.capncrunch.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "capn_crunch_original__current_2020s__440__3",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "current_web_page",
+          "source_domain": "underunderstood.com",
+          "source_url": "https://underunderstood.com/podcast/episode/capn-crunch-smaller/",
+          "source_title": "The Incredible Shrinking Cap'n - Underunderstood",
+          "source_owner": "Underunderstood",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Queue as a formulation-change research lead only. Promote no ingredient claim until direct 1995 photo evidence and current package-label evidence are attached and transcribed.;Editorial source with explicit links to cited 1995 box photos and current U.S. reta..."
+        },
+        {
+          "evidence_id": "capn_crunch_original__current_2020s__50__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "current_web_page",
+          "source_domain": "www.capncrunch.com",
+          "source_url": "https://www.capncrunch.com/products/cap-n-crunch-original",
+          "source_title": "Cap'n Crunch Original - Cap'n Crunch",
+          "source_owner": "Cap'n Crunch / Quaker",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Capture current page, package-currentness disclaimer, nutrition iframe details, package image roles, and link to exact SmartLabel/retailer label evidence.;Official current product page. It is context evidence; exact package label still needed because page say..."
+        },
+        {
+          "evidence_id": "capn_crunch_original__current_2020s__51__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.kroger.com",
+          "source_url": "https://www.kroger.com/p/cap-n-crunch-original-bag-cereal/0003000031378",
+          "source_title": "Cap'n Crunch Original Bag Cereal, 40 oz - Kroger",
+          "source_owner": "www.kroger.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Cap'n Crunch candidate with oil/color/preservative facets; verify whether gallery exposes ingredients panel.;Retailer page useful for ingredient/weight/UPC alignment and package imagery; WARC and package image verification required."
+        },
+        {
+          "evidence_id": "capn_crunch_original__1980s_or_earlier__277__4",
+          "vintage_label": "1980s_or_earlier",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "collector_package_photo",
+          "source_domain": "www.flickr.com",
+          "source_url": "https://www.flickr.com/photos/25692985%40N07/3461366520",
+          "source_title": "1980 Quaker Cap'n Crunch Cereal Box Back - Flickr",
+          "source_owner": "www.flickr.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Potentially useful for 1980 Cap'n Crunch back-panel review; verify exact Original variant and whether ingredients/net weight are readable.;Source-attributed Flickr page identifies uploader and package-back item title; label text readability must be reviewed a..."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    },
+    {
+      "product_id": "nilla_wafers",
+      "product_name": "Nilla Wafers",
+      "brand": "Nilla",
+      "category": "cookies",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 12,
+      "high_priority_row_count": 8,
+      "current_row_count": 6,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 8,
+      "ingredient_text_available_row_count": 2,
+      "top_source_domains": [
+        {
+          "domain": "www.walmart.com",
+          "count": 5
+        },
+        {
+          "domain": "www.directionsforme.org",
+          "count": 3
+        },
+        {
+          "domain": "www.flickr.com",
+          "count": 3
+        },
+        {
+          "domain": "unknown_source",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "nilla_wafers__current_2020s__64__5",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/17176262",
+          "source_title": "Nilla Wafers Mini Cookies, 11 oz - Walmart",
+          "source_owner": "www.walmart.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Mini package variant should remain SKU-specific.;Retailer source; useful for SKU/weight alignment, WARC and package verification required."
+        },
+        {
+          "evidence_id": "nilla_wafers__current_2020s__63__6",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "label_database_record",
+          "source_domain": "www.directionsforme.org",
+          "source_url": "https://www.directionsforme.org/product/75544",
+          "source_title": "Nilla Wafers Family Size - Directions for Me",
+          "source_owner": "www.directionsforme.org",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Nilla candidate with enriched flour, oils, HFCS, flavor, soy, milk/egg facets.;Accessibility/product database source; useful label text candidate, but package image verification required."
+        },
+        {
+          "evidence_id": "nilla_wafers__current_2020s__524__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/5032294033",
+          "source_title": "Nilla Wafers Cookies Family Size 15 oz Walmart page",
+          "source_owner": "Walmart",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": true,
+          "next_action": "extract_or_verify_source_ingredient_text",
+          "reviewer_note_excerpt": "Keep 15 oz family-size SKU separate for package-weight normalization; verify package-panel readability before promotion.;Retailer page with product gallery, package size, ingredient text, allergen text, and price context. Useful family-size SKU comparison aga..."
+        },
+        {
+          "evidence_id": "nilla_wafers__current_2020s__523__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/11069151100",
+          "source_title": "Nilla Wafers Cookies 11 oz Walmart page",
+          "source_owner": "Walmart",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": true,
+          "next_action": "extract_or_verify_source_ingredient_text",
+          "reviewer_note_excerpt": "Verify package-gallery ingredient panel before ground-truth promotion; retailer page may contain duplicated or normalized product-data fields.;Retailer page with product image gallery, net weight, ingredient text, allergen text, and product detail context. Us..."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    },
+    {
+      "product_id": "kfc_original_recipe_chicken",
+      "product_name": "KFC Original Recipe Chicken",
+      "brand": "KFC",
+      "category": "fast food",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "menu_component_source_needed",
+      "evidence_row_count": 9,
+      "high_priority_row_count": 8,
+      "current_row_count": 2,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 2,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.flickr.com",
+          "count": 3
+        },
+        {
+          "domain": "docslib.org",
+          "count": 2
+        },
+        {
+          "domain": "global.kfc.com",
+          "count": 2
+        },
+        {
+          "domain": "unknown_source",
+          "count": 1
+        },
+        {
+          "domain": "www.fastfoodmarketing.org",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "kfc_original_recipe_chicken__current_2020s__576__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "global.kfc.com",
+          "source_url": "https://global.kfc.com/chicken-and-nutrition",
+          "source_title": "KFC Chicken and Nutrition official page",
+          "source_owner": "KFC Global",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Pair with US market nutrition/allergen/ingredient documents before comparing Original Recipe formulation.;Official KFC source page, but not a US item ingredient record. Use as source-routing and global disclosure evidence only until market-specific PDF/page i..."
+        },
+        {
+          "evidence_id": "kfc_original_recipe_chicken__current_2020s__615__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "global.kfc.com",
+          "source_url": "https://global.kfc.com/stories/in-the-kitchen-with-fit-food-innovation-and-technology",
+          "source_title": "KFC Food Innovation and Technology story",
+          "source_owner": "KFC Global",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Do not promote ingredient details from this story. Pair with market-specific ingredient/nutrition documents for formulation records.;Official KFC formulation-governance/history context. It is useful for product-history notes but not for SKU-level ingredient g..."
+        },
+        {
+          "evidence_id": "kfc_original_recipe_chicken__1980s_or_earlier__623__1",
+          "vintage_label": "1980s_or_earlier",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.flickr.com",
+          "source_url": "https://www.flickr.com/photos/jasonliebigstuff/3524102231",
+          "source_title": "Kentucky Fried Chicken Colonel Sanders fast food bag, 1970s - Flickr",
+          "source_owner": "Flickr",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_back_or_side_panel_photo",
+          "reviewer_note_excerpt": "Review whether exact item context is Original Recipe or general takeout bag. Do not promote ingredient claims from this record.;Source-attributable KFC package/bag history lead. Useful for brand/package chronology, not Original Recipe formulation by itself."
+        },
+        {
+          "evidence_id": "kfc_original_recipe_chicken__2000s__766__1",
+          "vintage_label": "2000s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.flickr.com",
+          "source_url": "https://www.flickr.com/photos/yummyinthetummyblog/albums/72157603838448014/",
+          "source_title": "KFC Flickr album by yummyinthetummyblog, 2008",
+          "source_owner": "Flickr / yummyinthetummyblog",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Open album, capture exact photo URLs for box/bag/menu images, record taken/upload dates, and keep meal photos separate from ingredient evidence.;Source-attributable Flickr album with uploader/date metadata. Inspect individual images for boxes, bags, receipts,..."
+        }
+      ],
+      "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
+    },
+    {
+      "product_id": "dr_pepper_original",
+      "product_name": "Dr Pepper Original",
+      "brand": "Dr Pepper",
+      "category": "beverages",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 17,
+      "high_priority_row_count": 7,
+      "current_row_count": 6,
+      "current_official_row_count": 1,
+      "ingredient_panel_visible_row_count": 7,
+      "ingredient_text_available_row_count": 1,
+      "top_source_domains": [
+        {
+          "domain": "www.flickr.com",
+          "count": 6
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "www.kroger.com",
+          "count": 2
+        },
+        {
+          "domain": "www.sasinc.com",
+          "count": 2
+        },
+        {
+          "domain": "commons.wikimedia.org",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "dr_pepper_original__current_2020s__52__4",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.kroger.com",
+          "source_url": "https://www.kroger.com/p/dr-pepper/0007800008216",
+          "source_title": "Dr Pepper Soda Cans, 12 pk / 12 fl oz - Kroger",
+          "source_owner": "www.kroger.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Dr Pepper candidate for HFCS/caramel color/phosphoric acid/caffeine facets.;Retailer page useful for current ingredient/weight/UPC candidate; package and archive validation required."
+        },
+        {
+          "evidence_id": "dr_pepper_original__current_2020s__662__5",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "current_web_page",
+          "source_domain": "www.vitcofoods.com",
+          "source_url": "https://www.vitcofoods.com/productspecs/2818.pdf",
+          "source_title": "Dr Pepper / Seven Up Manufacturing Company product spec PDF",
+          "source_owner": "Vitco Foods product specs",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Store as foodservice/fountain variant evidence; do not collapse with retail package formulation.;Distributor product spec for fountain syrup. Strong for ingredient text but not equivalent to packaged Dr Pepper cans/bottles without variant mapping."
+        },
+        {
+          "evidence_id": "dr_pepper_original__current_2020s__661__6",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "brand_label_page",
+          "source_domain": "www.sasinc.com",
+          "source_url": "https://www.sasinc.com/wp-content/uploads/2021/09/Pepsico.pdf",
+          "source_title": "PepsiCo beverage nutrition PDF with Dr Pepper facts and ingredients",
+          "source_owner": "SAS foodservice/distributor PDF mirror",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Keep fountain/foodservice and retail can/bottle formulations distinct until package format is verified.;Foodservice/distributor PDF; useful for beverage ingredient and serving-size cross-check, but not a package photo or direct brand page."
+        },
+        {
+          "evidence_id": "dr_pepper_original__current_2020s__261__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.target.com",
+          "source_url": "https://www.target.com/p/-/A-12965290",
+          "source_title": "Dr Pepper Soda 12 pk / 12 fl oz Cans - Target",
+          "source_owner": "www.target.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Dr Pepper candidate; archive Target page and inspect gallery for full can/box label before ground-truth transcription.;Retailer page supplies source-attributable product images, price/weight identifiers, ingredients, and UPC; package label remains aut..."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    },
+    {
+      "product_id": "hostess_cupcakes",
+      "product_name": "Hostess CupCakes",
+      "brand": "Hostess",
+      "category": "snack cakes",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 16,
+      "high_priority_row_count": 7,
+      "current_row_count": 7,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 7,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.flickr.com",
+          "count": 6
+        },
+        {
+          "domain": "www.walmart.com",
+          "count": 6
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "commons.wikimedia.org",
+          "count": 1
+        },
+        {
+          "domain": "www.target.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "hostess_cupcakes__current_2020s__74__4",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/35772686",
+          "source_title": "Hostess Chocolate CupCakes, 3.17 oz Sleeve - Walmart",
+          "source_owner": "www.walmart.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "High-value animal-fat and hydrogenated-fat candidate; verify against readable package panel before ground truth.;Retailer page gives current SKU/package lead and image gallery; package label remains authoritative."
+        },
+        {
+          "evidence_id": "hostess_cupcakes__current_2020s__284__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/42679339",
+          "source_title": "Hostess Golden CupCakes, 12.7 oz, 8 Count - Walmart",
+          "source_owner": "www.walmart.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Hostess CupCakes candidate; keep variant-specific and inspect image gallery for nutrition/ingredient panel.;Retailer page provides image gallery, ingredient section, and package-size context; verify exact Golden versus chocolate Hostess CupCakes varia..."
+        },
+        {
+          "evidence_id": "hostess_cupcakes__current_2020s__540__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/27047495",
+          "source_title": "Hostess Chocolate CupCakes Walmart page",
+          "source_owner": "Walmart",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Review package gallery for ingredient panel, barcode, and exact net weight; keep count/package size explicit for timeline alignment.;Retailer page candidate with package imagery, price context, and product-data fields. Useful for current Hostess CupCakes labe..."
+        },
+        {
+          "evidence_id": "hostess_cupcakes__current_2020s__866__3",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/10450906",
+          "source_title": "Hostess Chocolate CupCakes 8 count Walmart page",
+          "source_owner": "Walmart",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Capture image carousel, ingredient text, package count/weight, price/store context, and exact Chocolate CupCakes variant.;Retailer current source. Use for package-image review and current ingredient candidate; verify exact count/weight and image panels."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    },
+    {
+      "product_id": "pearl_milling_pancake_mix_original",
+      "product_name": "Pearl Milling Company Original Pancake Mix",
+      "brand": "Pearl Milling Company",
+      "category": "breakfast",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 14,
+      "high_priority_row_count": 7,
+      "current_row_count": 7,
+      "current_official_row_count": 1,
+      "ingredient_panel_visible_row_count": 6,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "en.wikipedia.org",
+          "count": 2
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "www.flickr.com",
+          "count": 2
+        },
+        {
+          "domain": "www.pearlmillingcompany.com",
+          "count": 2
+        },
+        {
+          "domain": "www.walmart.com",
+          "count": 2
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "pearl_milling_pancake_mix_original__current_2020s__742__6",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "current_web_page",
+          "source_domain": "www.pearlmillingcompany.com",
+          "source_url": "https://www.pearlmillingcompany.com/productos-esp/pancake_waffle_mixes/original_pancakes",
+          "source_title": "Pearl Milling Company Original pancake and waffle mix page",
+          "source_owner": "Pearl Milling Company / PepsiCo",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Capture English/US equivalent page if available, ingredient text, package size, allergen text, and any recall/undeclared milk caveat separately.;Official brand page, but localized Spanish path. Use as current label candidate after market/language review and e..."
+        },
+        {
+          "evidence_id": "pearl_milling_pancake_mix_original__current_2020s__636__7",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "brand_label_page",
+          "source_domain": "contact.pepsico.com",
+          "source_url": "https://contact.pepsico.com/files/pearlmillingcompany/documents/1736899789/PMC%20Original%20Recall%20Press%20Release.pdf",
+          "source_title": "Pearl Milling Company Original recall press release PDF",
+          "source_owner": "PepsiCo / Quaker Oats",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Store as product-change/allergen-risk evidence. Do not treat undeclared milk as normal ingredient text without affected-lot review.;Official recall/change-event evidence for allergen disclosure and package identity. It is not a normal ingredient label stateme..."
+        },
+        {
+          "evidence_id": "pearl_milling_pancake_mix_original__current_2020s__123__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "current_web_page",
+          "source_domain": "www.pearlmillingcompany.com",
+          "source_url": "https://www.pearlmillingcompany.com/products/pancake_waffle_mixes/original_pancakes",
+          "source_title": "Pearl Milling Company Original Pancake & Waffle Mix",
+          "source_owner": "www.pearlmillingcompany.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current pancake-mix baseline and post-Aunt-Jemima identity transition candidate.;Brand product page with current label text; package photo remains authoritative. Current source also provides attributable product/package imagery for photo-review triage."
+        },
+        {
+          "evidence_id": "pearl_milling_pancake_mix_original__current_2020s__807__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/11210709777",
+          "source_title": "Pearl Milling Company Original Pancake Mix, 32 oz - Walmart",
+          "source_owner": "Walmart",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Review media, ingredients, package size, price/unit price, UPC, brand-transition text, and distinguish Original from Complete variant.;Retailer current package/price candidate. Contains historical brand text but must remain current Pearl Milling package evide..."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    },
+    {
+      "product_id": "kfc_famous_bowl",
+      "product_name": "KFC Famous Bowl",
+      "brand": "KFC",
+      "category": "fast food",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "menu_component_source_needed",
+      "evidence_row_count": 10,
+      "high_priority_row_count": 7,
+      "current_row_count": 3,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 3,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "global.kfc.com",
+          "count": 4
+        },
+        {
+          "domain": "unknown_source",
+          "count": 3
+        },
+        {
+          "domain": "docslib.org",
+          "count": 2
+        },
+        {
+          "domain": "locations.kfc.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "kfc_famous_bowl__current_2020s__581__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "locations.kfc.com",
+          "source_url": "https://locations.kfc.com/vt/rutland/153-s-main-st/delivery",
+          "source_title": "KFC location delivery page with Famous Bowl product description",
+          "source_owner": "KFC",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Archive page and resolve KFC nutrition calculator data. Keep regular Famous Bowl separate from Nashville Hot, Mac & Cheese Bowl, and limited-time variants.;Official KFC current item-source candidate. Use as product/component evidence, not a full ingredient st..."
+        },
+        {
+          "evidence_id": "kfc_famous_bowl__current_2020s__671__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "global.kfc.com",
+          "source_url": "https://global.kfc.com/press-releases/kfc-gives-the-gift-of-usd5-famous-bowls-and-limited-edition-holiday",
+          "source_title": "KFC $5 Famous Bowls and holiday buckets official press release",
+          "source_owner": "KFC Global",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Pair with current KFC nutrition/allergen calculator or PDF before formulation comparison. Keep regular, spicy, and limited-time bowls separate.;Official offer/product-history evidence. Use as change-event or price-context candidate, not full formulation evide..."
+        },
+        {
+          "evidence_id": "kfc_famous_bowl__current_2020s__672__3",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "global.kfc.com",
+          "source_url": "https://global.kfc.com/chicken-and-nutrition",
+          "source_title": "KFC Chicken and Nutrition official transparency page",
+          "source_owner": "KFC Global",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Use only as source-review/context evidence unless a market-specific Famous Bowl ingredient or allergen document is captured.;Official context source for KFC nutrition/allergen transparency. It does not support a Famous Bowl ingredient claim by itself."
+        },
+        {
+          "evidence_id": "kfc_famous_bowl__2010s__700__1",
+          "vintage_label": "2010s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "docslib.org",
+          "source_url": "https://docslib.org/doc/513747/kfc-ingredients-pdf",
+          "source_title": "KFC Ingredients PDF mirror with July 17 2012 ingredient list",
+          "source_owner": "DocsLib document mirror",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Extract Famous Bowl component list and component ingredient statements for popcorn chicken, gravy, mashed potatoes, corn, and cheese blend.;Third-party mirror of an older KFC ingredient guide. Use as historical source-review candidate only until original/arch..."
+        }
+      ],
+      "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
+    },
+    {
+      "product_id": "subway_italian_bmt",
+      "product_name": "Subway Italian B.M.T.",
+      "brand": "Subway",
+      "category": "fast food",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "menu_component_source_needed",
+      "evidence_row_count": 9,
+      "high_priority_row_count": 7,
+      "current_row_count": 3,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 5,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.subway.com",
+          "count": 3
+        },
+        {
+          "domain": "commons.wikimedia.org",
+          "count": 2
+        },
+        {
+          "domain": "img.pr.com",
+          "count": 2
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "subway_italian_bmt__current_2020s__570__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.subway.com",
+          "source_url": "https://www.subway.com/en-US/MenuNutrition/Nutrition/NutritionGrid",
+          "source_title": "Subway US Nutrition and Allergies page with nutrition, allergy, and ingredient guide links",
+          "source_owner": "Subway / Franchise World Headquarters, LLC",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Harvest linked PDFs and keep sandwich configuration explicit: bread, cheese, vegetables, sauces, and size materially change ingredients and nutrition.;Official source hub rather than a single item page. Good discovery anchor for the Subway fast-food path and..."
+        },
+        {
+          "evidence_id": "subway_italian_bmt__current_2020s__618__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.subway.com",
+          "source_url": "https://www.subway.com/en-us/menunutrition/nutrition?ID=1",
+          "source_title": "Subway US Nutrition Information page",
+          "source_owner": "Subway",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Keep sandwich size, bread, cheese, vegetables, sauces, and market explicit before comparing formulations.;Official current Subway nutrition/ingredient source hub. Use linked PDFs or table state to extract Italian B.M.T. configuration-specific rows."
+        },
+        {
+          "evidence_id": "subway_italian_bmt__current_2020s__944__3",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.subway.com",
+          "source_url": "https://www.subway.com/en-us/menunutrition/nutrition?ps=Know%3Asubway+ingredients",
+          "source_title": "Subway US nutrition, allergy, and ingredient portal",
+          "source_owner": "Subway",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Open linked PDFs, record document dates, extract Italian B.M.T. meat/bread/cheese/vegetable component ingredients, and keep build choices explicit.;Official source-owner portal. Use as a current document index and capture exact PDF URLs, dates, and Italian B...."
+        },
+        {
+          "evidence_id": "subway_italian_bmt__2000s__619__1",
+          "vintage_label": "2000s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "img.pr.com",
+          "source_url": "https://img.pr.com/upload/presskit_1214_1111255308.pdf",
+          "source_title": "Subway Nutrition Facts US revised January 2005 PDF",
+          "source_owner": "PR.com / Subway press kit asset",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Keep 2005 serving-size rows separate from current Subway configurations. Use only after confirming the PDF provenance and market.;Historical nutrition/serving-size candidate, not a full ingredient statement. Archive and verify PDF provenance before promotion."
+        }
+      ],
+      "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
+    },
+    {
+      "product_id": "subway_tuna_sub",
+      "product_name": "Subway Tuna Sub",
+      "brand": "Subway",
+      "category": "fast food",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "menu_component_source_needed",
+      "evidence_row_count": 9,
+      "high_priority_row_count": 7,
+      "current_row_count": 4,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 2,
+      "ingredient_text_available_row_count": 1,
+      "top_source_domains": [
+        {
+          "domain": "www.subway.com",
+          "count": 3
+        },
+        {
+          "domain": "cpb-us-e1.wpmucdn.com",
+          "count": 2
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "swcms-w.subway.com",
+          "count": 1
+        },
+        {
+          "domain": "www.flickr.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "subway_tuna_sub__current_2020s__587__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.subway.com",
+          "source_url": "https://www.subway.com/en-us/-/media/northamerica/usa/nutrition/nutritiondocuments/2025/us_ingredients_eng_1-23-25.pdf",
+          "source_title": "Subway US Product Ingredient Guide January 2025 PDF",
+          "source_owner": "Subway / Franchise World Headquarters, LLC",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": true,
+          "next_action": "extract_or_verify_source_ingredient_text",
+          "reviewer_note_excerpt": "Use for component ingredient ontology. Pair with nutrition table for 6-inch Tuna and specify default bread/toppings before formulation comparison.;Strong official ingredient evidence for Subway Tuna Salad component. It does not fully define a finished Tuna Su..."
+        },
+        {
+          "evidence_id": "subway_tuna_sub__current_2020s__673__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.subway.com",
+          "source_url": "https://www.subway.com/en-us/menunutrition/nutrition?ID=1",
+          "source_title": "Subway official Nutrition & Allergies page",
+          "source_owner": "Subway",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Capture U.S. PDF URLs/version dates, Tuna Salad row, bread choice, and default build assumptions.;Official current portal. Must download/capture the PDFs and selected tuna/bread/component rows before formulation use."
+        },
+        {
+          "evidence_id": "subway_tuna_sub__current_2020s__588__3",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "swcms-w.subway.com",
+          "source_url": "https://swcms-w.subway.com/-/media/USA/Documents/Nutrition/US_Nutrition_Values.PDF",
+          "source_title": "Subway US Nutrition Values PDF with 6 inch Tuna row",
+          "source_owner": "Subway / Franchise World Headquarters, LLC",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Extract the 6-inch Tuna row and document default bread/topping assumptions. Do not collapse wraps or footlongs into the same SKU.;Official nutrition/serving-size evidence for Subway Tuna. Pair with ingredient guide for formulation and keep sandwich build expl..."
+        },
+        {
+          "evidence_id": "subway_tuna_sub__current_2020s__698__4",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.subway.com",
+          "source_url": "https://www.subway.com/-/media/USA/Documents/Nutrition/US_Allergen_chart.pdf",
+          "source_title": "Subway U.S. Allergy and Sensitivity Information PDF",
+          "source_owner": "Subway",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Capture PDF date/version, Tuna Salad allergen row, and any update caveats.;Official allergen PDF. Use for allergen disclosure timeline and pair with ingredient guide for formulation text."
+        }
+      ],
+      "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
+    },
+    {
+      "product_id": "chef_boyardee_beefaroni",
+      "product_name": "Chef Boyardee Beefaroni",
+      "brand": "Chef Boyardee",
+      "category": "prepared foods",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 17,
+      "high_priority_row_count": 5,
+      "current_row_count": 5,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 5,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.flickr.com",
+          "count": 4
+        },
+        {
+          "domain": "www.chefboyardee.com",
+          "count": 3
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "www.flickriver.com",
+          "count": 2
+        },
+        {
+          "domain": "www.reddit.com",
+          "count": 2
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "chef_boyardee_beefaroni__current_2020s__69__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "current_web_page",
+          "source_domain": "www.chefboyardee.com",
+          "source_url": "https://www.chefboyardee.com/products/classics/beefaroni",
+          "source_title": "Chef Boyardee Beefaroni - Chef Boyardee",
+          "source_owner": "www.chefboyardee.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Beefaroni baseline candidate.;Brand product page; package/can label review is still required."
+        },
+        {
+          "evidence_id": "chef_boyardee_beefaroni__current_2020s__290__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/10308533",
+          "source_title": "Chef Boyardee Beefaroni 15 oz can Walmart page",
+          "source_owner": "Walmart",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Capture price, package size, UPC, ingredient statement, allergen text, and package images.;Retailer package/price source with explicit current ingredient text. Requires package-image/UPC review before manual verification."
+        },
+        {
+          "evidence_id": "chef_boyardee_beefaroni__current_2020s__1016__4",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "current_web_page",
+          "source_domain": "www.chefboyardee.com",
+          "source_url": "https://www.chefboyardee.com/products/beefaroni/beefaroni-40-oz",
+          "source_title": "Chef Boyardee Beefaroni 40 oz official product page",
+          "source_owner": "Chef Boyardee",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Capture ingredient text, nutrition, net weight, UPC/package image, manufacturer/owner text, and compare with 15 oz can records.;Official current source-owner page for a larger can format. Keep package-size economics separate from 15 oz can until SKU review."
+        },
+        {
+          "evidence_id": "chef_boyardee_beefaroni__current_2020s__755__5",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "current_web_page",
+          "source_domain": "www.chefboyardee.com",
+          "source_url": "https://www.chefboyardee.com/products/classics/beefaroni-can",
+          "source_title": "Chef Boyardee Beefaroni Can official product page",
+          "source_owner": "Chef Boyardee / Conagra",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Capture package size, full ingredients, nutrition, image roles, and page/capture date.;Official current source. Capture full ingredient text, can size, nutrition, and source/capture date."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    },
+    {
+      "product_id": "little_debbie_swiss_rolls",
+      "product_name": "Little Debbie Swiss Rolls",
+      "brand": "Little Debbie",
+      "category": "snack cakes",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 12,
+      "high_priority_row_count": 4,
+      "current_row_count": 5,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 3,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.flickr.com",
+          "count": 4
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "www.littledebbie.com",
+          "count": 2
+        },
+        {
+          "domain": "www.walmart.com",
+          "count": 2
+        },
+        {
+          "domain": "mckeefoodservice.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "little_debbie_swiss_rolls__current_2020s__889__5",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "mckeefoodservice.com",
+          "source_url": "https://mckeefoodservice.com/storage/app/media/Products/Product-pdfs/260120Nutritionals%20Table.pdf",
+          "source_title": "McKee Foodservice nutrition table PDF including Little Debbie products",
+          "source_owner": "McKee Foodservice",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Extract update date, Swiss Rolls rows, serving size, nutrition, manufacturer/source-owner, and any product identifiers.;Source-owner/foodservice document. Use for nutrition/serving fields only; package ingredients still require label/retailer evidence."
+        },
+        {
+          "evidence_id": "little_debbie_swiss_rolls__current_2020s__107__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/10295209",
+          "source_title": "Little Debbie Swiss Rolls, 13.31 oz, 12 count - Walmart",
+          "source_owner": "www.walmart.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Swiss Rolls baseline; good snack-cake comparator for oil, emulsifier, color, and preservative facets.;Retailer page useful for current SKU/package and ingredient lead; package label remains authoritative. Current source also provides attributable prod..."
+        },
+        {
+          "evidence_id": "little_debbie_swiss_rolls__current_2020s__646__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/19757454",
+          "source_title": "Little Debbie Swiss Rolls 3.4 oz - Walmart",
+          "source_owner": "Walmart",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Keep 3.4 oz single-serve format separate from 12-count family pack and other Little Debbie cake lines.;Retailer current package-label candidate for single-serve Swiss Rolls. Needs exact ingredient extraction and image review before promotion."
+        },
+        {
+          "evidence_id": "little_debbie_swiss_rolls__current_2020s__888__3",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.target.com",
+          "source_url": "https://www.target.com/p/-/A-13217399",
+          "source_title": "Little Debbie Swiss Rolls 13.31 oz Target page",
+          "source_owner": "Target",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Capture image carousel, ingredients, allergens, price context, package size, and exact family-pack variant.;Retailer current source. Use for package image review and current ingredients after recording Target attribution and capture context."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    },
+    {
+      "product_id": "burger_king_whopper",
+      "product_name": "Burger King Whopper",
+      "brand": "Burger King",
+      "category": "fast food",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "menu_component_source_needed",
+      "evidence_row_count": 6,
+      "high_priority_row_count": 4,
+      "current_row_count": 1,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 0,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.flickr.com",
+          "count": 3
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "help.bk.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "burger_king_whopper__current_2020s__746__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "help.bk.com",
+          "source_url": "https://help.bk.com/hc/en-us/articles/36913083446935-Where-can-I-view-the-nutrition-and-allergen-information-for-Burger-King-menu-items",
+          "source_title": "Burger King help page for nutrition and allergen information",
+          "source_owner": "Burger King Help Center",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Record current Nutrition Explorer URL and any downloaded PDF coordinates.;Official source-routing page, not product evidence by itself. Use to document where current data should be collected from."
+        },
+        {
+          "evidence_id": "burger_king_whopper__1980s_or_earlier__596__1",
+          "vintage_label": "1980s_or_earlier",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.flickr.com",
+          "source_url": "https://www.flickr.com/photos/jasonliebigstuff/2806708794",
+          "source_title": "Burger King Whopper Hotshot card, 1979 - Flickr",
+          "source_owner": "Flickr",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Do not use as package evidence unless the item includes product/package photography. Use only as a change-event or date-context lead after review.;Source-attributable Whopper-era ephemera. Useful for dating product marketing but unsupported for formulation, s..."
+        },
+        {
+          "evidence_id": "burger_king_whopper__2010s__595__1",
+          "vintage_label": "2010s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.flickr.com",
+          "source_url": "https://www.flickr.com/photos/25692985%40N07/8230909840",
+          "source_title": "Burger King Whopper Retro Box Packaging 55 Years - Flickr",
+          "source_owner": "Flickr",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_back_or_side_panel_photo",
+          "reviewer_note_excerpt": "Keep retro anniversary package distinct from original/vintage Whopper packaging. Review whether any nutrition, ingredient, or serving text is visible.;Source-attributable package-photo candidate for a 2012 Whopper packaging/anniversary design. Use as packagin..."
+        },
+        {
+          "evidence_id": "burger_king_whopper__earliest_verified_label__596__1",
+          "vintage_label": "earliest_verified_label",
+          "ocr_priority": "high",
+          "ocr_gap_category": "document_text_pipeline_needed",
+          "ocr_recommended_action": "route_to_document_or_pdf_text_extraction_before_image_ocr",
+          "evidence_kind": "menu_or_nutrition_document",
+          "source_domain": "www.flickr.com",
+          "source_url": "https://www.flickr.com/photos/jasonliebigstuff/2806708794",
+          "source_title": "Burger King Whopper Hotshot card, 1979 - Flickr",
+          "source_owner": "Flickr",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Do not use as package evidence unless the item includes product/package photography. Use only as a change-event or date-context lead after review.;Source-attributable Whopper-era ephemera. Useful for dating product marketing but unsupported for formulation, s..."
+        }
+      ],
+      "next_collection_goal": "collect_official_menu_component_ingredient_document_or_api_rows"
+    },
+    {
+      "product_id": "twinkies",
+      "product_name": "Hostess Twinkies",
+      "brand": "Hostess",
+      "category": "snack cakes",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 11,
+      "high_priority_row_count": 3,
+      "current_row_count": 2,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 3,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.flickr.com",
+          "count": 7
+        },
+        {
+          "domain": "unknown_source",
+          "count": 1
+        },
+        {
+          "domain": "upcfoodsearch.com",
+          "count": 1
+        },
+        {
+          "domain": "www.kroger.com",
+          "count": 1
+        },
+        {
+          "domain": "www.walmart.com",
+          "count": 1
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "twinkies__current_2020s__16__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.kroger.com",
+          "source_url": "https://www.kroger.com/p/hostess-twinkies-single-serve-chocolate-cakes/0088810901090",
+          "source_title": "Hostess Twinkies Single-Serve Chocolate Cakes, 2 ct / 2.7 oz - Kroger",
+          "source_owner": "www.kroger.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "This is chocolate cakes, not classic golden Twinkies; keep SKU-specific and do not generalize.;Retailer page; useful for current SKU/weight and ingredient candidate, not package-photo verified."
+        },
+        {
+          "evidence_id": "twinkies__current_2020s__299__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/36462419",
+          "source_title": "HOSTESS Banana Flavored Twinkies, 13.58 oz, 10 Count - Walmart",
+          "source_owner": "www.walmart.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Twinkies candidate; archive PDP and compare ingredient text against package back/side panel.;Retailer page provides source-attributable package imagery plus ingredient and size context; verify flavor and panel image before using as ground truth."
+        },
+        {
+          "evidence_id": "twinkies__2010s__15__1",
+          "vintage_label": "2010s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "label_database_record",
+          "source_domain": "upcfoodsearch.com",
+          "source_url": "https://upcfoodsearch.com/food-products/other-pastries/045000001008/",
+          "source_title": "Hostess Twinkies (045000001008) - UPC Food Search",
+          "source_owner": "upcfoodsearch.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Important trans-fat-era candidate; must verify against package/photo or archived label image.;Third-party UPC database; useful formulation lead, but the original ingredient-statement image requires separate review."
+        },
+        {
+          "evidence_id": "twinkies__1980s_or_earlier__17__1",
+          "vintage_label": "1980s_or_earlier",
+          "ocr_priority": "medium",
+          "ocr_gap_category": "readable_panel_photo_needed",
+          "ocr_recommended_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+          "evidence_kind": "collector_package_photo",
+          "source_domain": "www.flickr.com",
+          "source_url": "https://www.flickr.com/photos/wafflewhiffer/albums/72157629976913182/",
+          "source_title": "Twinkies Packages - Flickr album by Waffle Whiffer",
+          "source_owner": "Flickr",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_package_label_or_smartlabel_panel",
+          "reviewer_note_excerpt": "Queue item-level reviews for 1969, 1973, 1974, 1978, 1982, 1985, 1987, and 1989 Twinkies package entries.;Source venue for many Twinkies package vintages. The album itself should drive item-level acquisition; do not treat it as a verified product label."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    },
+    {
+      "product_id": "hot_pockets_pepperoni_pizza",
+      "product_name": "Hot Pockets Pepperoni Pizza",
+      "brand": "Hot Pockets",
+      "category": "frozen foods",
+      "coverage_status": "not_yet_represented_in_source_family",
+      "represented_source_families": [],
+      "capture_class": "candidate_panel_or_text_available",
+      "evidence_row_count": 7,
+      "high_priority_row_count": 3,
+      "current_row_count": 2,
+      "current_official_row_count": 0,
+      "ingredient_panel_visible_row_count": 3,
+      "ingredient_text_available_row_count": 0,
+      "top_source_domains": [
+        {
+          "domain": "www.walmart.com",
+          "count": 3
+        },
+        {
+          "domain": "unknown_source",
+          "count": 2
+        },
+        {
+          "domain": "www.flickr.com",
+          "count": 2
+        }
+      ],
+      "representative_rows": [
+        {
+          "evidence_id": "hot_pockets_pepperoni_pizza__current_2020s__83__2",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/14122459",
+          "source_title": "Hot Pockets Pepperoni Pizza Snacks, 54 oz 12 Pack - Walmart",
+          "source_owner": "www.walmart.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Hot Pockets package candidate; keep pack count and crust variant specific.;Retailer page is useful for SKU/package/price alignment; label text needs stronger package verification."
+        },
+        {
+          "evidence_id": "hot_pockets_pepperoni_pizza__current_2020s__301__1",
+          "vintage_label": "current_2020s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/10849133",
+          "source_title": "Hot Pockets Pepperoni Pizza Snack, 9 oz - Walmart",
+          "source_owner": "www.walmart.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "Current Hot Pockets candidate; archive PDP and check package panel for ingredient order and allergen statement.;Retailer page provides package imagery and ingredient text; verify single sandwich versus multipack and exact crust variant before formulation comp..."
+        },
+        {
+          "evidence_id": "hot_pockets_pepperoni_pizza__2010s__84__1",
+          "vintage_label": "2010s",
+          "ocr_priority": "high",
+          "ocr_gap_category": "panel_capture_needed",
+          "ocr_recommended_action": "capture_private_panel_crop_from_source_then_run_native_vision_ocr",
+          "evidence_kind": "retailer_page",
+          "source_domain": "www.walmart.com",
+          "source_url": "https://www.walmart.com/ip/49866144",
+          "source_title": "Hot Pockets Pepperoni Pizza Sandwiches, 13 ct Box - Walmart",
+          "source_owner": "www.walmart.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": true,
+          "ingredient_text_available": false,
+          "next_action": "capture_private_panel_crop_and_run_ocr",
+          "reviewer_note_excerpt": "High-value trans-fat/formulation-change lead; verify date and package label before deriving event.;Retailer text appears to preserve older formulation language; archive and package-image verification required before time-specific use."
+        },
+        {
+          "evidence_id": "hot_pockets_pepperoni_pizza__1980s_or_earlier__210__1",
+          "vintage_label": "1980s_or_earlier",
+          "ocr_priority": "medium",
+          "ocr_gap_category": "readable_panel_photo_needed",
+          "ocr_recommended_action": "find_back_or_side_panel_photo_with_readable_ingredient_text",
+          "evidence_kind": "collector_package_photo",
+          "source_domain": "www.flickr.com",
+          "source_url": "https://www.flickr.com/photos/mankatt/3502500167",
+          "source_title": "1987 Hot Pockets Box - Flickr",
+          "source_owner": "www.flickr.com",
+          "source_surface": "current_web",
+          "ingredient_panel_visible": false,
+          "ingredient_text_available": false,
+          "next_action": "find_back_or_side_panel_photo",
+          "reviewer_note_excerpt": "High-value early Hot Pockets package lead; keep variety-specific until label text is visible.;Flickr source gives uploader, title, upload date, and item context; exact variety and label panel visibility need review."
+        }
+      ],
+      "next_collection_goal": "promote_best_candidate_to_private_crop_and_reviewed_ocr"
+    }
+  ]
+}

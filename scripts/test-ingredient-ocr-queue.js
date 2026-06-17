@@ -11,6 +11,7 @@ const fullGapCsvPath = path.join(root, "docs/data/product-evidence/exports/full_
 const navigatorPath = path.join(root, "docs/data/product-evidence/navigator_data.json");
 const summaryPath = path.join(root, "docs/data/product-evidence/summary.json");
 const sourceFamilySummaryPath = path.join(root, "docs/data/product-evidence/source_family_summary.json");
+const sourceFamilyCoveragePath = path.join(root, "docs/data/product-evidence/source_family_coverage.json");
 const ocrBoardSummaryPath = path.join(root, "docs/data/product-evidence/ocr_board_summary.json");
 const productStoryIndexPath = path.join(root, "docs/data/product-evidence/product_story_index.json");
 const publicReviewQueuePath = path.join(root, "docs/data/product-evidence/review_queue_public.csv");
@@ -64,6 +65,7 @@ const fullManifest = JSON.parse(fs.readFileSync(fullManifestPath, "utf8"));
 const navigator = JSON.parse(fs.readFileSync(navigatorPath, "utf8"));
 const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 const sourceFamilySummary = JSON.parse(fs.readFileSync(sourceFamilySummaryPath, "utf8"));
+const sourceFamilyCoverage = JSON.parse(fs.readFileSync(sourceFamilyCoveragePath, "utf8"));
 const ocrBoardSummary = JSON.parse(fs.readFileSync(ocrBoardSummaryPath, "utf8"));
 const productStoryIndex = JSON.parse(fs.readFileSync(productStoryIndexPath, "utf8"));
 const queue = parseCsv(fs.readFileSync(queueCsvPath, "utf8"));
@@ -71,6 +73,21 @@ const fullQueue = parseCsv(fs.readFileSync(fullQueueCsvPath, "utf8"));
 const fullGapReport = parseCsv(fs.readFileSync(fullGapCsvPath, "utf8"));
 const publicReviewQueue = parseCsv(fs.readFileSync(publicReviewQueuePath, "utf8"));
 const publicGapReport = parseCsv(fs.readFileSync(publicGapReportPath, "utf8"));
+const { buildCoverage } = require("./build-source-family-coverage");
+
+function assertPublicSafeJson(filePath) {
+  const text = fs.readFileSync(filePath, "utf8");
+  assert(!text.includes(".cache"), `${filePath} should not expose private cache path text`);
+  assert(!text.includes("/Volumes/"), `${filePath} should not expose absolute volume paths`);
+  assert(!text.includes("local_image_path"), `${filePath} should not expose local image path fields`);
+  assert(!text.includes("source_html_path"), `${filePath} should not expose source html paths`);
+  assert(!text.includes("ingredient_fragment_path"), `${filePath} should not expose ingredient fragment paths`);
+  assert(!text.includes("product_image_path"), `${filePath} should not expose product image paths`);
+  assert(!text.includes("preview_path"), `${filePath} should not expose private preview paths`);
+  assert(!text.includes("ocr_path"), `${filePath} should not expose private OCR paths`);
+  assert(!/data:image\//.test(text), `${filePath} should not expose image data`);
+  assert(!text.includes('"lines"'), `${filePath} should not expose raw OCR lines`);
+}
 
 assert.strictEqual(manifest.schema_version, 1, "manifest schema should be versioned");
 assert.strictEqual(manifest.products.length, 10, "manifest should cover the 10-product pilot");
@@ -137,6 +154,22 @@ assert.strictEqual(ocrBoardSummary.scratch_soft_quota, "200GB", "OCR board shoul
 assert(!JSON.stringify(ocrBoardSummary).includes("/Volumes/azssd/scratch/ingredient-ocr/runs/"), "OCR board should not publish private run paths");
 assert(!JSON.stringify(ocrBoardSummary).includes("/Volumes/azssd/scratch"), "OCR board should not publish the private scratch path");
 assert(!JSON.stringify(sourceFamilySummary).includes("/Volumes/azssd/scratch"), "source family summary should not publish the private scratch path");
+
+assert.strictEqual(typeof buildCoverage, "function", "source-family coverage builder should export buildCoverage");
+assert.strictEqual(sourceFamilyCoverage.schema_version, 1, "source family coverage should be versioned");
+assert.strictEqual(sourceFamilyCoverage.totals.queue_products, 120, "source family coverage should audit the 120-product queue");
+assert.strictEqual(sourceFamilyCoverage.totals.represented_products, 104, "source family coverage should preserve represented product count");
+assert.strictEqual(sourceFamilyCoverage.totals.missing_products, 16, "source family coverage should expose the missing product queue");
+assert.strictEqual(navigator.source_family_coverage?.totals?.missing_products, 16, "navigator should embed the missing product queue");
+assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "starbucks_pumpkin_spice_latte"), "coverage queue should include Starbucks PSL");
+assert(sourceFamilyCoverage.missing_products.some((row) => row.product_id === "pearl_milling_pancake_mix_original"), "coverage queue should include Pearl Milling");
+assert(sourceFamilyCoverage.missing_products.every((row) => row.coverage_status === "not_yet_represented_in_source_family"), "missing queue should not mix represented products");
+assert(sourceFamilyCoverage.missing_products.every((row) => row.representative_rows.length > 0), "missing queue should include source leads");
+assert(sourceFamilyCoverage.missing_products.every((row) => row.representative_rows.every((lead) => /^https?:/.test(lead.source_url))), "missing queue leads should stay source-link based");
+assert(sourceFamilyCoverage.missing_capture_classes.candidate_panel_or_text_available >= 1, "coverage queue should classify panel/text candidates");
+assert(sourceFamilyCoverage.missing_capture_classes.menu_component_source_needed >= 1, "coverage queue should classify menu-component candidates");
+assertPublicSafeJson(sourceFamilyCoveragePath);
+assertPublicSafeJson(navigatorPath);
 
 assert.strictEqual(productStoryIndex.schema_version, 1, "product story index should be versioned");
 assert.strictEqual(productStoryIndex.pilot_products.length, 10, "story index should keep the 10 pilot products");
