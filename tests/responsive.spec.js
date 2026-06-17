@@ -697,6 +697,10 @@ test("ingredient navigator renders CWA visual timeline without relying on public
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-facts")).toContainText("ingredient entries");
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-facts")).toContainText("local crop available");
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-facts")).toContainText("Flickr Package Archive");
+  const drilldownIngredientCopy = page.locator("#ingredient-drilldown .cwa-ingredient-copy").first();
+  await expect(drilldownIngredientCopy.locator("ul")).toBeVisible();
+  await expect(drilldownIngredientCopy.locator("ul")).toContainText("sugar");
+  await expect(drilldownIngredientCopy.locator("ul + .cwa-ingredient-source-line")).toContainText("BHT added to maintain product freshness");
   await expect(page.locator("#ingredient-drilldown .ingredient-drilldown-trends")).toContainText("Product ingredient signals");
   const artificialColoringTrend = page.locator("#ingredient-drilldown .ingredient-drilldown-trends button").filter({ hasText: "artificial coloring" });
   await expect(artificialColoringTrend).toBeVisible();

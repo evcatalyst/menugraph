@@ -313,7 +313,7 @@ function ingredientTextBlock(row, options = {}) {
         <span>${escapeHtml(label)}</span>
         ${readerMeta}
       </div>
-      ${compact ? `${list}${sourceLine}` : `${sourceLine}${list}`}
+      ${list}${sourceLine}
     </div>
   `;
 }
