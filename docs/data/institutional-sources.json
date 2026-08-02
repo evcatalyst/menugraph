@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "sourceVerifiedAt": "2026-08-02",
+  "policy": {
+    "catalogBoundary": "Collection and folder descriptions remain separate from normalized menu-item counts.",
+    "mediaBoundary": "MenuGraph only renders media when a source record exposes a reusable public asset; otherwise the record is metadata-only.",
+    "naraBoundary": "Persistent NARA snapshots should come from NARA bulk data, not cached API responses. Runtime API access requires a user-supplied key."
+  },
+  "collections": [
+    {
+      "id": "si:mericle",
+      "parentSourceKey": "si",
+      "collectionKey": "NMAH.AC.1212",
+      "title": "Virginia Mericle Menu Collection",
+      "description": "More than 4,000 restaurant menus collected mainly by writing to U.S. restaurants, with strong state and country arrangement and useful postmark or correspondence context.",
+      "dateRange": "1960–1999",
+      "countLabel": "4,000+ menus",
+      "places": [
+        "United States",
+        "Europe",
+        "International"
+      ],
+      "themes": [
+        "chains and franchises",
+        "regional dining",
+        "restaurant marketing",
+        "postmark dating"
+      ],
+      "access": [
+        "SOVA finding aid",
+        "on-site research",
+        "reproductions by request"
+      ],
+      "accessUrl": "https://sova.si.edu/record/nmah.ac.1212",
+      "eadUrl": "https://sirismm.si.edu/EADs/NMAH.AC.1212-ead.xml",
+      "recordGranularity": "collection",
+      "metadataStatus": "finding-aid-ready",
+      "mediaStatus": "limited",
+      "rights": "SOVA descriptive metadata is CC0; item media rights may vary.",
+      "priority": 1
+    },
+    {
+      "id": "si:warshaw",
+      "parentSourceKey": "si",
+      "collectionKey": "NMAH.AC.0060.S01.01.Menus",
+      "title": "Warshaw Collection of Business Americana — Menus",
+      "description": "Approximately 700 menus spanning restaurants, railways, ships, holidays, special events, and souvenir forms; the finding aid notes digital images for some material.",
+      "dateRange": "1852–1965",
+      "countLabel": "about 700 menus",
+      "places": [
+        "United States",
+        "International"
+      ],
+      "themes": [
+        "decorative covers",
+        "travel",
+        "events",
+        "business Americana"
+      ],
+      "access": [
+        "SOVA finding aid",
+        "selected digital images",
+        "on-site research"
+      ],
+      "accessUrl": "https://sova.si.edu/record/nmah.ac.0060.s01.01.menus",
+      "eadUrl": "https://sirismm.si.edu/EADs/NMAH.AC.0060.S01.01.Menus-ead.xml",
+      "recordGranularity": "collection",
+      "metadataStatus": "folder-level",
+      "mediaStatus": "selective",
+      "rights": "SOVA descriptive metadata is CC0; item media rights may vary.",
+      "priority": 2
+    },
+    {
+      "id": "si:archives-center",
+      "parentSourceKey": "si",
+      "collectionKey": "NMAH.AC.1391",
+      "title": "Archives Center Menu Collection",
+      "description": "A mid-century-heavy menu collection with strong California and Los Angeles coverage, cruise-ship material, colorful imagery, themed designs, and unusual physical formats.",
+      "dateRange": "1937–1999",
+      "countLabel": "3.5 cubic feet",
+      "places": [
+        "United States",
+        "California",
+        "Canada",
+        "Cruise ships"
+      ],
+      "themes": [
+        "1950s dining",
+        "visual design",
+        "western themes",
+        "odd-shaped ephemera"
+      ],
+      "access": [
+        "Archives Center collection listing",
+        "on-site research",
+        "reproductions by request"
+      ],
+      "accessUrl": "https://americanhistory.si.edu/about/centers/archives/collections",
+      "recordGranularity": "collection",
+      "metadataStatus": "collection-level",
+      "mediaStatus": "limited",
+      "rights": "Descriptive metadata is reusable; item media rights may vary.",
+      "priority": 3
+    },
+    {
+      "id": "si:crimmins",
+      "parentSourceKey": "si",
+      "collectionKey": "NMAH.AC.0398",
+      "title": "John D. Crimmins Collection",
+      "description": "Event, banquet, civic, political, Irish-American, and Catholic menus with related programs, invitations, and seating material.",
+      "dateRange": "1880–1919",
+      "countLabel": "1.8 cubic feet",
+      "places": [
+        "New York",
+        "United States"
+      ],
+      "themes": [
+        "banquets",
+        "civic events",
+        "Irish-American history",
+        "ceremonial dining"
+      ],
+      "access": [
+        "Smithsonian collection record",
+        "selected item records",
+        "on-site research"
+      ],
+      "accessUrl": "https://americanhistory.si.edu/collections/archival-collection/sova-nmah-ac-0398",
+      "recordGranularity": "collection",
+      "metadataStatus": "item-selective",
+      "mediaStatus": "selective",
+      "rights": "Descriptive metadata is reusable; item media rights may vary.",
+      "priority": 4
+    },
+    {
+      "id": "nara:floresca",
+      "parentSourceKey": "nara",
+      "collectionKey": "Mariano Floresca Papers",
+      "title": "Mariano Floresca Papers — Presidential Yacht and Key West Menus",
+      "description": "Three folders of menus from President Truman's U.S.S. Williamsburg and Key West trips in the Mariano Floresca Papers.",
+      "dateRange": "1949–1950",
+      "countLabel": "3 menu folders",
+      "places": [
+        "U.S.S. Williamsburg",
+        "Key West",
+        "Florida"
+      ],
+      "themes": [
+        "presidential dining",
+        "yacht menus",
+        "vacation dining",
+        "official records"
+      ],
+      "access": [
+        "Truman Library finding aid",
+        "open for research"
+      ],
+      "accessUrl": "https://www.trumanlibrary.gov/library/personal-papers/mariano-floresca-papers",
+      "recordGranularity": "series",
+      "metadataStatus": "folder-level",
+      "mediaStatus": "metadata-only",
+      "rights": "U.S. government works may be public domain; donated or commercial material can retain copyright.",
+      "priority": 5
+    },
+    {
+      "id": "nara:presidential",
+      "parentSourceKey": "nara",
+      "collectionKey": "presidential-and-ceremonial",
+      "title": "Presidential and Ceremonial Menu Discovery Set",
+      "description": "A curated discovery layer for presidential-library, White House, state-dinner, military, hospital, and other official dining records across NARA holdings.",
+      "dateRange": "20th century–present",
+      "countLabel": "curated discovery set",
+      "places": [
+        "Washington, D.C.",
+        "Presidential libraries",
+        "United States"
+      ],
+      "themes": [
+        "state dinners",
+        "diplomacy",
+        "ceremonial dining",
+        "government foodways"
+      ],
+      "access": [
+        "NARA Catalog",
+        "presidential-library exhibits",
+        "NARA bulk downloads"
+      ],
+      "accessUrl": "https://catalog.archives.gov/",
+      "bulkDataUrl": "https://www.archives.gov/research/catalog/catalog-bulk-downloads",
+      "recordGranularity": "discovery-set",
+      "metadataStatus": "curated",
+      "mediaStatus": "selective",
+      "rights": "Rights vary by creating office, donor, and included commercial material.",
+      "priority": 6
+    }
+  ],
+  "pilotRecords": [
+    {
+      "id": "si:nmah.ac.0398:ref715",
+      "collectionId": "si:crimmins",
+      "parentSourceKey": "si",
+      "sourceRecordId": "NMAH.AC.0398_ref715",
+      "title": "135th Anniversary Dinner, Hotel Commodore",
+      "date": "March 17, 1919",
+      "place": "Hotel Commodore, New York",
+      "types": [
+        "banquet menu",
+        "anniversary dinner"
+      ],
+      "themes": [
+        "Irish-American history",
+        "ceremonial dining"
+      ],
+      "description": "Smithsonian item-level catalog record from the John D. Crimmins Collection.",
+      "accessUrl": "https://americanhistory.si.edu/collections/archival-item/sova-nmah-ac-0398-ref715",
+      "recordGranularity": "item",
+      "metadataStatus": "catalogued",
+      "mediaStatus": "metadata-only",
+      "rights": "Metadata only in MenuGraph until a reusable media asset is confirmed."
+    },
+    {
+      "id": "si:nmah.ac.0398:ref716",
+      "collectionId": "si:crimmins",
+      "parentSourceKey": "si",
+      "sourceRecordId": "NMAH.AC.0398_ref716",
+      "title": "Eighteenth Annual Dinner, American Irish Historical Society",
+      "date": "January 8, 1916",
+      "place": "Waldorf Astoria, New York",
+      "types": [
+        "banquet menu",
+        "annual dinner"
+      ],
+      "themes": [
+        "Irish-American history",
+        "ceremonial dining"
+      ],
+      "description": "Smithsonian item-level catalog record from the John D. Crimmins Collection.",
+      "accessUrl": "https://americanhistory.si.edu/collections/archival-item/sova-nmah-ac-0398-ref716",
+      "recordGranularity": "item",
+      "metadataStatus": "catalogued",
+      "mediaStatus": "metadata-only",
+      "rights": "Metadata only in MenuGraph until a reusable media asset is confirmed."
+    },
+    {
+      "id": "si:nmah.ac.0398:ref45",
+      "collectionId": "si:crimmins",
+      "parentSourceKey": "si",
+      "sourceRecordId": "NMAH.AC.0398_ref45",
+      "title": "American Numismatic and Archaeological Society Menu",
+      "date": "April 23, 1897",
+      "place": "New York",
+      "types": [
+        "event menu"
+      ],
+      "themes": [
+        "civic dining",
+        "nineteenth century"
+      ],
+      "description": "Smithsonian item-level catalog record from the John D. Crimmins Collection.",
+      "accessUrl": "https://americanhistory.si.edu/collections/archival-item/sova-nmah-ac-0398-ref45",
+      "recordGranularity": "item",
+      "metadataStatus": "catalogued",
+      "mediaStatus": "metadata-only",
+      "rights": "Metadata only in MenuGraph until a reusable media asset is confirmed."
+    },
+    {
+      "id": "nara:floresca:uss-williamsburg-menus",
+      "collectionId": "nara:floresca",
+      "parentSourceKey": "nara",
+      "sourceRecordId": "Floresca menu folders",
+      "title": "U.S.S. Williamsburg and Key West Menus",
+      "date": "1949–1950",
+      "place": "U.S.S. Williamsburg and Key West, Florida",
+      "types": [
+        "presidential yacht menu",
+        "travel menu"
+      ],
+      "themes": [
+        "Truman presidency",
+        "official dining"
+      ],
+      "description": "Finding-aid-level pilot record pointing to three menu folders in the Mariano Floresca Papers.",
+      "accessUrl": "https://www.trumanlibrary.gov/library/personal-papers/mariano-floresca-papers",
+      "recordGranularity": "folder-group",
+      "metadataStatus": "finding-aid-ready",
+      "mediaStatus": "metadata-only",
+      "rights": "Rights vary within the donated papers; MenuGraph stores metadata only."
+    },
+    {
+      "id": "nara:jfk:ceremonial-room-menu",
+      "collectionId": "nara:presidential",
+      "parentSourceKey": "nara",
+      "sourceRecordId": "JFK Library Ceremonial Room exhibit menu",
+      "title": "Dinner Menu with President Kennedy's Notes",
+      "date": "May 22, 1962",
+      "place": "White House, Washington, D.C.",
+      "types": [
+        "state dinner menu",
+        "annotated menu"
+      ],
+      "themes": [
+        "Kennedy presidency",
+        "diplomatic dining"
+      ],
+      "description": "The JFK Library Ceremonial Room exhibit identifies a dinner menu bearing President Kennedy's notes from the state visit of President Félix Houphouët-Boigny of Côte d'Ivoire.",
+      "accessUrl": "https://www.jfklibrary.org/visit-museum/exhibits/permanent-exhibits/ceremonial-room",
+      "recordGranularity": "exhibit-item",
+      "metadataStatus": "curated",
+      "mediaStatus": "metadata-only",
+      "rights": "Metadata only; no menu accession number or reusable media asset is asserted."
+    }
+  ],
+  "generatedAt": "2026-08-02T04:48:26.435Z",
+  "summary": {
+    "collectionCount": 6,
+    "pilotRecordCount": 5,
+    "sourceCounts": {
+      "si": 4,
+      "nara": 2
+    }
+  }
+}

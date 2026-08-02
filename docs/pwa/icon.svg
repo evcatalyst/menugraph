@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MenuGraph">
+  <rect width="512" height="512" rx="112" fill="#17151d"/>
+  <circle cx="256" cy="256" r="166" fill="#f6f2ec"/>
+  <path d="M152 178c0-18 14-32 32-32h144c18 0 32 14 32 32v156c0 18-14 32-32 32H184c-18 0-32-14-32-32V178Z" fill="#ff7657"/>
+  <path d="M198 210h116M198 256h116M198 302h78" stroke="#17151d" stroke-width="24" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#17151d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MenuGraph" />
+    <meta name="description" content="Swipe through historical menus, search archives, and build research lists." />
+    <title>MenuGraph — Swipe the Archive</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app" aria-busy="true">
+      <header class="topbar">
+        <button id="home-button" class="identity" type="button" aria-label="Go to menu deck">
+          <span class="identity__mark">M</span>
+          <span>MenuGraph</span>
+        </button>
+        <span id="menu-count" class="menu-count">Loading…</span>
+      </header>
+
+      <main id="view" class="view" tabindex="-1">
+        <section class="loading" aria-live="polite">
+          <span class="identity__mark">M</span>
+          <strong>Opening the archive</strong>
+          <p>Preparing menu cards and institutional sources.</p>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="MenuGraph navigation">
+        <button type="button" data-mode="deck" aria-current="page"><span>♡</span><small>Deck</small></button>
+        <button type="button" data-mode="search"><span>⌕</span><small>Search</small></button>
+        <button type="button" data-mode="lists"><span>▤</span><small>Lists</small></button>
+      </nav>
+    </div>
+
+    <div id="modal-root"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <noscript>MenuGraph requires JavaScript to search and save menu records.</noscript>
+    <script src="./app.js"></script>
+  </body>
+</html>
