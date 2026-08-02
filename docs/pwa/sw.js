@@ -1,4 +1,4 @@
-const CACHE = "menugraph-pwa-v2";
+const CACHE = "menugraph-pwa-v3";
 const SHELL = ["./", "./index.html", "./app.js", "./styles.css", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {

@@ -11,7 +11,7 @@
     source: "all",
     query: "",
     deckIds: [],
-    passedIds: new Set(),
+    deckIndex: 0,
     lists: loadLists(),
     listId: null,
     institutionId: null,
@@ -62,6 +62,63 @@
     return clean(menu?.date || menu?.decade, "Date unknown");
   }
 
+  function titleLooksUnhelpful(value) {
+    const normalized = clean(value)
+      .replace(/[\[\]().]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+    if (!normalized) return true;
+    if (normalized.includes("?")) return true;
+    if (/^\?\s*(?:,?\s*(?:menu|breakfast|brunch|lunch|luncheon|dinner|supper|tea))?$/.test(normalized)) return true;
+    return /^restaurant(?: name)? and\s*\/?\s*or location not given(?:\s+menu)?[,]?$/.test(normalized);
+  }
+
+  function mealName(menu) {
+    const text = [menu?.title, ...(menu?.types || [])].map(clean).join(" ").toLowerCase();
+    const match = text.match(/\b(breakfast|brunch|lunch|luncheon|dinner|supper|tea)\b/);
+    return match ? `${match[1][0].toUpperCase()}${match[1].slice(1)}` : "";
+  }
+
+  function displayTitle(menu) {
+    const title = clean(menu?.title).replace(/^\[+|\]+$/g, "").replace(/\s*,\s*$/g, "");
+    if (!titleLooksUnhelpful(title)) return title;
+    const meal = mealName(menu);
+    const unknownVenue = /restaurant(?: name)? and\s*\/?\s*or location not given/i.test(title);
+    const descriptor = unknownVenue ? "" : title
+      .replace(/\?/g, " ")
+      .replace(/\b(breakfast|brunch|lunch|luncheon|dinner|supper|tea|menu)\b/gi, " ")
+      .replace(/[\[\](),.;:-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const base = meal ? `${meal} menu` : "Menu";
+    return descriptor ? `${base} · ${descriptor}` : `${base} · venue unidentified`;
+  }
+
+  function listedVenue(menu) {
+    const venue = clean(menu?.restaurant);
+    if (!venue || titleLooksUnhelpful(venue) || /^(unknown|not given|n\/a)$/i.test(venue)) return "";
+    return venue;
+  }
+
+  function menuContext(menu) {
+    const venue = listedVenue(menu);
+    const place = placeLabel(menu);
+    if (venue && place !== "Place unknown") return `${venue} · ${place}`;
+    if (venue) return `Listed venue: ${venue}`;
+    if (place !== "Place unknown") return place;
+    return "Venue and location not recorded";
+  }
+
+  function pageLabel(menu) {
+    const count = Number(menu?.pageCount || 0);
+    return count > 0 ? `${count} page${count === 1 ? "" : "s"}` : "Single menu scan";
+  }
+
+  function listedDishes(menu) {
+    return [...new Set((menu?.topDishes || []).map(clean).filter(Boolean))].slice(0, 2);
+  }
+
   function placeholder(label) {
     const safe = clean(label, "Menu").slice(0, 42).replace(/[<>&]/g, "");
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900"><rect width="720" height="900" fill="#e7e0d8"/><rect x="70" y="70" width="580" height="760" rx="28" fill="#fffdf9"/><text x="360" y="420" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#17151d">MenuGraph</text><text x="360" y="466" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#746f7a">${safe}</text></svg>`;
@@ -70,7 +127,7 @@
 
   function menuImage(menu) {
     const image = document.createElement("img");
-    image.alt = "";
+    image.alt = `Menu scan for ${displayTitle(menu)}`;
     image.loading = "lazy";
     image.draggable = false;
     image.onerror = () => {
@@ -119,14 +176,16 @@
   function defaultDeck() {
     return [...state.menus]
       .filter((menu) => menu?.imageUrl)
-      .sort((a, b) => score(b) - score(a) || clean(a.title).localeCompare(clean(b.title)))
+      .sort((a, b) => score(b) - score(a) || displayTitle(a).localeCompare(displayTitle(b)))
       .slice(0, 80)
       .map(menuId);
   }
 
   function activeDeck() {
     const ids = state.deckIds.length ? state.deckIds : defaultDeck();
-    return ids.filter((id) => !state.passedIds.has(id)).map((id) => state.menuById.get(id)).filter(Boolean);
+    const menus = ids.map((id) => state.menuById.get(id)).filter(Boolean);
+    state.deckIndex = Math.max(0, Math.min(state.deckIndex, Math.max(menus.length - 1, 0)));
+    return menus.slice(state.deckIndex);
   }
 
   function institutionEntries() {
@@ -178,6 +237,12 @@
     if (!deck.length) {
       const empty = node("div", "empty");
       empty.append(node("h2", "", "You reached the end"), node("p", "", "Search for a place, dish, or decade to build another deck."));
+      if (state.deckIndex > 0) {
+        const previous = node("button", "secondary", "← Previous menu");
+        previous.type = "button";
+        previous.addEventListener("click", () => navigateDeck("previous"));
+        empty.appendChild(previous);
+      }
       const button = node("button", "primary", "Search the archive");
       button.type = "button";
       button.addEventListener("click", () => setMode("search"));
@@ -191,9 +256,9 @@
     if (deck[1]) stack.appendChild(renderCard(deck[1], true));
     stack.appendChild(renderCard(current, false));
     section.appendChild(stack);
-    section.appendChild(node("p", "gesture-hint", "Swipe left to pass · right to save"));
+    section.appendChild(node("p", "gesture-hint", "Swipe left for next · right for previous"));
     const actions = node("div", "actions");
-    [["pass", "×", `Pass ${current.title}`], ["info", "i", `Open ${current.title}`], ["save", "♥", `Save ${current.title}`]].forEach(([action, symbol, label]) => {
+    [["next", "×", `Next menu after ${displayTitle(current)}`], ["info", "i", `Open ${displayTitle(current)}`], ["save", "♥", `Save ${displayTitle(current)}`]].forEach(([action, symbol, label]) => {
       const button = node("button", "round-action", symbol);
       button.type = "button";
       button.dataset.action = action;
@@ -209,12 +274,12 @@
     const card = node("article", `menu-card${under ? " menu-card--under" : ""}`);
     card.dataset.menuId = menuId(menu);
     const image = node("div", "card-image");
-    image.append(menuImage(menu), node("span", "swipe-badge swipe-badge--pass", "Pass"), node("span", "swipe-badge swipe-badge--save", "Save"), node("span", "source-badge", sourceLabel(menu)));
+    image.append(menuImage(menu), node("span", "swipe-badge swipe-badge--next", "Next"), node("span", "swipe-badge swipe-badge--previous", "Back"), node("span", "source-badge", sourceLabel(menu)));
     const body = node("div", "card-body");
-    body.append(node("h2", "", clean(menu.title, "Untitled menu")), node("p", "place", placeLabel(menu)));
-    const facts = node("div", "facts");
-    [dateLabel(menu), menu.types?.[0], menu.topDishes?.[0]].filter(Boolean).forEach((fact) => facts.appendChild(node("span", "", fact)));
-    body.appendChild(facts);
+    body.append(node("h2", "", displayTitle(menu)), node("p", "card-context", menuContext(menu)));
+    body.appendChild(node("p", "card-meta", [sourceLabel(menu), dateLabel(menu), menu.types?.[0], pageLabel(menu)].filter(Boolean).join(" · ")));
+    const dishes = listedDishes(menu);
+    if (dishes.length) body.appendChild(node("p", "card-highlights", `Listed dishes: ${dishes.join(" · ")}`));
     card.append(image, body);
     if (!under) bindSwipe(card, menu);
     return card;
@@ -225,7 +290,7 @@
     let delta = 0;
     let dragging = false;
     card.tabIndex = 0;
-    card.setAttribute("aria-label", `${menu.title}. Swipe left to pass or right to save.`);
+    card.setAttribute("aria-label", `${displayTitle(menu)}. Swipe left for next or right for previous. Saving is a separate button.`);
     card.addEventListener("pointerdown", (event) => {
       if (event.button !== 0) return;
       start = event.clientX;
@@ -237,14 +302,14 @@
       if (!dragging) return;
       delta = event.clientX - start;
       card.style.transform = `translateX(${delta}px) rotate(${Math.max(-8, Math.min(8, delta / 24))}deg)`;
-      card.dataset.direction = Math.abs(delta) < 24 ? "" : delta > 0 ? "save" : "pass";
+      card.dataset.direction = Math.abs(delta) < 24 ? "" : delta > 0 ? "previous" : "next";
     });
     const release = () => {
       if (!dragging) return;
       dragging = false;
       card.classList.remove("is-dragging");
-      if (delta > 72) handleCardAction("save", menu);
-      else if (delta < -72) handleCardAction("pass", menu);
+      if (delta > 72) navigateDeck("previous");
+      else if (delta < -72) navigateDeck("next");
       else {
         card.style.transform = "";
         card.dataset.direction = "";
@@ -254,17 +319,28 @@
     card.addEventListener("pointerup", release);
     card.addEventListener("pointercancel", release);
     card.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowLeft") handleCardAction("pass", menu);
-      if (event.key === "ArrowRight") handleCardAction("save", menu);
+      if (event.key === "ArrowLeft") navigateDeck("next");
+      if (event.key === "ArrowRight") navigateDeck("previous");
       if (event.key === "Enter" || event.key === " ") handleCardAction("info", menu);
     });
   }
 
+  function navigateDeck(direction) {
+    const ids = state.deckIds.length ? state.deckIds : defaultDeck();
+    if (direction === "previous") {
+      if (state.deckIndex === 0) return announce("This is the first menu in this deck.");
+      state.deckIndex -= 1;
+    } else {
+      if (state.deckIndex >= ids.length - 1) return announce("This is the last menu in this deck.");
+      state.deckIndex += 1;
+    }
+    render();
+  }
+
   function handleCardAction(action, menu) {
     if (action === "info") return openMenuDetail(menu);
-    if (action === "save") return openSaveSheet({ kind: "menu", id: menuId(menu), advance: true });
-    state.passedIds.add(menuId(menu));
-    render();
+    if (action === "save") return openSaveSheet({ kind: "menu", id: menuId(menu) });
+    if (action === "next") return navigateDeck("next");
   }
 
   function menuMatches(menu, query) {
@@ -339,7 +415,7 @@
       build.type = "button";
       build.addEventListener("click", () => {
         state.deckIds = results.menus.slice(0, 60).map(menuId);
-        state.passedIds.clear();
+        state.deckIndex = 0;
         setMode("deck");
       });
       section.appendChild(build);
@@ -369,7 +445,7 @@
   function renderMenuResult(menu) {
     const row = node("article", "menu-result");
     const copy = node("div");
-    copy.append(node("span", "result-source", sourceLabel(menu)), node("h2", "", clean(menu.title, "Untitled menu")), node("p", "", `${dateLabel(menu)} · ${placeLabel(menu)}`));
+    copy.append(node("span", "result-source", sourceLabel(menu)), node("h2", "", displayTitle(menu)), node("p", "", `${menuContext(menu)} · ${dateLabel(menu)}`));
     const open = node("button", "small-button", "Open");
     open.type = "button";
     open.addEventListener("click", () => openMenuDetail(menu));
@@ -510,7 +586,7 @@
     section.append(back, node("p", "overline", "Saved list"), node("h1", "", list.name), node("p", "intro", `${count} source-linked item${count === 1 ? "" : "s"}`));
     if (!count) {
       const empty = node("div", "empty empty--panel");
-      empty.append(node("h2", "", "Nothing saved yet"), node("p", "", "Swipe right on a menu or save an institutional source."));
+      empty.append(node("h2", "", "Nothing saved yet"), node("p", "", "Use the heart on a menu or save an institutional source."));
       const browse = node("button", "primary", "Browse the deck");
       browse.type = "button";
       browse.addEventListener("click", () => setMode("deck"));
@@ -625,7 +701,6 @@
     if (!pending) return;
     if (pending.kind === "menu" && !list.menuIds.includes(pending.id)) list.menuIds.push(pending.id);
     if (pending.kind === "institution" && !list.institutionalIds.includes(pending.id)) list.institutionalIds.push(pending.id);
-    if (pending.advance && pending.kind === "menu") state.passedIds.add(pending.id);
     persistLists();
     closeModal();
     render();
@@ -647,9 +722,9 @@
     close.setAttribute("aria-label", "Close menu details");
     close.addEventListener("click", closeModal);
     const body = node("div", "detail-body");
-    body.append(node("span", "result-source", sourceLabel(menu)), node("h2", "", clean(menu.title, "Untitled menu")), node("p", "place", placeLabel(menu)));
+    body.append(node("span", "result-source", sourceLabel(menu)), node("h2", "", displayTitle(menu)), node("p", "place", menuContext(menu)));
     const facts = node("div", "facts");
-    [dateLabel(menu), ...(menu.types || []).slice(0, 2)].filter(Boolean).forEach((fact) => facts.appendChild(node("span", "", fact)));
+    [dateLabel(menu), ...(menu.types || []).slice(0, 1), pageLabel(menu)].filter(Boolean).forEach((fact) => facts.appendChild(node("span", "", fact)));
     body.appendChild(facts);
     const dishes = (menu.topDishes || []).slice(0, 5);
     body.appendChild(node("p", "detail-copy", dishes.length ? `Menu evidence includes ${dishes.join(", ")}.` : "No structured dish transcription is available for this menu."));
