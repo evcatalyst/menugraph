@@ -5,7 +5,6 @@ const DEFAULT_DEST = path.join(__dirname, "..", "docs", "data", "product-evidenc
 const SOURCE_CANDIDATES = [
   process.env.PRODUCT_EVIDENCE_SOURCE,
   path.resolve(__dirname, "..", "..", "pricehistory", "runs", "product-discovery-v3", "product_discovery", "product_discovery_board.json"),
-  "/Users/matthewlean/Documents/pricehistory/runs/product-discovery-v3/product_discovery/product_discovery_board.json",
 ].filter(Boolean);
 
 const vintages = [
