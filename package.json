@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
+    "cf:assets": "node scripts/prepare-cf-assets.js",
+    "cf:dry-run": "node scripts/prepare-cf-assets.js && npx wrangler@4.50.0 deploy --dry-run --outdir .cf-dry",
+    "test:cf": "node scripts/test-cf-chat.mjs",
+    "test:cf:e2e": "node scripts/prepare-cf-assets.js --with-fixtures && playwright test -c playwright.cf.config.js",
     "prepare:nypl": "node scripts/prepare-nypl-cache.js",
     "build:data": "node scripts/build-static-data.js --text=300 --prices=600",
     "build:data:sample": "node scripts/build-static-data.js --text=25 --prices=180",

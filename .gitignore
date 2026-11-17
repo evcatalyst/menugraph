@@ -5,3 +5,6 @@ node_modules/
 *.log
 test-results/
 playwright-report/
+.cf-assets/
+.cf-dry/
+.wrangler/

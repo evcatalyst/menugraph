@@ -1,0 +1,22 @@
+# MenuGraph phases 1–2. This file does not deploy, attach a route, or publish workers.dev.
+# Canal account from the absorb-and-publish plan. Do not substitute another account id here.
+name = "menugraph"
+account_id = "3d66aba1"
+main = "src/worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = false
+preview_urls = false
+
+[assets]
+directory = ".cf-assets"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/data/menus.json", "/data/prices.json", "/data/matches.json"]
+
+# Bucket is named only. Creating it is a later Platform Infra step.
+[[r2_buckets]]
+binding = "MENU_DATA"
+bucket_name = "menugraph-snapshots"
+
+# Secret names only. Do not put values in this file.
+# XAI_API_KEY or GROK_API_KEY
+# Optional: GROK_MODEL, GROK_API_BASE, MENUGRAPH_ASK_SECRET_HASH, MENUGRAPH_ASK_SECRET
