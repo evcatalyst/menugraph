@@ -6,7 +6,7 @@ GitHub Pages (`/docs` on `main`) and the existing Netlify Ask function stay as t
 
 ## What was built
 
-A Worker named `menugraph` on the Canal account named in the absorb-and-publish plan (`account_id` `3d66aba1` in `wrangler.toml`).
+A Worker named `menugraph` on the Canal account named in the absorb-and-publish plan. The plan cites the prefix `3d66aba1`. `wrangler.toml` uses the full account id `3d66aba1b55e8517ec6ef87f2c8c8e4f`. No other account id is set.
 
 - Static assets come from `.cf-assets`, a hardlink mirror of `docs/` produced by `scripts/prepare-cf-assets.js`.
 - `menus.json`, `prices.json`, and `matches.json` are omitted from that mirror. `GET /data/menus.json`, `/data/prices.json`, and `/data/matches.json` read the `MENU_DATA` R2 binding (`menugraph-snapshots`, object keys of the same filenames). If the object is missing, the Worker falls back to the asset copy when one is present.
@@ -38,6 +38,8 @@ npm run test:cf:e2e
 
 `test:cf` stubs the chat upstream. `test:cf:e2e` runs Playwright against `wrangler dev` on `127.0.0.1:8787` with tiny snapshot fixtures in `.cf-assets` only.
 
+A local call of the same handler against the real `menus.json` and `prices.json` snapshots returned 200, `local-retrieval`, 192,683 searched documents, and 36 matches in about 1.5 seconds. Process RSS was 531 MB. A Worker isolate is limited to 128 MB, so that full Ask does not fit on the isolate until retrieval is reduced. Streaming the three objects to the browser does not parse them in the isolate.
+
 ## What a later deploy needs
 
 These stay with Platform Infra after a separate OK:
@@ -51,11 +53,17 @@ These stay with Platform Infra after a separate OK:
 
 ## Open questions carried from the plan
 
-1. Hostname and account: Canal `menus.canalandcountry.com`, a capitaldistrict.io host, or something else?
+These are still open:
+
+1. Hostname and account: Canal `menus.canalandcountry.com` (suggested default), a capitaldistrict.io host, or something else?
 2. Scope now: MenuGraph only, or fold mealbandit in later?
-3. Images stay linked to CIA and NYPL until a rights pass, or may a later phase cache them in R2?
-4. When, if ever, to redirect the GitHub Pages site and retire Netlify?
-5. Should product-evidence and graph JSON over 1 MB also leave the asset bundle?
-6. Chat loads `menus.json` and `prices.json` into the isolate (about 64 MB together). Is that acceptable on the paid plan, or should a later phase pre-index?
+3. Confirm: do not enqueue through meeting-docs `menu-image`; build the separate workstream instead?
+4. May images be cached in R2, or should the UI keep linking to source URLs until a rights pass?
+5. Pilot sample: how many pages, and CIA vs NYPL vs product-evidence wrappers first?
+6. Engine: keep civic `auto`, or force Vision or Tesseract?
+7. Should the unpublished upstate.lol `menu_ocr` design share this workstream later, or stay a third queue?
+8. When, if ever, to redirect evcatalyst.github.io/menugraph and retire Netlify?
+
+Also still open, from this build: product-evidence and graph JSON over 1 MB stay in the asset directory for now. Full-corpus Ask needs a smaller retrieval path before `/api/chat` can run on the Worker.
 
 The meeting-docs `menu-image` hook is not used. This branch does not enqueue OCR or change any civic agent.

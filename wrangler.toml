@@ -1,7 +1,8 @@
 # MenuGraph phases 1–2. This file does not deploy, attach a route, or publish workers.dev.
-# Canal account from the absorb-and-publish plan. Do not substitute another account id here.
+# Canal account from the absorb-and-publish plan (prefix 3d66aba1). Wrangler needs the full id.
+# Do not substitute a different account.
 name = "menugraph"
-account_id = "3d66aba1"
+account_id = "3d66aba1b55e8517ec6ef87f2c8c8e4f"
 main = "src/worker.js"
 compatibility_date = "2026-11-01"
 workers_dev = false
